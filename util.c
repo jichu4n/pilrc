@@ -238,7 +238,7 @@ MakeFilename(const char *szFormat, ...)
         break;
 
       case '/':
-        if (fn == fname || (fn[-1] != '/' && fn[1] != '\\'))
+        if (fn == fname || (fn[-1] != '/' && fn[-1] != '\\'))
           *fn++ = DIRSEPARATOR;
         break;
 
