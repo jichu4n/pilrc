@@ -3476,7 +3476,11 @@ ParseDumpString()
   }
   else
   {
-    UngetTok();
+    /*
+     * skip backslash, allow string to start on next line 
+     */
+    if (tok.lex.lt != ltBSlash)
+      UngetTok();
     pchString = PchGetSzMultiLine("String Text");
   }
 
@@ -3656,9 +3660,11 @@ ParseDumpBitmapFile(int bitmapType)
   pchFileName[0] = PchGetSz("Bitmap Filename");
 
   // family? need to get em all :)
-  if ((bitmapType == rwBitmapFamily) ||
-      (bitmapType == rwBitmapFamily_special) ||
-      (bitmapType == rwBootScreenFamily))
+  if ((bitmapType == rwBitmapFamily) || (bitmapType == rwBitmapFamily_special)
+#ifdef PALM_INTERNAL
+      || (bitmapType == rwBootScreenFamily)
+#endif
+    )
   {
     // lets scan for those bitmap resources.. [if they exist] :)
     for (i = 1; i < MAXDEPTH; i++)
@@ -3750,11 +3756,13 @@ ParseDumpBitmapFile(int bitmapType)
     if ((szLocaleP) && (vfStripNoLocRes))
       goto CLEANUP;
   }
+#ifdef PALM_INTERNAL
   else if (bitmapType == rwBootScreenFamily)
   {
     if (ObjectDesiredInOutputLocale(&itm))
       goto CLEANUP;
   }
+#endif
   else if (itm.Locale)
   {
     if ((szLocaleP) && (vfStripNoLocRes))
@@ -3763,17 +3771,23 @@ ParseDumpBitmapFile(int bitmapType)
   else if (vfStripNoLocRes)
     goto CLEANUP;
 
+#ifdef PALM_INTERNAL
   if (bitmapType == rwBootScreenFamily)
   {
     OpenOutput((pchResType == NULL)
                ? kPalmResType[kBsBitmapRscType] : pchResType, id);
   }
   else
+#endif
   {
     OpenOutput((pchResType == NULL)
                ? kPalmResType[kBitmapRscType] : pchResType, id);
   }
-  if ((bitmapType == rwBitmapFamily) || (bitmapType == rwBootScreenFamily))
+  if ((bitmapType == rwBitmapFamily)
+#ifdef PALM_INTERNAL
+      || (bitmapType == rwBootScreenFamily)
+#endif
+    )
   {
 
     int i, flag;
@@ -3803,7 +3817,11 @@ ParseDumpBitmapFile(int bitmapType)
         DumpBitmap(pchFileName[i], 0, compress,
                    bitmapTypes[i], colortable, transparencyData,
                    ((flag & 0xfe) != 0x00),
-                   (bitmapType == rwBootScreenFamily));
+#ifdef PALM_INTERNAL
+                   (bitmapType == rwBootScreenFamily), 0);
+#else
+                   fFalse, 0);
+#endif
       flag = flag >> 1;
       i++;
     }
@@ -3838,7 +3856,7 @@ ParseDumpBitmapFile(int bitmapType)
       if ((flag & 0x01) == 0x01)
         DumpBitmap(pchFileName[i], 0, compress,
                    bitmapTypes[i], colortable, transparencyData,
-                   ((flag & 0xfe) != 0x00), fFalse);
+                   ((flag & 0xfe) != 0x00), fFalse, 0);
       flag = flag >> 1;
       i++;
     }
@@ -3846,7 +3864,7 @@ ParseDumpBitmapFile(int bitmapType)
   else
   {
     DumpBitmap(pchFileName[0], 0, compress, bitmapType,
-               colortable, transparencyData, fFalse, fFalse);
+               colortable, transparencyData, fFalse, fFalse, 0);
   }
   CloseOutput();
 
@@ -3871,6 +3889,359 @@ CLEANUP:
 
   if (pchPaletteFileName != NULL)
     free(pchPaletteFileName);
+  if (pchResType)
+    free(pchResType);
+#undef MAXDEPTH
+}
+
+/*-----------------------------------------------------------------------------
+|	ParseDumpBitmapExFile
+-------------------------------------------------------------RMa-------------*/
+void
+ParseDumpBitmapExFile(int bitmapType)
+{
+#define MAXDEPTH 16
+
+  typedef struct _bmpDef
+  {
+    char *pchFileName;
+    char *pchPaletteFileName;
+    int compress;
+    int transparencyData[4];
+    int density;
+    int bpp;
+    int bitmapTypes;
+    int nColors;
+    int palette[256][3];
+    BOOL haspalette;
+    BOOL colortable;
+  }
+  BMPDEF;
+
+  BMPDEF aBitmapEntries[MAXDEPTH];
+  BMPDEF currentEntry;
+  char *pchResType = NULL;
+  char *pLocale = NULL;
+  int defaultCompress = rwNoCompress;
+  int id = 0, i = 0;
+  int flag = 0;
+  int index = 0;
+  int nbrOfBmpDensityOne = 0;
+  int nbrOfBmpDensityTwoOrMore = 0;
+  int isAIcon = fFalse;
+  BOOL writeFakeDblHdr;
+  BOOL bootScreen = fFalse;
+
+  memset(aBitmapEntries, 0, sizeof(aBitmapEntries));
+
+  if (FGetTok(&tok))
+  {
+    UngetTok();
+    if (tok.lex.lt == ltStr)
+    {
+      pchResType = PchGetSz("Resource Type");
+      if (!strcmp(pchResType, "tAIB"))
+      {
+        isAIcon = fTrue;
+        strcpy(pchResType, kPalmResType[kIconType]);    // convert if ARM
+      }
+      if (!strcmp(pchResType, "Tbsb"))
+      {
+        if (vfPrc)
+          ErrorLine("PilRc option -ro not compatible with 'Tbsb' dump.");
+        else
+          bootScreen = fTrue;
+        strcpy(pchResType, kPalmResType[kBsBitmapRscType]);     // convert if ARM
+      }
+    }
+  }
+
+  while (FGetTok(&tok))
+  {
+    if (tok.rw == rwBegin)
+      break;
+    switch (tok.rw)
+    {
+      case rwBegin:
+        break;
+      case rwNoCompress:
+      case rwAutoCompress:
+      case rwForceCompress:
+        defaultCompress = tok.rw;
+        break;
+      case rwId:
+      case rwAutoId:
+        UngetTok();
+        id = WGetId("ItemId", fTrue);
+        if (isAIcon)
+          isAIcon = id;
+        break;
+      case rwLocale:
+        pLocale = PchGetSz("locale");
+        break;
+      default:
+        break;
+    }
+  }
+
+  /*
+   * RMa localisation 
+   */
+  if (pLocale)
+  {
+    if (szLocaleP)
+    {
+      if (strncmp(pLocale, szLocaleP, strlen(szLocaleP)))
+      {
+        ParseToFinalEnd();
+        goto CLEANUP;
+      }
+    }
+    else
+    {
+      ParseToFinalEnd();
+      goto CLEANUP;
+    }
+  }
+  else if (vfStripNoLocRes)
+  {
+    ParseToFinalEnd();
+    goto CLEANUP;
+  }
+
+  // parse Bitmap ...
+  while (FGetTok(&tok) && (tok.rw != rwEnd))
+  {
+    if (tok.rw == rwBitmap)
+    {
+      currentEntry.pchFileName = PchGetSz("Bitmap Filename");
+      currentEntry.haspalette = fFalse;
+      currentEntry.compress = defaultCompress;
+      currentEntry.colortable = fFalse;
+      currentEntry.transparencyData[0] = 0;
+      currentEntry.density = 1;
+      currentEntry.bpp = 0;
+      while (FGetTok(&tok))
+      {
+        if ((tok.rw == rwNoCompress) ||
+            (tok.rw == rwAutoCompress) || (tok.rw == rwForceCompress))
+        {
+          currentEntry.compress = tok.rw;
+        }
+        else if ((tok.rw == rwNoColorTable) || (tok.rw == rwColorTable))
+        {
+          currentEntry.colortable = (tok.rw == rwColorTable);
+        }
+        else if (tok.rw == rwTransparency)
+        {
+          currentEntry.transparencyData[0] = rwTransparency;
+          currentEntry.transparencyData[1] = WGetConst("red value");
+          currentEntry.transparencyData[2] = WGetConst("green value");
+          currentEntry.transparencyData[3] = WGetConst("blue value");
+        }
+        else if (tok.rw == rwTransparencyIndex)
+        {
+          currentEntry.transparencyData[0] = rwTransparencyIndex;
+          currentEntry.transparencyData[1] = WGetConst("transparency index");
+        }
+        else if (tok.rw == rwBitmapPalette)
+        {
+          currentEntry.pchPaletteFileName = PchGetSz("Palette Filename");
+          if ((currentEntry.pchPaletteFileName == NULL)
+              || (strcmp(currentEntry.pchPaletteFileName, "") == 0))
+            ErrorLine("Empty or no file name provided");
+
+          currentEntry.haspalette = fTrue;
+          ParsePaletteFile(currentEntry.pchPaletteFileName,
+                           currentEntry.palette, &currentEntry.nColors);
+        }
+        else if (tok.rw == rwBitmapBpp)
+        {
+          currentEntry.bpp = WGetConst("bit per pixels");
+        }
+        else if (tok.rw == rwBitmapDensity)
+        {
+          currentEntry.density = WGetConst("bitmap density");
+        }
+        else
+        {
+          UngetTok();
+          break;
+        }
+      }
+
+      switch (currentEntry.bpp)
+      {
+        case 1:
+          index = 0;
+          currentEntry.bitmapTypes = rwBitmap;
+          break;
+        case 2:
+          index = 1;
+          currentEntry.bitmapTypes = rwBitmapGrey;
+          break;
+        case 4:
+          index = 2;
+          currentEntry.bitmapTypes = rwBitmapGrey16;
+          break;
+        case 5:
+          index = 2;
+          currentEntry.bitmapTypes = rwBitmapColor16;
+          break;
+        case 8:
+          index = 3;
+          currentEntry.bitmapTypes = rwBitmapColor256;
+          break;
+        case 16:
+          index = 4;
+          currentEntry.bitmapTypes = rwBitmapColor16k;
+          break;
+        case 24:
+          index = 5;
+          currentEntry.bitmapTypes = rwBitmapColor24k;
+          break;
+        case 32:
+          index = 6;
+          currentEntry.bitmapTypes = rwBitmapColor32k;
+          break;
+        default:
+          ErrorLine("Bitmap bpp not supported.");
+          break;
+      }
+
+      if (currentEntry.density == 2)
+        index += 8;
+
+      if (flag & (0x01 << index))
+        ErrorLine("Bitmap can't have 4 bit gray and 4 bit color data.");
+      else
+        flag |= (0x01 << index);
+      memcpy(&aBitmapEntries[index], &currentEntry, sizeof(BMPDEF));
+      i++;
+    }
+    else
+    {
+      ErrorLine("Bad token found.");
+      break;
+    }
+  }
+
+  if (!(flag & 0x000000FF))
+    ErrorLine("BitmapFamilyEx must have at least one bitmap with density 1.");
+
+  if ((bitmapType == rwIconFamilyEx) || (bitmapType == rwIconSmallFamilyEx))
+  {
+    if (id == 0)
+    {
+      if (bitmapType == rwIconFamilyEx)
+        id = 1000;
+      else
+        id = 1001;
+    }
+    isAIcon = fTrue;
+    pchResType = malloc(strlen(kPalmResType[kIconType]) + 1);
+    strcpy(pchResType, kPalmResType[kIconType]);
+  }
+
+  // count number of bmp in each case
+  for (i = 0; i < MAXDEPTH; i++)
+  {
+    if (aBitmapEntries[i].density == 1)
+      nbrOfBmpDensityOne++;
+    if (aBitmapEntries[i].density > 1)
+      nbrOfBmpDensityTwoOrMore++;
+  }
+
+  // Dump BitmapFamilyEx resource
+  OpenOutput((pchResType == NULL)
+             ? kPalmResType[kBitmapRscType] : pchResType, id);
+  // only process the bitmaps that have been supplied!
+  i = 0;
+  writeFakeDblHdr = fFalse;
+  while (flag != 0x00)
+  {
+    if ((flag & 0x01) == 0x01)
+    {
+      if (aBitmapEntries[i].haspalette)
+      {
+        // 4bpc
+        if ((aBitmapEntries[i].bpp == 5) && (aBitmapEntries[i].nColors < 17))   // rwBitmapColor16
+          SetUserPalette4bpp(aBitmapEntries[i].palette,
+                             aBitmapEntries[i].nColors);
+        // 8bpp
+        if ((aBitmapEntries[i].bpp == 8) && (aBitmapEntries[i].nColors < 256))  // rwBitmapColor256
+          SetUserPalette8bpp(aBitmapEntries[i].palette,
+                             aBitmapEntries[i].nColors);
+      }
+      else
+      {
+        // 4bpc
+        if (aBitmapEntries[i].bpp == 5)          // rwBitmapColor16
+          SetUserPalette4bppToDefault4bpp();
+        // 8bpp
+        if (aBitmapEntries[i].bpp == 8)          // rwBitmapColor256
+          SetUserPalette8bppToDefault8bpp();
+      }
+
+      // fake header : begin of bmp part with density > 1
+      if ((aBitmapEntries[i].density > 1) && (!writeFakeDblHdr))
+      {
+        RCBITMAP emptyBmpHeader;
+
+        memset(&emptyBmpHeader, 0, sizeof(RCBITMAP));
+        emptyBmpHeader.pixelsize = 255;
+        if (vfLE32)
+          emptyBmpHeader.version = 0x81;
+        else
+          emptyBmpHeader.version = 0x01;
+        CbEmitStruct(&emptyBmpHeader, szRCBITMAP, NULL, fTrue);
+        writeFakeDblHdr = fTrue;
+      }
+
+      if (aBitmapEntries[i].density == 1)
+        DumpBitmap(aBitmapEntries[i].pchFileName, isAIcon,
+                   aBitmapEntries[i].compress, aBitmapEntries[i].bitmapTypes,
+                   aBitmapEntries[i].colortable,
+                   aBitmapEntries[i].transparencyData,
+                   (nbrOfBmpDensityTwoOrMore) ? fTrue : --nbrOfBmpDensityOne,
+                   bootScreen, 0);
+      else
+        DumpBitmap(aBitmapEntries[i].pchFileName, isAIcon,
+                   aBitmapEntries[i].compress, aBitmapEntries[i].bitmapTypes,
+                   aBitmapEntries[i].colortable,
+                   aBitmapEntries[i].transparencyData,
+                   --nbrOfBmpDensityTwoOrMore, bootScreen,
+                   aBitmapEntries[i].density);
+
+      if (aBitmapEntries[i].haspalette)
+      {
+        // 4bpc
+        if (aBitmapEntries[i].bpp == 5)          // rwBitmapColor16
+          SetUserPalette4bppToDefault4bpp();
+        // 8bpp
+        if (aBitmapEntries[i].bpp == 8)          // rwBitmapColor256
+          SetUserPalette8bppToDefault8bpp();
+      }
+    }
+    i++;
+    flag = flag >> 1;
+  }
+  CloseOutput();
+
+  // clean up
+  for (i = 0; i < MAXDEPTH; i++)
+  {
+    if (aBitmapEntries[i].pchFileName != NULL)
+      free(aBitmapEntries[i].pchFileName);
+    if (aBitmapEntries[i].pchPaletteFileName != NULL)
+      free(aBitmapEntries[i].pchPaletteFileName);
+  }
+
+CLEANUP:
+  if (pchResType)
+    free(pchResType);
+  if (pLocale)
+    free(pLocale);
 #undef MAXDEPTH
 }
 
@@ -4034,7 +4405,7 @@ ParseDumpIcon(BOOL fSmall,
       if ((flag & 0x01) == 0x01)
         DumpBitmap(pchFileName[i], id, rwNoCompress,
                    bitmapTypes[i], colortable, transparencyData,
-                   ((flag & 0xfe) != 0x00), fFalse);
+                   ((flag & 0xfe) != 0x00), fFalse, 0);
       flag = flag >> 1;
       i++;
     }
@@ -4042,7 +4413,7 @@ ParseDumpIcon(BOOL fSmall,
   else
   {
     DumpBitmap(pchFileName[0], id, rwNoCompress, bitmapType,
-               fFalse, transparencyData, fFalse, fFalse);
+               fFalse, transparencyData, fFalse, fFalse, 0);
   }
   CloseOutput();
 
@@ -4052,6 +4423,8 @@ CLEANUP:
     if (pchFileName[i] != NULL)
       free(pchFileName[i]);
 
+  if (locale)
+    free(locale);
 #undef MAXDEPTH
 }
 
@@ -4192,6 +4565,10 @@ ParseDumpTrap()
   if (tok.rw != rwValue)
     UngetTok();
   wTrap = WGetConstEx("Trap number");
+  if ((wTrap & 0xA000) == 0)
+  {
+    wTrap |= 0xA000;
+  }
   if (id < 1000)
     ErrorLine
       ("TRAP resource id must be >= 1000, see HackMaster documentation");
@@ -5409,8 +5786,15 @@ ParseRcpFile(char *szRcpIn,
       case rwBitmapColor32k:
       case rwBitmapFamily:
       case rwBitmapFamily_special:
+#ifdef PALM_INTERNAL
       case rwBootScreenFamily:
+#endif
         ParseDumpBitmapFile(tok.rw);
+        break;
+      case rwBitmapFamilyEx:
+      case rwIconFamilyEx:
+      case rwIconSmallFamilyEx:
+        ParseDumpBitmapExFile(tok.rw);
         break;
       case rwInteger:
         ParseDumpInteger();
@@ -5479,11 +5863,11 @@ ParseRcpFile(char *szRcpIn,
       case rwPalette:
         ParseDumpPalette();
         break;
-
-#ifdef PALM_INTERNAL
       case rwLauncherCategory:                  // RMa add: support for this resource
         ParseDumpLauncherCategory();
         break;
+
+#ifdef PALM_INTERNAL
       case rwGraffitiInputArea:
         ParseDumpGraffitiInputArea();
         break;
@@ -5553,9 +5937,13 @@ ParseRcpFile(char *szRcpIn,
           ErrorLine2(errorString,
                      "FORM, MENU, ALERT, VERSION, STRINGTABLE, STRING, CATEGORIES, "
                      "APPLICATIONICONNAME, APPLICATION, BITMAP, PALETTE, "
-                     "BITMAPGREY, BITMAPGREY16, BITMAPCOLOR16, BITMAPCOLOR256, "
+                     "BITMAPGREY, BITMAPGREY16, BITMAPCOLOR16, BITMAPCOLOR, "
                      "BITMAPCOLOR16K, BITMAPCOLOR24K, BITMAPCOLOR32K, BITMAPFAMILY, "
-                     "BOOTSCREENFAMILY, ICON, ICONFAMILY, SMALLICON, SMALLICONFAMILY, "
+                     "BITMAPFAMILYSPECIAL, BITMAPFAMILYEX, "
+#ifdef PALM_INTERNAL
+                     "BOOTSCREENFAMILY, "
+#endif
+                     "ICON, ICONFAMILY, SMALLICON, SMALLICONFAMILY, ICONFAMILYEX, SMALLICONFAMILYEX, "
                      "LAUNCHERCATEGORY, BYTELIST, WORDLIST, LONGWORDLIST, MIDI, "
                      "SYSAPPLICATIONPREFERENCES, PALETTETABLE, TRAP, FONT, HEX, DATA, INTEGER"
 #ifdef PALM_INTERNAL
@@ -5869,7 +6257,7 @@ ParseFile(char *szIn,
 
   if (szIncFile != NULL)
   {
-    //WriteIncFile(szIncFile);
+    WriteIncFile(szIncFile);
   }
 
 #ifdef PALM_INTERNAL

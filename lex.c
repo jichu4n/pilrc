@@ -369,7 +369,7 @@ FGetLex(LEX * plex,
         BOOL fInComment)
 {
   int ch;
-  char szT[2];
+  char szT[4];
   LEX lex;
   char *pchStore;
 
@@ -399,6 +399,7 @@ FGetLex(LEX * plex,
         /*
          * TODO logical operators 
          */
+        SLT(0xA0, ltConst)                       /* RMa add to support TRAP special case */
       SLT('.', ltPoint) SLT('+', ltPlus) SLT('-', ltMinus) SLT('*', ltMult) SLT('%', ltMod) SLT('(', ltLParen) SLT(')', ltRParen) SLT('[', ltLBracket) SLT(']', ltRBracket) SLT('{', ltLBrace) SLT('}', ltRBrace) SLT(',', ltComma) SLT('?', ltQuestion) SLT(':', ltColon) SLT('^', ltCaret) SLT('\\', ltBSlash) SLT('#', ltPound) SLT('@', ltAt) SLT(';', ltSemi) SLT('|', ltPipe) case '/':
         if (*pchLex == '/')
         {
@@ -565,8 +566,10 @@ FGetLex(LEX * plex,
         }
         else
         {
-          szT[0] = (char)ch;
-          szT[1] = '\000';
+          szT[0] = '\'';
+          szT[1] = (char)ch;
+          szT[2] = '\'';
+          szT[3] = '\000';
           ParseError("Unknown character: ", szT);
         }
         pchLex--;

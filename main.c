@@ -135,9 +135,9 @@ main(int cArg,
 
   // display the (c) string
 #ifdef PALM_INTERNAL
-  printf("PilRC v2.9 patch release 3 - (C)2002 A. Ardiri\n");
+  printf("PilRC v2.9 patch release 5 - (C)2002 A. Ardiri\n");
 #else
-  printf("PilRC v2.9 patch release 3\n");
+  printf("PilRC v2.9 patch release 5\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000-2002 Aaron Ardiri (aaron@ardiri.com)\n");
 #endif

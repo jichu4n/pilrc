@@ -348,12 +348,28 @@ CloseGlyph(int *header,
 /*
  * The main function of this module 
  */
+/*
+ * I changed this a little bit to correctly handle fonts with missing char provided.
+ * A font is not required to provide all the 256 chars and can even have hole.
+ * When a character not defined is displayed, PalmOS uses the "missingChar".
+ * The missing char is an additional set after the end of the font.
+ * You can specify it (you should actually) in a Font file using GLYPH -1.
+ * This should be the last one in the file.
+ * Thus you can control what is displayed if something using your font tries to
+ * display an unsupported character.
+ * 
+ * I changed PilRC to correctly handle font definition files containing or not the missing char.
+ * 
+ * Additionally, the columns array must contain n+1 items including the col past the last char
+ * used to compute the size of the last char by some tools. I also fixed that.
+ * Regis Nicolas (regis.nicolas@corp.palm.com)
+ */
 
 void
 DumpFont(char *pchFileName,
          int fntNo)
 {
-#define		kArraySize		257      /* RMa add 1 for handle missing char (256 +1) */
+#define		kArraySize		258
   FILE *in;
   char s[kArraySize], *s1, *bitmap[kArraySize];
   unsigned short int coltable[kArraySize];
@@ -365,6 +381,7 @@ DumpFont(char *pchFileName,
   int row = 0;
   int col = 0;
   int width = 0;
+  int missingChar = 0;
   unsigned short bit[8] = { 128, 64, 32, 16, 8, 4, 2, 1 };
 
   memset(header, 0, sizeof(header));
@@ -425,12 +442,15 @@ DumpFont(char *pchFileName,
           curChar++;
           fntOW[fntNo][curChar].offset = 0;
           coltable[curChar] = col;
+          missingChar = 1;
           continue;
         }
         if (value < 0 || value > 255)
           ErrorX("Glyph number out of range");
         if (value <= curChar)
           ErrorX("Glyph out of sequence");
+        if (missingChar != 0)
+          ErrorX("GLYPH -1 MUST be the last one in the font definition file");
 
         for (x = curChar + 1; x <= (size_t) value; x++)
           coltable[x] = col;
@@ -439,6 +459,7 @@ DumpFont(char *pchFileName,
         curChar = value;
         header[h_lastChar] = value;
         fntOW[fntNo][curChar].offset = 0;
+
         continue;
       }
 
@@ -503,13 +524,28 @@ DumpFont(char *pchFileName,
 
   if (curChar < 0)
     ErrorX("No glyphs");
+  if (!missingChar)
+  {
+    coltable[curChar + 1] = coltable[curChar] + fntOW[fntNo][curChar].width;
+    curChar++;
+    fntOW[fntNo][curChar].offset = 0;
+    fntOW[fntNo][curChar].width = 0;
+    /*
+     * Always output it 
+     */
+    missingChar = 1;
+  }
+  /*
+   * Add the extra column info used to compute the last char width (even if it is the missing char) 
+   */
+  coltable[curChar + 1] = coltable[curChar] + fntOW[fntNo][curChar].width;
   CloseGlyph(header, &width, &row, &col, autoWidth, autoRectWidth);
   fntH[fntNo] = header[h_fRectHeight];
 
   header[h_rowWords] = (col + 15) / 16;
   header[h_owTLoc] =
-    header[h_rowWords] * header[h_fRectHeight] + 8 + header[h_lastChar] -
-    header[h_firstChar];
+    header[h_rowWords] * header[h_fRectHeight] + 7 + header[h_lastChar] -
+    header[h_firstChar] + missingChar;
 
   CbEmitStruct(header, szRCFONT, NULL, fTrue);
 
@@ -519,25 +555,12 @@ DumpFont(char *pchFileName,
     free(bitmap[x]);
   }
 
-  /*
-   * adjusted: 12-Nov-2001
-   *
-   * see doc/2.8p8emails/henke for explanation
-   *
-   for (x = header[h_firstChar]; x <= (size_t) header[h_lastChar] + 1; x++)
-   EmitW(coltable[x]);
-   EmitW((unsigned short)col);
-   // EmitW(0);
-   */
-  for (x = header[h_firstChar]; x <= (size_t) header[h_lastChar]; x++)
+  for (x = header[h_firstChar];
+       x <= (size_t) header[h_lastChar] + 1 + missingChar; x++)
     EmitW(coltable[x]);
-  EmitW((unsigned short)col);
-  EmitW(0);
 
   DumpBytes(&fntOW[fntNo][header[h_firstChar]],
-            (header[h_lastChar] - header[h_firstChar] + 2) * 2);
-  EmitW(0xFFFF);                                 /* RMa bug correction last value in file must be 0xFFFF not 0 */
-
+            (header[h_lastChar] - header[h_firstChar] + 1 + missingChar) * 2);
 }
 
 static void

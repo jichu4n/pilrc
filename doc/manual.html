@@ -24,14 +24,14 @@
 <tr>
 <td>
 <font face="Arial,Helvetica">
-<h2>PilRC v2.90 p3<br>
+<h2>PilRC v2.90 p5<br>
     User Manual <div class="palmInternal">PALM internal</div></h2>
 </font>
 </td>
 <td valign=top align=right>
 <font face="Arial,Helvetica">
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
-  25 February 2002
+  30 April 2002
 </font>
 </td>
 </tr>
@@ -929,6 +929,30 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
+    <a href="#lang_icon2">ICONFAMILYEX</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    New icon family Resource (density support)
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_smallicon2">SMALLICONFAMILYEX</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    New icon family Resource (density support)
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
     <a href="#lang_bitmap">BITMAP</a> <br>
     <a href="#lang_bitmap">BITMAPGREY</a> <br>
     <a href="#lang_bitmap">BITMAPGREY16</a> <br>
@@ -945,6 +969,18 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     <td valign=center>
     <font face="Arial,Helvetica">
     Bitmap Resource
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_bitmap2">BITMAPFAMILYEX</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    New Bitmap Resource (density support)
     </font>
     </td>
   </tr>
@@ -1941,7 +1977,7 @@ ICON [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>]&nbsp
 ICONFAMILY [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>] 
            <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
            [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-           [TRANSPARENT r g b] [TRANSPARENTINDEX index]</pre>
+           [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]</pre>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -1990,7 +2026,7 @@ SMALLICON [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>]&nbsp
 SMALLICONFAMILY [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>] 
                 <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
                 [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-                [TRANSPARENT r g b] [TRANSPARENTINDEX index]</pre>
+                [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]</pre>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -2028,8 +2064,112 @@ SMALLICONFAMILY "smic1bpp.bmp" "" "" "smic8bpp.bmp" TRANSPARENTINDEX 255</pre>
 </ul>
 
 <font face="Arial,Helvetica">
+<a name="lang_icon2"></a>
+<b>ICONFAMILYEX (tAIB)</b><p>
+</font>
+
+<ul>
+<pre>
+ICONFAMILYEX [ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>]
+  [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+  [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+BEGIN
+  BITMAP <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> BPP <font color="#00ff00">&lt;BitPerPixel.n&gt;</font>
+         [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
+         [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
+         [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+         [DENSITY <font color="#00ff00">&lt;BitmapResourceDensity.n&gt;</font>]
+  ...
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Notes:</u> <p>
+<ul>
+<li> 
+The bitmap must be 32x32 (or 64x64 with density = 2), 32x22 (or 64x44) or 22x22 (or 44x44) in dimension.
+<li>
+<tt>BPP</tt> must be 1, 2, 4, 5, 8, 16 (5 is for generate 4bpp (16 color) bitmap resource).
+<li>
+<tt>DENSITY</tt> must be 1 or 2 default is 1. you can not have only bmp with DENSITY 2 in IconFamilyEx.
+<li> 
+A <tt>tAIB</tt> ICONFAMILYEX resource with ID 1000 is created unless an alternate ID is specified.
+<li> 
+A <tt>COMPRESS</tt> option before BEGIN is default option for all bitmap of that family.
+
+</pre>
+</ul>
+
+
+<u>Example:</u><p>
+</font>
+
+<ul><pre>
+ICONFAMILYEX
+BEGIN
+	BITMAP "bmp-1.bmp" BPP 1 
+	BITMAP "bmp-4.bmp" BPP 2 DENSITY 1
+	BITMAP "bmp-4.bmp" BPP 4 DENSITY 1
+	BITMAP "bmp-8.bmp" BPP 8 DENSITY 1
+	BITMAP "bmp-8d.bmp" BPP 8 DENSITY 2
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<a name="lang_smallicon2"></a>
+<b>SMALLICONFAMILYEX (tAIB)</b><p>
+</font>
+
+<ul>
+<pre>
+SMALLICONFAMILYEX [ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>]
+  [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+  [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+BEGIN
+  BITMAP <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> BPP <font color="#00ff00">&lt;BitPerPixel.n&gt;</font>
+         [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
+         [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
+         [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+         [DENSITY <font color="#00ff00">&lt;BitmapResourceDensity.n&gt;</font>]
+  ...
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Notes:</u> <p>
+<ul>
+<li> 
+The bitmap must be 15x9 (or 30x18 with density = 2) in dimension.
+<li>
+<tt>BPP</tt> must be 1, 2, 4, 5, 8, 16 (5 is for generate 4bpp (16 color) bitmap resource).
+<li>
+<tt>DENSITY</tt> must be 1 or 2 default is 1. you can not have only bmp with DENSITY 2 in SmallIconFamilyEx.
+<li> 
+A <tt>tAIB</tt> SMALLICONFAMILYEX resource with ID 1001 is created unless an alternate ID is specified.
+<li> 
+A <tt>COMPRESS</tt> option before BEGIN is default option for all bitmap of that family.
+
+</pre>
+</ul>
+
+
+<u>Example:</u><p>
+</font>
+
+<ul><pre>
+SMALLICONFAMILYEX
+BEGIN
+	BITMAP "bmp-1.bmp" BPP 1 
+	BITMAP "bmp-4.bmp" BPP 2 DENSITY 1
+	BITMAP "bmp-4.bmp" BPP 4 DENSITY 1
+	BITMAP "bmp-8.bmp" BPP 8 DENSITY 1
+	BITMAP "bmp-8d.bmp" BPP 8 DENSITY 2
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
 <a name="lang_bitmap"></a>
-<b>BITMAP (Tbmp) (tbsb)</b><p>
+<b>BITMAP (Tbmp) (Tbsb) (Sbmp)</b><p>
 </font>
 
 <ul>
@@ -2049,7 +2189,7 @@ BITMAPCOLOR16 [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#
 BITMAPCOLOR  [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp
              [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-             [TRANSPARENT r g b] [TRANSPARENTINDEX index]
+             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
 BITMAPCOLOR16K [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp
              [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
@@ -2057,18 +2197,18 @@ BITMAPCOLOR16K [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="
 BITMAPFAMILY [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; 
              &lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-             [TRANSPARENT r g b] [TRANSPARENTINDEX index]
+             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
 BITMAPFAMILYSPECIAL [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; 
              &lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-             [TRANSPARENT r g b] [TRANSPARENTINDEX index]
+             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
 BOOTSCREENFAMILY [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp
              [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">
              &lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-             [TRANSPARENT r g b] [TRANSPARENTINDEX index]
+             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
 </pre></ul>
 
@@ -2086,11 +2226,11 @@ BOOTSCREENFAMILY [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color
 <li>
 <tt>BITMAPCOLOR</tt> creates a 256 color bitmap resource.
 <li>
-<tt>BITMAPFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp and 256 color) icon resources.
+<tt>BITMAPFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp, 8bpp and 16bpp color) icon resources.
 <li>
-<tt>BITMAPFAMILYSPECIAL</tt> creates a multibit (1bpp, 2bpp, 4bpp color and 256 color) icon resources.
+<tt>BITMAPFAMILYSPECIAL</tt> creates a multibit (1bpp, 2bpp, 4bpp and 8bpp and 16bpp color) icon resources.
 <li>
-<tt>BOOTSCREENFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp color and 256 color) icon resources.
+<tt>BOOTSCREENFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp, 8bpp color) icon resources.
 In the header we found a size, a check sum and a BitmapFamily. The Resource created is a 'tbsb'.
 <li>
 <tt>BOOTSCREENFAMILY</tt> is system reserved.
@@ -2152,6 +2292,58 @@ BITMAPFAMILY  ID 7 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS
 BITMAPFAMILY  ID 8 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENT 255 255 255
 BITMAPFAMILY  ID 9 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENTINDEX 255</pre>
 </ul>
+
+<font face="Arial,Helvetica">
+<a name="lang_bitmap2"></a>
+<b>BITMAPFAMILYEX (Tbmp) (Sbmp) (Tbsb)</b><p>
+</font>
+
+<ul>
+<pre>
+BITMAPFAMILYEX [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font> 
+  [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+  [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+BEGIN
+  BITMAP <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> BPP <font color="#00ff00">&lt;BitPerPixel.n&gt;</font>
+         [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
+         [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
+         [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+         [DENSITY <font color="#00ff00">&lt;BitmapResourceDensity.n&gt;</font>]
+  ...
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Notes:</u> <p>
+<ul>
+<li>
+<tt>BPP</tt> must be 1, 2, 4, 5, 8, 16 (5 is for generate 4bpp (16 color) bitmap resource).
+<li>
+<tt>DENSITY</tt> must be 1 or 2 default is 1. you can not have only bmp with DENSITY 2 in BitmapFamilyEx.
+<li>
+<tt>"Sbmp"</tt> should not have bmps with density > 1.
+<li> 
+A <tt>COMPRESS</tt> option before BEGIN is default option for all bitmap of that family.
+
+</pre>
+</ul>
+
+
+<u>Example:</u><p>
+</font>
+
+<ul><pre>
+BITMAPFAMILYEX ID 1000 
+COMPRESS
+BEGIN
+	BITMAP "bmp-1.bmp" BPP 1 
+	BITMAP "bmp-4.bmp" BPP 2 DENSITY 1
+	BITMAP "bmp-4.bmp" BPP 4 DENSITY 1
+	BITMAP "bmp-8.bmp" BPP 8 DENSITY 1
+	BITMAP "bmp-16.bmp" BPP 16 DENSITY 1	
+	BITMAP "bmp-8d.bmp" BPP 8 NOCOMPRESS DENSITY 2
+END
+</pre></ul>
 
 <font face="Arial,Helvetica">
 <a name="lang_trap"></a>

@@ -956,14 +956,16 @@ typedef struct _rcscrollbar
   p_int pageSize;                                /* w */
   /*
    * Short penPosInCar;
- *//*
- * * * * * * * * * * * * * * * zw 
- */
+   */
+  /*
+   * zw 
+   */
   /*
    * Short savePos;
- *//*
- * * * * * * * * * * * * * * * zw 
- */
+   */
+  /*
+   * zw 
+   */
 }
 RCSCROLLBAR;
 
@@ -1320,9 +1322,10 @@ typedef struct _rcBITMAP
   p_int compressionType;                         /* b */
   /*
    * ushort and_reserved_and_colorTable[3] 
- *//*
- * * * * * * * * * * * * * * * z1w 
- */
+   */
+  /*
+   * z1w 
+   */
   unsigned char *pbBits;
 
   /*
@@ -1333,6 +1336,39 @@ typedef struct _rcBITMAP
 RCBITMAP;
 
 #define szRCBITMAP "w,w,w,uuuuuuzu10,b,b,w,b,b,zw"
+
+/*
+ * RMa add support for density > 1
+ */
+typedef struct _rcBITMAP_V3
+{                                                /* bm */
+  p_int cx;                                      /* w */
+  p_int cy;                                      /* w */
+  p_int cbRow;                                   /* w */
+  RCBitmapFlagsType flags;                       /* uuuuuuzu10 */
+  p_int pixelsize;                               /* b */
+  p_int version;                                 /* b */
+  p_int size;                                    /* b */
+  p_int pixelFormat;                             /* b */
+  //  p_int unused;                                                                                        /* zb */
+  p_int compressionType;                         /* b */
+  p_int density;                                 /* w */
+  p_int transparentValue;                        /* l */
+  p_int nextDepthOffset;                         /* l */
+  /*
+   * ushort colorTable[3] 
+   */
+
+  unsigned char *pbBits;
+
+  /*
+   * private, not stored into file 
+   */
+  int cbDst;
+}
+RCBITMAP_V3;
+
+#define szRCBITMAP_V3 "w,w,w,uuuuuuzu10,b,b,b,b,zb,b,w,l,l"
 
 /*-----------------------------------------------------------------------------
 |	FONT
@@ -1510,7 +1546,13 @@ RCPFILE;
        rwBitmapColor32k,
        rwBitmapFamily,
        rwBitmapFamily_special,
+       rwBitmapFamilyEx,
+       rwBitmapBpp,
+       rwBitmapDensity,
+
+#ifdef PALM_INTERNAL
        rwBootScreenFamily,
+#endif
        rwBitmapPalette,
        rwPalette,
 
@@ -1562,6 +1604,7 @@ RCPFILE;
        rwMinHeapSpace,
 
        rwTranslation,
+       rwLocale,                                 /* RMa Locatisation management */
 
 #ifdef PALM_INTERNAL
        rwCountryLocalisation,                    /* 'cnty' */
@@ -1622,7 +1665,6 @@ RCPFILE;
        rwKeyboard,
        rwDefaultItem,
 
-       rwLocale,                                 /* RMa Locatisation management */
        rwHardSoftButtonDefault,                  /* RMa add Hard/Soft button default */
 
        rwTableList,                              /* ttli */
@@ -1697,6 +1739,9 @@ RCPFILE;
        // - removed these due to be purely backward 
        //   compatable in the applications launcher
        rwIconSmallFamily,
+
+       rwIconFamilyEx,
+       rwIconSmallFamilyEx,
 
        rwTrap,
 
@@ -1807,7 +1852,13 @@ RWT;
        {"bitmapcolor32k", "bitmapcolour32k", rwBitmapColor32k},
        {"bitmapfamily", NULL, rwBitmapFamily},
        {"bitmapfamilyspecial", NULL, rwBitmapFamily_special},
+       {"bitmapfamilyex", NULL, rwBitmapFamilyEx},
+
+       {"bpp", NULL, rwBitmapBpp},
+       {"density", NULL, rwBitmapDensity},
+#ifdef PALM_INTERNAL
        {"bootscreenfamily", NULL, rwBootScreenFamily},  /* 'tbsb' it look like as a bitmapfamily with an header (size & crc) */
+#endif
        {"bitmappalette", NULL, rwBitmapPalette},
        {"palette", NULL, rwPalette},
 
@@ -1857,9 +1908,9 @@ RWT;
        {"midi", NULL, rwMidi},                   /* 'MIDI' */
 
        {"translation", NULL, rwTranslation},
+       {"launchercategory", "taic", rwLauncherCategory},
 
 #ifdef PALM_INTERNAL
-       {"launchercategory", "taic", rwLauncherCategory},
        {"fontindex", NULL, rwFontIndex},
 
        {"fontmap", NULL, rwFontMap},             /* 'NFNT' & 'fntm' */
@@ -2000,6 +2051,9 @@ RWT;
        //   compatable in the applications launcher
 
        {"smalliconfamily", NULL, rwIconSmallFamily},
+
+       {"iconfamilyEx", NULL, rwIconFamilyEx},
+       {"smalliconfamilyEx", NULL, rwIconSmallFamilyEx},
 
        {"trap", NULL, rwTrap},
 
@@ -2353,6 +2407,9 @@ ITM;
 #define if4numResultBits				0x00080000
 #define if4indexDataOffset				0x00100000
 #define if4compressed					0x00200000
+
+#define if4BitmapExtBpp			0x00400000
+#define if4BitmapExtDensity	0x00800000
 
 /*
  * Parse globals 

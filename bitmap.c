@@ -266,9 +266,11 @@ static void BMP_ConvertWindowsBitmap(RCBITMAP *, PILRC_BYTE *, int, BOOL, int *)
 static void BMP_ConvertTextBitmap(RCBITMAP *, PILRC_BYTE *, int);
 static void BMP_ConvertX11Bitmap(RCBITMAP *, PILRC_BYTE *, int);
 static void BMP_ConvertPNMBitmap(RCBITMAP *, PILRC_BYTE *, int, int, BOOL);
-static void BMP_CompressBitmap(RCBITMAP *, int, BOOL, BOOL);
-static void BMP_CompressDumpBitmap(RCBITMAP *, int, int, BOOL, BOOL, BOOL, BOOL);
+static void BMP_CompressBitmap(RCBITMAP *, int, int, BOOL, BOOL);
+static void BMP_CompressDumpBitmap(RCBITMAP *, int, int, BOOL, BOOL, BOOL, BOOL, int);
 static void BMP_InvalidExtension(char *);
+
+static void BMP_FillBitmapV3Header(RCBITMAP *, RCBITMAP_V3 *);
                                                                 // *INDENT-ON*
 
 // 
@@ -2070,19 +2072,23 @@ BMP_ConvertPNMBitmap(RCBITMAP * rcbmp,
 static void
 BMP_CompressBitmap(RCBITMAP * rcbmp,
                    int compress,
+                   int bmpVersion,
                    BOOL colortable,
                    BOOL directColor)
 {
   unsigned char *bits;
   int size, msize, i, j, k, flag;
+  int firstByteToWriteLen;
 
   // determine how much memory is required for compression (hopefully
   // less)
-  size = 2;
+  size = 2;                                      // compressed bmp size in UInt16
   if (colortable)
     size += COLOR_TABLE_SIZE;
   if (directColor)
     size += 8;
+  if (bmpVersion > 2)                            // compressed bmp size in UInt32
+    size += 2;
   msize = size + ((rcbmp->cbRow + ((rcbmp->cbRow + 7) / 8)) * rcbmp->cy);
 
   // allocat memory and clear
@@ -2125,38 +2131,49 @@ BMP_CompressBitmap(RCBITMAP * rcbmp,
   // if we must compress, or if it was worth it, save!
   if (compress == rwForceCompress || size < rcbmp->cbDst)
   {
-
     // do we have a color table?
     if ((colortable) && (!directColor))
     {
-
       int i;
 
       // copy the color table (dont forget it!)
       for (i = 0; i < COLOR_TABLE_SIZE; i++)
         bits[i] = rcbmp->pbBits[i];
 
-      bits[COLOR_TABLE_SIZE] = (unsigned char)(size >> 8);
-      bits[COLOR_TABLE_SIZE + 1] = (unsigned char)size;
+      firstByteToWriteLen = COLOR_TABLE_SIZE;
     }
     // direct color info?
-    if (directColor)
+    else if (directColor)
     {
-
       int i;
 
       // copy the direct color info (dont forget it!)
       for (i = 0; i < 8; i++)
         bits[i] = rcbmp->pbBits[i];
 
-      bits[8] = (unsigned char)(size >> 8);
-      bits[9] = (unsigned char)size;
+      firstByteToWriteLen = 8;
     }
-
     else
     {
-      bits[0] = (unsigned char)((size & 0xff00) >> 8);
-      bits[1] = (unsigned char)(size & 0x00ff);
+      firstByteToWriteLen = 0;
+    }
+
+    if (bmpVersion > 2)
+    {                                            /* 32 bits */
+      bits[firstByteToWriteLen] = (unsigned char)((size & 0xff000000) >> 24);
+      bits[firstByteToWriteLen + 1] =
+        (unsigned char)((size & 0x00ff0000) >> 16);
+      bits[firstByteToWriteLen + 2] =
+        (unsigned char)((size & 0x0000ff00) >> 8);
+      bits[firstByteToWriteLen + 3] = (unsigned char)(size & 0x000000ff);
+    }
+    else
+    {
+      if (size > 0xFFFF)
+        ErrorLine("bmp compressed too big to enter in version 2 format...");
+
+      bits[firstByteToWriteLen] = (unsigned char)((size & 0xff00) >> 8);
+      bits[firstByteToWriteLen + 1] = (unsigned char)(size & 0x00ff);
     }
 
     // change the data chunk to the newly compressed data
@@ -2246,6 +2263,41 @@ Crc16CalcBlock(const void *bufP,
 }
 
 /**
+ * Fill new header with common value and add new value
+ *
+ *	@param rcbmp		pointer to the source data buffer;
+ *	@param rcbmpv3		pointer to the destination data buffer;
+ *
+ * 25-apr-2002			RMa add on
+ *
+ */
+static void
+BMP_FillBitmapV3Header(RCBITMAP * rcbmp,
+                       RCBITMAP_V3 * rcbmpv3)
+{
+  if ((rcbmp) && (rcbmpv3))
+  {
+    rcbmpv3->cx = rcbmp->cx;
+    rcbmpv3->cy = rcbmp->cy;
+    rcbmpv3->cbRow = rcbmp->cbRow;
+    rcbmpv3->flags = rcbmp->flags;
+    rcbmpv3->pixelsize = rcbmp->pixelsize;
+    if (vfLE32)
+      rcbmpv3->version = 0x83;
+    else
+      rcbmpv3->version = 0x03;
+    rcbmpv3->size = 0x18;
+    rcbmpv3->pixelFormat = 0;
+    rcbmpv3->compressionType = rcbmp->compressionType;
+    rcbmpv3->density = 144;
+    rcbmpv3->transparentValue = rcbmp->transparentIndex;
+    rcbmpv3->nextDepthOffset = rcbmp->nextDepthOffset;
+    rcbmpv3->cbDst = rcbmp->cbDst;
+    rcbmpv3->pbBits = rcbmp->pbBits;
+  }
+}
+
+/**
  * Compress and Dump a single Bitmap (Tbmp or tAIB) resource.
  * 
  * @param rcbmp      a reference to the Bitmap resource
@@ -2255,6 +2307,7 @@ Crc16CalcBlock(const void *bufP,
  * @param directColor is the bitmap > 8bpp? (direct color mode)
  * @param multibit   should this bitmap be prepared for multibit? 
  * @param bootscreen	should this bitmap be prepared for size & crc header add on ?
+ * @param density    does this bitmap is a new version
  */
 static void
 BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
@@ -2263,24 +2316,44 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
                        BOOL colortable,
                        BOOL directColor,
                        BOOL multibit,
-                       BOOL bootScreen)
+                       BOOL bootScreen,
+                       int density)
 {
+  int stdIconSize_x = 32;
+  int stdIconSize_y = 22;
+  int stdSmallIconSize_x = 15;
+  int stdSmallIconSize_y = 9;
+
+  if (density)
+  {
+    stdIconSize_x *= 2;
+    stdIconSize_y *= 2;
+    stdSmallIconSize_x *= 2;
+    stdSmallIconSize_y *= 2;
+  }
   // anything specific with icons here?
   switch (isIcon)
   {
     case 1000:
-      if (((rcbmp->cx != 32) || (rcbmp->cy != 32)) &&
-          ((rcbmp->cx != 32) || (rcbmp->cy != 22)) &&
-          ((rcbmp->cx != 22) || (rcbmp->cy != 22)))
+      if (((rcbmp->cx != stdIconSize_x) || (rcbmp->cy != stdIconSize_x)) &&
+          ((rcbmp->cx != stdIconSize_x) || (rcbmp->cy != stdIconSize_y)) &&
+          ((rcbmp->cx != stdIconSize_y) || (rcbmp->cy != stdIconSize_y)))
       {
-        WarningLine("Icon resource not 32x32, 32x22 or 22x22 (preferred)");
+        if (density)
+          WarningLine("Icon resource not 64x64, 64x44 or 44x44 (preferred)");
+        else
+          WarningLine("Icon resource not 32x32, 32x22 or 22x22 (preferred)");
       }
       break;
 
     case 1001:
-      if ((rcbmp->cx != 15) && (rcbmp->cy != 9))
+      if ((rcbmp->cx != stdSmallIconSize_x)
+          && (rcbmp->cy != stdSmallIconSize_y))
       {
-        WarningLine("Small icon resource not 15x9");
+        if (density)
+          WarningLine("Small icon resource not 30x18");
+        else
+          WarningLine("Small icon resource not 15x9");
       }
       break;
 
@@ -2292,38 +2365,46 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
   // do we need to do some compression?
   if ((compress == rwAutoCompress) || (compress == rwForceCompress))
   {
-    BMP_CompressBitmap(rcbmp, compress, colortable, directColor);
+    BMP_CompressBitmap(rcbmp, compress, (density) ? 3 : 2, colortable,
+                       directColor);
   }
 
   // is this single resource part of a multibit bitmap family?
   if (multibit)
   {
-
-    // determine the next depth offset (# dwords)
-    rcbmp->nextDepthOffset = 4 + (rcbmp->cbDst >> 2);   // 16
+    if (density)
+    {
+      // determine the next depth offset (# byte)
+      if (rcbmp->cbDst & 3)
+        rcbmp->nextDepthOffset = 0x18 + rcbmp->cbDst + 4 - (rcbmp->cbDst & 3);
+      else
+        rcbmp->nextDepthOffset = 0x18 + rcbmp->cbDst;
+    }
+    else
+      // determine the next depth offset (# dwords)
+      rcbmp->nextDepthOffset = 4 + (rcbmp->cbDst >> 2); // 16
     // bytes - 
     // header
 
     // if we need to, round up to the nearest dword and get more
     // memory
-    if ((rcbmp->cbDst % 4) != 0)
-    {
+    if (!density)
+      if ((rcbmp->cbDst % 4) != 0)
+      {
+        int i, oldSize = rcbmp->cbDst;
 
-      int i, oldSize = rcbmp->cbDst;
+        rcbmp->nextDepthOffset++;
+        rcbmp->cbDst = (rcbmp->nextDepthOffset - 4) << 2;
+        rcbmp->pbBits = (PILRC_BYTE *) realloc(rcbmp->pbBits, rcbmp->cbDst);
 
-      rcbmp->nextDepthOffset++;
-      rcbmp->cbDst = (rcbmp->nextDepthOffset - 4) << 2;
-      rcbmp->pbBits = (PILRC_BYTE *) realloc(rcbmp->pbBits, rcbmp->cbDst);
-
-      // need to clear extra memory that was allocated?
-      for (i = oldSize; i < rcbmp->cbDst; i++)
-        rcbmp->pbBits[i] = 0x00;                 // clear it
-    }
+        // need to clear extra memory that was allocated?
+        for (i = oldSize; i < rcbmp->cbDst; i++)
+          rcbmp->pbBits[i] = 0x00;               // clear it
+      }
   }
 
   if (bootScreen)                                /* RMa add on header is a size and a crc */
   {
-    unsigned short structureSize;
     FILE *outputFile = getOpenedOutputFile();
     int currentPosInFile = ftell(outputFile);
     int newPosInFile;
@@ -2332,44 +2413,86 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
     int bootScreenHeaderSize = (vfLE32) ? 8 : 6;
     unsigned short crc;
     int test;
+    int error;
 
     EmitL(0);
     EmitW(0);
     if (vfLE32)
       EmitW(0);
 
-    structureSize = CbEmitStruct(rcbmp, szRCBITMAP, NULL, fTrue);       /* write structure tbmp */
+    // dump the bitmap header and data
+    if (density)
+    {
+      RCBITMAP_V3 rcbmpv3;
+
+      BMP_FillBitmapV3Header(rcbmp, &rcbmpv3);
+      CbEmitStruct(&rcbmpv3, szRCBITMAP_V3, NULL, fTrue);
+    }
+    else
+    {
+      CbEmitStruct(rcbmp, szRCBITMAP, NULL, fTrue);     /* write structure tbmp */
+    }
     DumpBytes(rcbmp->pbBits, rcbmp->cbDst);      /* write data tbmp */
-    PadBoundary();
+    if (density)
+    {
+      BOOL savedValue = vfLE32;
+
+      vfLE32 = fTrue;
+      PadBoundary();
+      vfLE32 = savedValue;
+    }
+    else
+      PadBoundary();
     newPosInFile = ftell(outputFile);
 
     dataSize = newPosInFile - (currentPosInFile + bootScreenHeaderSize);
     pData = malloc(dataSize);
-    fseek(outputFile, currentPosInFile + bootScreenHeaderSize, SEEK_SET);       /* jump after the header */
-    if ((test = fread(pData, 1, dataSize, outputFile)) != dataSize)
+    error = fseek(outputFile, currentPosInFile + bootScreenHeaderSize, SEEK_SET);       /* jump after the header */
+    if (!error)
     {
-      fprintf(stderr, "Read: %lu\n", (unsigned long)test);
-      abort();
+      if ((test = fread(pData, 1, dataSize, outputFile)) != dataSize)
+      {
+        fprintf(stderr, "Read: %lu\n", (unsigned long)test);
+        abort();
+      }
+      crc = Crc16CalcBlock(pData, (unsigned short)dataSize, 0);
+
+      error = fseek(outputFile, currentPosInFile, SEEK_SET);    /* jump before the header */
+      EmitL(dataSize);                           /* write header size of data */
+      if (vfLE32)                                /* write header crc of data */
+        EmitL((unsigned int)crc);
+      else
+        EmitW(crc);
+
+      error = fseek(outputFile, newPosInFile, SEEK_SET);        /* jump afer header + bmp */
     }
-    crc = Crc16CalcBlock(pData, (unsigned short)dataSize, 0);
-
-    fseek(outputFile, currentPosInFile, SEEK_SET);      /* jump before the header */
-    EmitL(dataSize);                             /* write header size of data */
-    if (vfLE32)                                  /* write header crc of data */
-      EmitL((unsigned int)crc);
-    else
-      EmitW(crc);
-
-    fseek(outputFile, newPosInFile, SEEK_SET);   /* jump afer header + bmp */
-    if (pData)
-      free(pData);
+    free(pData);
   }
   else
   {
     // dump the bitmap header and data
-    CbEmitStruct(rcbmp, szRCBITMAP, NULL, fTrue);
+    if (density)
+    {
+      RCBITMAP_V3 rcbmpv3;
+
+      BMP_FillBitmapV3Header(rcbmp, &rcbmpv3);
+      CbEmitStruct(&rcbmpv3, szRCBITMAP_V3, NULL, fTrue);
+    }
+    else
+    {
+      CbEmitStruct(rcbmp, szRCBITMAP, NULL, fTrue);
+    }
     DumpBytes(rcbmp->pbBits, rcbmp->cbDst);
-    PadBoundary();                               /* RMa add: BUG correction */
+    if (density)
+    {
+      BOOL savedValue = vfLE32;
+
+      vfLE32 = fTrue;
+      PadBoundary();
+      vfLE32 = savedValue;
+    }
+    else
+      PadBoundary();                             // RMa add: BUG correction 
   }
   // clean up
   free(rcbmp->pbBits);
@@ -2403,6 +2526,7 @@ BMP_InvalidExtension(char *fileName)
  * @param transparencyData anything we need to know about transparency
  * @param multibit   should this bitmap be prepared for multibit? 
  * @param bootscreen	should this bitmap be prepared for size & crc header add on ?
+ * @param density    does this bitmap is a new version
  */
 extern void
 DumpBitmap(char *fileName,
@@ -2412,7 +2536,8 @@ DumpBitmap(char *fileName,
            BOOL colortable,
            int *transparencyData,
            BOOL multibit,
-           BOOL bootScreen)
+           BOOL bootScreen,
+           int density)
 {
   PILRC_BYTE *pBMPData;
   char *pchExt;
@@ -2467,26 +2592,26 @@ DumpBitmap(char *fileName,
     BMP_ConvertWindowsBitmap(&rcbmp, pBMPData, bitmaptype, colortable,
                              transparencyData);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, colortable,
-                           directColor, multibit, bootScreen);
+                           directColor, multibit, bootScreen, density);
   }
   else if (FSzEqI(pchExt, "pbitm"))
   {
     BMP_ConvertTextBitmap(&rcbmp, pBMPData, size);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse,
-                           directColor, multibit, bootScreen);
+                           directColor, multibit, bootScreen, density);
   }
   else if (FSzEqI(pchExt, "xbm"))
   {
     BMP_ConvertX11Bitmap(&rcbmp, pBMPData, size);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse,
-                           directColor, multibit, bootScreen);
+                           directColor, multibit, bootScreen, density);
   }
   else if (FSzEqI(pchExt, "pbm") || FSzEqI(pchExt, "pgm")
            || FSzEqI(pchExt, "ppm") || FSzEqI(pchExt, "pnm"))
   {
     BMP_ConvertPNMBitmap(&rcbmp, pBMPData, size, bitmaptype, colortable);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse,
-                           directColor, multibit, bootScreen);
+                           directColor, multibit, bootScreen, density);
   }
   else
   {

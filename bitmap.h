@@ -51,7 +51,8 @@ extern void DumpBitmap(char *fileName,
                        BOOL colortable,
                        int *transparencyData,
                        BOOL multibit,
-                       BOOL bootscreen);
+                       BOOL bootscreen,
+                       int density);
 
 extern void SetUserPalette4bpp(int p[][3],
                                int nColors);

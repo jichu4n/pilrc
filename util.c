@@ -152,6 +152,7 @@ Error3(char *sz1,
 
   strcpy(szT, sz1);
   strcat(szT, sz2);
+  strcat(szT, " ");
   strcat(szT, sz3);
   Error(szT);
 }

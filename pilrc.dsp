@@ -169,6 +169,44 @@ SOURCE=.\main.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\makeKbd.c
+
+!IF  "$(CFG)" == "pilrc - Win32 int Release"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 int Debug"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\PalmRC.c
+
+!IF  "$(CFG)" == "pilrc - Win32 int Release"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 int Debug"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\pilrc.c
 # End Source File
 # Begin Source File
@@ -193,10 +231,6 @@ SOURCE=.\bitmap.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\CharLatin.h
-# End Source File
-# Begin Source File
-
 SOURCE=.\chars.h
 # End Source File
 # Begin Source File
@@ -205,7 +239,159 @@ SOURCE=.\font.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\KbdFrance.h
+
+!IF  "$(CFG)" == "pilrc - Win32 int Release"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 int Debug"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\KbdGermany.h
+
+!IF  "$(CFG)" == "pilrc - Win32 int Release"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 int Debug"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\KbdItaly.h
+
+!IF  "$(CFG)" == "pilrc - Win32 int Release"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 int Debug"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\KbdJapan.h
+
+!IF  "$(CFG)" == "pilrc - Win32 int Release"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 int Debug"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\KbdSpain.h
+
+!IF  "$(CFG)" == "pilrc - Win32 int Release"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 int Debug"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\KbdUS.h
+
+!IF  "$(CFG)" == "pilrc - Win32 int Release"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 int Debug"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
 SOURCE=.\lex.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\makeKbd.h
+
+!IF  "$(CFG)" == "pilrc - Win32 int Release"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 int Debug"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
+# End Source File
+# Begin Source File
+
+SOURCE=.\PalmRC.h
+
+!IF  "$(CFG)" == "pilrc - Win32 int Release"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 int Debug"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Debug"
+
+# PROP Exclude_From_Build 1
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Release"
+
+# PROP Exclude_From_Build 1
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
