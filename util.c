@@ -1,9 +1,8 @@
-
 /*
  * @(#)util.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2003, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -123,33 +122,41 @@ void FreeAccessPathsList(void)
   allocatedIncludePaths = 0;
 }
 
+
+#ifndef CW_PLUGIN
+/*-----------------------------------------------------------------------------
+|	Diagnostic
+|
+|		Print error or warning, and perhaps exit.
+-------------------------------------------------------------JohnM-----------*/
+VOID
+Diagnostic(BOOL fError, const char *filename, int lineno,
+           const char *szFormat, va_list *args)
+{
+  if (filename)
+    fprintf(stderr, vfVSErrors? "%s(%d): %s : " : "%s:%d: %s: ",
+            filename, lineno, fError? "error" : "warning");
+
+  vfprintf(stderr, szFormat, *args);
+  fprintf(stderr, "\n");
+
+  if (fError)
+    exit(1);
+}
+#endif
+
 /*-----------------------------------------------------------------------------
 |	Error
-|	
-|		Report error, exit
+|
+|		Call Diagnostic() with appropriate arguments
 ------------------------------------------------------------WESC------------*/
 VOID
-Error(const char *sz)
+Error(const char *szFormat, ...)
 {
-#ifdef WINGUI
-  if (vfWinGUI)
-  {
-    if (!vfErr)
-    {
-      vfErr = fTrue;
-      MessageBox(NULL, sz, NULL, MB_OK);
-    }
-  }
-  else
-#elif defined(CW_PLUGIN)
-  if (1)
-    CWError(sz);
-  else
-#endif
-  {
-    fprintf(stderr, "%s\n", sz);                   // added "%s", AA
-    exit(1);
-  }
+  va_list args;
+  va_start(args, szFormat);
+  Diagnostic(fTrue, NULL, 0, szFormat, &args);
+  va_end(args);
 }
 
 /*-----------------------------------------------------------------------------
@@ -211,9 +218,12 @@ ErrorLine2(const char *sz,
 |		Report error w/ current line #
 -------------------------------------------------------------WESC------------*/
 VOID
-ErrorLine(const char *sz)
+ErrorLine(const char *szFormat, ...)
 {
-  ErrorLine2(sz, NULL);
+  va_list args;
+  va_start(args, szFormat);
+  Diagnostic(fTrue, szInFile, iline, szFormat, &args);
+  va_end(args);
 }
 
 /*-----------------------------------------------------------------------------
@@ -222,20 +232,14 @@ ErrorLine(const char *sz)
 |		Report error w/ current line #
 -------------------------------------------------------------WESC------------*/
 VOID
-WarningLine(const char *sz)
+WarningLine(const char *szFormat, ...)
 {
-#ifdef CW_PLUGIN
-  CWWarningLine(sz, iline);
-#else
-  char szErr[256];
-
-  snprintf(szErr, sizeof(szErr),
-          ((vfVSErrors)
-           ? "%s(%d): warning : %s\n"
-           : "%s:%d: warning : %s\n"), szInFile, iline, sz);
-  fputs(szErr, stderr);
-#endif
+  va_list args;
+  va_start(args, szFormat);
+  Diagnostic(fFalse, szInFile, iline, szFormat, &args);
+  va_end(args);
 }
+
 
 /*-----------------------------------------------------------------------------
 |	EmitB

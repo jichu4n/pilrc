@@ -1,9 +1,8 @@
-
 /*
  * @(#)util.h
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2003, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -33,6 +32,7 @@
 #define __UTIL_H__
 
 #include <stdio.h>
+#include <stdarg.h>
 #include "std.h"
 
 /*
@@ -42,22 +42,42 @@
 #define		HEXOUT		1
 #endif
 
-VOID Error(const char *sz);
+#ifdef __GNUC__
+#define PRINTF_FORMATTING  __attribute__ ((format(printf, 1, 2)))
+#else
+#define PRINTF_FORMATTING
+#endif
+
+/* Error() and ErrorLine() write a message to stderr and halt translation;
+   WarningLine() writes to stderr and returns.  ErrorLine() and WarningLine()
+   add an indication of the current source file and line number to the message
+   given via the printf format etc arguments.  */
+
+VOID Error(const char *szFormat, ...)  PRINTF_FORMATTING;
 VOID Error2(const char *sz1,
             const char *sz2);
 VOID Error3(const char *sz1,
             const char *sz2,
             const char *sz3);
-VOID ErrorLine(const char *sz);
-VOID WarningLine(const char *sz);
+VOID ErrorLine(const char *szFormat, ...)    PRINTF_FORMATTING;
+VOID WarningLine(const char *szFormat, ...)  PRINTF_FORMATTING;
 VOID ErrorLine2(const char *sz,
                 const char *sz2);
+
+/* The functions above are actually wrappers around this general purpose
+   diagnostic function.  Generally there's no need to call this directly,
+   but in any case: fError distinguishes between error/warning, and if
+   filename is NULL then it's a non-localised dianostic, as for Error().  */
+
+VOID Diagnostic(BOOL fError, const char *filename, int lineno,
+                const char *szFormat, va_list *args);
 
 /*lint -function(exit,Error) */
 /*lint -function(exit,Error2) */
 /*lint -function(exit,Error3) */
 /*lint -function(exit,ErrorLine) */
 /*lint -function(exit,ErrorLine2) */
+/*lint -function(exit,Diagnostic) */
 
 BOOL FSzEqI(const char *sz1,
             const char *sz2);
