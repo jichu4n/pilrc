@@ -4603,14 +4603,14 @@ ParseDumpHex()
          switch (tok.lex.size)
          {
            case lsLong:
-                if (tok.lex.val > 0xffffffff)
-                  ErrorLine("HEX data must be BYTE (0..4294967295)");
+                if ((unsigned long) tok.lex.val > 0xfffffffful)
+                  ErrorLine("HEX data must be LONG (0..4294967295)");
                 EmitL((unsigned long)tok.lex.val);
                 break;
  
            case lsWord:
                 if (tok.lex.val > 0xffff)
-                  ErrorLine("HEX data must be BYTE (0..65535)");
+                  ErrorLine("HEX data must be WORD (0..65535)");
                 EmitW((unsigned short)tok.lex.val);
                 break;
  
