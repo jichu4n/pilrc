@@ -964,8 +964,9 @@ WGetConstEx(char *szErr)
 VOID
 AddDefineSymbol(void)
 {
-    auto     int        wIdVal;
-    auto     char       szId[256];
+    int        wIdVal;
+    char       szId[256];
+    int        current_line;
     
     GetExpectLt(&tok, ltId, "identifier");
     strcpy(szId, tok.lex.szId);
@@ -976,23 +977,35 @@ AddDefineSymbol(void)
         ErrorLine(msg);
     }
     
+    // save current line and check to see if we parse into another
+    // line for the value -- if so, reject token and define as 0
+    current_line = iline;
+    
     if (!FGetTok(&tok))
         ErrorLine("unexpected end of file");
     
-    if (ltStr == tok.lex.lt)
+    if (current_line != iline)
     {
-		// support a string define that spans multiple lines
-		char *szText;
-		UngetTok();
-		szText = PchGetSzMultiLine("#define string");
-        AddSymString(szId, szText);
-        free(szText);
+    	UngetTok();
+    	AddSym(szId, 0);
     }
     else
     {
-        UngetTok();
-        wIdVal = WGetConstEx("Constant");
-        AddSym(szId, wIdVal);
+	    if (ltStr == tok.lex.lt)
+	    {
+			// support a string define that spans multiple lines
+			char *szText;
+			UngetTok();
+			szText = PchGetSzMultiLine("#define string");
+	        AddSymString(szId, szText);
+	        free(szText);
+	    }
+	    else
+	    {
+	        UngetTok();
+	        wIdVal = WGetConstEx("Constant");
+	        AddSym(szId, wIdVal);
+	    }
     }
 }
 
