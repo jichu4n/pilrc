@@ -4913,17 +4913,20 @@ ParseNumbers(unsigned long **bufferp)
   unsigned long *buffer = NULL;
   unsigned int bufsize = 0;
   unsigned int n = 0;
+  unsigned long w;
 
   while (FGetTok(&tok) && tok.rw != rwEnd)
-    if (tok.lex.lt == ltConst)
   {
+	UngetTok();
+	w = WGetConstEx("number");
+
     if (n >= bufsize)
     {
       bufsize = (bufsize == 0)? 64 : 2 * bufsize;
       buffer = realloc (buffer, bufsize * sizeof (unsigned long));
     }
 
-      buffer[n++] = tok.lex.val;
+    buffer[n++] = w;
   }
 
   *bufferp = buffer;
