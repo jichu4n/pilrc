@@ -3893,7 +3893,7 @@ BMPDEF;
 static void
 SetUserPalette(BMPDEF *bm)
 {
-  if (bm->bitmapType == rwBitmapColor16 && bm->nColors < 17)
+  if (bm->bitmapType == rwBitmapColor16 && bm->nColors <= 16)
   {
     if (bm->haspalette)
       SetUserPalette4bpp(bm->palette, bm->nColors);
@@ -3901,7 +3901,7 @@ SetUserPalette(BMPDEF *bm)
       SetUserPalette4bppToDefault4bpp();
   }
 
-  if (bm->bitmapType == rwBitmapColor256 && bm->nColors < 256)
+  if (bm->bitmapType == rwBitmapColor256 && bm->nColors <= 256)
   {
     if (bm->haspalette)
       SetUserPalette8bpp(bm->palette, bm->nColors);
