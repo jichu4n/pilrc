@@ -3,7 +3,7 @@
  * @(#)util.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2002, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -76,8 +76,8 @@ static char szTempFile[FILENAME_MAX];            /* temporary filename */
 
 static VOID WriteOutResourceDB();
 
-DEFPL(PLEXRESOURCEDIR);
-typedef struct
+DEFPL(PLEXRESOURCEDIR)
+typedef struct RESOURCEDIRENTRY
 {
   int type[4];
   int id;
@@ -92,8 +92,9 @@ static PLEXRESOURCEDIR resdir;
 /*
  * Includes 
  */
-char *includePaths[MAXPATHS];
+const char **includePaths = NULL;
 int totalIncludePaths = 0;
+int allocatedIncludePaths = 0;
 
 /*-----------------------------------------------------------------------------
 |	Error
@@ -343,7 +344,7 @@ DumpBytes(VOID * pv,
     return;
   }
 #endif
-  if (vfWinGUI)
+  if (vfInhibitOutput || vfWinGUI)
     return;
 
   /*
@@ -469,16 +470,20 @@ OpenResDBFile(char *sz)
 VOID
 CloseResDBFile()
 {
-  if (!vfQuiet)
-    printf("Collecting *.bin files into %s\n", szOutResDBFile);
+  if (!vfInhibitOutput)
+  {
+      if (!vfQuiet)
+        printf("Collecting *.bin files into %s\n", szOutResDBFile);
 
-  Assert(vfhOut == NULL);
-  vfhOut = fopen(szOutResDBFile, "wb");
-  if (vfhOut == NULL)
-    Error3("Unable to open:", szOutResDBFile, strerror(errno));
+      Assert(vfhOut == NULL);
+      vfhOut = fopen(szOutResDBFile, "wb");
+      if (vfhOut == NULL)
+        Error3("Unable to open output resource DB:", szOutResDBFile, strerror(errno));
 
-  WriteOutResourceDB();
-  fclose(vfhOut);
+      WriteOutResourceDB();
+      fclose(vfhOut);
+  }
+  
   RemoveTempFile();
   PlexFree(&resdir);
 }
@@ -506,7 +511,7 @@ OpenOutput(char *szBase,
   /*
    * #ifdef BINOUT 
    */
-  if (vfWinGUI)
+  if (vfInhibitOutput || vfWinGUI)
     return;
 
   Assert(vfhOut == NULL);
@@ -533,7 +538,7 @@ OpenOutput(char *szBase,
 
   vfhOut = fopen(szFileName, szMode);
   if (vfhOut == NULL)
-    Error3("Unable to open:", szFileName, strerror(errno));
+    Error3("Unable to open binary file:", szFileName, strerror(errno));
 
   if (!vfQuiet)
     printf("Writing %s\n", szPrettyName);
@@ -566,7 +571,7 @@ CloseOutput()
   /*
    * #ifdef BINOUT 
    */
-  if (vfWinGUI)
+  if (vfInhibitOutput || vfWinGUI)
     return;
 
   if (!vfQuiet)
@@ -598,7 +603,7 @@ getOpenedOutputFile()
 VOID
 OpenResFile(char *sz)
 {
-  if (vfWinGUI)
+  if (vfInhibitOutput || vfWinGUI)
     return;
 
   if (sz == NULL)
@@ -607,7 +612,7 @@ OpenResFile(char *sz)
   vfhRes = fopen(sz, "wt");
 
   if (vfhRes == NULL)
-    Error3("Unable to open:", sz, strerror(errno));
+    Error3("Unable to open res file:", sz, strerror(errno));
   if (!vfQuiet)
     printf("Generating res file: %s\n", sz);
 }
@@ -615,7 +620,7 @@ OpenResFile(char *sz)
 VOID
 CloseResFile()
 {
-  if (vfWinGUI)
+  if (vfInhibitOutput || vfWinGUI)
     return;
 
   if (vfhRes != NULL)
@@ -656,11 +661,21 @@ FindAndOpenFile(char *szIn,
       ErrorLine2("Unable to find ", szIn);
     }
 
+    if (vfTrackDepends)
+    {
+        AddEntryToDependsList(szFullName);
+    }
+
     *returnFile = file;
     return szFullName;
   }
   else
   {
+    if (vfTrackDepends)
+    {
+        AddEntryToDependsList(szIn);
+    }
+
     *returnFile = file;
     return szIn;
   }
@@ -670,8 +685,8 @@ FindAndOpenFile(char *szIn,
  * case insenstitive string comparison  
  */
 BOOL
-FSzEqI(char *sz1,
-       char *sz2)
+FSzEqI(const char *sz1,
+       const char *sz2)
 {
   while (tolower(*sz1) == tolower(*sz2))
   {
@@ -723,7 +738,7 @@ intstrncpy(p_int * dst,
 |      WriteOutResourceDB
 -------------------------------------------------------------JOHN------------*/
 
-typedef struct
+typedef struct DBHEADER
 {
   p_int name[32];                                /* b32 */
   p_int attr;                                    /* w */
@@ -816,7 +831,7 @@ WriteOutResourceDB()
 
   f = fopen(szTempFile, "rb");
   if (f == NULL)
-    Error3("Unable to open:", szTempFile, strerror(errno));
+    Error3("Unable to open resource DB:", szTempFile, strerror(errno));
 
   while ((n = fread(buf, 1, sizeof buf, f)) > 0)
     DumpBytes(buf, n);
@@ -824,4 +839,127 @@ WriteOutResourceDB()
   fclose(f);
 
   vfLE32 = saveLE32;
+}
+
+struct DependsNode
+{
+    char *name;
+    struct DependsNode *next;
+};
+
+static struct DependsNode *pdDependsRoot = NULL;
+
+static char szDependsTarget[FILENAME_MAX] = "";
+
+/*-----------------------------------------------------------------------------
+|      SetDependsTarget
+-------------------------------------------------------------BLC-------------*/
+
+void SetDependsTarget(const char *szIn)
+{
+    strcpy(szDependsTarget, szIn);
+}
+
+/*-----------------------------------------------------------------------------
+|      InitDependsList
+-------------------------------------------------------------BLC-------------*/
+
+void InitDependsList(void)
+{
+    pdDependsRoot = NULL;
+}
+
+/*-----------------------------------------------------------------------------
+|      AddEntryToDependsList
+-------------------------------------------------------------BLC-------------*/
+
+void AddEntryToDependsList(const char *filename)
+{
+    struct DependsNode *pdNode;
+    
+    if (pdDependsRoot != NULL)
+    {
+        // search list for filename
+        pdNode = pdDependsRoot;
+        while (1)
+        {
+            if (strcmp(pdNode->name, filename) == 0) return;
+            if (pdNode->next == NULL) break;
+            pdNode = pdNode->next;
+        }
+    
+        // add node to the end
+        pdNode->next = malloc(sizeof(*pdNode));
+        pdNode = pdNode->next;
+    }
+    else
+    {
+        // start new list
+        pdDependsRoot = malloc(sizeof(*pdNode));
+        pdNode = pdDependsRoot;
+    }
+
+    // fill in new node
+    pdNode->next = NULL;
+    pdNode->name = malloc(strlen(filename) + 1);
+    strcpy(pdNode->name, filename);
+}
+
+/*-----------------------------------------------------------------------------
+|      EscapeChars
+-------------------------------------------------------------BLC-------------*/
+
+static char *EscapeChars(char *dest, const char *src)
+{
+    char *origDest = dest;
+    
+    for (; *src; ++src)
+    {
+        if (strchr(" \\\"\'", *src))
+        {
+            *dest++ = '\\';
+        }
+        *dest++ = *src;
+    }
+	/* NULL terminate destination */
+	*dest = 0;
+
+    return origDest;
+}
+
+/*-----------------------------------------------------------------------------
+|      OutputDependsList
+-------------------------------------------------------------BLC-------------*/
+
+void OutputDependsList(FILE *dependsFile)
+{
+    char buffer[512];
+    struct DependsNode *pdNode;
+
+    fprintf(dependsFile, "%s:", EscapeChars(buffer, szDependsTarget));
+
+    pdNode = pdDependsRoot;
+    while (pdNode)
+    {
+        fprintf(dependsFile, " \\\n %s", EscapeChars(buffer, pdNode->name));
+        pdNode = pdNode->next;
+    }
+        
+    // terminate line
+    fprintf(dependsFile, "\n");
+}
+
+/*-----------------------------------------------------------------------------
+|      FreeDependsList
+-------------------------------------------------------------BLC-------------*/
+
+void FreeDependsList(void)
+{
+    while (pdDependsRoot)
+    {
+        struct DependsNode *pdNode = pdDependsRoot;
+        pdDependsRoot = pdDependsRoot->next;
+        free(pdNode->name);
+        free(pdNode);
+    }
 }

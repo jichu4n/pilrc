@@ -3,7 +3,7 @@
  * @(#)main.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2002, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -35,6 +35,11 @@
  *                 Merged 68K and LE32 version into one binary
  *     12-Jan-2001 Renaud Malaval
  *                 Added 'wrdl' resource support
+ *      4-Jun-2002 Ben Combee
+ *                 Added more control over AUTOID numbers
+ *      3-Oct-2002 Ben Combee
+ *                 Changed include path mechanism to allow unlimited
+ *                 numbers of include paths (constrained by memory)
  */
 
 #include <stdio.h>
@@ -47,7 +52,7 @@
 #include "pilrc.h"
 #include "restype.h"
 
-#ifndef __GNUC__
+#if !defined(__GNUC__) && !defined(__MWERKS__)
 #ifdef HOST_LITTLE_ENDIAN
 #pragma message( "- little endian" )
 #else
@@ -63,7 +68,7 @@
 /**
  * Display the usage information for PilRC.
  */
-void
+static void
 Usage(void)
 {
   Error
@@ -85,6 +90,7 @@ Usage(void)
      "        -ts          put POSIX timestamp on .ro file generated\n"
      "        -o <filedir> Equivalent to [outfiledir]\n"
      "        -H <incfile> Autoassign IDs and write .h file with #defines\n"
+     "        -idStart <n> Start autoID assignment at number <n>, counting up\n"
      "        -D <macro>   Define a pre-processor macro symbol\n"
      "        -F5          Use Big5 Chinese font widths\n"
      "        -Fkt         Use Korean font widths (hantip font)\n"
@@ -109,11 +115,35 @@ Usage(void)
      "        -StripLoc    Don't compile 'non localisable resources'\n"
      "        -type        Specify the type to use when generating a prc (-ro)\n"
      "        -creator     Specify the creator to use when generating a prc (-ro)\n"
-     "        -name        Specify output filename (-R, -ro)\n"
+     "        -name        Specify the database name when generating a prc (-ro)\n"
      "        <outfiledir> Directory where .bin files should be generated,\n"
      "                     or name of the file to generate containing all\n"
-     "                     the generated resources\n");
+     "                     the generated resources\n"
+     "        -M           Generate dependency list only; suppress all other output\n"
+     "        -MD          Generate dependency list"
+     );
   exit(1);
+}
+
+/**
+ * Adds a new access path to the end of the access path array
+ *
+ * @param path access path string to add to list, must remain available
+ */
+static void
+AddAccessPath(const char *path)
+{
+	/* allocate memory for include paths in bundles of 32 */
+	if (totalIncludePaths == allocatedIncludePaths)
+	{
+		allocatedIncludePaths += 32;
+		includePaths = realloc(includePaths, allocatedIncludePaths * sizeof(const char *));
+		if (includePaths == NULL)
+		{
+			/* error: out of memory */
+		}
+	}
+   includePaths[totalIncludePaths++] = path;
 }
 
 /**
@@ -133,17 +163,18 @@ main(int cArg,
   char *szMacro;
   char *szValue;
   char *szIncFile;
+  char *szIDStart;
   int i;
   int fontType;
   int macroValue;
 
   // display the (c) string
 #ifdef PALM_INTERNAL
-  printf("PilRC v2.9 patch release 9 - (C)2002 A. Ardiri\n");
+  printf("PilRC v2.9 patch release 10-CW-3 - (C)2002 A. Ardiri\n");
 #else
-  printf("PilRC v2.9 patch release 9\n");
+  printf("PilRC v2.9 patch release 10-CW-3 \n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
-  printf("  Copyright 2000-2002 Aaron Ardiri (aaron@ardiri.com)\n");
+  printf("  Copyright 2000-2003 Aaron Ardiri (aaron@ardiri.com)\n");
 #endif
 
   // initialize
@@ -209,12 +240,7 @@ main(int cArg,
       if (i++ == cArg)
         Usage();
 
-      if (totalIncludePaths == MAXPATHS)
-      {
-        printf("Too many include paths!\n\n");
-        Usage();
-      }
-      includePaths[totalIncludePaths++] = rgszArg[i];
+	  AddAccessPath(rgszArg[i]);
       continue;
     }
 
@@ -260,6 +286,19 @@ main(int cArg,
 
       szIncFile = rgszArg[i];
       vfAutoId = fTrue;
+      continue;
+    }
+
+    // ID value control -- Increasing IDs
+    if (FSzEqI(rgszArg[i], "-idStart"))
+    {
+      if (i++ == cArg)
+        Usage();
+        
+      szIDStart = rgszArg[i];
+      // reset ID start sequence to this number and start counting up.
+      vfAutoStartID = atoi(szIDStart);
+      idAutoDirection = +1;
       continue;
     }
 
@@ -447,6 +486,21 @@ main(int cArg,
       continue;
     }
 
+    // dependency tracking, no output files
+    if (FSzEqI(rgszArg[i], "-M"))
+    {
+        vfTrackDepends = fTrue;
+        vfInhibitOutput = fTrue;
+        continue;
+    }
+    
+    // dependency tracking, compiler resources too
+    if (FSzEqI(rgszArg[i], "-MD"))
+    {
+        vfTrackDepends = fTrue;
+        continue;
+    }
+
     // unknown argument?
     Usage();
   }
@@ -492,6 +546,7 @@ main(int cArg,
 // bug fix: john marshall
 //ParseFile(szInputFile, szOutputPath, szResFile, szIncFile, fontType);
   FreeRcpfile(ParseFile(szInputFile, szOutputPath, szResFile, szIncFile, fontType));
-
+  free(includePaths);
+  
   return 0;
 }

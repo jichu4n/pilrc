@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
- PilRC version 2.9p10                                        August 4, 2002
+ PilRC version 2.9p10                                         August 4, 2002
 ----------------------------------------------------------------------------
 
   INSTALLATION:
@@ -11,7 +11,7 @@
   resource file. 
 
   Copyright (C) 1997-1999 Wes Cherry
-  Copyright (C) 2000-2001 Aaron Ardiri
+  Copyright (C) 2000-2002 Aaron Ardiri
 
   This program is free software;  you can redistribute it and/or modify it 
   under the terms of the GNU  General  Public  License as published by the 

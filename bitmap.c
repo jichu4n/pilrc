@@ -3,7 +3,7 @@
  * @(#)bitmap.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2002, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -36,10 +36,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
-#include <memory.h>
 #include <string.h>
 #include <ctype.h>
 #include "pilrc.h"
+#include "bitmap.h"
 
 typedef unsigned char PILRC_BYTE;                /* b */
 typedef unsigned short PILRC_USHORT;             /* us */
@@ -55,7 +55,7 @@ typedef int bool;                                /* f */
  */
 // NCR: 16-feb-00 = bitmapfileheader already defined if compiling for windows
 #if !defined(CW_PLUGIN) || (CWPLUGIN_HOST != CWPLUGIN_HOST_WIN32)
-typedef struct tagBITMAPFILEHEADER
+typedef struct BITMAPFILEHEADER
 {
 #ifdef __GNUC__
   PILRC_USHORT bfType;                           // gcc will only align the structure 
@@ -75,7 +75,7 @@ typedef struct tagBITMAPFILEHEADER
 }
 BITMAPFILEHEADER;
 
-typedef struct tagBITMAPINFOHEADER
+typedef struct BITMAPINFOHEADER
 {
   PILRC_ULONG biSize;
   long biWidth;
@@ -91,7 +91,7 @@ typedef struct tagBITMAPINFOHEADER
 }
 BITMAPINFOHEADER;
 
-typedef struct tagRGBQUAD
+typedef struct RGBQUAD
 {
   PILRC_BYTE rgbBlue;
   PILRC_BYTE rgbGreen;
@@ -100,7 +100,7 @@ typedef struct tagRGBQUAD
 }
 RGBQUAD;
 
-typedef struct tagBITMAPINFO
+typedef struct BITMAPINFO
 {
   BITMAPINFOHEADER bmiHeader;
   RGBQUAD bmiColors[1];
@@ -252,7 +252,7 @@ static int BMP_GetBits4bpp(BITMAPINFO *, int, PILRC_BYTE *,
 static int BMP_GetBits8bpp(BITMAPINFO *, int, PILRC_BYTE *,
                            int, int, int, int *, int *, int *, int *);
 static int BMP_GetBits15bpp(BITMAPINFO *, int, PILRC_BYTE *,
-                            int, int, int, int *, int *, int *, int *);
+                           int, int, int, int *, int *, int *, int *);
 static int BMP_GetBits16bpp(BITMAPINFO *, int, PILRC_BYTE *,
                             int, int, int, int *, int *, int *, int *);
 static int BMP_GetBits24bpp(BITMAPINFO *, int, PILRC_BYTE *,
@@ -271,12 +271,12 @@ static void BMP_SetBits32bpp(int, PILRC_BYTE *, int, int, int, int);
 static void BMP_ConvertWindowsBitmap(RCBITMAP *, PILRC_BYTE *, int, BOOL, int *, int);
 static void BMP_ConvertTextBitmap(RCBITMAP *, PILRC_BYTE *, int);
 static void BMP_ConvertX11Bitmap(RCBITMAP *, PILRC_BYTE *, int);
-static void BMP_ConvertPNMBitmap(RCBITMAP *, PILRC_BYTE *, int, int, BOOL);
+static void BMP_ConvertPNMBitmap(RCBITMAP *, PILRC_BYTE *, int, int, BOOL, int *);
 static void BMP_CompressBitmap(RCBITMAP *, int, int, BOOL, BOOL);
 static void BMP_CompressDumpBitmap(RCBITMAP *, int, int, BOOL, BOOL, BOOL, BOOL, int, int *);
 static void BMP_InvalidExtension(char *);
 
-static void BMP_FillBitmapV3Header(RCBITMAP *, RCBITMAP_V3 *, int *);
+static void BMP_FillBitmapV3Header(RCBITMAP *, RCBITMAP_V3 *, int *, int);
                                                                 // *INDENT-ON*
 
 // 
@@ -1038,7 +1038,7 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
         if (*((int *)pbSrc + 1) == 0x3E00)       //rgb 5-5-5
           getBits = BMP_GetBits15bpp;
         else                                     //rgb 5-6-5
-          getBits = BMP_GetBits16bpp;
+      getBits = BMP_GetBits16bpp;
         pbSrc += 12;                             // MiR 1st July 2002, for 16bpp bitmaps the bitmap body data 
         // starts at pbmi + cbHeader + 12
       }
@@ -1130,21 +1130,21 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
     case rwBitmapColor16k:
       cbitsPel = 16;
       colortable = fFalse;
-      if (!density)
+      if (density == kSingleDensity)
         colorDat = 8;                            // direct color structure & transparency
       break;
 
     case rwBitmapColor24k:
       cbitsPel = 24;
       colortable = fFalse;
-      if (!density)
+      if (density == kSingleDensity)
         colorDat = 8;                            // direct color structure & transparency
       break;
 
     case rwBitmapColor32k:
       cbitsPel = 32;
       colortable = fFalse;
-      if (!density)
+      if (density == kSingleDensity)
         colorDat = 8;                            // direct color structure & transparency
       break;
 
@@ -1278,7 +1278,7 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
       // rcbmp->ff |= 0x0400; 
       rcbmp->flags.directColor = fTrue;
       // do we need to consider transparency?
-      if (!density)
+      if (density == kSingleDensity)
       {
         PILRC_BYTE *tmpPtr;
 
@@ -1318,7 +1318,7 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
 
       rcbmp->flags.directColor = fTrue;
       // do we need to consider transparency?
-      if (!density)
+      if (density == kSingleDensity)
       {
         PILRC_BYTE *tmpPtr;
 
@@ -2090,13 +2090,15 @@ ReadP6(struct foreign_reader *r,
  * @param cb         the size the bitmap resource.
  * @param bitmaptype the type of bitmap (B+W, Grey, Grey16 or Color)?
  * @param colortable does a color table need to be generated?
+ * @param transparencyData anything we need to know about transparency
  */
 static void
 BMP_ConvertPNMBitmap(RCBITMAP * rcbmp,
                      PILRC_BYTE * pb,
                      int cb,
                      int bitmaptype,
-                     BOOL colortable)
+                     BOOL colortable,
+                     int *transparencyData)
 {
   static void (*read_func[]) (struct foreign_reader *,
                               struct rgb *) =
@@ -2140,6 +2142,19 @@ BMP_ConvertPNMBitmap(RCBITMAP * rcbmp,
     pnm.start_row = default_start_row;
 
   WriteTbmp(rcbmp, width, height, bitmaptype, colortable, &pnm);
+
+  switch (transparencyData[0])
+  {
+    case 0:
+      break;
+    case rwTransparencyIndex:
+      rcbmp->flags.hasTransparency = fTrue;
+      rcbmp->transparentIndex = transparencyData[1];
+      break;
+    default:
+      WarningLine("Only TransparencyIndex is implemented for PBM/PNM/PGM/PPM files");
+      break;
+  }
 }
 
 /**
@@ -2328,7 +2343,7 @@ static const unsigned short crctt_16[256] =
  * 03-mar-2001			RMa add on
  *
  */
-unsigned short
+static unsigned short
 Crc16CalcBlock(const void *bufP,
                unsigned short count,
                unsigned short crc)
@@ -2355,6 +2370,8 @@ Crc16CalcBlock(const void *bufP,
  *
  *	@param rcbmp		pointer to the source data buffer;
  *	@param rcbmpv3		pointer to the destination data buffer;
+ *	@param transparencyData    pointer to transparency data
+ *	@param density		bit density of new V3 bitmap
  *
  * 25-apr-2002			RMa add on
  *
@@ -2362,7 +2379,8 @@ Crc16CalcBlock(const void *bufP,
 static void
 BMP_FillBitmapV3Header(RCBITMAP * rcbmp,
                        RCBITMAP_V3 * rcbmpv3,
-                       int *transparencyData)
+                       int *transparencyData,
+                       int density)
 {
   if ((rcbmp) && (rcbmpv3))
   {
@@ -2393,12 +2411,12 @@ BMP_FillBitmapV3Header(RCBITMAP * rcbmp,
     }
 
     rcbmpv3->compressionType = rcbmp->compressionType;
-    rcbmpv3->density = 144;
+    rcbmpv3->density = density;
     rcbmpv3->transparentValue = 0;
     if (rcbmp->flags.hasTransparency)
     {
       if (rcbmp->pixelsize <= 8)
-        rcbmpv3->transparentValue = rcbmp->transparentIndex;
+    rcbmpv3->transparentValue = rcbmp->transparentIndex;
       else if (rcbmp->pixelsize == 16)
       {
         // RMa bug fix in 16k no palette, no index just the 5-6-5 color intead.
@@ -2443,18 +2461,37 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
                        int density,
                        int *transparencyData)
 {
-  int stdIconSize_x = 32;
-  int stdIconSize_y = 22;
-  int stdSmallIconSize_x = 15;
-  int stdSmallIconSize_y = 9;
+  int stdIconSize_x;
+  int stdIconSize_y;
+  int stdSmallIconSize_x;
+  int stdSmallIconSize_y;
 
-  if (density)
+  if (density == kSingleDensity)
   {
-    stdIconSize_x *= 2;
-    stdIconSize_y *= 2;
-    stdSmallIconSize_x *= 2;
-    stdSmallIconSize_y *= 2;
+	stdIconSize_x = 32;
+	stdIconSize_y = 22;
+	stdSmallIconSize_x = 15;
+	stdSmallIconSize_y = 9;
   }
+  else if (density == kOneAndOneHalfDensity)
+  {
+	stdIconSize_x = 48;
+	stdIconSize_y = 33;
+	stdSmallIconSize_x = 22;
+	stdSmallIconSize_y = 13;
+  }
+  else if (density == kDoubleDensity)
+  {
+	stdIconSize_x = 64;
+	stdIconSize_y = 44;
+	stdSmallIconSize_x = 30;
+	stdSmallIconSize_y = 18;
+  }
+  else
+  {
+  	// ERROR SITUATION -- unknown density value
+  }
+
   // anything specific with icons here?
   switch (isIcon)
   {
@@ -2463,10 +2500,12 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
           ((rcbmp->cx != stdIconSize_x) || (rcbmp->cy != stdIconSize_y)) &&
           ((rcbmp->cx != stdIconSize_y) || (rcbmp->cy != stdIconSize_y)))
       {
-        if (density)
-          WarningLine("Icon resource not 64x64, 64x44 or 44x44 (preferred)");
-        else
-          WarningLine("Icon resource not 32x32, 32x22 or 22x22 (preferred)");
+		  char buffer[128];
+		  sprintf(buffer, "Icon resource not %dx%d, %dx%d or %dx%d (preferred)",
+		  	stdIconSize_x, stdIconSize_x, 
+		  	stdIconSize_x, stdIconSize_y,
+		  	stdIconSize_y, stdIconSize_y);
+		  WarningLine(buffer);
       }
       break;
 
@@ -2474,10 +2513,10 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
       if ((rcbmp->cx != stdSmallIconSize_x)
           && (rcbmp->cy != stdSmallIconSize_y))
       {
-        if (density)
-          WarningLine("Small icon resource not 30x18");
-        else
-          WarningLine("Small icon resource not 15x9");
+		  char buffer[128];
+		  sprintf(buffer, "Small icon resource not %dx%d",
+		  	stdSmallIconSize_x, stdSmallIconSize_y);
+          WarningLine(buffer);
       }
       break;
 
@@ -2490,14 +2529,14 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
   // NOTE: compression of 16, 24 and 32bpp DONT work right now
   if ((compress == rwAutoCompress) || (compress == rwForceCompress))
   {
-    BMP_CompressBitmap(rcbmp, compress, (density) ? 3 : 2, colortable,
+    BMP_CompressBitmap(rcbmp, compress, (density != kSingleDensity) ? 3 : 2, colortable,
                        directColor);
   }
 
   // is this single resource part of a multibit bitmap family?
   if (multibit)
   {
-    if (density)
+    if (density != kSingleDensity)
     {
       // determine the next depth offset (# byte)
       if (rcbmp->cbDst & 3)
@@ -2513,7 +2552,7 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
 
     // if we need to, round up to the nearest dword and get more
     // memory
-    if (!density)
+    if (density == kSingleDensity)
       if ((rcbmp->cbDst % 4) != 0)
       {
         int i, oldSize = rcbmp->cbDst;
@@ -2546,11 +2585,11 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
       EmitW(0);
 
     // dump the bitmap header and data
-    if (density)
+    if (density != kSingleDensity)
     {
       RCBITMAP_V3 rcbmpv3;
 
-      BMP_FillBitmapV3Header(rcbmp, &rcbmpv3, transparencyData);
+      BMP_FillBitmapV3Header(rcbmp, &rcbmpv3, transparencyData, density);
       CbEmitStruct(&rcbmpv3, szRCBITMAP_V3, NULL, fTrue);
     }
     else
@@ -2558,7 +2597,7 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
       CbEmitStruct(rcbmp, szRCBITMAP, NULL, fTrue);     /* write structure tbmp */
     }
     DumpBytes(rcbmp->pbBits, rcbmp->cbDst);      /* write data tbmp */
-    if (density)
+    if (density != kSingleDensity)
     {
       BOOL savedValue = vfLE32;
 
@@ -2596,14 +2635,14 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
   else
   {
     // dump the bitmap header and data
-    if (density)
+    if (density != kSingleDensity)
     {
       RCBITMAP_V3 rcbmpv3;
       BOOL savedValue = vfLE32;
 
-      BMP_FillBitmapV3Header(rcbmp, &rcbmpv3, transparencyData);
+      BMP_FillBitmapV3Header(rcbmp, &rcbmpv3, transparencyData, density);
       CbEmitStruct(&rcbmpv3, szRCBITMAP_V3, NULL, fTrue);
-      DumpBytes(rcbmp->pbBits, rcbmp->cbDst);
+    DumpBytes(rcbmp->pbBits, rcbmp->cbDst);
 
       vfLE32 = fTrue;
       PadBoundary();
@@ -2614,7 +2653,7 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
       CbEmitStruct(rcbmp, szRCBITMAP, NULL, fTrue);
       DumpBytes(rcbmp->pbBits, rcbmp->cbDst);
       PadBoundary();                             // RMa add: BUG correction 
-    }
+  }
 
   }
   // clean up
@@ -2716,7 +2755,7 @@ DumpBitmap(char *fileName,
                              transparencyData, density);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, colortable,
                            directColor, multibit, bootScreen, density,
-                           transparencyData);
+                             transparencyData);
   }
   else if (FSzEqI(pchExt, "pbitm"))
   {
@@ -2735,7 +2774,8 @@ DumpBitmap(char *fileName,
   else if (FSzEqI(pchExt, "pbm") || FSzEqI(pchExt, "pgm")
            || FSzEqI(pchExt, "ppm") || FSzEqI(pchExt, "pnm"))
   {
-    BMP_ConvertPNMBitmap(&rcbmp, pBMPData, size, bitmaptype, colortable);
+	BMP_ConvertPNMBitmap(&rcbmp, pBMPData, size, bitmaptype, colortable,
+                         transparencyData);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse,
                            directColor, multibit, bootScreen, density,
                            transparencyData);

@@ -3,7 +3,7 @@
  * @(#)font.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2002, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -78,7 +78,7 @@ int vfontType;
  * Global to hold the font widths and offsets 
  */
 
-typedef struct
+typedef struct FontCharInfoType
 {
   char offset;
   char width;
@@ -87,7 +87,7 @@ FontCharInfoType;
 FontCharInfoType *fntOW[256];
 unsigned int fntH[256];
 
-int
+static int
 IsDBCSNone(unsigned char *cp,
            int *pdxChar)
 {
@@ -99,7 +99,7 @@ IsDBCSNone(unsigned char *cp,
 |	
 |		Check the double byte char is BIG5 coded
 -------------------------------------------------------------DLIN------------*/
-int
+static int
 IsBIG5(unsigned char *cp,
        int *pdxChar)
 {
@@ -139,7 +139,7 @@ IsBIG5(unsigned char *cp,
 |	
 |		Check the double byte char is Japanese coded
 -------------------------------------------------------------DLIN------------*/
-int
+static int
 IsJapanese(unsigned char *cp,
            int *pdxChar)
 {
@@ -167,7 +167,7 @@ IsJapanese(unsigned char *cp,
 |	
 |	Check the double byte char is Korean coded(Large Font, for HanMe)
 -----------------------------------------------------------------------------*/
-int
+static int
 IsKoreanHanme(unsigned char *cp,
               int *pdxChar)
 {
@@ -192,7 +192,7 @@ IsKoreanHanme(unsigned char *cp,
 |	
 |	Check the double byte char is Korean coded(Small Font, for Hantiip)
 -----------------------------------------------------------------------------*/
-int
+static int
 IsKoreanHantip(unsigned char *cp,
                int *pdxChar)
 {

@@ -3,7 +3,7 @@
  * @(#)bitmap.h
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2002, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -60,5 +60,9 @@ extern void SetUserPalette4bppToDefault4bpp();
 extern void SetUserPalette8bpp(int p[][3],
                                int nColors);
 extern void SetUserPalette8bppToDefault8bpp();
+
+#define kSingleDensity          72
+#define kOneAndOneHalfDensity   108
+#define kDoubleDensity          144
 
 #endif

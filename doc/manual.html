@@ -24,7 +24,7 @@
 <tr>
 <td>
 <font face="Arial,Helvetica">
-<h2>PilRC v2.90 p8<br>
+<h2>PilRC v2.90 p10-CW-3<br>
     User Manual <div class="palmInternal">PALM internal</div></h2>
 </font>
 </td>
@@ -116,8 +116,8 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
 <td>
    [-L LANGUAGE] [-I INCLUDE PATH] [-D MACRO(=VAL)] 
 	[-R RESFILE] [-H INCLUDE PATH]<BR>[-ro] [-ts] [-q] [-V] [-Loc CODE] [-StripLoc]
-	[-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] [-allowEditID]<BR>[-LE32] [-noIFIH]
-	<span class="palmInternal">[-AppIcon68K] [-amdc NAME]</span>[-noEllipsis] [-o OUTPUTPATH] file.rcp [output path]
+	[-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] [-allowEditID]<BR>[-LE32] [-noIFIH] 
+	<span class="palmInternal">[-AppIcon68K] [-amdc NAME]</span>[-noEllipsis] [-o OUTPUTPATH] [-M] [-MD] file.rcp [output path]
 </td>
 </tr>
 <tr>
@@ -130,6 +130,7 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
 
 <table border=0>
 <tr>
+  <a name="switch_L"></a>
   <td valign=top width="150">
   <font face="Arial,Helvetica">
   -L LANGUAGE
@@ -183,6 +184,7 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
   </td>
 </tr>
 <tr>
+  <a name="switch_H"></a>
   <td valign=top>
   <font face="Arial,Helvetica">
   -H INCFILE
@@ -451,7 +453,7 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
   However, this is not sufficient. You need an external tool to create the 'ovly' resources in both the base prc and the overlays. 
   It is planned to have such a small tool available soon.
   </ul>
-  This is a different approach than the one provided by the -L flag.
+  This is a different approach than the one provided by the <a href="#switch_L">-L</a> flag.
   </ul>
   </font>
   </td>
@@ -501,6 +503,30 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
   <td valign=top>
   <font face="Arial,Helvetica">
   Alternative way of specifying an output path (below).
+  </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -M
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Generate dependency list only; supress all other output.
+  </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -MD
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Generate dependency list.
   </font>
   </td>
 </tr>
@@ -650,13 +676,28 @@ Each field's required type is indicated by a suffix after the field name
     <ul>
       <table border=0>
       <tr>
-        <td valign=top width=150>
+    <td valign=top width=150>
 	<tt>AUTO</tt>
 	</td>
 	<td valign=top>
         <font face="Arial,Helvetica">
         Automatic width or height. <br>
         Value is computed based on the text in the item.
+	</font>
+        </td>
+      </tr>
+      <tr>
+    <td valign=top>
+	<tt>AUTO&gt; &lt;size.n&gt;</tt>
+	</td>
+	<td valign=top>
+        <font face="Arial,Helvetica">
+        Constrained automatic width or height. <br>
+        Value is computed based on the text in the item,
+        but if less than the number specified, is replaced
+        by that number.  For example, if you wanted a button
+        that was at least 32 pixels wide, you could use this
+        knowing that it would expand if the text got bigger.
 	</font>
         </td>
       </tr>
@@ -1008,7 +1049,7 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     </td>
     <td valign=center>
     <font face="Arial,Helvetica">
-    New icon family Resource (density support)
+    New small icon family Resource (density support)
     </font>
     </td>
   </tr>
@@ -1322,6 +1363,16 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     </font>
     </td>
   </tr>
+  </table>
+</ul>
+</ul>
+
+
+<ul>
+The <tt>.rcp</tt> file may also contain the following directives: <p>
+
+<ul>
+  <table border=0>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
@@ -1330,13 +1381,38 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     </td>
     <td valign=center>
     <font face="Arial,Helvetica">
-    Language String Translation Resource
+    Language Translation Strings
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_generateheader">GENERATEHEADER</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    Generate a header file from IDs defined in the file
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_resetautoid">RESETAUTOID</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    Reset AutoID sequence number
     </font>
     </td>
   </tr>
   </table>
 </ul>
 </ul>
+
 
 <a name="lang_form"></a>
 <b>FORM (tFRM)</b> <p>
@@ -1372,7 +1448,7 @@ is one or more of: <p>
     </td>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Title.s&gt;</font>
+    <font color="#00ff00">&lt;Title.ss&gt;</font>
     </tt>
     </td>
   </tr>
@@ -1382,7 +1458,7 @@ is one or more of: <p>
     </td>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font> 
+    <font color="#00ff00">&lt;Label.ss&gt;</font> 
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR] 
@@ -1401,7 +1477,7 @@ is one or more of: <p>
     </td>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font> 
+    <font color="#00ff00">&lt;Label.ss&gt;</font> 
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>)<br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR] 
@@ -1420,7 +1496,7 @@ is one or more of: <p>
     </td>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font>
+    <font color="#00ff00">&lt;Label.ss&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
@@ -1436,7 +1512,7 @@ is one or more of: <p>
     </td>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font>
+    <font color="#00ff00">&lt;Label.ss&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
@@ -1454,7 +1530,7 @@ is one or more of: <p>
     </td>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font>
+    <font color="#00ff00">&lt;Label.ss&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
@@ -1472,7 +1548,7 @@ is one or more of: <p>
     </td>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font>
+    <font color="#00ff00">&lt;Label.ss&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
@@ -1491,7 +1567,7 @@ is one or more of: <p>
     </td>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font>
+    <font color="#00ff00">&lt;Label.ss&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] 
@@ -1729,7 +1805,7 @@ is one or more of: <p>
 <ul>
 <pre>
 MENUITEM <font color="#00ff00">&lt;MenuItem.s&gt;</font> ID <font color="#00ff00">&lt;MenuItemId.n&gt;</font> [AccelChar.c]
-MENUITEM SEPARATOR </pre>
+MENUITEM SEPARATOR [ID <font color="#00ff00">&lt;MenuItemId.n&gt;</font>]</pre>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -2137,11 +2213,13 @@ SMALLICONFAMILY "smic1bpp.bmp" "" "" "smic8bpp.bmp" TRANSPARENTINDEX 255</pre>
 ICONFAMILYEX [ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>]
   [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
   [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+  [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
 BEGIN
   BITMAP <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> BPP <font color="#00ff00">&lt;BitPerPixel.n&gt;</font>
          [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
          [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
          [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+         [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
          [DENSITY <font color="#00ff00">&lt;BitmapResourceDensity.n&gt;</font>]
   ...
 END
@@ -2155,7 +2233,8 @@ The bitmap must be 32x32 (or 64x64 with density = 2), 32x22 (or 64x44) or 22x22 
 <li>
 <tt>BPP</tt> must be 1, 2, 4, 5, 8, 16 (5 is for generate 4bpp (16 color) bitmap resource).
 <li>
-<tt>DENSITY</tt> must be 1 or 2 default is 1. you can not have only bmp with DENSITY 2 in IconFamilyEx.
+<tt>DENSITY</tt> must be 72 (single), 108 (one and one half), or 144 (double).  Legacy values of 1 and 2 are
+supported.  You must have at least one single-density bitmap in an IconFamilyEx.
 <li> 
 A <tt>tAIB</tt> ICONFAMILYEX resource with ID 1000 is created unless an alternate ID is specified.
 <li> 
@@ -2174,10 +2253,10 @@ A <tt>TRANSPARENTINDEX</tt> is not compatible with BPP > 8bpp.
 ICONFAMILYEX
 BEGIN
 	BITMAP "bmp-1.bmp" BPP 1 
-	BITMAP "bmp-4.bmp" BPP 2 DENSITY 1
-	BITMAP "bmp-4.bmp" BPP 4 DENSITY 1
-	BITMAP "bmp-8.bmp" BPP 8 DENSITY 1
-	BITMAP "bmp-8d.bmp" BPP 8 DENSITY 2
+	BITMAP "bmp-4.bmp" BPP 2 DENSITY 72
+	BITMAP "bmp-4.bmp" BPP 4 DENSITY 72
+	BITMAP "bmp-8.bmp" BPP 8 DENSITY 72
+	BITMAP "bmp-8d.bmp" BPP 8 DENSITY 144
 END
 </pre></ul>
 
@@ -2191,11 +2270,13 @@ END
 SMALLICONFAMILYEX [ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>]
   [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
   [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+  [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
 BEGIN
   BITMAP <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> BPP <font color="#00ff00">&lt;BitPerPixel.n&gt;</font>
          [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
          [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
          [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+         [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
          [DENSITY <font color="#00ff00">&lt;BitmapResourceDensity.n&gt;</font>]
   ...
 END
@@ -2209,7 +2290,8 @@ The bitmap must be 15x9 (or 30x18 with density = 2) in dimension.
 <li>
 <tt>BPP</tt> must be 1, 2, 4, 5, 8, 16 (5 is for generate 4bpp (16 color) bitmap resource).
 <li>
-<tt>DENSITY</tt> must be 1 or 2 default is 1. you can not have only bmp with DENSITY 2 in SmallIconFamilyEx.
+<tt>DENSITY</tt> must be 72 (single), 108 (one and one half), or 144 (double).  Legacy values of 1 and 2 are
+supported.  You must have at least one single-density bitmap in an SmallIconFamilyEx.
 <li> 
 A <tt>tAIB</tt> SMALLICONFAMILYEX resource with ID 1001 is created unless an alternate ID is specified.
 <li> 
@@ -2227,10 +2309,10 @@ A <tt>TRANSPARENTINDEX</tt> is not compatible with BPP > 8bpp.
 SMALLICONFAMILYEX
 BEGIN
 	BITMAP "bmp-1.bmp" BPP 1 
-	BITMAP "bmp-4.bmp" BPP 2 DENSITY 1
-	BITMAP "bmp-4.bmp" BPP 4 DENSITY 1
-	BITMAP "bmp-8.bmp" BPP 8 DENSITY 1
-	BITMAP "bmp-8d.bmp" BPP 8 DENSITY 2
+	BITMAP "bmp-4.bmp" BPP 2 DENSITY 72
+	BITMAP "bmp-4.bmp" BPP 4 DENSITY 72
+	BITMAP "bmp-8.bmp" BPP 8 DENSITY 72
+	BITMAP "bmp-8d.bmp" BPP 8 DENSITY 144
 END
 </pre></ul>
 
@@ -2293,11 +2375,11 @@ BOOTSCREENFAMILY [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color
 <li>
 <tt>BITMAPCOLOR</tt> creates a 256 color bitmap resource.
 <li>
-<tt>BITMAPFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp, 8bpp and 16bpp color) icon resources.
+<tt>BITMAPFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp, 8bpp and 16bpp color) bitmap resource.
 <li>
-<tt>BITMAPFAMILYSPECIAL</tt> creates a multibit (1bpp, 2bpp, 4bpp and 8bpp and 16bpp color) icon resources.
+<tt>BITMAPFAMILYSPECIAL</tt> creates a multibit (1bpp, 2bpp, 4bpp and 8bpp and 16bpp color) bitmap resource.
 <li>
-<tt>BOOTSCREENFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp, 8bpp color) icon resources.
+<tt>BOOTSCREENFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp, 8bpp color) bitmap resource.
 In the header we found a size, a check sum and a BitmapFamily. The Resource created is a 'tbsb'.
 <li>
 <tt>BOOTSCREENFAMILY</tt> is system reserved.
@@ -2370,11 +2452,13 @@ BITMAPFAMILY  ID 9 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENTINDEX 2
 BITMAPFAMILYEX [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font> 
   [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
   [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+  [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
 BEGIN
   BITMAP <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> BPP <font color="#00ff00">&lt;BitPerPixel.n&gt;</font>
          [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
          [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
          [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+         [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
          [DENSITY <font color="#00ff00">&lt;BitmapResourceDensity.n&gt;</font>]
   ...
 END
@@ -2386,7 +2470,8 @@ END
 <li>
 <tt>BPP</tt> must be 1, 2, 4, 5, 8, 16 (5 is used to generate 4bpp/16 colors bitmap resources).
 <li>
-<tt>DENSITY</tt> must be 1 or 2 (default is 1). You can not have only bmp with DENSITY 2 in BitmapFamilyEx. There must be at least one DENSITY 1 bitmap (or the OS will complain).
+<tt>DENSITY</tt> must be 72 (single), 108 (one and one half), or 144 (double).  Legacy values of 1 and 2 are
+supported.  You must have at least one single-density bitmap in an BitmapFamilyEx.
 <li>
 <tt>"Sbmp"</tt> should not have bmps with density > 1.
 <li> 
@@ -2406,11 +2491,12 @@ BITMAPFAMILYEX ID 1000
 COMPRESS
 BEGIN
 	BITMAP "bmp-1.bmp" BPP 1 
-	BITMAP "bmp-4.bmp" BPP 2 DENSITY 1
-	BITMAP "bmp-4.bmp" BPP 4 DENSITY 1
-	BITMAP "bmp-8.bmp" BPP 8 DENSITY 1
-	BITMAP "bmp-16.bmp" BPP 16 DENSITY 1	
-	BITMAP "bmp-8d.bmp" BPP 8 NOCOMPRESS DENSITY 2
+	BITMAP "bmp-4.bmp" BPP 2 DENSITY 72
+	BITMAP "bmp-4.bmp" BPP 4 DENSITY 72
+	BITMAP "bmp-8.bmp" BPP 8 DENSITY 72
+	BITMAP "bmp-16.bmp" BPP 16 DENSITY 72
+	BITMAP "bmp-8x.bmp" BPP 8 NOCOMPRESS DENSITY 108
+	BITMAP "bmp-8d.bmp" BPP 8 NOCOMPRESS DENSITY 144
 END
 </pre></ul>
 
@@ -3510,6 +3596,55 @@ END
 <BR>
 <font face="Arial,Helvetica">
 <a name="international"></a>
+<b><u>ID Generation Support</u></b><p>
+
+<ul>
+PilRC supports automatically generating a C header file with
+ID symbols used in the text.  You can either specify this using the
+<a href="#switch_H">-H</a> command line option, or by using
+a GENERATEHEADER command in your RCP file.  To control the
+numbering used by this process, to allow multiple RCP files being
+build without conflicting ID numbers, you use the
+<a href="#lang_resetautoid">RESETAUTOID</a> command to give each file its own ID number
+range. <p>
+</ul>
+
+<font face="Arial,Helvetica">
+<a name="lang_generateheader"></a>
+<b>GENERATEHEADER</b><p>
+</font>
+
+<ul>
+<pre>
+GENERATEHEADER <font color="#00ff00">&lt;HeaderFile.s&gt;</font></pre>
+</ul>
+<u>Example:</u>
+</font>
+
+<ul>
+<pre>
+GENERATEHEADER "ApplicationRsc.h"</pre>
+</ul>
+
+<font face="Arial,Helvetica">
+<a name="lang_resetautoid"></a>
+<b>RESETAUTOID</b><p>
+</font>
+
+<ul>
+<pre>
+RESETAUTOID <font color="#00ff00">&lt;IDBase.n&gt;</font></pre>
+</ul>
+<u>Example:</u>
+</font>
+
+<ul>
+<pre>
+RESETAUTOID 1000</pre>
+</ul>
+
+<font face="Arial,Helvetica">
+<a name="international"></a>
 <b><u>International Support</u></b><p>
 
 <ul>
@@ -3517,7 +3652,7 @@ PilRC supports a limited form of international tokenization. It works by
 substituting strings in the resource definitions with replacements
 specified in a <a href="#lang_translation">TRANSLATION</a> section. 
 Multiple translation blocks may be specified in a resource script. The 
-active language is specified with the "-L" flag to PilRC. <p> 
+active language is specified with the <a href="#switch_L">-L</a> flag to PilRC. <p> 
 
 Positioning of controls is a <b>large</b> problem if absolute values are
 used. It is recommended you use AUTO, CENTER and PREVRIGHT et al when 
@@ -3602,7 +3737,8 @@ FORM<br>
 FONT<br>
 <ul>
   <li>Developed based on reverse-engineering. <br>
-  The complete operation of how Palm handles FONT manipulation is unknown.
+  The complete operation of how Palm OS handles FONT manipulation has recently been
+  documented in the Palm OS SDK 5 Reference Manual.
 </ul>
 </ul> <p>
 

@@ -3,7 +3,7 @@
  * @(#)pilrc.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2002, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -77,6 +77,15 @@
  *                 Added 'tSCH' resource support
  *     04-Aug-2002 Michael McLagen
  *                 Fixed BITMAPID/SELECTEDBITMAPID warnings
+ *     22-Sep-2002 Ben Combee
+ *                 Allow zero-item lists in forms
+ *                 Fix transparency handling for high density bitmaps
+ *                 Allow LABELs to have strings that span lines
+ *      1-Oct-2002 Ben Combee
+ *                 Patch from Joshua Buergel to not warn when using
+ *                 horizonal scroll bars at recommended height.
+ *      5-Nov-2002 Ben Combee
+ *                 Altered MENU SEPARATOR to allow specifying ID or AUTOID
  */
 
 #include <stdio.h>
@@ -101,7 +110,8 @@ char *strdup(const char *s);
 #include "PalmRC.h"
 #endif
 
-#define idAutoInit 9999
+#define idDefaultAutoInit 9999
+#define idDefaultDirection -1
 #define idPalmOSReservedMin 10000
 #define idPalmOSReservedMinWithEditIDs 10008
 
@@ -170,8 +180,15 @@ BOOL vfRTL = fFalse;
 /*
  * next auto id 
  */
-int idAutoMac = idAutoInit;
-BOOL vfAutoId;
+BOOL vfAutoId = fFalse;
+int vfAutoStartID = idDefaultAutoInit;
+int idAutoMac = idDefaultAutoInit;
+int idAutoDirection = idDefaultDirection;
+
+/*
+ * output header file support
+ */
+static char szOutputHeaderFile[256] = "";
 
 /*
  * Warning about duplicates in forms and menus 
@@ -214,6 +231,12 @@ BOOL vfPrcTimeStamp = fFalse;
  * LDu Ignore Include File In Header Files
  */
 BOOL vfIFIH = fFalse;
+
+/*
+ * Track dependencies
+ */
+BOOL vfTrackDepends = fFalse;
+BOOL vfInhibitOutput = fFalse;
 
 /*
  * Menu globals 
@@ -292,7 +315,7 @@ AddSym(char *sz,
 |	
 |		Lookup symbol based on sz -- case sensitive
 -------------------------------------------------------------WESC------------*/
-SYM *
+static SYM *
 PsymLookup(char *sz)
 {
   SYM *psym;
@@ -303,13 +326,14 @@ PsymLookup(char *sz)
   return NULL;
 }
 
-int
+static int
 IdGetAutoId()
 {
-  return idAutoMac--;
+  idAutoMac += idAutoDirection;
+  return idAutoMac;
 }
 
-SYM *
+static SYM *
 PsymAddSymAutoId(char *sz)
 {
   SYM *psym;
@@ -325,7 +349,7 @@ PsymAddSymAutoId(char *sz)
 |	
 |	Free up all memory allocated for the symbol table
 -------------------------------------------------------------WESC------------*/
-VOID
+static VOID
 FreeSymTable()
 {
   SYM *psym;
@@ -345,7 +369,7 @@ FreeSymTable()
 |	
 |		Maps a reserved word into a string
 -------------------------------------------------------------WESC------------*/
-char *
+static char *
 PchFromRw(int rw,
           BOOL fTrySecondName)
 {
@@ -370,7 +394,7 @@ PchFromRw(int rw,
 |	
 |		Looks up lex.id in reserved word table.  returns rwNil if not found
 -------------------------------------------------------------WESC------------*/
-RW
+static RW
 RwFromLex(LEX * plex)
 {
   RWT *prwt;
@@ -394,7 +418,7 @@ RwFromLex(LEX * plex)
 |		Look up a language tranlation entry. All strings in the .rcp file
 |	potentially get translated
 -------------------------------------------------------------WESC------------*/
-TE *
+static TE *
 PteFromSz(char *sz)
 {
   TE *pte;
@@ -410,7 +434,7 @@ PteFromSz(char *sz)
 |	
 |		Free up the translation table
 -------------------------------------------------------------WESC------------*/
-VOID
+static VOID
 FreeTranslations()
 {
   TE *pte;
@@ -485,10 +509,12 @@ FGetTok(TOK * ptok)
 
     if (ptok->lex.lt == ltCComment)
       fInComment = fTrue;
-    else if (ptok->lex.lt != ltEndCComment)
-      break;
-    else
+    else if (ptok->lex.lt == ltEndCComment)
       fInComment = fFalse;
+    else if (ptok->lex.lt == ltDoubleSlash)
+      NextLine();
+    else
+      break;
   }
 
   if (ptok->lex.lt == ltId)
@@ -532,7 +558,7 @@ UngetTok(void)
 |		Get a token and expect a particular lex type.  Emit szErr if it isn't
 |	what's expected
 -------------------------------------------------------------WESC------------*/
-VOID
+static VOID
 GetExpectLt(TOK * ptok,
             LT lt,
             char *szErr)
@@ -606,7 +632,7 @@ PchGetSz(char *szErr)
 |	
 |   gets strings on multiple lines w/ \ continuation character.
 -------------------------------------------------------------WESC------------*/
-char *
+static char *
 PchGetSzMultiLine(char *szErr)
 {
   char sz[16384];
@@ -631,6 +657,7 @@ PchGetSzMultiLine(char *szErr)
     }
     w return strdup(sz);
   }
+}  
 #else
 
 /*-----------------------------------------------------------------------------
@@ -638,7 +665,7 @@ PchGetSzMultiLine(char *szErr)
 |	
 |   gets strings on multiple lines w/ \ continuation character.
 -------------------------------------------------------------WESC------------*/
-char *
+static char *
 PchGetSzMultiLine(char *szErr)
 {
   char sz[8192];
@@ -664,7 +691,7 @@ PchGetSzMultiLine(char *szErr)
 |	
 |		Epect and get an ident. (ltId)
 -------------------------------------------------------------WESC------------*/
-char *
+static char *
 PchGetId(char *szErr)
 {
   GetExpectLt(&tok, ltId, szErr);
@@ -735,7 +762,7 @@ int WGetConstEx(char *szErr);
 | 
 | Get a constant expression -- parens allowed left to right associativity
 -------------------------------------------------------------WESC------------*/
-int
+static int
 WGetConstExFactor(char *szErr)
 {
   int wVal;
@@ -829,7 +856,7 @@ WGetConstEx(char *szErr)
 |	
 |		Get a Konstant, returning the type.
 -------------------------------------------------------------WESC------------*/
-KT
+static KT
 KtGetK(K * pk,
        char *szErr)
 {
@@ -858,6 +885,22 @@ KtGetK(K * pk,
       break;
     case rwAuto:
       pk->kt = ktAuto;
+      if (FGetTok(&tok))
+      {
+        if (tok.lex.lt == ltGT)
+        {
+          pk->wVal = WGetConstEx("AUTO> size");  /* we store min size */
+          pk->kt = ktAutoGreaterThan;
+        }
+        else if (tok.lex.lt == ltGTE)
+        {
+          pk->wVal = WGetConstEx("AUTO>= size"); /* we store min size */
+          pk->kt = ktAutoGreaterThan;
+        }
+        else
+          UngetTok();
+      }
+
       break;
     case rwRight:
       pk->kt = ktRightAt;
@@ -878,7 +921,7 @@ KtGetK(K * pk,
 |	
 |		Parse a point (not the AT and () parts).
 -------------------------------------------------------------WESC------------*/
-VOID
+static VOID
 ParseKpt(KPT * pkpt)
 {
   KtGetK(&pkpt->kX, "x pos");
@@ -890,7 +933,7 @@ ParseKpt(KPT * pkpt)
 |	
 |		Parse a rect (not the AT and () parts).
 -------------------------------------------------------------WESC------------*/
-VOID
+static VOID
 ParseKrc(KRC * pkrc)
 {
   KtGetK(&pkrc->kptUpperLeft.kX, "rect left");
@@ -909,12 +952,9 @@ ParsePaletteFile(char *pchFileName,
                  int p[256][3],
                  int *nColors)
 {
-  int cch;
-  char *data;
   FILE *fh;
   int c = 0, i = 0;
   int status = 0;
-  char tcolor[10];
   int tcolorindex = 0;
   int r = 0, g = 0, b = 0;
 
@@ -922,103 +962,34 @@ ParsePaletteFile(char *pchFileName,
   if (fh == NULL)
     ErrorLine2("Unable to open palette file ", pchFileName);
 
-  data = malloc(16384);
-  cch = fread(data, 1, 16384, fh);
-  fclose(fh);
-
   // Start parse of file
-  memset(tcolor, 0, 10);
-  for (c = 0; c < cch; c++)
+
+  while (EOF != fscanf(fh, "%d %d %d", &r, &g, &b))
   {
-    switch (status)
-    {
-      case 0:
-        if (data[c] >= '0' && data[c] <= '9')
-        {
-          tcolor[tcolorindex++] = data[c];
-        }
+	if (r > 255)
+	{
+		ErrorLine("Red color component must be BYTE (0..255)");
+	}
+	if (g > 255)
+	{
+		ErrorLine("Green color component must be BYTE (0..255)");
+	}
+	if (b > 255)
+	{
+		ErrorLine("Blue color component must be BYTE (0..255)");
+	}
 
-        if (data[c] == ' ' || data[c] == '\t')
-        {
-          status = 1;
-          r = atoi(tcolor);
-          if (r > 255)
-          {
-            ErrorLine("Color component must be BYTE (0..255)");
-          }
-          memset(tcolor, 0, 10);
-          tcolorindex = 0;
-        }
-        break;
+	p[i][0] = r;
+	p[i][1] = g;
+	p[i][2] = b;
+	i++;
 
-      case 1:
-        if (data[c] >= '0' && data[c] <= '9')
-        {
-          tcolor[tcolorindex++] = data[c];
-        }
-
-        if (data[c] == ' ' || data[c] == '\t')
-        {
-          status = 2;
-          g = atoi(tcolor);
-          if (g > 255)
-          {
-            ErrorLine("Color component must be BYTE (0..255)");
-          }
-          memset(tcolor, 0, 10);
-          tcolorindex = 0;
-        }
-        break;
-
-      case 2:
-        if (data[c] >= '0' && data[c] <= '9')
-        {
-          tcolor[tcolorindex++] = data[c];
-        }
-
-        if (data[c] == ' ' || data[c] == '\t')
-        {
-          status = 3;
-          b = atoi(tcolor);
-          if (b > 255)
-          {
-            ErrorLine("Color component must be BYTE (0..255)");
-          }
-          memset(tcolor, 0, 10);
-          tcolorindex = 0;
-
-          if (data[c] == '\n')
-          {
-            status = 4;
-          }
-        }
-        break;
-
-      default:
-      case 3:
-        if (data[c] == '\n')
-        {
-          status = 4;
-        }
-        break;
-    }
-
-    if (status == 4)
-    {
-      p[i][0] = r;
-      p[i][1] = g;
-      p[i][2] = b;
-      i++;
-
-      if (i == 257)
-      {
-        c = cch;
-      }
-      status = 0;
-    }
+	if (i == 257)
+	{
+		break;
+	}
   }
 
-  free(data);
   *nColors = i;
 }
 
@@ -1033,7 +1004,7 @@ ParsePaletteFile(char *pchFileName,
 |	
 |		Resolve a Konstant to it's real value, returning it.
 -------------------------------------------------------------WESC------------*/
-int
+static int
 WResolveK(K * pk,
           ITM * pitm,
           int dxyExtent,
@@ -1050,6 +1021,8 @@ WResolveK(K * pk,
     case ktConst:
       return pk->wVal;
     case ktAuto:
+    case ktAutoGreaterThan:
+      
       if (fHoriz)
       {
         /*
@@ -1081,7 +1054,11 @@ WResolveK(K * pk,
       }
       else
         wVal = DyFont(pitm->font) + 1;
-      return wVal;
+      if (pk->kt == ktAuto)
+        return wVal;
+      else /* pk->kt == ktAutoGreaterThan */
+        return (pk->wVal > wVal) ? pk->wVal : wVal;
+
     case ktCenter:
       if (fHoriz)
         dxyCenterAcross = PBAFIELD(vpfrm, form.window.windowBounds.extent.x);
@@ -1106,7 +1083,7 @@ WResolveK(K * pk,
 |	
 |		Resolve a Krc and/or Kpt, setting rcPrev
 -------------------------------------------------------------WESC------------*/
-VOID
+static VOID
 ResolveKrcKpt(ITM * pitm)
 {
   if (pitm->grif & ifRc)
@@ -1144,7 +1121,7 @@ ResolveKrcKpt(ITM * pitm)
 |	
 | Check if ifP is set in grif -- error if not
 -------------------------------------------------------------WESC------------*/
-VOID
+static VOID
 DoCheckGrif(int grif,
             int ifP)
 {
@@ -1160,12 +1137,10 @@ DoCheckGrif(int grif,
 |		Parse ID <const>
 -------------------------------------------------------------WESC------------*/
 int
-WGetId(char *szErr,
-       BOOL fAutoIDOk)
+WGetId(char *szErr)
 {
   int w;
 
-  fAutoIDOk = fAutoIDOk;                         /* shut up whiney compilers */
   if (!FGetTok(&tok))
     return 0;
   if (tok.rw == rwAutoId)
@@ -1177,9 +1152,17 @@ WGetId(char *szErr,
     w = WGetConstEx(szErr);
   }
 
-  if ((!vfAllowEditIDs) && ((w >= idPalmOSReservedMin) ||
-                            (w >= idPalmOSReservedMinWithEditIDs)))
+  if (vfAllowEditIDs)
+  {
+    if (w >= idPalmOSReservedMinWithEditIDs)
+    {
+	  WarningLine("ID conflicts with reserved ID range (0-10007 only)");
+    }
+  }
+  else if (w >= idPalmOSReservedMin)
+  {
     WarningLine("ID conflicts with reserved ID range (0-9999 only)");
+  }
 
   return w;
 }
@@ -1233,7 +1216,7 @@ ParseItm(ITM * pitm,
   if (grif & ifText)
   {
     pitm->grifOut |= ifText;
-    pitm->text = PchGetSz("item string");
+    pitm->text = PchGetSzMultiLine("item string"); // BLC change PchGetSz to PchGetSzMultiLine
     pitm->cbText = strlen(pitm->text) + 1;
   }
   if (grif & ifMultText)
@@ -1242,31 +1225,38 @@ ParseItm(ITM * pitm,
     char rgb[16384];
 
     pitm->grifOut |= ifMultText;
-    GetExpectLt(&tok, ltStr, "text");
-    pch = rgb;
-    for (;;)
+
+	// BLC - to support "no strings" for a MultText type, need to peek 
+	// ahead and see if token is a string before entering string read loop
+	FGetTok(&tok);
+    if (tok.lex.lt == ltStr)
     {
-      strcpy(pch, tok.lex.szId);
-      if (pch)                                   // RMa add test. Bug in LIST with no element pitm->numItems must = 0
-        pitm->numItems++;                        // RMa test pch instead of *pch
-      pch += strlen(tok.lex.szId) + 1;
-      if (!FGetTok(&tok))
-        return;
-      if (tok.lex.lt != ltStr)
-        break;
-    }
-    if (pch - rgb >= 16384)
-      ErrorLine("Hex string or String are too big");
-    pitm->text = malloc(pch - rgb);
-    pitm->cbText = pch - rgb;
-    memcpy(pitm->text, rgb, pch - rgb);
-    UngetTok();
+	    pch = rgb;
+	    for (;;)
+	    {
+		  // BLC - check for buffer overflow before the strcpy
+	      if (pch + strlen(tok.lex.szId) + 1 - rgb >= sizeof(rgb))
+	        ErrorLine("Hex string or String are too big");
+
+	      strcpy(pch, tok.lex.szId);
+	      pitm->numItems++;
+	      pch += strlen(tok.lex.szId) + 1;
+	      if (!FGetTok(&tok))
+	        return;
+	      if (tok.lex.lt != ltStr)
+	        break;
+	    }
+	    pitm->text = malloc(pch - rgb);
+	    pitm->cbText = pch - rgb;
+	    memcpy(pitm->text, rgb, pch - rgb);
+	 }
+     UngetTok();
   }
 
   if (grif & ifId)
   {
     pitm->grifOut |= ifId;
-    pitm->id = WGetId("ItemId", fTrue);
+    pitm->id = WGetId("ItemId");
   }
   if (grif & ifListId)
   {
@@ -1989,7 +1979,7 @@ CbInit(void)
 |		Return emitted size of the form item.  if fText then include the
 |	length of the associated item text
 -------------------------------------------------------------WESC------------*/
-int
+static int
 CbFromLt(RCFORMOBJLIST * plt,
          int fText)
 {
@@ -2043,7 +2033,7 @@ CbFromLt(RCFORMOBJLIST * plt,
 /*-----------------------------------------------------------------------------
 |	DumpForm
 -------------------------------------------------------------WESC------------*/
-void
+static void
 DumpForm(FRM * pfrm)
 {
   int cbDirectory;
@@ -2163,7 +2153,7 @@ DumpForm(FRM * pfrm)
   CloseOutput();
 }
 
-BOOL
+static BOOL
 FIdFormObject(FormObjectKind kind,
               BOOL fIncludeLabels)
 {
@@ -2198,7 +2188,7 @@ FIdFormObject(FormObjectKind kind,
  * Grrr, the PalmOS developers could have been intelligent created a common header
  * for all form objects 
  */
-int
+static int
 IdFromObj(RCFORMOBJECT * pobj,
           FormObjectKind kind)
 {
@@ -2243,7 +2233,7 @@ IdFromObj(RCFORMOBJECT * pobj,
 |	
 |		Add an object (item) to the current form
 -------------------------------------------------------------WESC------------*/
-VOID
+static VOID
 AddObject(RCFORMOBJECT * pobj,
           FormObjectKind kind)
 {
@@ -2298,7 +2288,7 @@ AddObject(RCFORMOBJECT * pobj,
 |	
 |		Frees stuff pointed to by lt (Doesn't free lt itself)
 -------------------------------------------------------------WESC------------*/
-VOID
+static VOID
 FreeLt(RCFORMOBJLIST * plt)
 {
   char *pchText;
@@ -2316,7 +2306,7 @@ FreeLt(RCFORMOBJLIST * plt)
 /*-----------------------------------------------------------------------------
 |	FreeFrm
 -------------------------------------------------------------WESC------------*/
-void
+static void
 FreeFrm(FRM * pfrm)
 {
   int ilt, count;
@@ -2354,7 +2344,7 @@ FreeRcpfile(RCPFILE * prcpf)
   iidStringMac = 0;
   iidStringTableMac = 0;
   iidAISMac = 0;
-  idAutoMac = idAutoInit;
+  idAutoMac = vfAutoStartID;
 
   FreeFontMem();
 }
@@ -2364,7 +2354,7 @@ FreeRcpfile(RCPFILE * prcpf)
 |	
 |		Parse the objects (items) in a form
 -------------------------------------------------------------WESC------------*/
-BOOL
+static BOOL
 FParseObjects()
 {
   RCFORMOBJECT obj;
@@ -2640,8 +2630,8 @@ FParseObjects()
         obj.scrollbar = calloc(1, sizeof(RCSCROLLBAR));
         obj.scrollbar->id = itm.id;
         obj.scrollbar->bounds = itm.rc;
-        if (itm.rc.extent.x != 7)
-          WarningLine("Scrollbar width not the recommended 7");
+        if ((itm.rc.extent.x != 7) && (itm.rc.extent.y != 7))
+          WarningLine("Scrollbar width or height not the recommended 7 pixels");
         obj.scrollbar->attr.usable = itm.usable;
         obj.scrollbar->value = itm.value;
         obj.scrollbar->minValue = itm.minValue;
@@ -2719,7 +2709,7 @@ FParseObjects()
   return fFalse;
 }
 
-void
+static void
 InitFrm(FRM * pfrm)
 {
   if (vfLE32)
@@ -2731,7 +2721,7 @@ InitFrm(FRM * pfrm)
 /*-----------------------------------------------------------------------------
 |	FParseForm
 -------------------------------------------------------------WESC------------*/
-BOOL
+static BOOL
 FParseForm(RCPFILE * prcpf)
 {
   ITM itm;
@@ -2822,7 +2812,7 @@ FParseForm(RCPFILE * prcpf)
 | This could be done more efficiently by emitting the strings differently, but I want to make the
 | emitted bytes the same as the USR tools.
 -------------------------------------------------------------WESC------------*/
-VOID
+static VOID
 DumpMenu()
 {
   int cmpd;
@@ -2916,7 +2906,7 @@ DumpMenu()
 |	
 |		Compute the menu screen rect
 -------------------------------------------------------------WESC------------*/
-VOID
+static VOID
 AssignMenuRects()
 {
   int cmpd;
@@ -2979,7 +2969,7 @@ AssignMenuRects()
 /*-----------------------------------------------------------------------------
 |	FParsePullDown
 -------------------------------------------------------------WESC------------*/
-BOOL
+static BOOL
 FParsePullDown()
 {
   RCMENUPULLDOWN mpd;
@@ -3003,10 +2993,26 @@ FParsePullDown()
         if (tok.rw == rwSeparator)
         {
           mi.itemStr = strdup("-");
+          // BLC: eat an auto ID so menus specified using AutoIDs and a start number
+          // will correctly skip ID numbers when used with the PilRC plugin
+          (void) IdGetAutoId();
           // RMa add support of id for separator to be compliant with palmRez
           // File generated by Rsrc2Rcp generaly dont have id comflict
           if (vfPalmRez)
             mi.id = previousID;
+
+		  // BLC: allow a manually specified ID for the separator
+          FGetTok(&tok);
+          if (tok.rw == rwId || tok.rw == rwAutoId)
+          {
+            UngetTok();
+            mi.id = WGetId("CommandId");
+          }
+          else
+          {
+            UngetTok();
+          }
+
         }
         else
         {
@@ -3035,7 +3041,7 @@ FParsePullDown()
               mi.itemStr[cch - 1] = (char)0x18;
             }
           }
-          mi.id = WGetId("CommandId", fFalse);
+          mi.id = WGetId("CommandId");
           if (vfPalmRez)
             previousID = mi.id + 1;              // RMa 
           if (FGetTok(&tok))
@@ -3092,7 +3098,7 @@ FParsePullDown()
 /*-----------------------------------------------------------------------------
 |	FParseMenu
 -------------------------------------------------------------WESC------------*/
-BOOL
+static BOOL
 FParseMenu()
 {
   ITM itm;
@@ -3153,7 +3159,7 @@ FParseMenu()
 /*-----------------------------------------------------------------------------
 |	FreeMenu
 -------------------------------------------------------------WESC------------*/
-void
+static void
 FreeMenu()
 {
   int impd;
@@ -3177,7 +3183,7 @@ FreeMenu()
 /*-----------------------------------------------------------------------------
 |	ParseDumpAlert
 -------------------------------------------------------------WESC------------*/
-void
+static void
 ParseDumpAlert()
 {
   ITM itm;
@@ -3247,7 +3253,12 @@ ParseDumpAlert()
 
 WriteAlert:
   at.numButtons = itm.numItems;
-  if (at.numButtons > 0 && at.defaultButton >= at.numButtons)
+  // BLC: since ifMultText now allows zero items, need to enforce
+  // rule that alerts must have at least one button, or you get an alert
+  // that cannot be dismissed.  Constructor enforces this for its alerts.
+  if (at.numButtons == 0)
+    ErrorLine("Alerts must have at least one button");
+  if (at.defaultButton >= at.numButtons)
     ErrorLine("Invalid default button number");
   /*
    * removed 2.8p8, 12-Nov-2001
@@ -3274,7 +3285,7 @@ WriteAlert:
 /*-----------------------------------------------------------------------------
 |	ParseDumpVersion
 -------------------------------------------------------------WESC------------*/
-void
+static void
 ParseDumpVersion()
 {
   int id;
@@ -3286,7 +3297,7 @@ ParseDumpVersion()
   {
     UngetTok();
     if (tok.lex.lt != ltStr)
-      id = WGetId("Version ResourceId", fFalse);
+      id = WGetId("Version ResourceId");
   }
 
   pchVersion = PchGetSz("Version Text");
@@ -3315,7 +3326,7 @@ ParseDumpVersion()
 |							when we compare the Id.
 |
 -------------------------------------------------------------KAS-------------*/
-void
+static void
 ParseDumpStringTable()
 {
   int id;
@@ -3411,7 +3422,7 @@ ParseDumpStringTable()
 /*-----------------------------------------------------------------------------
 |	ParseDumpString
 -------------------------------------------------------------WESC------------*/
-void
+static void
 ParseDumpString()
 {
   int id;
@@ -3532,7 +3543,7 @@ ParseDumpString()
 /*-----------------------------------------------------------------------------
 |       ParseDumpCategories
 -------------------------------------------------------------JOHNL-----------*/
-void
+static void
 ParseDumpCategories()
 {
   int id, len, count;
@@ -3638,7 +3649,7 @@ ParseDumpCategories()
 /*-----------------------------------------------------------------------------
 |	ParseDumpBitmapFile
 -------------------------------------------------------------DAVE------------*/
-void
+static void
 ParseDumpBitmapFile(int bitmapType)
 {
 #define MAXDEPTH 7
@@ -3826,9 +3837,9 @@ ParseDumpBitmapFile(int bitmapType)
                    bitmapTypes[i], colortable, transparencyData,
                    ((flag & 0xfe) != 0x00),
 #ifdef PALM_INTERNAL
-                   (bitmapType == rwBootScreenFamily), 0);
+                   (bitmapType == rwBootScreenFamily), kSingleDensity);
 #else
-                   fFalse, 0);
+                   fFalse, kSingleDensity);
 #endif
       flag = flag >> 1;
       i++;
@@ -3864,7 +3875,7 @@ ParseDumpBitmapFile(int bitmapType)
       if ((flag & 0x01) == 0x01)
         DumpBitmap(pchFileName[i], 0, compress,
                    bitmapTypes[i], colortable, transparencyData,
-                   ((flag & 0xfe) != 0x00), fFalse, 0);
+                   ((flag & 0xfe) != 0x00), fFalse, kSingleDensity);
       flag = flag >> 1;
       i++;
     }
@@ -3872,7 +3883,7 @@ ParseDumpBitmapFile(int bitmapType)
   else
   {
     DumpBitmap(pchFileName[0], 0, compress, bitmapType,
-               colortable, transparencyData, fFalse, fFalse, 0);
+               colortable, transparencyData, fFalse, fFalse, kSingleDensity);
   }
   CloseOutput();
 
@@ -3905,16 +3916,17 @@ CLEANUP:
 /*-----------------------------------------------------------------------------
 |	ParseDumpBitmapExFile
 -------------------------------------------------------------RMa-------------*/
-void
+static void
 ParseDumpBitmapExFile(int bitmapType)
 {
-#define MAXDEPTH 16
+#define MAXDEPTH 24
 
-  typedef struct _bmpDef
+  typedef struct BMPDEF
   {
     char *pchFileName;
     char *pchPaletteFileName;
     int compress;
+    int compressMethod;
     int transparencyData[4];
     int density;
     int bpp;
@@ -3931,8 +3943,9 @@ ParseDumpBitmapExFile(int bitmapType)
   char *pchResType = NULL;
   char *pLocale = NULL;
   int defaultCompress = 0;                       // ??? MJM: initialized to 0
+  int defaultCompressionMethod = rwCompressScanLine;
   int id = 0, i = 0;
-  int flag = 0;
+  long flag = 0;	// must be at least 24 bits wide
   int index = 0;
   int nbrOfBmpDensityOne = 0;
   int nbrOfBmpDensityTwoOrMore = 0;
@@ -3977,10 +3990,16 @@ ParseDumpBitmapExFile(int bitmapType)
       case rwForceCompress:
         defaultCompress = tok.rw;
         break;
+      case rwCompressScanLine:
+      case rwCompressRLE:
+      case rwCompressPackBits:
+      case rwCompressBest:
+        defaultCompressionMethod = tok.rw;
+        break;
       case rwId:
       case rwAutoId:
         UngetTok();
-        id = WGetId("ItemId", fTrue);
+        id = WGetId("ItemId");
         if (isAIcon)
           isAIcon = id;
         break;
@@ -4022,12 +4041,14 @@ ParseDumpBitmapExFile(int bitmapType)
   {
     if (tok.rw == rwBitmap)
     {
+      memset(&currentEntry, 0, sizeof(currentEntry));
       currentEntry.pchFileName = PchGetSz("Bitmap Filename");
       currentEntry.haspalette = fFalse;
       currentEntry.compress = defaultCompress;
+      currentEntry.compressMethod = defaultCompressionMethod;
       currentEntry.colortable = fFalse;
       currentEntry.transparencyData[0] = 0;
-      currentEntry.density = 1;
+      currentEntry.density = kSingleDensity;
       currentEntry.bpp = 0;
       while (FGetTok(&tok))
       {
@@ -4035,6 +4056,13 @@ ParseDumpBitmapExFile(int bitmapType)
             (tok.rw == rwAutoCompress) || (tok.rw == rwForceCompress))
         {
           currentEntry.compress = tok.rw;
+        }
+        else if ((tok.rw == rwCompressScanLine) ||
+            (tok.rw == rwCompressRLE) || 
+            (tok.rw == rwCompressPackBits) ||
+            (tok.rw == rwCompressBest))
+        {
+          currentEntry.compressMethod = tok.rw;
         }
         else if ((tok.rw == rwNoColorTable) || (tok.rw == rwColorTable))
         {
@@ -4070,12 +4098,28 @@ ParseDumpBitmapExFile(int bitmapType)
         else if (tok.rw == rwBitmapDensity)
         {
           currentEntry.density = WGetConst("bitmap density");
+          if (currentEntry.density == 1) currentEntry.density = kSingleDensity;
+          if (currentEntry.density == 2) currentEntry.density = kDoubleDensity;
+
+		  if (currentEntry.density != kSingleDensity &&
+		      currentEntry.density != kOneAndOneHalfDensity &&
+		      currentEntry.density != kDoubleDensity)
+		  {
+		      // unsupported density value
+		      ErrorLine("Unsupported bitmap density (use 72, 108, or 144)");
+		  }
         }
         else
         {
           UngetTok();
           break;
         }
+      }
+
+      if ((currentEntry.compressMethod == rwCompressRLE) ||
+          (currentEntry.compressMethod == rwCompressPackBits))
+      {
+          ErrorLine("RLE and PackBits compression methods not yet supported.");
       }
 
       switch (currentEntry.bpp)
@@ -4117,18 +4161,25 @@ ParseDumpBitmapExFile(int bitmapType)
           break;
       }
 
-      if (currentEntry.density == 2)
-        index += 8;
-
+      /* check color depth vs. transparency before adding double density index */
       if ((index >= 4) &&
           (currentEntry.transparencyData[0] == rwTransparencyIndex))
         ErrorLine
           ("16k, 24k and 32k colors bitmap don't support transparancy index.");
 
+      if (currentEntry.density == kOneAndOneHalfDensity)
+      {
+        index += 8;
+      }
+      if (currentEntry.density == kDoubleDensity)
+      {
+        index += 16;
+      }
+
       if ((index == 2) && (flag & (0x01 << 2)))
         ErrorLine("Bitmap can't have 4 bit gray and 4 bit color data.");
       else if (flag & (0x01 << index))
-        ErrorLine("Multiple bitmaps for one depth.");
+        ErrorLine("Multiple bitmaps for one depth/density.");
       else
         flag |= (0x01 << index);
       memcpy(&aBitmapEntries[index], &currentEntry, sizeof(BMPDEF));
@@ -4142,7 +4193,7 @@ ParseDumpBitmapExFile(int bitmapType)
   }
 
   if (!(flag & 0x000000FF))
-    ErrorLine("BitmapFamilyEx must have at least one bitmap with density 1.");
+    ErrorLine("BitmapFamilyEx must have at least one bitmap with single density (72).");
 
   if ((bitmapType == rwIconFamilyEx) || (bitmapType == rwIconSmallFamilyEx))
   {
@@ -4161,9 +4212,9 @@ ParseDumpBitmapExFile(int bitmapType)
   // count number of bmp in each case
   for (i = 0; i < MAXDEPTH; i++)
   {
-    if (aBitmapEntries[i].density == 1)
+    if (aBitmapEntries[i].density == kSingleDensity)
       nbrOfBmpDensityOne++;
-    if (aBitmapEntries[i].density > 1)
+    if (aBitmapEntries[i].density != kSingleDensity)
       nbrOfBmpDensityTwoOrMore++;
   }
 
@@ -4198,8 +4249,8 @@ ParseDumpBitmapExFile(int bitmapType)
           SetUserPalette8bppToDefault8bpp();
       }
 
-      // fake header : begin of bmp part with density > 1
-      if ((aBitmapEntries[i].density > 1) && (!writeFakeDblHdr))
+      // fake header : begin of bmp part with density != kSingleDensity
+      if ((aBitmapEntries[i].density != kSingleDensity) && (!writeFakeDblHdr))
       {
         RCBITMAP emptyBmpHeader;
 
@@ -4213,19 +4264,21 @@ ParseDumpBitmapExFile(int bitmapType)
         writeFakeDblHdr = fTrue;
       }
 
-      if (aBitmapEntries[i].density == 1)
+      if (aBitmapEntries[i].density == kSingleDensity)
         DumpBitmap(aBitmapEntries[i].pchFileName, isAIcon,
                    aBitmapEntries[i].compress, aBitmapEntries[i].bitmapTypes,
                    aBitmapEntries[i].colortable,
                    aBitmapEntries[i].transparencyData,
                    (nbrOfBmpDensityTwoOrMore) ? fTrue : --nbrOfBmpDensityOne,
-                   bootScreen, 0);
+                   bootScreen,
+                   kSingleDensity);
       else
         DumpBitmap(aBitmapEntries[i].pchFileName, isAIcon,
                    aBitmapEntries[i].compress, aBitmapEntries[i].bitmapTypes,
                    aBitmapEntries[i].colortable,
                    aBitmapEntries[i].transparencyData,
-                   --nbrOfBmpDensityTwoOrMore, bootScreen,
+                   --nbrOfBmpDensityTwoOrMore,
+                   bootScreen,
                    aBitmapEntries[i].density);
 
       if (aBitmapEntries[i].haspalette)
@@ -4263,7 +4316,7 @@ CLEANUP:
 /*-----------------------------------------------------------------------------
 |	ParseDumpIcon
 -------------------------------------------------------------DAVE------------*/
-void
+static void
 ParseDumpIcon(BOOL fSmall,
               int bitmapType)
 {
@@ -4284,7 +4337,7 @@ ParseDumpIcon(BOOL fSmall,
     UngetTok();
     if (tok.lex.lt != ltStr)
     {
-      id = WGetId("Icon ResourceId", fFalse);
+      id = WGetId("Icon ResourceId");
       nonStandard = fTrue;
     }
     if (FGetTok(&tok))
@@ -4388,7 +4441,6 @@ ParseDumpIcon(BOOL fSmall,
 
   if (bitmapType == rwBitmapFamily)
   {
-
     int i, flag;
     int bitmapTypes[] = {
       rwBitmap,
@@ -4420,7 +4472,7 @@ ParseDumpIcon(BOOL fSmall,
       if ((flag & 0x01) == 0x01)
         DumpBitmap(pchFileName[i], id, rwNoCompress,
                    bitmapTypes[i], colortable, transparencyData,
-                   ((flag & 0xfe) != 0x00), fFalse, 0);
+                   ((flag & 0xfe) != 0x00), fFalse, kSingleDensity);
       flag = flag >> 1;
       i++;
     }
@@ -4428,7 +4480,7 @@ ParseDumpIcon(BOOL fSmall,
   else
   {
     DumpBitmap(pchFileName[0], id, rwNoCompress, bitmapType,
-               fFalse, transparencyData, fFalse, fFalse, 0);
+               fFalse, transparencyData, fFalse, fFalse, kSingleDensity);
   }
   CloseOutput();
 
@@ -4446,7 +4498,7 @@ CLEANUP:
 /*---------------------------------------------------------------------------
 |	ParseDumpLauncherCategory
 -------------------------------------------------------------RMa------------*/
-void
+static void
 ParseDumpLauncherCategory(void)
 {
   int id = 0;                                    // ??? MJM: Added initialization to 0
@@ -4458,7 +4510,7 @@ ParseDumpLauncherCategory(void)
     if ((tok.rw == rwId) || (tok.rw == rwAutoId))
     {
       UngetTok();
-      id = WGetId("LauncherCategory ResourceId", fFalse);
+      id = WGetId("LauncherCategory ResourceId");
       if (id != 1000)
         WarningLine
           ("Default Launcher Category ID is 1000 (it dont work otherwise)");
@@ -4468,11 +4520,11 @@ ParseDumpLauncherCategory(void)
       pLocale = PchGetSz("locale");
     }
     else if (tok.lex.lt == ltStr)
-    {
-      UngetTok();
+      {
+        UngetTok();
       pString = PchGetSz("taic");
-      break;
-    }
+        break;
+      }
     else
       ErrorLine2("Unexpected token: ", tok.lex.szId);
   }
@@ -4501,7 +4553,7 @@ ParseDumpLauncherCategory(void)
 
 CLEANUP:
   if (pString)
-    free(pString);
+  free(pString);
   if (pLocale)
     free(pLocale);
 }
@@ -4509,7 +4561,7 @@ CLEANUP:
 /*-----------------------------------------------------------------------------
 |	ParseDumpApplicationIconName
 -------------------------------------------------------------WESC------------*/
-void
+static void
 ParseDumpApplicationIconName()
 {
   int id;
@@ -4550,7 +4602,7 @@ ParseDumpApplicationIconName()
 /*-----------------------------------------------------------------------------
 |	ParseDumpApplication
 -------------------------------------------------------------WESC------------*/
-void
+static void
 ParseDumpApplication()
 {
   int id;
@@ -4587,14 +4639,14 @@ ParseDumpApplication()
 /*-----------------------------------------------------------------------------
 |	ParseDumpTrap
 -------------------------------------------------------------WESC------------*/
-void
+static void
 ParseDumpTrap()
 {
   int id;
   int wTrap;
   TOK tok;                                       // RMa validate if needed
 
-  id = WGetId("TRAP ResourceId", fFalse);
+  id = WGetId("TRAP ResourceId");
   /*
    * Skip "value" if it's present.  
    */
@@ -4623,7 +4675,7 @@ ParseDumpTrap()
 /*-----------------------------------------------------------------------------
 |     ParseDumpFont
 -------------------------------------------------------------DPT-------------*/
-void
+static void
 ParseDumpFont()
 {
   int id;
@@ -4658,7 +4710,7 @@ ParseDumpFont()
 /*-----------------------------------------------------------------------------
 |     ParseDumpHex
 --------------------------------------------------------------AA-------------*/
-void
+static void
 ParseDumpHex()
 {
   char *pchResType;
@@ -4724,7 +4776,7 @@ ParseDumpHex()
 /*-----------------------------------------------------------------------------
 |     ParseDumpData
 --------------------------------------------------------------AA-------------*/
-void
+static void
 ParseDumpData()
 {
   char *pchResType;
@@ -4791,7 +4843,7 @@ ParseDumpData()
 /*-----------------------------------------------------------------------------
 |	ParseDumpInteger
 -------------------------------------------------------------BLC-------------*/
-void
+static void
 ParseDumpInteger()
 {
   int id;
@@ -4824,7 +4876,7 @@ ParseDumpInteger()
 /*-----------------------------------------------------------------------------
 |	ParseDumpWordList
 -------------------------------------------------------------RMa-------------*/
-void
+static void
 ParseDumpWordList(void)
 {
   int id;
@@ -4887,7 +4939,7 @@ ParseDumpWordList(void)
 /*-----------------------------------------------------------------------------
 |	ParseDumpLongWordList
 -------------------------------------------------------------RMa-------------*/
-void
+static void
 ParseDumpLongWordList(void)
 {
   int id;
@@ -4953,7 +5005,7 @@ ParseDumpLongWordList(void)
 /*-----------------------------------------------------------------------------
 |	ParseDumpByteList
 -------------------------------------------------------------RMa-------------*/
-void
+static void
 ParseDumpByteList(void)
 {
   int id;
@@ -5019,7 +5071,7 @@ ParseDumpByteList(void)
 /*-----------------------------------------------------------------------------
 |	ParseDumpPaletteTable
 -------------------------------------------------------------RMa-------------*/
-void
+static void
 ParseDumpPaletteTable(void)
 {
   int id;
@@ -5029,7 +5081,7 @@ ParseDumpPaletteTable(void)
   char *pRunning;
   int bufferSize = 256 * 4;
 
-  id = WGetId("Integer ResourceId", fFalse);
+  id = WGetId("Integer ResourceId");
   GetExpectRw(rwBegin);
   pData = malloc(bufferSize);
   pRunning = pData;
@@ -5092,13 +5144,13 @@ ParseDumpPaletteTable(void)
 /*-----------------------------------------------------------------------------
 |      ParseDumpPalette
 -------------------------------------------------------------RMa-------------*/
-void
+static void
 ParseDumpPalette()
 {
   char *pchFileName;
   int id;
 
-  id = WGetId("Data ResourceId", fFalse);
+  id = WGetId("Data ResourceId");
 
   // get the information from the .rcp entry
   pchFileName = PchGetSz("Palette Filename");
@@ -5135,14 +5187,14 @@ ParseDumpPalette()
 /*-----------------------------------------------------------------------------
 |	ParseDumpMidi 'MIDI'
 -------------------------------------------------------------RMa------------*/
-void
+static void
 ParseDumpMidi(void)
 {
   int resId;
   char *pFileName;
 
   // get the information from the .rcp entry
-  resId = WGetId("Midi ResourceId", fFalse);
+  resId = WGetId("Midi ResourceId");
   pFileName = PchGetSz("Data Filename");
 
   /*
@@ -5208,7 +5260,7 @@ ParseDumpMidi(void)
 /*-----------------------------------------------------------------------------
 |	ParseApplicationPreferences : 'pref'
 -------------------------------------------------------------RMa-------------*/
-void
+static void
 ParseApplicationPreferences(void)
 {
   RCSYSAPPPREFS sysAppPrefs;
@@ -5243,7 +5295,7 @@ ParseApplicationPreferences(void)
 /*-----------------------------------------------------------------------------
 |	ParseTranslation
 -------------------------------------------------------------WESC------------*/
-void
+static void
 ParseTranslation()
 {
   BOOL fAddTranslation;
@@ -5285,9 +5337,37 @@ ParseTranslation()
 }
 
 /*-----------------------------------------------------------------------------
+|	ParseResetAutoID
+-------------------------------------------------------------BLC-------------*/
+
+static void
+ParseResetAutoID()
+{
+    int newAutoID = WGetConstEx("reset value for AutoID");
+    idAutoMac = newAutoID;
+    idAutoDirection = +1;
+   
+}
+
+/*-----------------------------------------------------------------------------
+|	ParseResetAutoID
+-------------------------------------------------------------BLC-------------*/
+
+static void
+ParseGenerateHeader()
+{
+    TOK tok;
+    static char szOutputHeader[256];
+    
+    GetExpectLt(&tok, ltStr, "Output header name");
+    strcpy(szOutputHeaderFile, tok.lex.szId);
+    vfAutoId = fTrue;
+}
+
+/*-----------------------------------------------------------------------------
 |	OpenInputFile
 -------------------------------------------------------------WESC------------*/
-VOID
+static VOID
 OpenInputFile(char *szIn)
 {
   extern char szInFile[];
@@ -5307,7 +5387,7 @@ OpenInputFile(char *szIn)
  * - pass the previous global values to the function.
  * - these values will be restored at the function's end.
  */
-void
+static void
 // LDu 31-8-2001 : deleted// ParseCInclude(char *szIncludeFile)
 // LDu 31-8-2001 : start modification//
 ParseCInclude(char *szIncludeFile,
@@ -5608,7 +5688,7 @@ ParseCInclude(char *szIncludeFile,
 		public static final short <idname> = <idnumber>;
 	}
 -------------------------------------------------------------DAVE------------*/
-void
+static void
 ParseJavaInclude(char *szIncludeFile)
 {
   FILE *fhInSav;
@@ -5684,7 +5764,7 @@ endOfClass:
   vfhIn = fhInSav;
 }
 
-void
+static void
 WriteIncFile(char *szFile)
 {
   FILE *fh;
@@ -5692,7 +5772,7 @@ WriteIncFile(char *szFile)
 
   fh = fopen(szFile, "wt");
   if (fh == NULL)
-    Error3("Unable to open:", szFile, strerror(errno));
+    Error3("Unable to open include file:", szFile, strerror(errno));
   if (!vfQuiet)
     printf("writing include file: %s\n", szFile);
   fprintf(fh, "/* pilrc generated file.  Do not edit!*/\n");
@@ -5704,7 +5784,7 @@ WriteIncFile(char *szFile)
   fclose(fh);
 }
 
-VOID
+static VOID
 InitRcpfile(RCPFILE * prcpfile,
             int fontType)
 {
@@ -5716,7 +5796,7 @@ InitRcpfile(RCPFILE * prcpfile,
   iidStringMac = 0;
   iidStringTableMac = 0;
   iidAISMac = 0;
-  idAutoMac = idAutoInit;
+  idAutoMac = vfAutoStartID;
 }
 
 /*-----------------------------------------------------------------------------
@@ -5724,8 +5804,8 @@ InitRcpfile(RCPFILE * prcpfile,
 /   original code extract from ParseFile
 /   put in separate function to obtain recursive analyzis thru .rcp files
 -------------------------------------------------------------LDu--------------*/
-void ParseDirectives(RCPFILE * prcpfile);
-void
+static void ParseDirectives(RCPFILE * prcpfile);
+static void
 ParseRcpFile(char *szRcpIn,
              RCPFILE * prcpfile,
              char *prv_szInfile,
@@ -5952,6 +6032,12 @@ ParseRcpFile(char *szRcpIn,
       case rwData:
         ParseDumpData();
         break;
+      case rwResetAutoID:
+        ParseResetAutoID();
+        break;
+      case rwGenerateHeader:
+        ParseGenerateHeader();
+        break;
 
         /*
          * Add a rw here, remember to add to error message below 
@@ -5982,13 +6068,13 @@ ParseRcpFile(char *szRcpIn,
 #endif
                      "ICON, ICONFAMILY, SMALLICON, SMALLICONFAMILY, ICONFAMILYEX, SMALLICONFAMILYEX, "
                      "LAUNCHERCATEGORY, BYTELIST, WORDLIST, LONGWORDLIST, MIDI, "
-                     "SYSAPPLICATIONPREFERENCES, PALETTETABLE, TRAP, FONT, HEX, DATA, INTEGER"
+                     "SYSAPPLICATIONPREFERENCES, PALETTETABLE, TRAP, FONT, HEX, DATA, INTEGER, "
 #ifdef PALM_INTERNAL
-                     ", FONTINDEX, FONTMAP, GRAFFITIINPUTAREA, COUNTRYLOCALISATION, "
+                     "FONTINDEX, FONTMAP, GRAFFITIINPUTAREA, COUNTRYLOCALISATION, "
                      "LOCALES, FEATURE, KEYBOARD, HARDSOFTBUTTONDEFAULT, "
-                     "SEARCHTABLE, TEXTTABLE, TABLELIST, CHARSETLIST"
+                     "SEARCHTABLE, TEXTTABLE, TABLELIST, CHARSETLIST, "
 #endif
-                     "or TRANSLATION expected");
+                     "RESETAUTOID, GENERATEHEADER, or TRANSLATION expected");
         }
     }
   }
@@ -6014,7 +6100,7 @@ ParseRcpFile(char *szRcpIn,
 /*-----------------------------------------------------------------------------
 |	ParseDirectives
 -------------------------------------------------------------DAVE------------*/
-void
+static void
 // LDu 31-8-2001 : deleted //ParseDirectives()
 // LDu 31-8-2001 : start modification //
 ParseDirectives(RCPFILE * prcpfile)
@@ -6228,6 +6314,22 @@ ParseDirectives(RCPFILE * prcpfile)
 
 }
 
+static void ChangeOrAppendFilenameSuffix(
+    char *szIn,
+    const char *szCurrentSuffix,
+    const char *szNewSuffix)
+{
+    int cutPoint = strlen(szIn) - strlen(szCurrentSuffix);
+    if ((cutPoint >= 0) && (FSzEqI(szIn + cutPoint, szCurrentSuffix)))
+    {
+        strcpy(szIn + cutPoint, szNewSuffix);
+    }
+    else
+    {
+        strcat(szIn, szNewSuffix);
+    }
+}    
+
 /*-----------------------------------------------------------------------------
 |	ParseFile
 -------------------------------------------------------------WESC------------*/
@@ -6239,6 +6341,12 @@ ParseFile(char *szIn,
           int fontType)
 {
   RCPFILE *prcpfile;
+  char szDependsFile[FILENAME_MAX];
+
+  if (szIncFile != NULL)
+  {
+    strncpy(szOutputHeaderFile, szIncFile, sizeof(szOutputHeaderFile));
+  }
 
   prcpfile = calloc(1, sizeof(RCPFILE));
   InitRcpfile(prcpfile, fontType);
@@ -6254,9 +6362,7 @@ ParseFile(char *szIn,
        * Deduce one from the input filename.  
        */
       strcpy(szFile, szIn);
-      if (FSzEqI(szFile + strlen(szFile) - 4, ".rcp"))
-        szFile[strlen(szFile) - 4] = '\0';
-      strcat(szFile, ".ro");
+      ChangeOrAppendFilenameSuffix(szFile, ".rcp", ".ro");
     }
     else
     {
@@ -6275,9 +6381,17 @@ ParseFile(char *szIn,
     }
 
     OpenResDBFile(szFile);
+    SetDependsTarget(szFile);
   }
   else
     SetOutFileDir(szOutDir);
+
+  if (vfTrackDepends)
+  {
+    strcpy(szDependsFile, szIn);
+    ChangeOrAppendFilenameSuffix(szDependsFile, ".rcp", ".d");
+    InitDependsList();
+  }
 
   // LDu 31-8-2001 deleted// OpenInputFile(szIn);
   OpenResFile(szResFile);
@@ -6290,11 +6404,39 @@ ParseFile(char *szIn,
   // is now in ParseRcpFile function
   // to have a recursive implementation
 
+  if (vfTrackDepends)
+  {
+    FILE *dependsFile = fopen(szDependsFile, "w");
+    if (dependsFile)
+    {
+        OutputDependsList(dependsFile);
+        fclose(dependsFile);
+    }
+    else
+    {
+        // FIXME: error
+    }
+  }
+
   // LDu 31-8-2001 end modification //
 
-  if (szIncFile != NULL)
+  if (!vfInhibitOutput && szOutputHeaderFile[0] != 0)
   {
-    WriteIncFile(szIncFile);
+    WriteIncFile(szOutputHeaderFile);
+    if (vfTrackDepends)
+    {
+      FILE *dependsFile = fopen(szDependsFile, "a");
+      if (dependsFile)
+      {
+          SetDependsTarget(szOutputHeaderFile);
+          OutputDependsList(dependsFile);
+          fclose(dependsFile);
+      }
+      else
+      {
+          // FIXME: error
+      }
+    }
   }
 
 #ifdef PALM_INTERNAL
@@ -6314,6 +6456,11 @@ ParseFile(char *szIn,
   }
 #endif
 
+    
+  if (vfTrackDepends)
+  {
+    FreeDependsList();
+  }
   FreeSymTable();
   FreeTranslations();
   CloseResFile();

@@ -3,7 +3,7 @@
  * @(#)pilrc.h
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2002, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -35,6 +35,8 @@
  *                 additions to support LE32 resouces
  *     03-Jun-2002 Renaud Malaval
  *                 additions of SEARCH flag in list
+ *     22-Aug-2002 Ben Combee
+ *                 Added dependency tracking and better AUTOID support
  */
 
 #ifndef _pilrc_h
@@ -114,20 +116,20 @@ char *strdup(const char *s);
 #define Enum(type) typedef enum type
 #define EndEnum
 
-Enum(controlStyles)
+Enum(ControlStyles)
 {
   buttonCtl, pushButtonCtl, checkboxCtl, popupTriggerCtl, selectorTriggerCtl, repeatingButtonCtl, sliderCtl, feedbackSliderCtl  /* RMa add support sliders */
 }
 
 EndEnum ControlStyles;
 
-Enum(alertTypes)
+Enum(AlertType)
 {
 informationAlert, confirmationAlert, warningAlert, errorAlert}
 
 EndEnum AlertType;
 
-Enum(formObjects)
+Enum(FormObjectKind)
 {
   frmFieldObj, frmControlObj, frmListObj, frmTableObj, frmBitmapObj, frmLineObj, frmFrameObj, frmRectangleObj, frmLabelObj, frmTitleObj, frmPopupObj, frmGraffitiStateObj, frmGadgetObj, frmScrollbarObj, frmSliderObj, /* RMa add support sliders */
     frmGraphicalControlObj                       /* RMa add support graphical control */
@@ -135,20 +137,20 @@ Enum(formObjects)
 
 EndEnum FormObjectKind;
 
-Enum(fontID)
+Enum(FontID)
 {
 stdFont, boldFont, largeFont, symbolFont, symbol11Font, symbol7Font, ledFont}
 
 EndEnum FontID;
 
-typedef struct _rcpoint
+typedef struct RCPOINT
 {
   p_int x;
   p_int y;
 }
 RCPOINT;
 
-typedef struct _Rcrect
+typedef struct RCRECT
 {
   RCPOINT topLeft;
   RCPOINT extent;
@@ -164,7 +166,7 @@ RCRECT;
 /*
  * window.h 
  */
-typedef struct _rcframebits
+typedef struct RCFRAMEBITS
 {
   p_int cornerDiam;                              /* u8   */
   /*
@@ -176,7 +178,7 @@ typedef struct _rcframebits
 }
 RCFRAMEBITS;                                     /* u8zu3uu2u2 */
 
-typedef struct _rcwindowflags
+typedef struct RCWINDOWFLAGS
 {
   /*
    * Word format:1;      zu 
@@ -202,7 +204,7 @@ typedef struct _rcwindowflags
 }
 RCWINDOWFLAGS;                                   /* zuzuuu zuzuuzu zu8 */
 
-typedef struct _rcwindowBA16Type
+typedef struct RCWindowBA16Type
 {
   p_int displayWidth;                            /* w */
   p_int displayHeight;                           /* w */
@@ -229,7 +231,7 @@ RCWindowBA16Type;
 
 #define szRCWindowBA16 "w,w,zl,zuzuuuzuzuuzuzu8,w4,zw4,zl,u8zu3uu2u2,zl,zl"
 
-typedef struct _rcwindowBA32Type
+typedef struct RCWindowBA32Type
 {
   p_int displayWidth;                            /* w */
   p_int displayHeight;                           /* w */
@@ -259,7 +261,7 @@ RCWindowBA32Type;
 /*
  * ------------------ List ------------------ 
  */
-typedef struct _rclistattr
+typedef struct RCLISTATTR
 {
   p_int usable;                                  /* u */
   p_int enabled;                                 /* u */
@@ -273,7 +275,7 @@ typedef struct _rclistattr
 }
 RCLISTATTR;                                      /* uuuuuuzu10 */
 
-typedef struct _rcListBA16Type
+typedef struct RCListBA16Type
 {
   p_int id;                                      /* w */
   RCRECT bounds;                                 /* w4 */
@@ -305,7 +307,7 @@ RCListBA16Type;
 
 #define szRCListBA16 "w,w4,uuuuuuzu10,p,w,zw,zw,bzb,zl,zl"
 
-typedef struct _rclistBA32Type
+typedef struct RCListBA32Type
 {
   p_int id;                                      /* w */
   RCLISTATTR attr;                               /* uuuuuuzu10 */
@@ -337,7 +339,7 @@ RCListBA32Type;
 
 #define szRCListBA32 "w,uuuuuuzu10,w4,p,w,zw,zw,bzb,zl,zl"
 
-typedef union _rcListType
+typedef union RCListType
 {
   RCListBA16Type s16;
   RCListBA32Type s32;
@@ -347,7 +349,7 @@ RCListType;
 /*
  * ------------------ Field ------------------ 
  */
-typedef struct _rcfieldattr
+typedef struct RCFIELDATTR
 {
   p_int usable;                                  /* u  */
   p_int visible;                                 /* u  */
@@ -370,7 +372,7 @@ typedef struct _rcfieldattr
 }
 RCFIELDATTR;                                     /* uuuuuuuu u2u2uuuzu */
 
-typedef struct _rcFieldBA16Type
+typedef struct RCFieldBA16Type
 {
   p_int id;                                      /* w */
   RCRECT rect;                                   /* w4 */
@@ -410,7 +412,7 @@ RCFieldBA16Type;
 
 #define szRCFieldBA16 "w,w4,uuuuuuuu,u2u2uuuzu,p,zl,zl,zw,zw,w,zw,zw,zw,zw,b,zb"
 
-typedef struct _rcFieldBA32Type
+typedef struct RCFieldBA32Type
 {
   RCRECT rect;                                   /* w4 */
   p_int id;                                      /* w */
@@ -450,7 +452,7 @@ RCFieldBA32Type;
 
 #define szRCFieldBA32 "w4,w,uuuuuuuu,u2u2uuuzu,p,zl,zl,zw,zw,w,zw,zw,zw,zw,b,zb"
 
-typedef union _rcFieldType
+typedef union RCFieldType
 {
   RCFieldBA16Type s16;
   RCFieldBA32Type s32;
@@ -460,7 +462,7 @@ RCFieldType;
 /*
  * ------------------ Table ------------------ 
  */
-typedef struct _rcTableColumnAttrBA16Type
+typedef struct RCTableColumnAttrBA16Type
 {
   p_int width;                                   /* w  */
   /*
@@ -487,7 +489,7 @@ RCTableColumnAttrBA16Type;
 
 #define szRCTableColumnAttrBA16 "w,zt5tttzb,w,zl,zl,zl"
 
-typedef struct _rcTableColumnAttrBA32Type
+typedef struct RCTableColumnAttrBA32Type
 {
   p_int width;                                   /* w  */
   p_int spacing;                                 /* w  */
@@ -518,14 +520,14 @@ RCTableColumnAttrBA32Type;
 #define szRCTableColumnAttrBA32 "w,w,zt5tttzb,zw,zl,zl,zl"
 
 #define szRCTABLECOLUMNATTR (vfLE32?szRCTableColumnAttrBA32:szRCTableColumnAttrBA16)
-typedef union _RCTABLECOLUMNATTR
+typedef union RCTABLECOLUMNATTR
 {
   RCTableColumnAttrBA16Type s16;
   RCTableColumnAttrBA32Type s32;
 }
 RCTABLECOLUMNATTR;
 
-typedef struct _rcTableRowAttrType
+typedef struct RCTABLEROWATTR
 {
   p_int id;                                      /* w  */
   p_int height;                                  /* w  */
@@ -556,7 +558,7 @@ RCTABLEROWATTR;
  */
 #define szRCTABLEPADDING "zl,zl"
 
-typedef struct RCTableAttrType
+typedef struct RCTABLEATTR
 {
   p_int visible;                                 /* u */
   p_int editable;                                /* u */
@@ -569,7 +571,7 @@ typedef struct RCTableAttrType
 }
 RCTABLEATTR;                                     /* uuuu uzu11 */
 
-typedef struct _rcTableBA16Type
+typedef struct RCTableBA16Type
 {
   p_int id;                                      /* w  */
   RCRECT bounds;                                 /* w4 */
@@ -597,7 +599,7 @@ typedef struct _rcTableBA16Type
 RCTableBA16Type;
 
 #define szRCTableBA16 "w,w4,uuuuuzu11,w,w,w,w,w,zl,zl,zl" szRCFieldBA16
-typedef struct _rcTableBA32Type
+typedef struct RCTableBA32Type
 {
   p_int id;                                      /* w  */
   RCTABLEATTR attr;                              /* uuuu uzu11 */
@@ -629,7 +631,7 @@ RCTableBA32Type;
 
 #define szRCTableBA32 "w,uuuuuzu11,w4,w,w,w,w,w,zw,zl,zl,zl" szRCFieldBA32
 
-typedef union _rcTableType
+typedef union RCTableType
 {
   RCTableBA16Type s16;
   RCTableBA32Type s32;
@@ -643,7 +645,7 @@ RCTableType;
 /*
  * form.h 
  */
-typedef struct _rcformobjattr
+typedef struct RCFORMOBJATTR
 {
   p_int usable;                                  /* t,zt7 (opt) */
   /*
@@ -652,7 +654,7 @@ typedef struct _rcformobjattr
 }
 RCFORMOBJATTR;                                   /* tzt7,zb */
 
-typedef struct _rcFormLabelBA16Type
+typedef struct RCFormLabelBA16Type
 {
   p_int id;                                      /* w */
   RCPOINT pos;                                   /* w2 */
@@ -667,7 +669,7 @@ RCFormLabelBA16Type;
 
 #define szRCFormLabelBA16 "w,w2,uzu15,b,zb,p"
 
-typedef struct _rcFormLabelBA32Type
+typedef struct RCFormLabelBA32Type
 {
   RCPOINT pos;                                   /* w2 */
   char *text;                                    /* p */
@@ -685,7 +687,7 @@ RCFormLabelBA32Type;
 
 #define szRCFormLabelBA32 "w2,p,w,uzu15,b,zb,zw"
 
-typedef union _rcFormLabelType
+typedef union RCFormLabelType
 {
   RCFormLabelBA16Type s16;
   RCFormLabelBA32Type s32;
@@ -695,7 +697,7 @@ RCFormLabelType;
 /*
  * ------------------ Form Title ------------------ 
  */
-typedef struct _rcformtitle
+typedef struct RCFORMTITLE
 {
   RCRECT rect;                                   /* w4 */
   char *text;                                    /* p */
@@ -707,7 +709,7 @@ RCFORMTITLE;
 /*
  * ------------------ Form Popup ------------------ 
  */
-typedef struct _rcformpopup
+typedef struct RCFORMPOPUP
 {
   p_int controlID;                               /* w */
   p_int listID;                                  /* w */
@@ -719,7 +721,7 @@ RCFORMPOPUP;
 /*
  * ------------------ Form Graffiti State ------------------ 
  */
-typedef struct _rcgsi
+typedef struct RCFORMGRAFFITISTATE
 {
   RCPOINT pos;                                   /* w2 */
 }
@@ -730,7 +732,7 @@ RCFORMGRAFFITISTATE;
 /*
  * ------------------ Form Gadget ------------------ 
  */
-typedef struct _rcFormGadgetAttr
+typedef struct RCFormGadgetAttr
 {
   p_int usable;                                  /* u */
   p_int extended;                                /* u */
@@ -741,7 +743,7 @@ typedef struct _rcFormGadgetAttr
 }
 RCFormGadgetAttr;                                /* uuuzu13 */
 
-typedef struct _rcformgadget
+typedef struct RCFORMGADGET
 {
   p_int id;                                      /* w */
   RCFormGadgetAttr attr;                         /* uuuzu13 */
@@ -760,7 +762,7 @@ RCFORMGADGET;
 /*
  * ------------------ Form Bitmap ------------------ 
  */
-typedef struct _rcFormBitMapBA16Type
+typedef struct RCFormBitMapBA16Type
 {
   RCFORMOBJATTR attr;                            /* uzu15 */
   RCPOINT pos;                                   /* w2 */
@@ -770,7 +772,7 @@ RCFormBitMapBA16Type;
 
 #define szRCFormBitMapBA16 "uzu15,w2,w"
 
-typedef struct _rcFormBitMapBA32Type
+typedef struct RCFormBitMapBA32Type
 {
   RCFORMOBJATTR attr;                            /* uzu15 */
   p_int rscID;                                   /* w */
@@ -780,7 +782,7 @@ RCFormBitMapBA32Type;
 
 #define szRCFormBitMapBA32 "uzu15,w,w2"
 
-typedef union _rcFormBitMapType
+typedef union RCFormBitMapType
 {
   RCFormBitMapBA16Type s16;
   RCFormBitMapBA32Type s32;
@@ -790,7 +792,7 @@ RCFormBitMapType;
 /*
  * ------------------ Control ------------------ 
  */
-typedef struct _rccontrolattr
+typedef struct RCCONTROLATTR
 {
   p_int usable;                                  /* u  */
   p_int enabled;                                 /* u  */
@@ -808,7 +810,7 @@ typedef struct _rccontrolattr
 }
 RCCONTROLATTR;                                   /* uuuuuu3 uuuzu5 */
 
-typedef struct _rcControlBA16Type
+typedef struct RCControlBA16Type
 {
   p_int id;                                      /* w */
   RCRECT bounds;                                 /* w4 */
@@ -833,7 +835,7 @@ RCControlBA16Type;
 #define szRCControlBA16 "w,w4,p,uuuuuu3,uuuzu5,b,b,b,zb"
 #define szRCGraphicalControlBA16 "w,w4,l,uuuuuu3,uuuzu5,b,b,b,zb"
 
-typedef struct _rcControlBA32Type
+typedef struct RCControlBA32Type
 {
   p_int id;                                      /* w */
   RCCONTROLATTR attr;                            /* uuuuuu3 uuuzu5 */
@@ -861,7 +863,7 @@ RCControlBA32Type;
 #define szRCControlBA32 "w,uuuuuu3,uuuzu5,w4,p,b,b,b,zb"
 #define szRCGraphicalControlBA32 "w,uuuuuu3,uuuzu5,w4,l,b,b,b,zb"
 
-typedef union _rcControlType
+typedef union RCControlType
 {
   RCControlBA16Type s16;
   RCControlBA32Type s32;
@@ -871,7 +873,7 @@ RCControlType;
 /*
  * ------------------ Slider ------------------ 
  */
-typedef struct _SliderControlBA16Type
+typedef struct RCSliderControlBA16Type
 {
   p_int id;                                      /* w  */
   RCRECT bounds;                                 /* w4 */
@@ -898,7 +900,7 @@ RCSliderControlBA16Type;
 
 #define szRCSliderControlBA16 "w,w4,l,uuuuuu3,uuuzu5,b,zb,w,w,w,w,zl"
 
-typedef struct _SliderControlBA32Type
+typedef struct RCSliderControlBA32Type
 {
   p_int id;                                      /* w */
   RCCONTROLATTR attr;                            /* uuuuuu3,uuuzu5 */// graphical *is* set
@@ -924,7 +926,7 @@ RCSliderControlBA32Type;
 
 #define szRCSliderControlBA32 "w,uuuuuu3,uuuzu5,w4,l,b,zb,w,w,w,w,zw,zl"
 
-typedef union _rcSliderControlType
+typedef union RCSliderControlType
 {
   RCSliderControlBA16Type s16;
   RCSliderControlBA32Type s32;
@@ -934,7 +936,7 @@ RCSliderControlType;
 /*
  * ------------------ ScrollBar ------------------ 
  */
-typedef struct _rcscrollbarattr
+typedef struct RCSCROLLBARATTR
 {
   p_int usable;                                  /* t */
   p_int visible;                                 /* t */
@@ -947,7 +949,7 @@ typedef struct _rcscrollbarattr
 }
 RCSCROLLBARATTR;
 
-typedef struct _rcscrollbar
+typedef struct RCSCROLLBAR
 {
   RCRECT bounds;                                 /* w4 */
   p_int id;                                      /* w */
@@ -976,7 +978,7 @@ RCSCROLLBAR;
 /*
  * ------------------ Forms ------------------ 
  */
-typedef union _RCFORMOBJECT
+typedef union RCFORMOBJECT
 {
   void *ptr;
   RCFieldType *field;
@@ -1006,7 +1008,7 @@ typedef union _RCFORMOBJECT
 }
 RCFORMOBJECT;
 
-typedef struct _rcFormObjListBA16Type
+typedef struct RCFormObjListBA16Type
 {
   p_int objectType;                              /* b  */
   /*
@@ -1023,7 +1025,7 @@ RCFormObjListBA16Type;
 
 #define szRCFormObjListBA16 "b,zb,l"
 
-typedef struct _rcFormObjListBA32Type
+typedef struct RCFormObjListBA32Type
 {
   union
   {
@@ -1044,14 +1046,14 @@ RCFormObjListBA32Type;
 #define szRCFormObjListBA32 "l,b,zb,zw"
 
 #define szRCFORMOBJLIST (vfLE32?szRCFormObjListBA32:szRCFormObjListBA16)
-typedef union _RCFORMOBJLIST
+typedef union RCFORMOBJLIST
 {
   RCFormObjListBA16Type s16;
   RCFormObjListBA32Type s32;
 }
 RCFORMOBJLIST;
 
-typedef struct _rcformattr
+typedef struct RCFORMATTR
 {
   p_int usable;                                  /* u */
   p_int enabled;                                 /* u */
@@ -1071,7 +1073,7 @@ typedef struct _rcformattr
 }
 RCFORMATTR;                                      /* uuuuuuuu,uzu7,zw */
 
-typedef struct _rcFormBA16Type
+typedef struct RCFormBA16Type
 {
   RCWindowBA16Type window;
   p_int formId;                                  /* w  */
@@ -1096,7 +1098,7 @@ typedef struct _rcFormBA16Type
 RCFormBA16Type;
 
 #define szRCFormBA16 szRCWindowBA16 ",w,uuuuuuuuuzu7,zw,zl,zl,zw,w,w,w,w,zl"
-typedef struct _rcFormBA32Type
+typedef struct RCFormBA32Type
 {
   RCWindowBA32Type window;
   RCFORMATTR attr;                               /* uuuuuuuu uzu7 zw */
@@ -1128,7 +1130,7 @@ RCFormBA32Type;
 |	MENUS
 -------------------------------------------------------------WESC------------*/
 
-typedef struct _rcmenuitem
+typedef struct RCMENUITEM
 {
   p_int id;                                      /* w */
   p_int command;                                 /* b */
@@ -1142,7 +1144,7 @@ RCMENUITEM;
 
 #define szRCMENUITEM "w,b,tzt7,l"
 
-typedef struct _rcMenuPullDownBA16Type
+typedef struct RCMenuPullDownBA16Type
 {
   /*
    * WinHandle menuWin;       zl 
@@ -1161,7 +1163,7 @@ RCMenuPullDownBA16Type;
 
 #define szRCMenuPullDownBA16 "zl,w4,zl,w4,l,uu15,l"
 
-typedef struct _rcMenuPullDownBA32Type
+typedef struct RCMenuPullDownBA32Type
 {
   /*
    * WinHandle menuWin;       zl 
@@ -1184,14 +1186,14 @@ RCMenuPullDownBA32Type;
 #define szRCMenuPullDownBA32 "zl,w4,zl,w4,l,uzu15,w,l"
 
 #define szRCMENUPULLDOWN (vfLE32?szRCMenuPullDownBA32:szRCMenuPullDownBA16)
-typedef union _RCMENUPULLDOWN
+typedef union RCMENUPULLDOWN
 {
   RCMenuPullDownBA16Type s16;
   RCMenuPullDownBA32Type s32;
 }
 RCMENUPULLDOWN;
 
-typedef struct _RCMENUBARATTR
+typedef struct RCMENUBARATTR
 {
   p_int visible;                                 /* u  */
   /*
@@ -1209,7 +1211,7 @@ typedef struct _RCMENUBARATTR
 }
 RCMENUBARATTR;
 
-typedef struct _rcMenuBarBA16Type
+typedef struct RCMenuBarBA16Type
 {
   /*
    * WinHandle barWin;                               zl 
@@ -1239,7 +1241,7 @@ typedef struct _rcMenuBarBA16Type
 RCMenuBarBA16Type;
 
 #define szRCMenuBarBA16 "zl,zl,zl,zl,uzu3zu12,zw,w,zl,w,zl"
-typedef struct _rcMenuBarBA32Type
+typedef struct RCMenuBarBA32Type
 {
   /*
    * WinHandle barWin;                               zl 
@@ -1271,7 +1273,7 @@ RCMenuBarBA32Type;
 #define szRCMenuBarBA32 "zl,zl,zl,zl,uzu3zu12,zw,w,w,zl,zl"
 
 #define szRCMENUBAR (vfLE32?szRCMenuBarBA32:szRCMenuBarBA16)
-typedef union _RCMENUBAR
+typedef union RCMENUBAR
 {
   RCMenuBarBA16Type s16;
   RCMenuBarBA32Type s32;
@@ -1282,7 +1284,7 @@ RCMENUBAR;
 |	ALERTS
 -------------------------------------------------------------WESC------------*/
 
-typedef struct _rcALERTTEMPLATE
+typedef struct RCALERTTEMPLATE
 {
   p_int alertType;                               /* w */
   p_int helpRscID;                               /* w */
@@ -1296,7 +1298,7 @@ RCALERTTEMPLATE;
 /*-----------------------------------------------------------------------------
 |	BITMAP
 -------------------------------------------------------------WESC------------*/
-typedef struct _rcBitmapFlagsType
+typedef struct RCBitmapFlagsType
 {
   p_int compressed;                              /* u *//* Data format:  0=raw; 1=compressed */
   p_int hasColorTable;                           /* u *//* if true, color table stored before bits[] */
@@ -1314,7 +1316,7 @@ typedef struct _rcBitmapFlagsType
 }
 RCBitmapFlagsType;
 
-typedef struct _rcBITMAP
+typedef struct RCBITMAP
 {                                                /* b */
   p_int cx;                                      /* w */
   p_int cy;                                      /* w */
@@ -1345,7 +1347,7 @@ RCBITMAP;
 /*
  * RMa add support for density > 1
  */
-Enum(PixelFormatBV3Tag)
+Enum(PixelFormatBV3Type)
 {
   pixelFormatIndexed, pixelFormat565, pixelFormat565LE, // not used by 68K-based OS
     pixelFormatIndexedLE                         // not used by 68K-based OS
@@ -1353,7 +1355,7 @@ Enum(PixelFormatBV3Tag)
 
 EndEnum PixelFormatBV3Type;
 
-typedef struct _rcBITMAP_V3
+typedef struct RCBITMAP_V3
 {                                                /* bm */
   p_int cx;                                      /* w */
   p_int cy;                                      /* w */
@@ -1386,7 +1388,7 @@ RCBITMAP_V3;
 /*-----------------------------------------------------------------------------
 |	FONT
 -------------------------------------------------------------RMa------------*/
-typedef struct _rcFONTCHARINFO
+typedef struct RCFONTCHARINFOTYPE
 {
   p_int offset;                                  /* b */
   p_int width;                                   /* b */
@@ -1396,7 +1398,7 @@ RCFONTCHARINFOTYPE,
 
 #define szRCFONTCHARINFO "b,b"
 
-typedef struct _rcFONT
+typedef struct RCFONTTYPE
 {
   p_int fontType;                                /* w */// font type
   p_int firstChar;                               /* w */// ASCII code of first character
@@ -1419,7 +1421,7 @@ RCFONTTYPE;
 /*----------------------------------------------------------------------------
 |	SYSAPPPREFS
 -------------------------------------------------------------RMa------------*/
-typedef struct _SysAppPrefsBA16Type
+typedef struct RCSysAppPrefsBA16Type
 {
   p_int priority;                                // task priority
   p_int stackSize;                               // required stack space
@@ -1429,7 +1431,7 @@ RCSysAppPrefsBA16Type;
 
 #define szRCSysAppPrefsBA16EmitStr "w,l,l"
 
-typedef struct _SysAppPrefsBA32Type
+typedef struct RCSysAppPrefsBA32Type
 {
   p_int priority;                                // task priority
   //      p_int           reserved;
@@ -1441,7 +1443,7 @@ RCSysAppPrefsBA32Type;
 #define szRCSysAppPrefsBA32EmitStr "w,zw,l,l"
 
 #define szRCSYSAPPPREFS (vfLE32?szRCSysAppPrefsBA32EmitStr:szRCSysAppPrefsBA16EmitStr)
-typedef union _szRCSYSAPPPREFS
+typedef union RCSYSAPPPREFS
 {
   RCSysAppPrefsBA16Type s16;
   RCSysAppPrefsBA32Type s32;
@@ -1470,14 +1472,14 @@ Using these macros allows to avoid to test vfLE32 and write the code twice...
 
 //#define ifrmMax 32
 DEFPL(PLEXFORMOBJLIST)
-     typedef struct _FRMBA16
+     typedef struct FRMBA16Type
      {
        RCFormBA16Type form;
        PLEXFORMOBJLIST pllt;
        //      RCFORMOBJLIST *rglt;
      }
 FRMBA16Type;
-     typedef struct _FRMBA32
+     typedef struct FRMBA32Type
      {
        RCFormBA32Type form;
        PLEXFORMOBJLIST pllt;
@@ -1485,7 +1487,7 @@ FRMBA16Type;
      }
 FRMBA32Type;
 
-     typedef union _FRM
+     typedef union FRM
      {
        FRMBA16Type s16;
        FRMBA32Type s32;
@@ -1497,23 +1499,23 @@ FRM;
 /*
  * Translation Entry -- used to map to foreign languages 
  */
-     typedef struct _te
+     typedef struct TE
      {
        char *szOrig;
        char *szTrans;
-       struct _te *pteNext;
+       struct TE *pteNext;
      }
 TE;
 
 /*
  * Symbol Table 
  */
-     typedef struct _sym
+     typedef struct SYM
      {
        char *sz;
        int wVal;
        BOOL fAutoId;
-       struct _sym *psymNext;
+       struct SYM *psymNext;
      }
 SYM;
 
@@ -1521,7 +1523,7 @@ SYM;
  * RCPFILE -- contains everything in a .rcp file 
  */
 DEFPL(PLEXFRM)
-     typedef struct _rcpfile
+     typedef struct RCPFILE
      {
        PLEXFRM plfrm;
      }
@@ -1531,7 +1533,7 @@ RCPFILE;
 /*
  * ReservedWord 
  */
-     typedef enum
+     typedef enum RW
      {
        rwFLD, rwLST, rwTBL, rwFBM, rwLBL, rwTTL, rwPUL, rwGSI, rwGDT,
        rwBTN, rwPBN, rwCBX, rwPUT, rwSLT, rwREP, rwSLD, rwSCL,
@@ -1771,6 +1773,14 @@ RCPFILE;
        rwAutoCompress,
        rwForceCompress,
 
+       rwCompressScanLine,
+       rwCompressRLE,
+       rwCompressPackBits,
+       rwCompressBest,
+
+       rwResetAutoID,
+       rwGenerateHeader,
+
        rwPublic,
        rwShort,
        rwInt,
@@ -1781,7 +1791,7 @@ RCPFILE;
      }
 RW;
 
-     typedef struct _rwt
+     typedef struct RWT
      {
        char *sz1;
        char *sz2;
@@ -2083,6 +2093,14 @@ RWT;
        {"autocompress", "compress", rwAutoCompress},
        {"forcecompress", NULL, rwForceCompress},
 
+       {"compressscanline", NULL, rwCompressScanLine},
+       {"compressrle", NULL, rwCompressRLE},
+       {"compresspackbits", NULL, rwCompressPackBits},
+       {"compressbest", NULL, rwCompressBest},
+
+       {"resetautoid", NULL, rwResetAutoID},
+       {"generateheader", NULL, rwGenerateHeader},
+
        /*
         * Java specific 
         */
@@ -2098,7 +2116,7 @@ RWT;
 /*
  * TOKen 
  */
-typedef struct _tok
+typedef struct TOK
 {
   RW rw;
   LEX lex;
@@ -2114,11 +2132,12 @@ TOK;
 /*
  * Konstant Type 
  */
-typedef enum _kt
+typedef enum KT
 {
   ktConst,
   ktCenter,
   ktAuto,
+  ktAutoGreaterThan,
   ktCenterAt,
   ktRightAt,
   ktBottomAt
@@ -2128,7 +2147,7 @@ KT;
 /*
  * Konstant 
  */
-typedef struct _k
+typedef struct K
 {
   KT kt;
   int wVal;
@@ -2138,7 +2157,7 @@ K;
 /*
  * Konstant Point 
  */
-typedef struct _kpt
+typedef struct KPT
 {
   K kX;
   K kY;
@@ -2148,7 +2167,7 @@ KPT;
 /*
  * Konstant Rect 
  */
-typedef struct _krc
+typedef struct KRC
 {
   KPT kptUpperLeft;
   KPT kptExtent;
@@ -2160,7 +2179,7 @@ KRC;
 |		an item in a form -- grif and grif2 define the syntax of the item
 |	and what to expect.
 -------------------------------------------------------------WESC------------*/
-typedef struct _itm
+typedef struct ITM
 {
   int grif;
   int grifOut;
@@ -2438,7 +2457,6 @@ extern int iline;
 extern char szLine[4096];
 
 extern BOOL vfWinGUI;
-extern BOOL vfAutoId;
 extern BOOL vfQuiet;
 extern BOOL vfAllowEditIDs;
 extern BOOL vfNoEllipsis;
@@ -2450,6 +2468,13 @@ extern BOOL vfRTL;
 extern BOOL vfLE32;
 extern BOOL vfAppIcon68K;
 extern BOOL vfAutoAmdc;
+extern BOOL vfTrackDepends;
+extern BOOL vfInhibitOutput;
+
+extern BOOL vfAutoId;
+extern int  vfAutoDirection;
+extern int  vfAutoStartID;
+extern int  idAutoDirection;
 
 extern char *szDllNameP;
 
@@ -2493,8 +2518,7 @@ VOID UngetTok(void);
 int WGetConst(char *szErr);
 char *PchGetSz(char *szErr);
 VOID GetExpectRw(RW rw);
-int WGetId(char *szErr,
-           BOOL fAutoIDOk);
+int WGetId(char *szErr);
 int WGetConstEx(char *szErr);
 
 void CbInit(void);

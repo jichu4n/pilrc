@@ -3,7 +3,7 @@
  * @(#)util.h
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2002, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -52,8 +52,8 @@ VOID ErrorLine(char *sz);
 VOID WarningLine(char *sz);
 VOID ErrorLine2(char *sz,
                 char *sz2);
-BOOL FSzEqI(char *sz1,
-            char *sz2);
+BOOL FSzEqI(const char *sz1,
+            const char *sz2);
 int WMin(int w1,
          int w2);
 int WMax(int w1,
@@ -99,12 +99,18 @@ char *FindAndOpenFile(char *szIn,
                       char *mode,
                       FILE ** returnFile);
 
+void SetDependsTarget(const char *szIn);
+void InitDependsList(void);
+void AddEntryToDependsList(const char *filename);
+void OutputDependsList(FILE *dependsFile);
+void FreeDependsList(void);
+
 extern char rgbZero[];
 extern FILE *vfhIn;
 
-#define MAXPATHS 64
-extern char *includePaths[];
-extern int totalIncludePaths;
+extern const char **includePaths; // pointer to array of path pointers
+extern int totalIncludePaths;     // how many paths have we read
+extern int allocatedIncludePaths; // how many path pointers are allocated?
 
 #ifdef CW_PLUGIN
 // XXX ncr
