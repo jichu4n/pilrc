@@ -1,4 +1,3 @@
-
 /*
  * @(#)font.c
  *
@@ -279,6 +278,10 @@ ParseLine(char *s,
         *token = h_descent;
       if (!strcmp(s, "LEADING"))
         *token = h_leading;
+      if (!strcmp(s, "FIRSTCHAR"))
+        *token = h_firstChar;
+      if (!strcmp(s, "LASTCHAR"))
+        *token = h_lastChar;
       if (!strcmp(s, "GLYPH"))
         *token = g_glyph;
       if (!strcmp(s, "OFFSET"))
@@ -427,6 +430,10 @@ DumpFont(char *pchFileName,
           autoWidth = 0;
         if (token == h_fRectWidth)
           autoRectWidth = 0;
+        if (token == h_firstChar)
+          WarningX("FIRSTCHAR will be overridden based on data");
+        if (token == h_lastChar)
+          WarningX("LASTCHAR will be overridden based on data");
       }
 
       /*
