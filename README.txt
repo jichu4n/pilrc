@@ -80,8 +80,8 @@
   Use "unix/configure --help" to see what configure options are available;
   the PilRC-specific options are --enable-pilrcui, which causes PilRCUI to
   be built  (which requires GTK development headers and libraries,  and is
-  disabled by default),  and --enable-warnings, which turns on a number of
-  GCC warning options during the build.
+  disabled by default),   and  --enable-build-warnings,   which turns on a
+  number of GCC warning options during the build.
 
   Not  all  of the files in the "unix" subdirectory are PilRC source files
   which can usefully be edited.  They can be divided into three categories:
