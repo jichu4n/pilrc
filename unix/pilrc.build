@@ -25,7 +25,7 @@ install -m 0755 fonts/pilfont.exe $DESTDIR/$bindir/pilfont.exe
 
 mkdir -p $DESTDIR$docdir
 cp -p LICENSE.txt README.txt fonts/README-pilfont.txt $DESTDIR$docdir
-cp -rp doc/*.html doc/images example $DESTDIR$docdir
+cp -rp doc/*.html doc/images $DESTDIR$docdir
 
 #policy
 strip $DESTDIR$bindir/*

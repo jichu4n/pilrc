@@ -50,7 +50,6 @@ install -m 0755 fonts/pilfont $RPM_BUILD_ROOT%{_bindir}/pilfont
 %doc README.txt
 %doc doc/*.html doc/images
 %doc fonts/README-pilfont.txt
-%doc example
 
 %files -n pilrcui
 %defattr(-, root, root)
