@@ -28,6 +28,7 @@
  * update version numbers and dates in:
  *
  *	README.txt
+ *	doc/index.html
  *	doc/manual.html
  *	unix/pilrc.spec
  */
