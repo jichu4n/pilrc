@@ -24,14 +24,16 @@
 <tr>
 <td>
 <font face="Arial,Helvetica">
-<h2>PilRC v2.90 p10-CW-3<br>
+<h2>PilRC v3.0<br>
     User Manual <div class="palmInternal">PALM internal</div></h2>
 </font>
 </td>
 <td valign=top align=right>
 <font face="Arial,Helvetica">
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
-  22 july 2002
+  <a href="mailto:combee@techwood.org">Ben Combee</a> (combee@techwood.org)<br>
+  <a href="mailto:johnm@falch.net">John Marshall</a> (johnm@falch.net)<br>
+  28 february 2003
 </font>
 </td>
 </tr>
@@ -820,9 +822,6 @@ Each field's required type is indicated by a suffix after the field name
 <ul>
   Single line comments begin with "<tt>//</tt>". <br>
   Block comments exist between the "<tt>/*</tt>" and "<tt>*/</tt>" tokens. <p>
-
-  <b>NOTE</b>: "<tt>//</tt>" comments within the definition of objects are
-  treated as errors.
 </ul>
 
 <b>Include Files</b><p>
@@ -1303,7 +1302,7 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     </font>
     </td>
   </tr>
-  <tr>
+  <tr class="palmInternal">
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_SysAppPrefs">SYSAPPLICATIONPREFERENCES</a>
@@ -1463,7 +1462,7 @@ is one or more of: <p>
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR] 
     [RIGHTANCHOR] <br>
-    [<font color="#0000ff">FRAME</font>] [NOFRAME] [BOLDFRAME] 
+    [<font color="#0000ff">FRAME</font>] [NOFRAME] [BOLDFRAME] [RECTFRAME] 
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] <br> 
     [GRAPHICAL]
     [BITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
@@ -1553,7 +1552,7 @@ is one or more of: <p>
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
     [RIGHTANCHOR] <br>
-    [<font color="#0000ff">FRAME</font>] [NOFRAME] [BOLDFRAME]
+    [<font color="#0000ff">FRAME</font>] [NOFRAME] [BOLDFRAME] [RECTFRAME]
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] <br>
     [GRAPHICAL]
     [BITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
@@ -3358,6 +3357,7 @@ BEGIN
 
 END</pre>
 </div>
+<div class="palmInternal">
 <font face="Arial,Helvetica">
 <a name="lang_SysAppPrefs"></a>
 <b>SYSAPPLICATIONPREFERENCES (pref)</b><p>
@@ -3382,6 +3382,7 @@ SYSAPPLICATIONPREFERENCES ID <font color="#00ff00">&lt;ResId.n&gt;</font>
 </font><pre>
 SYSAPPLICATIONPREFERENCES ID 1000 PRIORITY 30 STACKSIZE 0x1000 MINHEAPSPACE 0x1000
 </pre>
+</div>
 <div class="palmInternal">
 <font face="Arial,Helvetica">
 <a name="lang_SearchTable"></a>
@@ -3606,7 +3607,9 @@ a GENERATEHEADER command in your RCP file.  To control the
 numbering used by this process, to allow multiple RCP files being
 build without conflicting ID numbers, you use the
 <a href="#lang_resetautoid">RESETAUTOID</a> command to give each file its own ID number
-range. <p>
+range. You can also use it to do different ranges for different items in one
+file.  To emulate Constructor's numbering behavior, you could reset the auto ID
+number before each form to the next multiple of 100.<p>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -3750,14 +3753,21 @@ For Palm Computing Platform reference information, be sure to also visit the
 following websites: <p>
 
 <ul>
-<li> <a href="http://www.palmos.com/" target="_">http://www.palmos.com/</a> <br>
-     Provided by Palm Computing. <p>
-<li> <a href="http://www.massena.com/" target="_">http://www.massena.com</a> <br>
+<li> <a href="http://www.palmsource.com/developers" target="_">http://www.palmsource.com/developers</a> <br>
+     Provided by PalmSource. <p>
+<li> <a href="http://prc-tools.sourceforge.net/" target="_">http://prc-tools.sourceforge.net/</a> <br>
+     Home page for prc-tools, a development kit supporting C and C++ programming 
+     on Palm OS using GCC. <p>
+<li> <a href="http://www.falch.net/" target="_">http://www.falch.net/</a> <br>
+     Developers of Falch.net Developer Studio for Palm OS and 
+     PilRC Designer for Palm OS. <p>
+<li> <a href="http://www.metrowerks.com/palm/" target="_">http://www.metrowerks.com/palm/</a> <br>
+     Developers of CodeWarrior Developer Studio for Palm OS. <p>
+<li> <a href="http://www.palmoswerks.com/" target="_">http://www.palmoswerks.com/</a> <br>
+     Development resources for Palm OS developers with a CodeWarrior focus. <p>
+<li> <a href="http://www.massena.com/darrin/pilot/" target="_">http://www.massena.com/darrin/pilot/</a> <br>
      A great source of low level Palm Computing Platform information. <br>
      Provided by David Massena. <p>
-<li> <a href="http://www.roadcoders.com/" target="_">http://www.roadcoders.com</a> <br>
-     Need some examples? This is a great resource to find plenty of source 
-     code for applications written on the Palm Computing Platform. <p>
 </ul>
 
 </font>
