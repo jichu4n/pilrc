@@ -1964,11 +1964,18 @@ ParseToFinalEnd(void)
   }
 }
 
+/*-----------------------------------------------------------------------------
+|	DesirableLocale
+|
+|		An object with a non-NULL locale is desired if
+|		that particular locale has been selected with -Loc;
+|		one without is desired depending only on -StripLoc.
+-------------------------------------------------------------JohnM-----------*/
 static BOOL
 DesirableLocale(const char *objlocale)
 {
   if (objlocale)
-    return szLocaleP == NULL || strcmp(objlocale, szLocaleP) == 0;
+    return szLocaleP && strcmp(objlocale, szLocaleP) == 0;
   else
     return ! vfStripNoLocRes;
 }
