@@ -1,3 +1,4 @@
+
 /*
  * @(#)restype.h
  *
@@ -29,13 +30,6 @@
 #ifndef __RESTYPE_H__
 #define __RESTYPE_H__
 
-#define k68k_ALIGN_16		0
-#define kARM_ALIGN_32		1
-/*	not use now
-	#define kARM_ALIGN_16	3
-	#define k68k_ALIGN_32	4
-*/
-
 #define kAinRscType				0
 #define kStrRscType				1
 #define kVerRscType				2
@@ -61,21 +55,17 @@
 #define kTrapType				21
 #define kTitleTextType			22
 #define kLabelTextType			23
+#define kGraffitiInputAreaType	24
+#define kCountryType			25
+#define kFeatureType			26
+#define kKeyboardType		27
+#define kLongWrdListRscType	28
+#define kByteListRscType		29
 
-#define kMaxNumberResType		24
+#define kMaxNumberResType		30
 
+extern char *kPalmResType[kMaxNumberResType];
 
-extern char	*kPalmResType[kMaxNumberResType];
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-
-#ifdef __cplusplus 
-}
-#endif
+void ResTypeInit(void);
 
 #endif // __RESTYPE_H__

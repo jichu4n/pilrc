@@ -16,6 +16,23 @@ PilRC
 </center> <p>
 
 <pre>
+What's new in 2.8 (Tue, 1 May 2001)
+-----------------
+o added new resources
+- WORDLIST, GRAFITTIINPUTAREA, COLORTABLE, KEYBOARD, COUNTRYLOCALIZATION etc
+- [MOST ARE SYSTEM USE ONLY], see doc/manual.html for more information
+o ID generation consistancy fixes
+- ie: VERSION ID 1 "1.0", VERSION 1 "1.0" and VERSION "1.0" should work
+- restore's old behaviour to maintain compatibility in older sample code
+o SLIDER changes
+- fix warnings for sliders, no longer complain when legal :))
+o error message fix
+- adjust include file messing error to have line # printed :)
+o DATA change
+- such that the data file can be found in include directories specified
+o added -LE32 flag, generate little endian 32bit compatible resources (ARM, NT)
+o various bugfixes et al :P
+
 What's new in 2.7b  (Thu, 08 Feb 2001)
 ------------------
 o BITMAP*, ICON* changes

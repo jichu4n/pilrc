@@ -1,3 +1,4 @@
+
 /*
  * @(#)bitmap.h
  *
@@ -41,13 +42,15 @@
  * @param colortable does a color table need to be generated?
  * @param transparencyData anything we need to know about transparency
  * @param multibit   should this bitmap be prepared for multibit? 
+ * @param bootscreen	should this bitmap be prepared for size & crc header add on ?
  */
-extern void DumpBitmap(char *fileName, 
-                       int  isIcon, 
-                       int  compress, 
-                       int  bitmaptype, 
+extern void DumpBitmap(char *fileName,
+                       int isIcon,
+                       int compress,
+                       int bitmaptype,
                        BOOL colortable,
-                       int  *transparencyData,
-                       BOOL multibit);
+                       int *transparencyData,
+                       BOOL multibit,
+                       BOOL bootscreen);
 
 #endif

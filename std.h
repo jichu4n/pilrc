@@ -1,3 +1,4 @@
+
 /*
  * @(#)std.h
  *
@@ -32,6 +33,7 @@
 #define __STD_H__
 
 typedef int BOOL;
+
 #define fTrue 1
 #define fFalse 0
 #define VOID void

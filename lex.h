@@ -1,3 +1,4 @@
+
 /*
  * @(#)lex.h
  *
@@ -27,13 +28,14 @@
  *     18-Jun-2000 Aaron Ardiri
  *                 GNU GPL documentation additions
  */
-							
+
 #ifndef __lex__
 #define __lex__
 
 typedef int LT;
 
 #define ltNil     -1
+
 /* must be same as nt's */
 #define ltConst    0
 #define ltId       1
@@ -72,29 +74,27 @@ typedef int LT;
 #define ltEndCComment 53
 #define ltPoint    54
 
-
 typedef int VAL;
 
 #define cchIdMax 4096
+
 /* LEXeme */
-typedef struct _lex
-	{
-	LT lt;
-	char szId[cchIdMax];
-	VAL val;
-	} LEX;
-
-
+typedef struct _lex {
+  LT lt;
+  char szId[cchIdMax];
+  VAL val;
+} LEX;
 
 /* Lex function prototypes */
-BOOL FInitLexer(char *pch, BOOL fReportErrors);
+BOOL FInitLexer(char *pch,
+                BOOL fReportErrors);
 char *PchLexer(void);
 char *PchLexerPrev(void);
-BOOL FGetLex(LEX *plex, BOOL fInComment);
-VOID PrintLex(LEX *plex);
+BOOL FGetLex(LEX * plex,
+             BOOL fInComment);
+VOID PrintLex(LEX * plex);
 char *PchParseError();
-VOID ParseError(char *, char *);
-
+VOID ParseError(char *,
+                char *);
 
 #endif /* __lex__ */
-

@@ -1,3 +1,4 @@
+
 /*
  * @(#)restype.c
  *
@@ -24,62 +25,74 @@
  *
  *     18-Aug-2000 RMa
  *                 creation
+ *     Jan-2001    Regis Nicolas
+ *                 Merged 68K and LE32 version into one binary
  */
 
 #include "restype.h"
+#include "pilrc.h"
 
-char	*kPalmResType[kMaxNumberResType] =
+char *kPalmResType[kMaxNumberResType];
+
+/**
+ * Resource Type initialization based on the target type (68K/LE32).
+ */
+void
+ResTypeInit(void)
 {
-#ifdef ARM
-/*  0 */	"tAIN",
-/*  1 */	"tSTR",
-/*  2 */	"tver",
-/*  3 */	"tAIS",
-/*  4 */	"taic",
-/*  5 */	"tSTL",
-/*  6 */	"aaib",
-/*  7 */	"abmp",
-/*  8 */	"absb",
-/*  9 */	"aalt",
-/* 10 */	"akbd",
-/* 11 */	"amnu",
-/* 12 */	"afnt",
-/* 13 */	"afti",
-/* 14 */	"amid",
-/* 15 */	"aclt",
-/* 16 */	"acbr",
-/* 17 */	"aint",
-/* 18 */	"afrm",
-/* 19 */	"awrd",
-/* 20 */	"APPL",
-/* 21 */	"TRAP",
-/* 22 */	"tTTL",
-/* 23 */	"tLBL",
-#else
-/*  0 */	"tAIN",
-/*  1 */	"tSTR",
-/*  2 */	"tver",
-/*  3 */	"tAIS",
-/*  4 */	"taic",
-/*  5 */	"tSTL",
-/*  6 */	"tAIB",
-/*  7 */	"Tbmp",
-/*  8 */	"Tbsb",
-/*  9 */	"Talt",
-/* 10 */	"tkbd",
-/* 11 */	"MBAR",
-/* 12 */	"NFNT",
-/* 13 */	"fnti",
-/* 14 */	"MIDI",
-/* 15 */	"tclt",
-/* 16 */	"tcbr",
-/* 17 */	"tint",
-/* 18 */	"tFRM",
-/* 19 */	"wrdl",
-/* 20 */	"APPL",
-/* 21 */	"TRAP",
-/* 22 */	"tTTL",
-/* 23 */	"tLBL",
-#endif
-};
-
+  kPalmResType[0] = "tAIN";
+  kPalmResType[1] = "tSTR";
+  kPalmResType[2] = "tver";
+  kPalmResType[3] = "tAIS";
+  kPalmResType[4] = "taic";
+  kPalmResType[5] = "tSTL";
+  kPalmResType[14] = "MIDI";
+  kPalmResType[20] = "APPL";
+  kPalmResType[21] = "TRAP";
+  kPalmResType[22] = "tTTL";
+  kPalmResType[23] = "tLBL";
+  if (vfLE32)
+  {
+    kPalmResType[6] = "aaib";
+    kPalmResType[7] = "abmp";
+    kPalmResType[8] = "absb";
+    kPalmResType[9] = "aalt";
+    kPalmResType[10] = "akbd";
+    kPalmResType[11] = "amnu";
+    kPalmResType[12] = "afnt";
+    kPalmResType[13] = "afti";
+    kPalmResType[15] = "aclt";
+    kPalmResType[16] = "acbr";
+    kPalmResType[17] = "aint";
+    kPalmResType[18] = "afrm";
+    kPalmResType[19] = "awrd";
+    kPalmResType[24] = "aslk";
+    kPalmResType[25] = "acty";
+    kPalmResType[26] = "afea";
+    kPalmResType[27] = "akbd";
+    kPalmResType[28] = "adwd";
+    kPalmResType[29] = "abyt";
+  }
+  else
+  {
+    kPalmResType[6] = "tAIB";
+    kPalmResType[7] = "Tbmp";
+    kPalmResType[8] = "Tbsb";
+    kPalmResType[9] = "Talt";
+    kPalmResType[10] = "tkbd";
+    kPalmResType[11] = "MBAR";
+    kPalmResType[12] = "NFNT";
+    kPalmResType[13] = "fnti";
+    kPalmResType[15] = "tclt";
+    kPalmResType[16] = "tcbr";
+    kPalmResType[17] = "tint";
+    kPalmResType[18] = "tFRM";
+    kPalmResType[19] = "wrdl";
+    kPalmResType[24] = "silk";
+    kPalmResType[25] = "cnty";
+    kPalmResType[26] = "feat";
+    kPalmResType[27] = "tkbd";
+    kPalmResType[28] = "DLST";
+    kPalmResType[29] = "BLST";
+  }
+}

@@ -1,3 +1,4 @@
+
 /*
  * @(#)main.c
  *
@@ -29,43 +30,49 @@
  *     20-Nov-2000 Renaud malaval (rmalaval@palm.com)
  *                 Add full support of PalmOS 3.5 (bitfields, structures, ...)
  *                 Add resource LAUNCHERCATEGORY (taic)
- *                 Add support for ARM
+ *                 Add support for Little Endian 32 bits: LE32 (ARM and NT)
+ *     Jan-2001    Regis Nicolas
+ *                 Merged 68K and LE32 version into one binary
+ *     12-Jan-2001 Renaud Malaval
+ *                 Added 'wrdl' resource support
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "pilrc.h"
+#include "restype.h"
 
 /**
  * Display the usage information for PilRC.
  */
-void 
+void
 Usage(void)
 {
-  printf("\nThis program is free software; you may redistribute it under the\n"
-  	"terms of the GNU General Public License. This program as absolutely\n"
-	"no warranty, you use it AS IS at your own risk.\n\n"
-	"usage: pilrc {<options>} infile [outfiledir]\n\n"
-        "Options:\n"
-        "        -L LANGUAGE  Compile resources for specific language\n"
-        "        -I <path>    Search for bitmap and include files in <path>\n"
-        "                     More than one -I <path> options may be given\n"
-        "                     The current directory is always searched\n"
-        "        -R <resfile> Generate JUMP/PilA .res file\n"
-        "        -H <incfile> Autoassign IDs and write .h file with #defines\n"
-	"        -D <macro>   Define a pre-processor macro symbol\n"
-        "        -F5          Use Big5 Chinese font widths\n"
-        "        -Fkt         Use Korean font widths (hantip font)\n"
-        "        -Fkm         Use Korean font widths (hanme font)\n"
-        "        -Fg          Use GB Chinese font widths\n"
-        "        -Fj          Use Japense font widths\n"
-        "        -Fh          Use Hebrew font widths\n"
-        "        -rtl         Right to left support\n"
-        "        -q           Less noisy output\n"
-        "        -V           Generate M$ (VS-type) error/warning output\n"
-	"        -allowEditID Allow edit menu IDs (10000-10007)\n"
-  );
+  printf
+    ("\nThis program is free software; you may redistribute it under the\n"
+     "terms of the GNU General Public License. This program has absolutely\n"
+     "no warranty, you use it AS IS at your own risk.\n\n"
+     "usage: pilrc {<options>} infile [outfiledir]\n\n" "Options:\n"
+     "        -L LANGUAGE  Compile resources for specific language\n"
+     "        -I <path>    Search for bitmap and include files in <path>\n"
+     "                     More than one -I <path> options may be given\n"
+     "                     The current directory is always searched\n"
+     "        -R <resfile> Generate JUMP/PilA .res file\n"
+     "        -H <incfile> Autoassign IDs and write .h file with #defines\n"
+     "        -D <macro>   Define a pre-processor macro symbol\n"
+     "        -F5          Use Big5 Chinese font widths\n"
+     "        -Fkt         Use Korean font widths (hantip font)\n"
+     "        -Fkm         Use Korean font widths (hanme font)\n"
+     "        -Fg          Use GB Chinese font widths\n"
+     "        -Fj          Use Japense font widths\n"
+     "        -Fh          Use Hebrew font widths\n"
+     "        -rtl         Right to left support\n"
+     "        -q           Less noisy output\n"
+     "        -V           Generate M$ (VS-type) error/warning output\n"
+     "        -allowEditID Allow edit menu IDs (10000-10007)\n"
+     "        -PalmRez     Generate res with PalmRez option\n"
+     "        -LE32        Generate Little Endian 32 bits compatible resources (ARM, NT)\n");
 
   exit(1);
 }
@@ -78,7 +85,7 @@ Usage(void)
  * @return program exit status, zero successful, non-zero otherwise.
  */
 int
-main(int  cArg, 
+main(int cArg,
      char *rgszArg[])
 {
   char *szOutputPath;
@@ -87,64 +94,72 @@ main(int  cArg,
   char *szMacro;
   char *szValue;
   char *szIncFile;
-  int  i;
-  int  fontType;
-  int  macroValue;
-	
+  int i;
+  int fontType;
+  int macroValue;
+
   // display the (c) string
-#ifdef ARM
-  printf("PilRC ARM v2.7b\n");
-#else
-  printf("PilRC 68k v2.7b\n");
-#endif
+  printf("PilRC v2.8\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000-2001 Aaron Ardiri (ardiri@palmgear.com)\n");
 
   // initialize
-  if (cArg < 2) Usage();
-  vfCheckDupes = 1;	
-  szResFile    = NULL;
-  szIncFile    = NULL;
-  fontType     = fontDefault;
+  if (cArg < 2)
+    Usage();
+  vfCheckDupes = 1;
+  szResFile = NULL;
+  szIncFile = NULL;
+  fontType = fontDefault;
 
   // process as many command line arguments as possible
-  for (i=1; i<cArg; i++) {
+  for (i = 1; i < cArg; i++)
+  {
 
     // no more options to process
-    if (rgszArg[i][0] != '-') break;
+    if (rgszArg[i][0] != '-')
+      break;
 
     // language
-    if (FSzEqI(rgszArg[i], "-L")) {
-      if (i++ == cArg) Usage();
+    if (FSzEqI(rgszArg[i], "-L"))
+    {
+      if (i++ == cArg)
+        Usage();
 
       szLanguage = rgszArg[i];
       continue;
     }
 
     // include directory(s)
-    if (FSzEqI(rgszArg[i], "-I")) {
-      if (i++ == cArg) Usage();
+    if (FSzEqI(rgszArg[i], "-I"))
+    {
+      if (i++ == cArg)
+        Usage();
 
-      if (totalIncludePaths == MAXPATHS) {
+      if (totalIncludePaths == MAXPATHS)
+      {
         printf("Too many include paths!\n\n");
         Usage();
       }
-      includePaths[ totalIncludePaths++ ] = rgszArg[i];
+      includePaths[totalIncludePaths++] = rgszArg[i];
       continue;
     }
 
     // define macro(s) for #ifdef's
-    if (FSzEqI(rgszArg[i], "-D")) {
-      if (i++ == cArg) Usage();
+    if (FSzEqI(rgszArg[i], "-D"))
+    {
+      if (i++ == cArg)
+        Usage();
 
       szMacro = strdup(rgszArg[i]);
 
       // Check if there is a value defined for the macro, otherwise use '1'
-      if ((szValue = strchr(szMacro, '=')) != NULL) {
+      if ((szValue = strchr(szMacro, '=')) != NULL)
+      {
         *szValue++ = '\0';
         macroValue = atoi(szValue);
       }
-      else {
+      else
+      {
         macroValue = 1;
       }
 
@@ -154,98 +169,137 @@ main(int  cArg,
     }
 
     // resource file for PILA?
-    if (FSzEqI(rgszArg[i], "-R")) {
-      if (i++ == cArg) Usage();
+    if (FSzEqI(rgszArg[i], "-R"))
+    {
+      if (i++ == cArg)
+        Usage();
 
       szResFile = rgszArg[i];
       continue;
     }
-			
+
     // header file generation (autoID for ALL)
-    if (FSzEqI(rgszArg[i], "-H")) {
-      if (i++ == cArg) Usage();
+    if (FSzEqI(rgszArg[i], "-H"))
+    {
+      if (i++ == cArg)
+        Usage();
 
       szIncFile = rgszArg[i];
-      vfAutoId  = fTrue;
+      vfAutoId = fTrue;
       continue;
     }
-			
+
     // be quiet?
-    if (FSzEqI(rgszArg[i], "-q")) {
+    if (FSzEqI(rgszArg[i], "-q"))
+    {
       vfQuiet = fTrue;
       continue;
     }
 
     // allow "edit" ID's?
-    if (FSzEqI(rgszArg[i], "-allowEditID")) {
+    if (FSzEqI(rgszArg[i], "-allowEditID"))
+    {
       vfAllowEditIDs = fTrue;
       continue;
     }
 
+    // No default flag for form and object form
+    if (FSzEqI(rgszArg[i], "-PalmRez"))
+    {
+      vfPalmRez = fTrue;
+      continue;
+    }
+
     // M$ (VS-type) error/warning ouput (regis_nicolas@palm.com)
-    if (FSzEqI(rgszArg[i], "-V")) {
+    if (FSzEqI(rgszArg[i], "-V"))
+    {
       vfVSErrors = fTrue;
       continue;
     }
-			
+
     // font hebrew
-    if (FSzEqI(rgszArg[i], "-Fh")) {
+    if (FSzEqI(rgszArg[i], "-Fh"))
+    {
       fontType = fontHebrew;
       continue;
     }
-			
+
     // font japanese
-    if (FSzEqI(rgszArg[i], "-Fj")) {
+    if (FSzEqI(rgszArg[i], "-Fj"))
+    {
       fontType = fontJapanese;
       continue;
     }
-			
+
     // font chinese big 5
-    if (FSzEqI(rgszArg[i], "-F5")) {
+    if (FSzEqI(rgszArg[i], "-F5"))
+    {
       fontType = fontChineseBig5;
       continue;
     }
-			
+
     // font chinese GB
-    if (FSzEqI(rgszArg[i], "-Fg")) {
+    if (FSzEqI(rgszArg[i], "-Fg"))
+    {
       fontType = fontChineseGB;
       continue;
     }
 
     // font korean (jmjeong@oopsla.snu.ac.kr)
-    if (FSzEqI(rgszArg[i], "-Fkm")) {
+    if (FSzEqI(rgszArg[i], "-Fkm"))
+    {
       fontType = fontKoreanHanme;
       continue;
     }
 
     // font korean (jmjeong@oopsla.snu.ac.kr)
-    if (FSzEqI(rgszArg[i], "-Fkt")) {
+    if (FSzEqI(rgszArg[i], "-Fkt"))
+    {
       fontType = fontKoreanHantip;
       continue;
     }
-			
+
     // right to left?
-    if (FSzEqI(rgszArg[i], "-rtl")) {
+    if (FSzEqI(rgszArg[i], "-rtl"))
+    {
       vfRTL = fTrue;
       continue;
     }
-			
+
+    // LE32
+    if (FSzEqI(rgszArg[i], "-LE32"))
+    {
+      vfLE32 = fTrue;
+      continue;
+    }
+
     // unknown argument?
     Usage();
   }
-  if ((cArg-i) < 1) Usage();
+  if ((cArg - i) < 1)
+    Usage();
   printf("\n");
 
   // determine the input path
-  szInputFile  = rgszArg[i++];
+  szInputFile = rgszArg[i++];
 
   // determine the ouput path
-  if (cArg != i) szOutputPath = rgszArg[i++];
-  else szOutputPath = ".";
+  if (cArg != i)
+    szOutputPath = rgszArg[i++];
+  else
+    szOutputPath = ".";
 
   // last minute check? (extra stuff?)
-  if (cArg != i) Usage();
+  if (cArg != i)
+    Usage();
 
+  if (vfLE32)
+    printf("Generating LE32 resources (ARM/NT) from '%s'.\n", szInputFile);
+  else
+    printf("Generating 68K resources from '%s'.\n", szInputFile);
+
+  ResTypeInit();
+  CbInit();
   ParseFile(szInputFile, szOutputPath, szResFile, szIncFile, fontType);
 
   return 0;

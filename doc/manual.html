@@ -21,14 +21,14 @@ PilRC
 <tr>
 <td>
 <font face="Arial,Helvetica">
-<h2>PilRC v2.7b / PilRCUI<br>
+<h2>PilRC v2.8<br>
     User Manual</h2>
 </font>
 </td>
 <td valign=top align=right>
 <font face="Arial,Helvetica">
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
-  8 February 2001
+  1 May 2001
 </font>
 </td>
 </tr>
@@ -51,23 +51,7 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
     </font>
     </td>
   </tr>
-  <tr>
-    <td valign=top>
-    <font face="Arial,Helvetica">
-    PilRCUI
-    </font>
-    </td>
-    <td>
-    <font face="Arial,Helvetica">
-    A form previewer. It launches a window which previews a close 
-    approximation of forms as they would appear on the Palm. Clicking in 
-    the content window of PilRCUI will cause it to reload the current 
-    script.<p>
-    <i><b>NOT UPDATED:</b> - any GUI programmers want to help?</i>
-    </font>
-    </td>
-  </tr>
-  </table>
+</table>
 </ul>
 
 <b><u>Table of Contents</u></b>
@@ -124,7 +108,7 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
 <ul>
 <pre>
 pilrc   [-L LANGUAGE] [-I INCLUDE PATH] [-D MACRO(=VAL)] [-R RESFILE] 
-        [-q] [-V] [-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] [-allowEditID]
+        [-q] [-V] [-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] [-allowEditID] [-LE32]
 	file.rcp [output path]
 pilrcui [-L LANGUAGE] file.rcp</pre>
 <font face="Arial,Helvetica">
@@ -303,6 +287,18 @@ pilrcui [-L LANGUAGE] file.rcp</pre>
   <td valign=top>
   <font face="Arial,Helvetica">
   Allow the use of "edit menu" ID values (10000-10007 inclusive).
+  </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -LE32
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Generate Little Endian 32 bits compatible resources (ARM, NT)
   </font>
   </td>
 </tr>
@@ -797,7 +793,8 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     <a href="#lang_bitmap">BITMAPCOLOR24K</a> <br>
     <a href="#lang_bitmap">BITMAPCOLOR32K</a> <br>
     <a href="#lang_bitmap">BITMAPFAMILY</a> <br>
-    <a href="#lang_bitmap">BITMAPFAMILYSPECIAL</a>
+    <a href="#lang_bitmap">BITMAPFAMILYSPECIAL</a> <br>
+    <a href="#lang_bitmap">BOOTSCREENFAMILY</a>
     </font>
     </td>
     <td valign=center>
@@ -833,6 +830,18 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
+    <a href="#lang_fontindex">FONTINDEX</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    Font Index table for Font Resource
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
     <a href="#lang_hex">HEX</a>
     </font>
     </td>
@@ -862,7 +871,115 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     </td>
     <td valign=center>
     <font face="Arial,Helvetica">
-    4-byte Integer Value
+    2-byte Integer Value
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_bytelist">BYTELIST</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    1-byte Integer Value List
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_wordlist">WORDLIST</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    2-byte Integer Value List
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_longwordlist">LONGWORDLIST</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    4-byte Integer Value List
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_palettetable">PALETTETABLE</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    Color List Resource
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_feature">FEATURE</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    System reserved
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_graffitiinputarea">GRAFFITIINPUTAREA</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    System reserved
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_countrylocalisation">COUNTRYLOCALISATION</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    System reserved
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_keyboard">KEYBOARD</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    System reserved 
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_midi">MIDI</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    Copy .aif to a Palm midi Resource
     </font>
     </td>
   </tr>
@@ -1644,7 +1761,7 @@ SMALLICONFAMILY "smic1bpp.bmp" "" "" "smic8bpp.bmp" TRANSPARENTINDEX 255</pre>
 
 <font face="Arial,Helvetica">
 <a name="lang_bitmap"></a>
-<b>BITMAP (Tbmp)</b><p>
+<b>BITMAP (Tbmp) (tbsb)</b><p>
 </font>
 
 <ul>
@@ -1672,8 +1789,13 @@ BITMAPFAMILYSPECIAL [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font co
              &lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
              [TRANSPARENT r g b] [TRANSPARENTINDEX index]
-             [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]</pre>
-</ul>
+             [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+BOOTSCREENFAMILY [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; 
+             &lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
+             [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
+             [TRANSPARENT r g b] [TRANSPARENTINDEX index]
+             [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+</pre></ul>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u> <p>
@@ -1692,6 +1814,11 @@ BITMAPFAMILYSPECIAL [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font co
 <tt>BITMAPFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp and 256 color) icon resources.
 <li>
 <tt>BITMAPFAMILYSPECIAL</tt> creates a multibit (1bpp, 2bpp, 4bpp color and 256 color) icon resources.
+<li>
+<tt>BOOTSCREENFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp color and 256 color) icon resources.
+In the header we found a size, a check sum and a BitmapFamily. The Resource created is a 'tbsb'.
+<li>
+<tt>BOOTSCREENFAMILY</tt> is system reserved.
 <li>
 The inclusion of the bitmap color table is <b>not</b> recommended as it slows
 down system performance. PilRC implements a simple color table matching 
@@ -1913,6 +2040,23 @@ can be overridden, however it is not recommended as it is set automatically.
 <ul>
 <li>
 <tt>FONT</tt> declarations must be defined before the font is used. 
+<li>ALL font declaration must have as last glyph :<ul><pre>
+GLYPH -1
+-----
+-----
+-----
+-----
+#####
+#---#
+#---#
+#---#
+#---#
+#---#
+#---#
+#####
+-----
+-----
+-----</pre></ul>
 <li>
 <tt>&lt;FontId.n&gt;</tt> must be between 128 and 255.
 <li>
@@ -1948,6 +2092,35 @@ FntDefineFont(128, font128);</pre>
 <li>
 FONT support in PilRC is not complete, and has been reverse engineered.
 </ul>
+
+<a name="lang_fontindex"></a>
+<b>FONTINDEX</b><p>
+</font>
+
+<ul><pre>
+FONTINDEX ID <font color="#00ff00">&lt;ResId.n&gt;</font>
+BEGIN
+	<font color="#00ff00">&lt;FontType.s&gt; &lt;ResId.n&gt;</font>
+	...
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Notes:</u><p>
+<ul>
+<li>This resource is system reserved.
+</ul>
+
+<u>Example:</u>
+</font>
+<ul><pre>
+FONTINDEX ID 1000 
+BEGIN
+	"NFNT" 9001
+	"NFNT" 9002
+	"NFNT" 9003
+END
+</pre></ul>
 
 <a name="lang_hex"></a>
 <b>HEX</b><p>
@@ -1993,6 +2166,7 @@ DATA <font color="#00ff00">&lt;ResType.s&gt;</font> ID <font color="#00ff00">&lt
 DATA "junk" ID 1000 "binary.bin"</pre>
 </ul>
 
+
 <font face="Arial,Helvetica">
 <a name="lang_integer"></a>
 <b>INTEGER (tint)</b><p>
@@ -2002,7 +2176,6 @@ DATA "junk" ID 1000 "binary.bin"</pre>
 <pre>
 INTEGER ID <font color="#00ff00">&lt;ResId.n&gt; &lt;Value.n&gt;</font></pre>
 </ul>
-
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
@@ -2016,6 +2189,349 @@ INTEGER ID <font color="#00ff00">&lt;ResId.n&gt; &lt;Value.n&gt;</font></pre>
 <pre>
 INTEGER ID 1000 1974 </pre>
 </ul>
+
+
+<font face="Arial,Helvetica">
+<a name="lang_bytelist"></a>
+<b>BYTELIST (BLST)</b><p>
+</font>
+
+<ul><pre>
+BYTELIST ID <font color="#00ff00">&lt;ResId.n&gt;</font>
+BEGIN
+	<font color="#00ff00">&lt;Value.n&gt;</font>
+	...
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Example:</u>
+</font><pre>
+BYTELIST ID 1000
+BEGIN
+	23
+	3
+	205
+	55
+END
+</pre>
+
+
+<font face="Arial,Helvetica">
+<a name="lang_wordlist"></a>
+<b>WORDLIST (wrdl)</b><p>
+</font>
+
+<ul><pre>
+WORDLIST ID <font color="#00ff00">&lt;ResId.n&gt;</font>
+BEGIN
+	<font color="#00ff00">&lt;Value.n&gt;</font>
+	...
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Example:</u>
+</font><pre>
+WORDLIST ID 1000
+BEGIN
+	23
+	1303
+	2505
+	2055
+END
+</pre>
+
+<font face="Arial,Helvetica">
+<a name="lang_longwordlist"></a>
+<b>LONGWORDLIST (DLST)</b><p>
+</font>
+
+<ul><pre>
+LONGWORDLIST ID <font color="#00ff00">&lt;ResId.n&gt;</font>
+BEGIN
+	<font color="#00ff00">&lt;Value.n&gt;</font>
+	...
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Example:</u>
+</font><pre>
+LONGWORDLIST ID 1000
+BEGIN
+	123456789
+	130300
+	78005
+	200055
+END
+</pre>
+
+
+<font face="Arial,Helvetica">
+<a name="lang_palettetable"></a>
+<b>PALETTETABLE (tclt)</b><p>
+</font>
+
+<ul><pre>
+PALETTETABLE ID <font color="#00ff00">&lt;ResId.n&gt;</font>
+BEGIN
+	<font color="#00ff00">&lt;index.n&gt; &lt;red.n&gt; &lt;green.n&gt; &lt;blue.n&gt;</font>
+	...
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Example:</u>
+</font><pre>
+PALETTETABLE ID 1000
+BEGIN
+	0x00 0xFF 0xFF 0xFF
+	0x01 0x00 0x00 0x00
+END </pre>
+
+
+<font face="Arial,Helvetica">
+<a name="lang_feature"></a>
+<b>FEATURE (tfea)</b><p>
+</font>
+
+<ul><pre>
+FEATURE ID <font color="#00ff00">&lt;ResId.n&gt;</font>
+BEGIN
+	[CREATOR <font color="#00ff00">&lt;creator.s&gt;</font>]
+	BEGIN
+		[ENTRY] [NUMBER<font color="#00ff00">&lt;number.n&gt;</font>] [VALUE<font color="#00ff00">&lt;value.n&gt;</font>]
+		...
+	END
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Example:</u>
+</font><pre>
+FEATURE ID 1000
+BEGIN
+	[CREATOR <font color="#00ff00">&lt;creator.s&gt;</font>]
+	BEGIN
+		ENTRY NUMBER 5 VALUE 0
+		ENTRY NUMBER 6 VALUE 0
+	END
+END</pre>
+
+
+<font face="Arial,Helvetica">
+<a name="lang_graffitiinputarea"></a>
+<b>GRAFFITIINPUTAREA (silk)</b><p>
+</font>
+
+<ul><pre>
+GRAFFITIINPUTAREA ID <font color="#00ff00">&lt;GraffitiInputAreaId.n&gt;</font>
+  [VERSION <font color="#00ff00">&lt;version.n&gt;</font>]
+  [CREATOR <font color="#00ff00">&lt;creator.s&gt;</font>]
+  [LANGUAGE <font color="#00ff00">&lt;language.s&gt;</font>]
+  [COUNTRY <font color="#00ff00">&lt;conutry.s&gt;</font>]
+BEGIN
+  <font color="#00ff00">&lt;OBJECTS&gt;</font>
+END </pre>
+</ul>
+
+<font face="Arial,Helvetica">
+Where 
+</font><tt><font color="#00ff00">&lt;OBJECTS&gt;</font></tt>
+<font face="Arial,Helvetica">
+is one or more of: <p>
+
+<ul>
+<table>
+  <tr>
+    <td valign=top>
+	<tt>AREA</tt>
+    </td>
+    <td valign=top>
+    <tt>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
+    [SCREEN] [GRAFFITI] [INDEX <font color="#00ff00">&lt;index.n&gt;</font>]
+    </tt>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <tt>BUTTON		</tt>
+    </td>
+    <td valign=top>
+    <tt>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
+    [KEYDOWNCHR <font color="#00ff00">&lt;keydownchr.n&gt;</font>] <br> 
+    [KEYDOWNKEYCODE <font color="#00ff00">&lt;keydownkeycode.n&gt;</font>] <br> 
+    [KEYDOWNMODIFIERS <font color="#00ff00">&lt;keydownmodifiers.n&gt;</font>]
+    </tt>
+    </td>
+  </tr>
+</table>
+</ul>
+<u>Notes:</u><p>
+<ul>
+<li>This resource is system reserved.
+<li>
+<tt>LANGUAGE</tt> is one of this strings :<br>
+	"English", "French", "German", "Italian", "Spanish", "Japanese".
+<li>
+<tt>COUNTRY</tt> is one of this strings :<br>
+	"Australia", "Austria", "Belgium", "Brazil", "Canada", "Denmark",
+	"Finland", "France", "Germany", "HongKong", "Iceland", "Ireland",
+	"Italy", "Japan", "Luxembourg", "Mexico", "Netherlands", "NewZealand",
+	"Norway", "Spain", "Sweden", "Switzerland", "UnitedKingdom", "UnitedStates",
+	"India", "Indonesia", "Korea", "Malaysia", "RepChina", "Philippines",
+	"Singapore", "Thailand", "Taiwan".
+</ul>
+
+<u>Example:</u><p>
+</font>
+<pre>
+GRAFFITIINPUTAREA ID 10000
+  VERSION 1
+  CREATOR "psys"
+  LANGUAGE "English"
+  COUNTRY "UnitedStates"
+BEGIN
+	AREA AT (0 0 160 160) SCREEN INDEX 0
+	AREA AT (27 164 62 56) GRAFFITI INDEX 0
+	AREA AT (89 164 44 56) GRAFFITI INDEX 1
+	BUTTON AT (27 206 18 14) KEYDOWNCHR 272 KEYDOWNKEYCODE 0 KEYDOWNMODIFIERS 8
+	BUTTON AT (115 206 18 14) KEYDOWNCHR 273 KEYDOWNKEYCODE 0 KEYDOWNMODIFIERS 8
+	BUTTON AT (0 164 27 28) KEYDOWNCHR 264 KEYDOWNKEYCODE 0 KEYDOWNMODIFIERS 8
+	BUTTON AT (0 192 27 28) KEYDOWNCHR 261 KEYDOWNKEYCODE 0 KEYDOWNMODIFIERS 8
+	BUTTON AT (133 164 27 28) KEYDOWNCHR 267 KEYDOWNKEYCODE 0 KEYDOWNMODIFIERS 8
+	BUTTON AT (133 192 27 28) KEYDOWNCHR 266 KEYDOWNKEYCODE 0 KEYDOWNMODIFIERS 8
+END
+</pre>
+
+
+
+<font face="Arial,Helvetica">
+<a name="lang_countrylocalisation"></a>
+<b>COUNTRYLOCALISATION (cnty)</b><p>
+</font>
+
+<ul>
+<pre>
+COUNTRYLOCALISATION ID <font color="#00ff00">&lt;ResId.n&gt;</font>
+BEGIN
+  BEGIN
+    [NUMBER <font color="#00ff00">&lt;number.n&gt;</font>]
+    [NAME <font color="#00ff00">&lt;name.s&gt;</font>]
+    [DATEFORMAT <font color="#00ff00">&lt;dateformat.n&gt;</font>]
+    [LONGDATEFORMAT <font color="#00ff00">&lt;longdateformat.n&gt;</font>]
+    [WEEKSTARTDAY <font color="#00ff00">&lt;weekstartday.n&gt;</font>]
+    [TIMEFORMAT <font color="#00ff00">&lt;timeformat.n&gt;</font>]
+    [NUMBERFORMAT <font color="#00ff00">&lt;numberformat.n&gt;</font>]
+    [CURRENCYNAME <font color="#00ff00">&lt;currencyname.s&gt;</font>]
+    [CURRENCYSYMBOL <font color="#00ff00">&lt;currencysymbol.s&gt;</font>]
+    [CURRENCYUNIQUESYMBOL <font color="#00ff00">&lt;currencyuniquesymbol.s&gt;</font>]
+    [CURRENCYDECIMALPLACES <font color="#00ff00">&lt;currencydecimalplaces.n&gt;</font>]
+    [DAYLIGHTSAVINGS <font color="#00ff00">&lt;daylightsavings.n&gt;</font>]
+    [MINUTESWESTOFGMT <font color="#00ff00">&lt;minuteswestofgmt.n&gt;</font>]
+    [MEASUREMENTSYSTEM <font color="#00ff00">&lt;measuresystem.n&gt;</font>]
+  END
+  BEGIN
+  ...
+  END
+END</pre>
+</ul>
+
+<font face="Arial,Helvetica">
+<u>Notes:</u><p>
+<ul>
+<li>This resource is system reserved.
+</ul>
+
+<u>Example:</u>
+</font>
+<pre>
+COUNTRYLOCALISATION ID 10000
+BEGIN
+	BEGIN
+		NUMBER 7
+		NAME "France"
+		DATEFORMAT 1
+		LONGDATEFORMAT 8
+		WEEKSTARTDAY 1
+		TIMEFORMAT 2
+		NUMBERFORMAT 2
+		CURRENCYNAME "Franc"
+		CURRENCYSYMBOL "F"
+		CURRENCYUNIQUESYMBOL "FRF"
+		CURRENCYDECIMALPLACES 2
+		DAYLIGHTSAVINGS 3
+		MINUTESWESTOFGMT 60
+		MEASUREMENTSYSTEM 1
+	END
+	BEGIN
+		NUMBER 23
+		NAME "United States"
+		DATEFORMAT 0
+		LONGDATEFORMAT 7
+		WEEKSTARTDAY 0
+		TIMEFORMAT 1
+		NUMBERFORMAT 0
+		CURRENCYNAME "US Dollar"
+		CURRENCYSYMBOL "$"
+		CURRENCYUNIQUESYMBOL "$US"
+		CURRENCYDECIMALPLACES 2
+		DAYLIGHTSAVINGS 1
+		MINUTESWESTOFGMT 1140
+		MEASUREMENTSYSTEM 0
+	END
+END</pre>
+
+
+<font face="Arial,Helvetica">
+<a name="lang_keyboard"></a>
+<b>KEYBOARD (tkbd)</b><p>
+</font>
+
+<ul>
+<pre>
+KEYBOARD ID <font color="#00ff00">&lt;ResId.n&gt; &lt;Value.n&gt;</font></pre>
+</ul>
+<font face="Arial,Helvetica">
+<u>Notes:</u><p>
+<ul><li>
+Supported Value are:<br>
+	if keyboard is for United State then value = 0<br>
+	if keyboard is for French then value = 1<br>
+	if keyboard is for Germany then value = 2
+<li>This resource is system reserved.
+</ul>
+
+<u>Example:</u>
+</font>
+<ul><pre>
+KEYBOARD ID 1000 0
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<a name="lang_midi"></a>
+<b>MIDI (MIDI)</b><p>
+</font>
+
+<ul>
+<pre>
+MIDI ID <font color="#00ff00">&lt;ResId.n&gt; &lt;string.s&gt;</font></pre>
+</ul>
+<font face="Arial,Helvetica">
+<u>Notes:</u><p>
+<ul><li>
+This not convert file to midi resource. The .aif file must be Palm Midi compliant 
+</ul>
+
+<u>Example:</u>
+</font>
+<ul><pre>
+MIDI ID 1000 "trompette.aif"
+</pre></ul>
+
 
 <font face="Arial,Helvetica">
 <a name="international"></a>

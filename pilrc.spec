@@ -1,9 +1,8 @@
 Name: pilrc
 Summary: Pilot Resources Compiler
-Version: 2.7b
+Version: 2.8
 Release: 1
 Source: %{name}-%{version}.tar.gz
-Patch: pilrc_table.patch
 Group: Development/Palm
 URL: http://www.ardiri.com/
 BuildRoot: /var/tmp/%{name}-buildroot
@@ -18,7 +17,6 @@ Palm resources compiler
 rm -rf $RPM_BUILD_ROOT
 
 %setup -q
-%patch -p1
 
 %build
 ./configure
