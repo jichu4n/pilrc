@@ -166,6 +166,9 @@ BOOL vfLE32 = fFalse;
  * LDu Output a Prc File
  */
 BOOL vfPrc = fFalse;
+char vfPrcName[32];
+int vfPrcCreator;
+int vfPrcType;
 
 /*
  * Menu globals 
@@ -1651,7 +1654,7 @@ CbEmitStruct(void *pv,
              BOOL fEmit)
 {
   char *pch;
-  int *pi;
+  p_int *pi;
   int ibit;
   unsigned char byte;
   unsigned short word;                           /* RMa add */
@@ -1663,8 +1666,8 @@ CbEmitStruct(void *pv,
   ibit = 0;
   byte = 0;
   word = 0;                                      /* RMa add */
-  Assert(sizeof(char *) == sizeof(int));
-  pi = (int *)pv;
+  Assert(sizeof(char *) == sizeof(p_int));
+  pi = (p_int *) pv;
   for (pch = szPic; *pch != 0;)
   {
     int ch;
@@ -1681,7 +1684,7 @@ CbEmitStruct(void *pv,
       pch++;
     ch = *pch++;
     c = 0;
-    while (isdigit(*pch))
+    while (isdigit((int)*pch))
     {
       c = 10 * c + (*pch - '0');
       pch++;
@@ -1981,7 +1984,7 @@ DumpForm(FRM * pfrm)
         if (PBAFIELD(pobj->list, numItems))      // RMa add Test for case : List with NO item
         {
           for (il = 0; il < PBAFIELD(pobj->list, numItems); il++)
-            DumpBytes(rgbZero, sizeof(unsigned long));
+            DumpBytes(rgbZero, 4);
           DumpBytes(PBAFIELD(pobj->list, itemsText),
                     PBAFIELD(pobj->list, cbListItems));
         }
@@ -2219,6 +2222,7 @@ FreeRcpfile(RCPFILE * prcpf)
   iidMenuMac = 0;
   iidAlertMac = 0;
   iidStringMac = 0;
+  iidStringTableMac = 0;
   iidAISMac = 0;
   idAutoMac = idAutoInit;
 
@@ -2577,6 +2581,18 @@ FParseObjects()
           if (itm.rc.extent.y != 15)
             WarningLine("Slider height not the recommended 15");
         }
+
+        if ((itm.minValue >= itm.maxValue) ||
+            (itm.value < itm.minValue) || (itm.value > itm.maxValue))
+        {
+          WarningLine
+            ("Assigning default values to VALUE, MIN, MAX and PAGESIZE");
+          itm.minValue = 0;
+          itm.maxValue = 100;
+          itm.value = 50;
+          itm.pageSize = 10;
+        }
+
         break;
 
       default:
@@ -2689,8 +2705,8 @@ DumpMenu()
   int cmpd;
   int impd;
   int imi;
-  int ibCommands;
-  int ibStrings;
+  p_int ibCommands;
+  p_int ibStrings;
 
   OpenOutput(kPalmResType[kMenuRscType], idMenu);       /* RMa "MBAR" */
   cmpd = BAFIELD(menu, numMenus);
@@ -3886,7 +3902,7 @@ ParseDumpFontIndex()
 
       bufferSize *= 2;
       dataP = realloc(dataP, bufferSize);
-      runningP = dataP + offset;
+      runningP = (unsigned char *)(dataP + offset);
     }
   }
   OpenOutput(kPalmResType[kFontIndexType], id);  /* RMa "fnti" */
@@ -4197,7 +4213,7 @@ ParseDumpByteList()
 
         bufferSize *= 2;
         dataP = realloc(dataP, bufferSize);
-        runningP = dataP + offset;
+        runningP = (unsigned char *)dataP + offset;
       }
     }
     // we dunno, assume "end" of resource
@@ -4665,7 +4681,7 @@ ParseDumpFeature()
         SETPBAFIELD(((RCFEATURECREATOR *) pRunning), creator, creatorName);
         pEntryNumber = pRunning;                 /* keep place to store entry number */
         (char *)pRunning += sizeof(RCFEATURECREATOR);
-        printf("creatorSize= %d\n", sizeof(RCFEATURECREATOR));
+        printf("creatorSize= %ld\n", (long)sizeof(RCFEATURECREATOR));
         creatorCounter++;
         g = fTrue;
         break;
@@ -4679,7 +4695,7 @@ ParseDumpFeature()
         SETPBAFIELD(((RCFEATUREFEATURE *) pRunning), num, itm.Number);
         SETPBAFIELD(((RCFEATUREFEATURE *) pRunning), value, itm.value);
         (char *)pRunning += sizeof(RCFEATUREFEATURE);
-        printf("featureEntrySize= %d\n", sizeof(RCFEATUREFEATURE));
+        printf("featureEntrySize= %ld\n", (long)sizeof(RCFEATUREFEATURE));
         entryCounter++;
         break;
       default:
@@ -4877,6 +4893,7 @@ ParseCInclude(char *szIncludeFile,
   //LDu 2-5-2001 : deleted// FILE *fhInSav;
   //LDu 2-5-2001 : deleted// int ilineSav;
   //LDu 2-5-2001 : deleted// char szInFileSav[256];
+  char szInFileSav[256];                         // LDu added: 7-5-2001
   char szId[256];
   int wIdVal;
   extern char szInFile[];
@@ -4908,7 +4925,10 @@ ParseCInclude(char *szIncludeFile,
   ifdefLevel = 0;
   //LDu 2-5-2001 : end modification
 
+  strcpy(szInFileSav, prv_szInfile);             // LDu added: 7-5-2001
+
   OpenInputFile(szIncludeFile);
+
   while (FGetTok(&tok))
   {
     switch (tok.lex.lt)
@@ -4941,13 +4961,14 @@ ParseCInclude(char *szIncludeFile,
                       /*
                        * Assume it's a .h file 
                        */
-                      ParseCInclude(szFileName, szIncludeFile, ifdefSkipping,
+                      //LDu 7-5-2001 changed
+                      ParseCInclude(szFileName, prv_szInfile, ifdefSkipping,
                                     ifdefLevel, vfhIn, iline);
                       break;
                     }
 
                     pchExt++;
-                    ParseCInclude(szFileName, szIncludeFile, ifdefSkipping,
+                    ParseCInclude(szFileName, prv_szInfile, ifdefSkipping,
                                   ifdefLevel, vfhIn, iline);
                   }
                   else
@@ -5142,7 +5163,7 @@ ParseCInclude(char *szIncludeFile,
   /*
    * LDu 2-5-2001 : restore the previous global values 
    */
-  strcpy(szInFile, prv_szInfile);
+  strcpy(szInFile, szInFileSav);                 //LDu 7-5-2001 changed
   iline = prv_iline;
   vfhIn = prv_vfhIn;
   ifdefSkipping = prv_ifdefSkipping;
@@ -5267,6 +5288,20 @@ InitRcpfile(RCPFILE * prcpfile,
 {
   PlexInit(&prcpfile->plfrm, sizeof(FRM), 10, 10);
   InitFontMem(fontType);
+
+#ifdef CW_PLUGIN
+  // NCR: 15-feb-00 : in codewarrior plugin, globals need to be reinitialized
+
+  iidMenuMac = 0;
+  iidAlertMac = 0;
+  iidStringMac = 0;
+  iidStringTableMac = 0;
+  iidAISMac = 0;
+  idAutoMac = idAutoInit;
+  psymFirst = 0;
+  vfAllowEditIDs = 1;
+  szLanguage = "ENGLISH";                        // so we have some default
+#endif
 }
 
 // LDu: 2-5-2001 prototype for use with recursing calls
@@ -5730,7 +5765,8 @@ ParseFile(char *szIn,
   OpenResFile(szResFile);
   FInitLexer(NULL, fTrue);
 
-  ParseRcpFile(szIn, prcpfile, NULL, 0, 0, NULL, 0);
+  //LDu 7-5-2001 changed
+  ParseRcpFile(szIn, prcpfile, szIn, 0, 0, NULL, 0);
 
   if (szIncFile != NULL)
   {

@@ -31,6 +31,8 @@
 
 #ifdef WINGUI
 #include <windows.h>
+#elif defined(CW_PLUGIN)
+#include "Extra.h"                               // <-- neil, where is this file? :P
 #endif
 #include <stdio.h>
 #include <stdlib.h>
@@ -83,6 +85,10 @@ Error(char *sz)
     }
   }
   else
+#elif defined(CW_PLUGIN)
+  if (1)
+    CWError(sz);
+  else
 #endif
   {
     fprintf(stderr, "\n");
@@ -131,6 +137,9 @@ void
 ErrorLine2(char *sz,
            char *sz2)
 {
+#ifdef CW_PLUGIN
+  CWErrorLine2(sz, sz2);
+#else
   char szErr[256];
 
   if (sz2 == NULL)
@@ -144,6 +153,7 @@ ErrorLine2(char *sz,
              ? "%s(%d): error : %s %s"
              : "%s:%d: error : %s %s"), szInFile, iline, sz, sz2);
   Error(szErr);
+#endif
 }
 
 /*-----------------------------------------------------------------------------
@@ -165,6 +175,9 @@ ErrorLine(char *sz)
 void
 WarningLine(char *sz)
 {
+#ifdef CW_PLUGIN
+  CWWarningLine(sz);
+#else
   char szErr[256];
 
   sprintf(szErr,
@@ -174,6 +187,7 @@ WarningLine(char *sz)
   fprintf(stderr, "\n");
   fprintf(stderr, szErr);
   fprintf(stderr, "\n");
+#endif
 }
 
 /*-----------------------------------------------------------------------------
@@ -263,6 +277,9 @@ void
 DumpBytes(void *pv,
           int cb)
 {
+#ifdef CW_PLUGIN
+  CWDumpBytes(pv, cb);
+#else
 #ifdef HEXOUT                                    /* RMa activate Hex dump in debug */
   BYTE *pb;
   int ib;
@@ -336,6 +353,7 @@ DumpBytes(void *pv,
     }
   }
 #endif
+#endif
 }
 
 /*-----------------------------------------------------------------------------
@@ -390,7 +408,9 @@ VOID
 OpenOutput(char *szBase,
            int id)
 {
-
+#ifdef CW_PLUGIN
+  CWOpenOutput(szBase, id);
+#else
   /*
    * #ifdef BINOUT 
    */
@@ -432,6 +452,7 @@ OpenOutput(char *szBase,
   {
     fprintf(vfhRes, "\tres '%s', %d, \"%s\"\n", szBase, id, szOutFile);
   }
+#endif
 }
 
 /*-----------------------------------------------------------------------------
@@ -440,6 +461,9 @@ OpenOutput(char *szBase,
 VOID
 CloseOutput()
 {
+#ifdef CW_PLUGIN
+  CWCloseOutput();
+#else
 #ifdef HEXOUT                                    /* RMA call little hack to display clean Hex output */
   DumpBytes(NULL, 0);
 #endif
@@ -467,6 +491,7 @@ CloseOutput()
   /*
    * #endif 
    */
+#endif
 }
 
 /*-----------------------------------------------------------------------------

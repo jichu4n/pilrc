@@ -33,6 +33,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#include <time.h>
 #include "pilrc.h"
 #include "util.h"
 #include "prc.h"
@@ -109,7 +110,9 @@ DatabaseHdrType;
 
 typedef DatabaseHdrType *DatabaseHdrPtr;
 
+#ifndef _MAX_PATH
 #define _MAX_PATH 256
+#endif
 
 extern BOOL vfLE32;
 static char tempName[_MAX_PATH];
@@ -126,58 +129,6 @@ static RsrcEntryType crt_entry;
 //------------------------------------------------------------------------
 #define SwapW(x) ((unsigned short)(((x>>8)&0xff)|(x<<8)))
 #define SwapL(x) ((unsigned long)((SwapW(x))<<16)|(SwapW(x>>16)&0xffff))
-/*
- * unsigned short SwapW (unsigned short HostWord)
- * {
- * unsigned short HHWord;
- * 
- * typedef struct tagspdw{
- * unsigned char d1;
- * unsigned char d2;
- * } spdw;
- * 
- * union dbh {
- * spdw dw;
- * unsigned short d;
- * } db1, db2;
- * 
- * db1.d=HostWord;
- * 
- * db2.dw.d2=db1.dw.d1;
- * db2.dw.d1=db1.dw.d2;
- * 
- * HHWord=db2.d;
- * 
- * return HHWord;
- * }
- * 
- * unsigned long SwapL (unsigned long HostDword)
- * {
- * unsigned long HHDword;
- * 
- * typedef struct tagspdw{
- * unsigned short d1;
- * unsigned short d2;
- * } spdw;
- * 
- * union dbh {
- * spdw dw;
- * unsigned long d;
- * } db1, db2;
- * 
- * db1.d=HostDword;
- * 
- * db2.dw.d1=SwapW(db1.dw.d1);
- * db2.dw.d2=SwapW(db1.dw.d2);
- * 
- * db1.dw.d2=db2.dw.d1;
- * db1.dw.d1=db2.dw.d2;
- * 
- * HHDword=db1.d;
- * 
- * return HHDword;
- * }
- */
 
 //------------------------------------------------------------------------
 // Open a temporary file 
@@ -231,6 +182,7 @@ PrcCloseFile(FILE * pF)
   UInt32 zero = 0;
   RsrcEntryType entry;
   unsigned char chr;
+  UInt32 theTime, dTime;
 
   // close the temporary files (was opened 'wb')
   fclose(pF);
@@ -242,13 +194,30 @@ PrcCloseFile(FILE * pF)
   if (prcF == NULL)
     Error3("Unable to open:", prcName, strerror(errno));
   memset(&hdr, 0, sizeof(hdr));
+
+  // get current time (since 1/1/1970) and convert to PalmOS time (1/1/1904)
+  theTime = time(0);
+  dTime = (UInt32) (66L * (365.25252 * 24 * 60 * 60));
+  theTime += dTime;
+
+  strncpy(hdr.name, vfPrcName, sizeof(hdr.name) - 1);
   if (vfLE32)
+  {
     hdr.attributes = dmHdrAttrResDB;
+    hdr.type = vfPrcType;
+    hdr.creator = vfPrcCreator;
+    hdr.creationDate = theTime;
+    hdr.modificationDate = theTime;
+  }
   else
+  {
     hdr.attributes = SwapW(dmHdrAttrResDB);
-  strcpy(hdr.name, "PilRC resources");
-  hdr.type = 0x64617461;                         // 'data';
-  hdr.creator = 0x70524553;                      // 'pRES';
+    hdr.type = SwapL(vfPrcType);
+    hdr.creator = SwapL(vfPrcCreator);
+    hdr.creationDate = SwapL(theTime);
+    hdr.modificationDate = SwapL(theTime);
+  }
+
   if (fwrite(&hdr, sizeof(hdr) - sizeof(RecordListType), 1, prcF) != 1)
     Error3("Error writing to output file: ", prcName, strerror(errno));
 

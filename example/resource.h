@@ -12,8 +12,6 @@
  * modification without prior consent of the original author is prohibited. 
  */
 
-#include "palm.h"
-
 // bitmaps
 
 #define bitmapIcon              1000

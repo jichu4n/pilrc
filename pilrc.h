@@ -35,14 +35,26 @@
  *                 additions to support LE32 resouces
  */
 
+#ifndef _pilrc_h
+#define _pilrc_h                                 // RMA : multiples include protection
+
 #include "std.h"
 #include "util.h"
 #include "lex.h"
 #include "plex.h"
 #include "font.h"
 
-#ifndef _pilrc_h
-#define _pilrc_h                                 // RMA : multiples include protection
+#if (SIZEOF_INT == SIZEOF_CHAR_P)
+typedef int p_int;
+#elif (SIZEOF_LONG == SIZEOF_CHAR_P)
+typedef long p_int;
+#endif
+
+#if (SIZEOF_SHORT * 2 == SIZEOF_CHAR_P)
+typedef short p_short;
+#elif (SIZEOF_INT * 2 == SIZEOF_CHAR_P)
+typedef int p_short;
+#endif
 
 #ifdef WIN32                                     // little endian
 #define HOST_LITTLE_ENDIAN
@@ -60,7 +72,7 @@
 |	pilot structs.  This way you do not have to include pilot include files
 |	which are definitely not compiler/processor independent.  
 |
-|	note:  we make the assumption that sizeof(int) == sizeof(void *) -- the emitter
+|	note:  we make the assumption that sizeof(p_int) == sizeof(void *) -- the emitter
 |	moves through the structs as if they were an array of ints and emits the struct
 |	according to the template
 |
@@ -125,8 +137,8 @@ EndEnum FontID;
 
 typedef struct _rcpoint
 {
-  int x;
-  int y;
+  p_int x;
+  p_int y;
 }
 RCPOINT;
 
@@ -148,13 +160,13 @@ RCRECT;
  */
 typedef struct _rcframebits
 {
-  int cornerDiam;                                /* u8   */
+  p_int cornerDiam;                              /* u8   */
   /*
-   * int reserved;           zu3 
+   * p_int reserved;           zu3 
    */
-  int threeD;                                    /* u   */
-  int shadowWidth;                               /* u2  */
-  int width;                                     /* u2  */
+  p_int threeD;                                  /* u   */
+  p_int shadowWidth;                             /* u2  */
+  p_int width;                                   /* u2  */
 }
 RCFRAMEBITS;                                     /* u8zu3uu2u2 */
 
@@ -166,15 +178,15 @@ typedef struct _rcwindowflags
   /*
    * Word offscreen:1;   zu 
    */
-  int modal;                                     /* u  */
-  int focusable;                                 /* u  */
+  p_int modal;                                   /* u  */
+  p_int focusable;                               /* u  */
   /*
    * Word enabled:1;    zu 
    */
   /*
    * Word visible:1;     zu  
    */
-  int dialog;                                    /* u */
+  p_int dialog;                                  /* u */
   /*
    * Word freeBitmap:1   zu 
    */
@@ -186,10 +198,10 @@ RCWINDOWFLAGS;                                   /* zuzuuu zuzuuzu zu8 */
 
 typedef struct _rcwindowBA16Type
 {
-  int displayWidth;                              /* w */
-  int displayHeight;                             /* w */
+  p_int displayWidth;                            /* w */
+  p_int displayHeight;                           /* w */
   /*
-   * int displayAddr;                                        zl 
+   * p_int displayAddr;                                        zl 
    */
   RCWINDOWFLAGS windowFlags;                     /* zuzuuu zuzuuzu zu8 */
   RCRECT windowBounds;                           /* w4 */
@@ -213,10 +225,10 @@ RCWindowBA16Type;
 
 typedef struct _rcwindowBA32Type
 {
-  int displayWidth;                              /* w */
-  int displayHeight;                             /* w */
+  p_int displayWidth;                            /* w */
+  p_int displayHeight;                           /* w */
   /*
-   * int displayAddr;                                        zl 
+   * p_int displayAddr;                                        zl 
    */
   RCRECT windowBounds;                           /* w4 */
   /*
@@ -243,32 +255,32 @@ RCWindowBA32Type;
  */
 typedef struct _rclistattr
 {
-  int usable;                                    /* u */
-  int enabled;                                   /* u */
-  int visible;                                   /* u */
-  int poppedUp;                                  /* u */
-  int hasScrollBar;                              /* u */
-  int search;                                    /* u */
+  p_int usable;                                  /* u */
+  p_int enabled;                                 /* u */
+  p_int visible;                                 /* u */
+  p_int poppedUp;                                /* u */
+  p_int hasScrollBar;                            /* u */
+  p_int search;                                  /* u */
   /*
-   * int reserved;           zu10 
+   * p_int reserved;           zu10 
    */
 }
 RCLISTATTR;                                      /* uuuuuuzu10 */
 
 typedef struct _rcListBA16Type
 {
-  int id;                                        /* w */
+  p_int id;                                      /* w */
   RCRECT bounds;                                 /* w4 */
   RCLISTATTR attr;                               /* uuuuuuzu10 */
   char *itemsText;                               /* p */
-  int numItems;                                  /* w */
+  p_int numItems;                                /* w */
   /*
    * Word currentItem;       zw 
    */
   /*
    * Word topItem;                   zw 
    */
-  int font;                                      /* b  */
+  p_int font;                                    /* b  */
   /*
    * UInt8 reserved;             zb 
    */
@@ -289,18 +301,18 @@ RCListBA16Type;
 
 typedef struct _rclistBA32Type
 {
-  int id;                                        /* w */
+  p_int id;                                      /* w */
   RCLISTATTR attr;                               /* uuuuuuzu10 */
   RCRECT bounds;                                 /* w4 */
   char *itemsText;                               /* p */
-  int numItems;                                  /* w */
+  p_int numItems;                                /* w */
   /*
    * Word currentItem;       zw 
    */
   /*
    * Word topItem;                   zw 
    */
-  int font;                                      /* b  */
+  p_int font;                                    /* b  */
   /*
    * UInt8 reserved;             zb 
    */
@@ -331,21 +343,21 @@ RCListType;
  */
 typedef struct _rcfieldattr
 {
-  int usable;                                    /* u  */
-  int visible;                                   /* u  */
-  int editable;                                  /* u  */
-  int singleLine;                                /* u  */
+  p_int usable;                                  /* u  */
+  p_int visible;                                 /* u  */
+  p_int editable;                                /* u  */
+  p_int singleLine;                              /* u  */
 
-  int hasFocus;                                  /* u  */
-  int dynamicSize;                               /* u  */
-  int insPtVisible;                              /* u  */
-  int dirty;                                     /* u  */
+  p_int hasFocus;                                /* u  */
+  p_int dynamicSize;                             /* u  */
+  p_int insPtVisible;                            /* u  */
+  p_int dirty;                                   /* u  */
 
-  int underlined;                                /* u2 */
-  int justification;                             /* u2 */
-  int autoShift;                                 /* u  */
-  int hasScrollBar;                              /* u  */
-  int numeric;                                   /* u  */
+  p_int underlined;                              /* u2 */
+  p_int justification;                           /* u2 */
+  p_int autoShift;                               /* u  */
+  p_int hasScrollBar;                            /* u  */
+  p_int numeric;                                 /* u  */
   /*
    * zu 
    */
@@ -354,7 +366,7 @@ RCFIELDATTR;                                     /* uuuuuuuu u2u2uuuzu */
 
 typedef struct _rcFieldBA16Type
 {
-  int id;                                        /* w */
+  p_int id;                                      /* w */
   RCRECT rect;                                   /* w4 */
   RCFIELDATTR attr;                              /* uuuuuuuu u2u2uuuzu */
   char *text;                                    /* p */
@@ -370,22 +382,22 @@ typedef struct _rcFieldBA16Type
   /*
    * Word                        zw       textBlockSize; 
    */
-  int maxChars;                                  /* w */
+  p_int maxChars;                                /* w */
   /*
-   * int selFirstPos;    zw  
+   * p_int selFirstPos;    zw  
    */
   /*
-   * int selLastPos;     zw 
+   * p_int selLastPos;     zw 
    */
   /*
-   * int insPtXPos;      zw 
+   * p_int insPtXPos;      zw 
    */
   /*
-   * int insPtYPos;      zw 
+   * p_int insPtYPos;      zw 
    */
-  int fontID;                                    /* b */
+  p_int fontID;                                  /* b */
   /*
-   * int reserved;           zb 
+   * p_int reserved;           zb 
    */
 }
 RCFieldBA16Type;
@@ -395,7 +407,7 @@ RCFieldBA16Type;
 typedef struct _rcFieldBA32Type
 {
   RCRECT rect;                                   /* w4 */
-  int id;                                        /* w */
+  p_int id;                                      /* w */
   RCFIELDATTR attr;                              /* uuuuuuuu u2u2uuuzu */
   char *text;                                    /* p */
   /*
@@ -410,22 +422,22 @@ typedef struct _rcFieldBA32Type
   /*
    * Word                        zw       textBlockSize; 
    */
-  int maxChars;                                  /* w */
+  p_int maxChars;                                /* w */
   /*
-   * int selFirstPos;    zw  
+   * p_int selFirstPos;    zw  
    */
   /*
-   * int selLastPos;     zw 
+   * p_int selLastPos;     zw 
    */
   /*
-   * int insPtXPos;      zw 
+   * p_int insPtXPos;      zw 
    */
   /*
-   * int insPtYPos;      zw 
+   * p_int insPtYPos;      zw 
    */
-  int fontID;                                    /* b */
+  p_int fontID;                                  /* b */
   /*
-   * int reserved;           zb 
+   * p_int reserved;           zb 
    */
 }
 RCFieldBA32Type;
@@ -444,17 +456,17 @@ RCFieldType;
  */
 typedef struct _rcTableColumnAttrBA16Type
 {
-  int width;                                     /* w  */
+  p_int width;                                   /* w  */
   /*
-   * int reserved1;                                              zt5 
+   * p_int reserved1;                                              zt5 
    */
-  int masked;                                    /* t  */
-  int editIndicator;                             /* t  */
-  int usable;                                    /* t */
+  p_int masked;                                  /* t  */
+  p_int editIndicator;                           /* t  */
+  p_int usable;                                  /* t */
   /*
-   * int reserved2;                                                  zb 
+   * p_int reserved2;                                                  zb 
    */
-  int spacing;                                   /* w  */
+  p_int spacing;                                 /* w  */
   /*
    * TableDrawItemFuncPtr drawCallback;           zl 
    */
@@ -471,19 +483,19 @@ RCTableColumnAttrBA16Type;
 
 typedef struct _rcTableColumnAttrBA32Type
 {
-  int width;                                     /* w  */
-  int spacing;                                   /* w  */
+  p_int width;                                   /* w  */
+  p_int spacing;                                 /* w  */
   /*
-   * int reserved1;                                              zt5 
+   * p_int reserved1;                                              zt5 
    */
-  int masked;                                    /* t  */
-  int editIndicator;                             /* t  */
-  int usable;                                    /* t */
+  p_int masked;                                  /* t  */
+  p_int editIndicator;                           /* t  */
+  p_int usable;                                  /* t */
   /*
-   * int reserved2;                                                  zb 
+   * p_int reserved2;                                                  zb 
    */
   /*
-   * int reserved3;                                                  zw 
+   * p_int reserved3;                                                  zw 
    */
   /*
    * TableDrawItemFuncPtr drawCallback;                   zl 
@@ -509,24 +521,24 @@ RCTABLECOLUMNATTR;
 
 typedef struct _rcTableRowAttrType
 {
-  int id;                                        /* w  */
-  int height;                                    /* w  */
+  p_int id;                                      /* w  */
+  p_int height;                                  /* w  */
   /*
    * DWord data;             zl 
    */
   /*
-   * int reserved1;                  zt7 
+   * p_int reserved1;                  zt7 
    */
-  int usable;                                    /* t  */
+  p_int usable;                                  /* t  */
   /*
-   * int reserved2;                  zt4 
+   * p_int reserved2;                  zt4 
    */
-  int masked;                                    /* t  */
-  int invalid;                                   /* t  */
-  int staticHeight;                              /* t  */
-  int selectable;                                /* t  */
+  p_int masked;                                  /* t  */
+  p_int invalid;                                 /* t  */
+  p_int staticHeight;                            /* t  */
+  p_int selectable;                              /* t  */
   /*
-   * int reserved3;                  zw 
+   * p_int reserved3;                  zw 
    */
 }
 RCTABLEROWATTR;
@@ -540,27 +552,27 @@ RCTABLEROWATTR;
 
 typedef struct RCTableAttrType
 {
-  int visible;                                   /* u */
-  int editable;                                  /* u */
-  int editing;                                   /* u */
-  int selected;                                  /* u */
-  int hasScrollBar;                              /* u */
+  p_int visible;                                 /* u */
+  p_int editable;                                /* u */
+  p_int editing;                                 /* u */
+  p_int selected;                                /* u */
+  p_int hasScrollBar;                            /* u */
   /*
-   * int reserved;                   zu11 
+   * p_int reserved;                   zu11 
    */
 }
 RCTABLEATTR;                                     /* uuuu uzu11 */
 
 typedef struct _rcTableBA16Type
 {
-  int id;                                        /* w  */
+  p_int id;                                      /* w  */
   RCRECT bounds;                                 /* w4 */
   RCTABLEATTR attr;                              /* uuuu uzu11 */
-  int numColumns;                                /* w */
-  int numRows;                                   /* w */
-  int currentRow;                                /* w */
-  int currentColumn;                             /* w */
-  int topRow;                                    /* w */
+  p_int numColumns;                              /* w */
+  p_int numRows;                                 /* w */
+  p_int currentRow;                              /* w */
+  p_int currentColumn;                           /* w */
+  p_int topRow;                                  /* w */
   /*
    * TableColumnAttrType * columnAttrs;           zl 
    */
@@ -574,23 +586,23 @@ typedef struct _rcTableBA16Type
   /*
    * not emitted 
    */
-  int *rgdxcol;
+  p_int *rgdxcol;
 }
 RCTableBA16Type;
 
-#define szRCTableBA16 "w,w4,uuuuuzu11,w,w,w,w,w,zl,zl,zl"##szRCFieldBA16
+#define szRCTableBA16 "w,w4,uuuuuzu11,w,w,w,w,w,zl,zl,zl" szRCFieldBA16
 typedef struct _rcTableBA32Type
 {
-  int id;                                        /* w  */
+  p_int id;                                      /* w  */
   RCTABLEATTR attr;                              /* uuuu uzu11 */
   RCRECT bounds;                                 /* w4 */
-  int numColumns;                                /* w */
-  int numRows;                                   /* w */
-  int currentRow;                                /* w */
-  int currentColumn;                             /* w */
-  int topRow;                                    /* w */
+  p_int numColumns;                              /* w */
+  p_int numRows;                                 /* w */
+  p_int currentRow;                              /* w */
+  p_int currentColumn;                           /* w */
+  p_int topRow;                                  /* w */
   /*
-   * int reserved                                    zw 
+   * p_int reserved                                    zw 
    */
   /*
    * TableColumnAttrType *   columnAttrs; zl 
@@ -605,11 +617,11 @@ typedef struct _rcTableBA32Type
   /*
    * not emitted 
    */
-  int *rgdxcol;
+  p_int *rgdxcol;
 }
 RCTableBA32Type;
 
-#define szRCTableBA32 "w,uuuuuzu11,w4,w,w,w,w,w,zw,zl,zl,zl"##szRCFieldBA32
+#define szRCTableBA32 "w,uuuuuzu11,w4,w,w,w,w,w,zw,zl,zl,zl" szRCFieldBA32
 
 typedef union _rcTableType
 {
@@ -627,21 +639,21 @@ RCTableType;
  */
 typedef struct _rcformobjattr
 {
-  int usable;                                    /* t,zt7 (opt) */
+  p_int usable;                                  /* t,zt7 (opt) */
   /*
-   * int reserved            zb 
+   * p_int reserved            zb 
    */
 }
 RCFORMOBJATTR;                                   /* tzt7,zb */
 
 typedef struct _rcFormLabelBA16Type
 {
-  int id;                                        /* w */
+  p_int id;                                      /* w */
   RCPOINT pos;                                   /* w2 */
   RCFORMOBJATTR attr;                            /* uzu15 */
-  int fontID;                                    /* b */
+  p_int fontID;                                  /* b */
   /*
-   * int reserved        zb 
+   * p_int reserved        zb 
    */
   char *text;                                    /* p */
 }
@@ -653,14 +665,14 @@ typedef struct _rcFormLabelBA32Type
 {
   RCPOINT pos;                                   /* w2 */
   char *text;                                    /* p */
-  int id;                                        /* w */
+  p_int id;                                      /* w */
   RCFORMOBJATTR attr;                            /* uzu15 */
-  int fontID;                                    /* b */
+  p_int fontID;                                  /* b */
   /*
-   * int reserved        zb 
+   * p_int reserved        zb 
    */
   /*
-   * int padding;            zw 
+   * p_int padding;            zw 
    */
 }
 RCFormLabelBA32Type;
@@ -691,8 +703,8 @@ RCFORMTITLE;
  */
 typedef struct _rcformpopup
 {
-  int controlID;                                 /* w */
-  int listID;                                    /* w */
+  p_int controlID;                               /* w */
+  p_int listID;                                  /* w */
 }
 RCFORMPOPUP;
 
@@ -714,18 +726,18 @@ RCFORMGRAFFITISTATE;
  */
 typedef struct _rcFormGadgetAttr
 {
-  int usable;                                    /* u */
-  int extended;                                  /* u */
-  int visible;                                   /* u */
+  p_int usable;                                  /* u */
+  p_int extended;                                /* u */
+  p_int visible;                                 /* u */
   /*
-   * int reserved            zu13 
+   * p_int reserved            zu13 
    */
 }
 RCFormGadgetAttr;                                /* uuuzu13 */
 
 typedef struct _rcformgadget
 {
-  int id;                                        /* w */
+  p_int id;                                      /* w */
   RCFormGadgetAttr attr;                         /* uuuzu13 */
   RCRECT rect;                                   /* w4 */
   /*
@@ -746,7 +758,7 @@ typedef struct _rcFormBitMapBA16Type
 {
   RCFORMOBJATTR attr;                            /* uzu15 */
   RCPOINT pos;                                   /* w2 */
-  int rscID;                                     /* w */
+  p_int rscID;                                   /* w */
 }
 RCFormBitMapBA16Type;
 
@@ -755,7 +767,7 @@ RCFormBitMapBA16Type;
 typedef struct _rcFormBitMapBA32Type
 {
   RCFORMOBJATTR attr;                            /* uzu15 */
-  int rscID;                                     /* w */
+  p_int rscID;                                   /* w */
   RCPOINT pos;                                   /* w2 */
 }
 RCFormBitMapBA32Type;
@@ -774,41 +786,41 @@ RCFormBitMapType;
  */
 typedef struct _rccontrolattr
 {
-  int usable;                                    /* u  */
-  int enabled;                                   /* u  */
-  int visible;                                   /* u  *//* OS use internal */
-  int on;                                        /* u  */
-  int leftAnchor;                                /* u  */
-  int frame;                                     /* u3 */
+  p_int usable;                                  /* u  */
+  p_int enabled;                                 /* u  */
+  p_int visible;                                 /* u  *//* OS use internal */
+  p_int on;                                      /* u  */
+  p_int leftAnchor;                              /* u  */
+  p_int frame;                                   /* u3 */
 
-  int drawnAsSelected;                           /* u  */
-  int graphical;                                 /* u  */
-  int vertical;                                  /* u  */
+  p_int drawnAsSelected;                         /* u  */
+  p_int graphical;                               /* u  */
+  p_int vertical;                                /* u  */
   /*
-   * int reserved;                   zu5 
+   * p_int reserved;                   zu5 
    */
 }
 RCCONTROLATTR;                                   /* uuuuuu3 uuuzu5 */
 
 typedef struct _rcControlBA16Type
 {
-  int id;                                        /* w */
+  p_int id;                                      /* w */
   RCRECT bounds;                                 /* w4 */
   union
   {
     struct
     {
-      short backgroundid;                        /* l/2 switch order on intel */
-      short thumbid;                             /* l/2 */
+      p_short backgroundid;                      /* l/2 switch order on intel */
+      p_short thumbid;                           /* l/2 */
     }
     ids;
     char *text;                                  /* p */
   }
   u;
   RCCONTROLATTR attr;                            /* uuuuuu3 uuuzu5 */
-  int style;                                     /* b */
-  int font;                                      /* b */
-  int group;                                     /* b */
+  p_int style;                                   /* b */
+  p_int font;                                    /* b */
+  p_int group;                                   /* b */
 }
 RCControlBA16Type;
 
@@ -817,25 +829,25 @@ RCControlBA16Type;
 
 typedef struct _rcControlBA32Type
 {
-  int id;                                        /* w */
+  p_int id;                                      /* w */
   RCCONTROLATTR attr;                            /* uuuuuu3 uuuzu5 */
   RCRECT bounds;                                 /* w4 */
   union
   {
     struct
     {
-      short backgroundid;                        /* l/2 switch order on intel */
-      short thumbid;                             /* l/2 */
+      p_short backgroundid;                      /* l/2 switch order on intel */
+      p_short thumbid;                           /* l/2 */
     }
     ids;
     char *text;                                  /* p */
   }
   u;
-  ControlStyles style;                           /* b */
-  int font;                                      /* b */
-  int group;                                     /* b */
+  p_int style;                                   /* b */
+  p_int font;                                    /* b */
+  p_int group;                                   /* b */
   /*
-   * int reserved;                           zb 
+   * p_int reserved;                           zb 
    */
 }
 RCControlBA32Type;
@@ -855,23 +867,23 @@ RCControlType;
  */
 typedef struct _SliderControlBA16Type
 {
-  int id;                                        /* w  */
+  p_int id;                                      /* w  */
   RCRECT bounds;                                 /* w4 */
 
   /*
    * reversing this 2 param to manage word ordering 
    */
-  short backgroundid;                            /* l  */// overlays text in ControlBA16Type
-  short thumbid;                                 /*     */// overlays text in ControlBA16Type
+  p_short backgroundid;                          /* l  */// overlays text in ControlBA16Type
+  p_short thumbid;                               /*     */// overlays text in ControlBA16Type
   RCCONTROLATTR attr;                            /* uuuuuu3,uuuzu5 */// graphical *is* set
-  ControlStyles style;                           /* b */// must be sliderCtl or repeatingSliderCtl
+  p_int style;                                   /* b */// must be sliderCtl or repeatingSliderCtl
   /*
    * UInt8                        reserved;                  zb 
    */
-  int minValue;                                  /* w */
-  int maxValue;                                  /* w */
-  int pageSize;                                  /* w *//* pageJump == pageSize */
-  int value;                                     /* w */
+  p_int minValue;                                /* w */
+  p_int maxValue;                                /* w */
+  p_int pageSize;                                /* w *//* pageJump == pageSize */
+  p_int value;                                   /* w */
   /*
    * MemPtr                       activeSliderP;     zl 
    */
@@ -882,21 +894,21 @@ RCSliderControlBA16Type;
 
 typedef struct _SliderControlBA32Type
 {
-  int id;                                        /* w */
+  p_int id;                                      /* w */
   RCCONTROLATTR attr;                            /* uuuuuu3,uuuzu5 */// graphical *is* set
   RCRECT bounds;                                 /* w4 */
-  short thumbid;                                 /*    */// overlays text in ControlBA16Type
-  short backgroundid;                            /* l  */// overlays text in ControlBA16Type
-  ControlStyles style;                           /* b  */// must be sliderCtl or repeatingSliderCtl
+  p_short thumbid;                               /*    */// overlays text in ControlBA16Type
+  p_short backgroundid;                          /* l  */// overlays text in ControlBA16Type
+  p_int style;                                   /* b  */// must be sliderCtl or repeatingSliderCtl
   /*
    * UInt8                        reserved;                  zb 
    */
-  int minValue;                                  /* w */
-  int maxValue;                                  /* w */
-  int pageSize;                                  /* w */
-  int value;                                     /* w */
+  p_int minValue;                                /* w */
+  p_int maxValue;                                /* w */
+  p_int pageSize;                                /* w */
+  p_int value;                                   /* w */
   /*
-   * int                          reserved2;                 zw 
+   * p_int                          reserved2;                 zw 
    */
   /*
    * MemPtr                       activeSliderP;     zl 
@@ -918,13 +930,13 @@ RCSliderControlType;
  */
 typedef struct _rcscrollbarattr
 {
-  int usable;                                    /* t */
-  int visible;                                   /* t */
-  int hilighted;                                 /* t */
-  int shown;                                     /* t */
-  int activeRegion;                              /* t4 */
+  p_int usable;                                  /* t */
+  p_int visible;                                 /* t */
+  p_int hilighted;                               /* t */
+  p_int shown;                                   /* t */
+  p_int activeRegion;                            /* t4 */
   /*
-   * int reserved;                   zb 
+   * p_int reserved;                   zb 
    */
 }
 RCSCROLLBARATTR;
@@ -932,21 +944,21 @@ RCSCROLLBARATTR;
 typedef struct _rcscrollbar
 {
   RCRECT bounds;                                 /* w4 */
-  int id;                                        /* w */
+  p_int id;                                      /* w */
   RCSCROLLBARATTR attr;                          /* ttttt4,zb */
-  int value;                                     /* w */
-  int minValue;                                  /* w */
-  int maxValue;                                  /* w */
-  int pageSize;                                  /* w */
+  p_int value;                                   /* w */
+  p_int minValue;                                /* w */
+  p_int maxValue;                                /* w */
+  p_int pageSize;                                /* w */
   /*
    * Short penPosInCar;
  *//*
- * * * * * zw 
+ * * * * * * * * * zw 
  */
   /*
    * Short savePos;
  *//*
- * * * * * zw 
+ * * * * * * * * * zw 
  */
 }
 RCSCROLLBAR;
@@ -988,14 +1000,14 @@ RCFORMOBJECT;
 
 typedef struct _rcFormObjListBA16Type
 {
-  int objectType;                                /* b  */
+  p_int objectType;                              /* b  */
   /*
-   * int reserved;                                   zb 
+   * p_int reserved;                                   zb 
    */
   union
   {
     RCFORMOBJECT object;                         /* l */
-    int ibobj;
+    p_int ibobj;
   }
   u;
 }
@@ -1008,15 +1020,15 @@ typedef struct _rcFormObjListBA32Type
   union
   {
     RCFORMOBJECT object;                         /* l */
-    int ibobj;
+    p_int ibobj;
   }
   u;
-  int objectType;                                /* b */
+  p_int objectType;                              /* b */
   /*
-   * int reserved;                                   zb 
+   * p_int reserved;                                   zb 
    */
   /*
-   * int padding;                            zw 
+   * p_int padding;                            zw 
    */
 }
 RCFormObjListBA32Type;
@@ -1033,20 +1045,20 @@ RCFORMOBJLIST;
 
 typedef struct _rcformattr
 {
-  int usable;                                    /* u */
-  int enabled;                                   /* u */
-  int visible;                                   /* u */
-  int dirty;                                     /* u */
-  int saveBehind;                                /* u */
-  int graffitiShift;                             /* u */
-  int globalsAvailable;                          /* u */
-  int doingDialog;                               /* u */
-  int exitDialog;                                /* u */
+  p_int usable;                                  /* u */
+  p_int enabled;                                 /* u */
+  p_int visible;                                 /* u */
+  p_int dirty;                                   /* u */
+  p_int saveBehind;                              /* u */
+  p_int graffitiShift;                           /* u */
+  p_int globalsAvailable;                        /* u */
+  p_int doingDialog;                             /* u */
+  p_int exitDialog;                              /* u */
   /*
-   * int reserved;                           zu7 
+   * p_int reserved;                           zu7 
    */
   /*
-   * int reserved2;                  zw 
+   * p_int reserved2;                  zw 
    */
 }
 RCFORMATTR;                                      /* uuuuuuuu,uzu7,zw */
@@ -1054,7 +1066,7 @@ RCFORMATTR;                                      /* uuuuuuuu,uzu7,zw */
 typedef struct _rcFormBA16Type
 {
   RCWindowBA16Type window;
-  int formId;                                    /* w  */
+  p_int formId;                                  /* w  */
   RCFORMATTR attr;                               /* uuuuuuuu uzu7 zw */
   /*
    * WinHandle bitsBehindForm;               zl 
@@ -1065,17 +1077,17 @@ typedef struct _rcFormBA16Type
   /*
    * Word focus;                                             zw 
    */
-  int defaultButton;                             /* w  */
-  int helpRscId;                                 /* w  */
-  int menuRscId;                                 /* w  */
-  int numObjects;                                /* w  */
+  p_int defaultButton;                           /* w  */
+  p_int helpRscId;                               /* w  */
+  p_int menuRscId;                               /* w  */
+  p_int numObjects;                              /* w  */
   /*
    * RCFormObjListBA16Type *objects;     zl 
    */
 }
 RCFormBA16Type;
 
-#define szRCFormBA16 szRCWindowBA16##",w,uuuuuuuuuzu7,zw,zl,zl,zw,w,w,w,w,zl"
+#define szRCFormBA16 szRCWindowBA16 ",w,uuuuuuuuuzu7,zw,zl,zl,zw,w,w,w,w,zl"
 typedef struct _rcFormBA32Type
 {
   RCWindowBA32Type window;
@@ -1086,21 +1098,21 @@ typedef struct _rcFormBA32Type
   /*
    * FormEventHandlerPtr handler;            zl 
    */
-  int formId;                                    /* w  */
+  p_int formId;                                  /* w  */
   /*
    * Word focus;                                             zw 
    */
-  int defaultButton;                             /* w  */
-  int helpRscId;                                 /* w  */
-  int menuRscId;                                 /* w  */
-  int numObjects;                                /* w  */
+  p_int defaultButton;                           /* w  */
+  p_int helpRscId;                               /* w  */
+  p_int menuRscId;                               /* w  */
+  p_int numObjects;                              /* w  */
   /*
    * RCFormObjListBA32Type *objects;         zl 
    */
 }
 RCFormBA32Type;
 
-#define szRCFormBA32 szRCWindowBA32##",uuuuuuuuuzu7,zw,zl,zl,w,zw,w,w,w,w,zl"
+#define szRCFormBA32 szRCWindowBA32 ",uuuuuuuuuzu7,zw,zl,zl,w,zw,w,w,w,w,zl"
 
 #define szRCFORM (vfLE32?szRCFormBA32:szRCFormBA16)
 
@@ -1110,11 +1122,11 @@ RCFormBA32Type;
 
 typedef struct _rcmenuitem
 {
-  int id;                                        /* w */
-  int command;                                   /* b */
-  int hidden;                                    /* t */
+  p_int id;                                      /* w */
+  p_int command;                                 /* b */
+  p_int hidden;                                  /* t */
   /*
-   * int reserved;         zt7 
+   * p_int reserved;         zt7 
    */
   char *itemStr;                                 /* l */
 }
@@ -1133,8 +1145,8 @@ typedef struct _rcMenuPullDownBA16Type
    */
   RCRECT titleBounds;                            /* w4 */
   char *title;                                   /* l */
-  int hidden;                                    /* u */
-  int numItems;                                  /* u15 */
+  p_int hidden;                                  /* u */
+  p_int numItems;                                /* u15 */
   RCMENUITEM *items;                             /* l */
 }
 RCMenuPullDownBA16Type;
@@ -1152,11 +1164,11 @@ typedef struct _rcMenuPullDownBA32Type
    */
   RCRECT titleBounds;                            /* w4 */
   char *title;                                   /* l  */
-  int hidden;                                    /* u  */
+  p_int hidden;                                  /* u  */
   /*
-   * int reserved                         zu15 
+   * p_int reserved                         zu15 
    */
-  int numItems;                                  /*     w  */
+  p_int numItems;                                /*     w  */
   RCMENUITEM *items;                             /* l  */
 }
 RCMenuPullDownBA32Type;
@@ -1173,7 +1185,7 @@ RCMENUPULLDOWN;
 
 typedef struct _RCMENUBARATTR
 {
-  int visible;                                   /* u  */
+  p_int visible;                                 /* u  */
   /*
    * WORD commandPending;    zu 
    */
@@ -1181,10 +1193,10 @@ typedef struct _RCMENUBARATTR
    * WORD insPtEnabled;      zu 
    */
   /*
-   * int needsRecalc;                zu 
+   * p_int needsRecalc;                zu 
    */
   /*
-   * int reserved;                           zu12 
+   * p_int reserved;                           zu12 
    */
 }
 RCMENUBARATTR;
@@ -1207,11 +1219,11 @@ typedef struct _rcMenuBarBA16Type
   /*
    * SWord curMenu;                                  zw 
    */
-  int curItem;                                   /* w  */
+  p_int curItem;                                 /* w  */
   /*
    * SDWord commandTick;                     zl 
    */
-  int numMenus;                                  /* w   number of menus */
+  p_int numMenus;                                /* w   number of menus */
   /*
    * MenuPullDownPtr menus;                  zl  array of menus 
    */
@@ -1237,8 +1249,8 @@ typedef struct _rcMenuBarBA32Type
   /*
    * SWord curMenu;                                  zw 
    */
-  int curItem;                                   /* w  */
-  int numMenus;                                  /* w   number of menus */
+  p_int curItem;                                 /* w  */
+  p_int numMenus;                                /* w   number of menus */
   /*
    * SDWord commandTick;                     zl 
    */
@@ -1264,10 +1276,10 @@ RCMENUBAR;
 
 typedef struct _rcALERTTEMPLATE
 {
-  int alertType;                                 /* w */
-  int helpRscID;                                 /* w */
-  int numButtons;                                /* w */
-  int defaultButton;                             /* w */
+  p_int alertType;                               /* w */
+  p_int helpRscID;                               /* w */
+  p_int numButtons;                              /* w */
+  p_int defaultButton;                           /* w */
 }
 RCALERTTEMPLATE;
 
@@ -1278,34 +1290,34 @@ RCALERTTEMPLATE;
 -------------------------------------------------------------WESC------------*/
 typedef struct _rcBitmapFlagsType
 {
-  int compressed;                                /* u *//* Data format:  0=raw; 1=compressed */
-  int hasColorTable;                             /* u *//* if true, color table stored before bits[] */
-  int hasTransparency;                           /* u *//* true if transparency is used */
-  int indirect;                                  /* u *//* true if bits are stored indirectly */
+  p_int compressed;                              /* u *//* Data format:  0=raw; 1=compressed */
+  p_int hasColorTable;                           /* u *//* if true, color table stored before bits[] */
+  p_int hasTransparency;                         /* u *//* true if transparency is used */
+  p_int indirect;                                /* u *//* true if bits are stored indirectly */
   /*
    * Never set this flag. Only the display (screen) bitmap has the indirect bit set. 
    */
-  int forScreen;                                 /* u *//* system use only */
-  int directColor;                               /* u  *//* direct color bitmap */
-  //int reserved;                 /* zu10 */ 
+  p_int forScreen;                               /* u *//* system use only */
+  p_int directColor;                             /* u  *//* direct color bitmap */
+  //p_int reserved;                 /* zu10 */ 
 }
 RCBitmapFlagsType;
 
 typedef struct _rcBITMAP
 {                                                /* bm */
-  int cx;                                        /* w */
-  int cy;                                        /* w */
-  int cbRow;                                     /* w */
+  p_int cx;                                      /* w */
+  p_int cy;                                      /* w */
+  p_int cbRow;                                   /* w */
   RCBitmapFlagsType flags;                       /* uuuuuuzu10 *//* RMa struct updated */
-  int pixelsize;                                 /* b */
-  int version;                                   /* b */
-  int nextDepthOffset;                           /* w */
-  int transparentIndex;                          /* b */
-  int compressionType;                           /* b */
+  p_int pixelsize;                               /* b */
+  p_int version;                                 /* b */
+  p_int nextDepthOffset;                         /* w */
+  p_int transparentIndex;                        /* b */
+  p_int compressionType;                         /* b */
   /*
    * ushort and_reserved_and_colorTable[3] 
  *//*
- * * * * * z1w 
+ * * * * * * * * * z1w 
  */
   unsigned char *pbBits;
 
@@ -1323,8 +1335,8 @@ RCBITMAP;
 -------------------------------------------------------------RMa------------*/
 typedef struct _rcFONTCHARINFO
 {
-  int offset;                                    /* b */
-  int width;                                     /* b */
+  p_int offset;                                  /* b */
+  p_int width;                                   /* b */
 }
 RCFONTCHARINFOTYPE,
  *RCFONTCHARINFOTYPEPTR;
@@ -1333,19 +1345,19 @@ RCFONTCHARINFOTYPE,
 
 typedef struct _rcFONT
 {
-  int fontType;                                  /* w */// font type
-  int firstChar;                                 /* w */// ASCII code of first character
-  int lastChar;                                  /* w */// ASCII code of last character
-  int maxWidth;                                  /* w */// maximum character width
-  int kernMax;                                   /* w */// negative of maximum character kern
-  int nDescent;                                  /* w */// negative of descent
-  int fRectWidth;                                /* w */// width of font rectangle
-  int fRectHeight;                               /* w */// height of font rectangle
-  int owTLoc;                                    /* w */// offset to offset/width table
-  int ascent;                                    /* w */// ascent
-  int descent;                                   /* w */// descent
-  int leading;                                   /* w */// leading
-  int rowWords;                                  /* w */// row width of bit image / 2
+  p_int fontType;                                /* w */// font type
+  p_int firstChar;                               /* w */// ASCII code of first character
+  p_int lastChar;                                /* w */// ASCII code of last character
+  p_int maxWidth;                                /* w */// maximum character width
+  p_int kernMax;                                 /* w */// negative of maximum character kern
+  p_int nDescent;                                /* w */// negative of descent
+  p_int fRectWidth;                              /* w */// width of font rectangle
+  p_int fRectHeight;                             /* w */// height of font rectangle
+  p_int owTLoc;                                  /* w */// offset to offset/width table
+  p_int ascent;                                  /* w */// ascent
+  p_int descent;                                 /* w */// descent
+  p_int leading;                                 /* w */// leading
+  p_int rowWords;                                /* w */// row width of bit image / 2
 }
 RCFONTTYPE;
 
@@ -1358,8 +1370,8 @@ RCFONTTYPE;
 typedef struct _rcSilkAreaBA16Type
 {
   RCRECT bounds;                                 /* w4 */
-  int areaType;                                  /* l */
-  int areaIndex;                                 /* w */
+  p_int areaType;                                /* l */
+  p_int areaIndex;                               /* w */
 }
 RCSilkAreaBA16Type;
 
@@ -1367,8 +1379,8 @@ RCSilkAreaBA16Type;
 typedef struct _rcSilkAreaBA32Type
 {
   RCRECT bounds;                                 /* w4 */
-  int areaType;                                  /* l */
-  int areaIndex;                                 /* w */
+  p_int areaType;                                /* l */
+  p_int areaIndex;                               /* w */
 }
 RCSilkAreaBA32Type;
 
@@ -1384,22 +1396,22 @@ RCSILKAREA;
 
 typedef struct _rcSilkButtonBA16Type
 {
-  //      int             buttonCount;            /* w */
+  //      p_int             buttonCount;            /* w */
   RCRECT bounds;                                 /* w4 */
-  int keyDownChr;                                /* w */
-  int keyDownKeyCode;                            /* w */
-  int keyDownModifiers;                          /* w */
+  p_int keyDownChr;                              /* w */
+  p_int keyDownKeyCode;                          /* w */
+  p_int keyDownModifiers;                        /* w */
 }
 RCSilkButtonBA16Type;
 
 #define szRCSilkButtonBA16EmitStr "w4,w,w,w"
 typedef struct _rcSilkButtonBA32Type
 {
-  //      int             buttonCount;            /* w */
+  //      p_int             buttonCount;            /* w */
   RCRECT bounds;                                 /* w4 */
-  int keyDownChr;                                /* w */
-  int keyDownKeyCode;                            /* w */
-  int keyDownModifiers;                          /* w */
+  p_int keyDownChr;                              /* w */
+  p_int keyDownKeyCode;                          /* w */
+  p_int keyDownModifiers;                        /* w */
 }
 RCSilkButtonBA32Type;
 
@@ -1415,22 +1427,22 @@ RCSILKBUTTON;
 
 typedef struct _rcSilkBA16Type
 {
-  int version;                                   /* w */
-  int vendorCreator;                             /* l */
-  int localeLanguage;                            /* w */
-  int localeCountry;                             /* w */
-  int areaCount;                                 /* w */
+  p_int version;                                 /* w */
+  p_int vendorCreator;                           /* l */
+  p_int localeLanguage;                          /* w */
+  p_int localeCountry;                           /* w */
+  p_int areaCount;                               /* w */
 }
 RCSilkBA16Type;
 
 #define szRCSilkBA16EmitStr "w,l,w,w,w"
 typedef struct _rcSilkBA32Type
 {
-  int version;                                   /* w */
-  int areaCount;                                 /* w */
-  int vendorCreator;                             /* l */
-  int localeLanguage;                            /* w */
-  int localeCountry;                             /* w */
+  p_int version;                                 /* w */
+  p_int areaCount;                               /* w */
+  p_int vendorCreator;                           /* l */
+  p_int localeLanguage;                          /* w */
+  p_int localeCountry;                           /* w */
 }
 RCSilkBA32Type;
 
@@ -1456,23 +1468,23 @@ RCSILK;
 
 typedef struct CountryPreferencesBA16Type
 {
-  int country;                                   // Country the structure represents
-  //      int             filler1;                                                                                                        // (Word alignment)
-  int countryName[countryNameLength];
-  int dateFormat;                                // Format to display date in
-  int longDateFormat;                            // Format to display date in
-  int weekStartDay;                              // Sunday or Monday
-  int timeFormat;                                // Format to display time in
-  int numberFormat;                              // Format to display numbers in
-  //      int             filler2;                                                                                                        // (Word alignment)
-  int currencyName[currencyNameLength];          // Dollars
-  int currencySymbol[currencySymbolLength];      // $
-  int uniqueCurrencySymbol[currencySymbolLength];       // US$
-  int currencyDecimalPlaces;                     // 2 for 1.00
-  int daylightSavings;                           // Type of daylight savings correction
-  int minutesWestOfGMT;                          // minutes west of Greenwich
-  int measurementSystem;                         // metric, english, etc.
-  //      int             filler3;                                                                                                        // (Word alignment)
+  p_int country;                                 // Country the structure represents
+  //      p_int             filler1;                                                                                                        // (Word alignment)
+  p_int countryName[countryNameLength];
+  p_int dateFormat;                              // Format to display date in
+  p_int longDateFormat;                          // Format to display date in
+  p_int weekStartDay;                            // Sunday or Monday
+  p_int timeFormat;                              // Format to display time in
+  p_int numberFormat;                            // Format to display numbers in
+  //      p_int             filler2;                                                                                                        // (Word alignment)
+  p_int currencyName[currencyNameLength];        // Dollars
+  p_int currencySymbol[currencySymbolLength];    // $
+  p_int uniqueCurrencySymbol[currencySymbolLength];     // US$
+  p_int currencyDecimalPlaces;                   // 2 for 1.00
+  p_int daylightSavings;                         // Type of daylight savings correction
+  p_int minutesWestOfGMT;                        // minutes west of Greenwich
+  p_int measurementSystem;                       // metric, english, etc.
+  //      p_int             filler3;                                                                                                        // (Word alignment)
 }
 CountryPreferencesBA16Type;
 
@@ -1480,22 +1492,22 @@ CountryPreferencesBA16Type;
 
 typedef struct CountryPreferencesBA32Type
 {
-  int country;                                   // Country the structure represents - 1 byte, 0
-  int dateFormat;                                // Format to display date in - 1 byte, 1
-  int longDateFormat;                            // Format to display date in - 1 byte, 2
-  int weekStartDay;                              // Sunday or Monday - 1 byte, 3
-  int countryName[countryNameLength];            // 20 bytes, 4
-  int timeFormat;                                // Format to display time in - 1 byte, 24
-  int numberFormat;                              // Format to display numbers in - 1 byte, 25
-  int daylightSavings;                           // Type of daylight savings correction - 1 byte, 26
-  int measurementSystem;                         // metric, english, etc. - 1 byte, 27
-  int currencyName[currencyNameLength];          // Dollars - 20 bytes, 28
-  int currencySymbol[currencySymbolLength];      // $ - 6 bytes, 48
-  int uniqueCurrencySymbol[currencySymbolLength];       // US$ - 6 bytes, 54
-  int minutesWestOfGMT;                          // minutes west of Greenwich - 4 bytes, 60
-  int currencyDecimalPlaces;                     // 2 for 1.00 - 1 byte, 61
-  //      int             reserved1;                                                                                              // padding
-  //      int             reserved2;                                                                                              // padding
+  p_int country;                                 // Country the structure represents - 1 byte, 0
+  p_int dateFormat;                              // Format to display date in - 1 byte, 1
+  p_int longDateFormat;                          // Format to display date in - 1 byte, 2
+  p_int weekStartDay;                            // Sunday or Monday - 1 byte, 3
+  p_int countryName[countryNameLength];          // 20 bytes, 4
+  p_int timeFormat;                              // Format to display time in - 1 byte, 24
+  p_int numberFormat;                            // Format to display numbers in - 1 byte, 25
+  p_int daylightSavings;                         // Type of daylight savings correction - 1 byte, 26
+  p_int measurementSystem;                       // metric, english, etc. - 1 byte, 27
+  p_int currencyName[currencyNameLength];        // Dollars - 20 bytes, 28
+  p_int currencySymbol[currencySymbolLength];    // $ - 6 bytes, 48
+  p_int uniqueCurrencySymbol[currencySymbolLength];     // US$ - 6 bytes, 54
+  p_int minutesWestOfGMT;                        // minutes west of Greenwich - 4 bytes, 60
+  p_int currencyDecimalPlaces;                   // 2 for 1.00 - 1 byte, 61
+  //      p_int             reserved1;                                                                                              // padding
+  //      p_int             reserved2;                                                                                              // padding
 }
 CountryPreferencesBA32Type;
 
@@ -1514,8 +1526,8 @@ RCCOUNTRY;
 -------------------------------------------------------------RMa------------*/
 typedef struct ROMFtrFeatureBA16Type
 {
-  int num;                                       // feature number
-  int value;                                     // feature value
+  p_int num;                                     // feature number
+  p_int value;                                   // feature value
 }
 ROMFtrFeatureBA16Type;
 
@@ -1523,9 +1535,9 @@ ROMFtrFeatureBA16Type;
 
 typedef struct ROMFtrFeatureBA32Type
 {
-  int num;                                       // feature number
-  //      int             reserved;
-  int value;                                     // feature value
+  p_int num;                                     // feature number
+  //      p_int             reserved;
+  p_int value;                                   // feature value
 }
 ROMFtrFeatureBA32Type;
 
@@ -1541,8 +1553,8 @@ RCFEATUREFEATURE;
 
 typedef struct ROMFtrCreatorBA16Type
 {
-  int creator;                                   // feature creator
-  int numEntries;                                // # of entries
+  p_int creator;                                 // feature creator
+  p_int numEntries;                              // # of entries
   //      ROMFtrFeatureBA16Type   feature[1];                     // variable size array of Features
 }
 ROMFtrCreatorBA16Type;
@@ -1551,9 +1563,9 @@ ROMFtrCreatorBA16Type;
 
 typedef struct ROMFtrCreatorBA32Type
 {
-  int creator;                                   // feature creator
-  int numEntries;                                // # of entries
-  //      int                                             reserved;
+  p_int creator;                                 // feature creator
+  p_int numEntries;                              // # of entries
+  //      p_int                                             reserved;
   //      ROMFtrFeatureBA32Type   feature[1];                     // variable size array of Features
 }
 ROMFtrCreatorBA32Type;
@@ -1570,7 +1582,7 @@ RCFEATURECREATOR;
 
 typedef struct ROMFtrTableBA16Type
 {
-  int numEntries;                                // # of entries
+  p_int numEntries;                              // # of entries
   //      ROMFtrCreatorBA16Type   creator[1];                     // var. size array of Creators
 }
 ROMFtrTableBA16Type;
@@ -1579,8 +1591,8 @@ ROMFtrTableBA16Type;
 
 typedef struct ROMFtrTableBA32Type
 {
-  int numEntries;                                // # of entries
-  //      int                                             reserved;
+  p_int numEntries;                              // # of entries
+  //      p_int                                             reserved;
   //      ROMFtrCreatorBA32Type   creator[1];                     // var. size array of Creators
 }
 ROMFtrTableBA32Type;
@@ -1599,15 +1611,15 @@ RCFEATURE;
 |	KEYBOARD
 -------------------------------------------------------------RMa------------*/
 #define keyboardRows		4
-#define numKeyboards		3                // alpha, punc/number, and int'l
+#define numKeyboards		3                // alpha, punc/number, and p_int'l
 
 typedef struct _KeyboardKeyBA16Type
 {
-  int shiftedKey;                                // key to use if shift is on
-  int capsKey;                                   // key to use if caps lock is on
-  int unshiftedKey;
-  int width;                                     // the width of the key.  The text is drawn centered.
-  int labelOffset;                               // if there is a label display it instead
+  p_int shiftedKey;                              // key to use if shift is on
+  p_int capsKey;                                 // key to use if caps lock is on
+  p_int unshiftedKey;
+  p_int width;                                   // the width of the key.  The text is drawn centered.
+  p_int labelOffset;                             // if there is a label display it instead
   // of a key (all modes)
 }
 KeyboardKeyType;
@@ -1620,16 +1632,16 @@ KeyboardKeyType;
 typedef struct _keyboardlayoutBA16Type
 {
   RCRECT bounds;
-  int rowHeight;
-  int font;
-  int keys;
-  int keysPerRow[keyboardRows];
-  int shiftKey;
-  int capsKey;
-  int lastLayoutInKeyboard;
+  p_int rowHeight;
+  p_int font;
+  p_int keys;
+  p_int keysPerRow[keyboardRows];
+  p_int shiftKey;
+  p_int capsKey;
+  p_int lastLayoutInKeyboard;
 
   /*
-   * int                          reserved 
+   * p_int                          reserved 
    */
 }
 KeyboardLayoutType;
@@ -1646,14 +1658,14 @@ Depending on the value of vfLE32, it uses the appropriate struct in the union
 defining each object.
 Using these macros allows to avoid to test vfLE32 and write the code twice...
 -------------------------------------------------------------RNi-------------*/
-#define BAFIELD(obj, field) (vfLE32?obj.s32. ## field:obj.s16. ## field)
-#define PBAFIELD(pobj, field) (vfLE32?pobj->s32. ## field:pobj->s16. ## field)
-#define SETBAFIELD(obj, field, value) do { if (vfLE32) obj.s32. ## field = (value); else obj.s16. ## field = (value); } while (0)
-#define SETPBAFIELD(pobj, field, value) do { if (vfLE32) pobj->s32. ## field = (value); else pobj->s16. ## field = (value); } while (0)
-#define BAFIELD16(obj, field) obj.s16. ## field
-#define BAFIELD32(obj, field) obj.s32. ## field
-#define PBAFIELD16(obj, field) obj->s16. ## field
-#define PBAFIELD32(obj, field) obj->s32. ## field
+#define BAFIELD(obj, field) (vfLE32 ? obj.s32.field : obj.s16.field)
+#define PBAFIELD(pobj, field) (vfLE32 ? pobj->s32.field : pobj->s16.field)
+#define SETBAFIELD(obj, field, value) do { if (vfLE32) obj.s32.field = (value); else obj.s16.field = (value); } while (0)
+#define SETPBAFIELD(pobj, field, value) do { if (vfLE32) pobj->s32.field = (value); else pobj->s16.field = (value); } while (0)
+#define BAFIELD16(obj, field) obj.s16.field
+#define BAFIELD32(obj, field) obj.s32.field
+#define PBAFIELD16(obj, field) obj->s16.field
+#define PBAFIELD32(obj, field) obj->s32.field
 
 /*-----------------------------------------------------------------------------
 |	Other PILRC types and such
@@ -2148,6 +2160,13 @@ extern BOOL vfLE32;
 
 //LDu : Output a Prc file
 extern BOOL vfPrc;
+extern char vfPrcName[32];
+extern int vfPrcCreator;
+extern int vfPrcType;
+
+#define DEFAULT_PRCNAME "PilRC resources"
+#define DEFAULT_PRCCR8R 0x70524553               // 'pRES'
+#define DEFAULT_PRCTYPE 0x64617461               // 'data'
 
 extern char *szLanguage;
 

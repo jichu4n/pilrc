@@ -35,7 +35,7 @@ PREFIX   =
 CC       = gcc
 
 # source / outputs
-OBJS 	= pilrc.o lex.o util.o restype.o bitmap.o font.o plex.o makeKbd.o xwin.o
+OBJS 	= pilrc.o prc.o lex.o util.o restype.o bitmap.o font.o plex.o makeKbd.o xwin.o
 EXEC    = pilrcui
 
 # compiler flags 

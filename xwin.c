@@ -275,7 +275,7 @@ pilrcui_drawform(GtkDrawingArea * w)
 {
   GtkStateType state;
   PLEXFORMOBJLIST *pplt;
-  RCFORM *pform;
+  RCFormBA16Type *pform;
   FRM *pfrm;
   int ilt;
   static GdkGC *pens[5] = { NULL, NULL, NULL, NULL, NULL };
@@ -321,8 +321,8 @@ pilrcui_drawform(GtkDrawingArea * w)
 
   pfrm = (FRM *) PlexGetElementAt(&vprcpfile->plfrm, CurrentForm);
 
-  pform = &pfrm->form;
-  pplt = &pfrm->pllt;
+  pform = &pfrm->s16.form;
+  pplt = &pfrm->s16.pllt;
 
   /*
    * Select pen based on pform->window.frameType.width 
@@ -374,19 +374,19 @@ pilrcui_drawform(GtkDrawingArea * w)
   {
     RCFORMOBJLIST *plt;
     RCFORMOBJECT *pobj;
-    RCFIELD field;
-    RCFORMLABEL label;
+    RCFieldBA16Type field;
+    RCFormLabelBA16Type label;
     RCRECT rc;
     char *pchText;
     int savepen;
 
     plt = (RCFORMOBJLIST *) PlexGetElementAt(pplt, ilt);
-    pobj = &plt->u.object;
+    pobj = &plt->s16.u.object;
     pchText = NULL;
-    switch (plt->objectType)
+    switch (plt->s16.objectType)
     {
       case frmFieldObj:
-        field = *pobj->field;
+        field = pobj->field->s16;
         if (!field.attr.usable)
           break;
         if (field.attr.underlined)
@@ -434,13 +434,13 @@ pilrcui_drawform(GtkDrawingArea * w)
         break;
       case frmControlObj:
         {
-          RCCONTROL ctl;
+          RCControlBA16Type ctl;
 
-          ctl = *pobj->control;
+          ctl = pobj->control->s16;
           if (!ctl.attr.usable)
             break;
 
-          pchText = pobj->control->u.text;
+          pchText = pobj->control->s16.u.text;
           switch (ctl.style)
           {
             case buttonCtl:
@@ -563,12 +563,12 @@ pilrcui_drawform(GtkDrawingArea * w)
         break;
       case frmListObj:
         {
-          RCLIST list;
+          RCListBA16Type list;
           RCRECT rc;
           char *s;
           int x;
 
-          list = *pobj->list;
+          list = pobj->list->s16;
           if (!list.attr.usable)
             break;
           gdk_draw_rectangle(GTK_WIDGET(w)->window, pens[pen], FALSE,
@@ -616,9 +616,9 @@ pilrcui_drawform(GtkDrawingArea * w)
         break;
       case frmBitmapObj:
         {
-          RCFORMBITMAP bitmap;
+          RCFormBitMapBA16Type bitmap;
 
-          bitmap = *pobj->bitmap;
+          bitmap = pobj->bitmap->s16;
           if (!bitmap.attr.usable)
             break;
 
@@ -631,10 +631,10 @@ pilrcui_drawform(GtkDrawingArea * w)
       case frmRectangleObj:
         break;
       case frmLabelObj:
-        label = *pobj->label;
+        label = pobj->label->s16;
         if (!label.attr.usable)
           break;
-        pchText = pobj->label->text;
+        pchText = pobj->label->s16.text;
         rc.topLeft = label.pos;
         pilrcui_pilot_text(w, pchText, org, &rc, label.fontID,
                            ptxLeft | ptxNoExtent);
@@ -752,7 +752,7 @@ void
 pilrcui_form_select(GtkWidget * w,
                     gpointer ifrm)
 {
-  CurrentForm = (int)ifrm;
+  CurrentForm = (p_int) ifrm;
 
   pilrcui_drawform(GTK_DRAWING_AREA(FormArea));
 }
@@ -808,11 +808,13 @@ pilrc_reload(char *fn)
     GtkWidget *menuitem;
 
     sprintf(buf, "Form %04x",
-            ((FRM *) PlexGetElementAt(&vprcpfile->plfrm, ifrm))->form.formId);
+            (int)((FRM *) PlexGetElementAt(&vprcpfile->plfrm, ifrm))->s16.
+            form.formId);
     menuitem = gtk_radio_menu_item_new_with_label(group, buf);
     group = gtk_radio_menu_item_group(GTK_RADIO_MENU_ITEM(menuitem));
     gtk_signal_connect(GTK_OBJECT(menuitem), "activate",
-                       (GtkSignalFunc) pilrcui_form_select, (gpointer) ifrm);
+                       (GtkSignalFunc) pilrcui_form_select,
+                       (gpointer) (p_int) ifrm);
     gtk_menu_append(GTK_MENU(menu), menuitem);
     gtk_widget_show(menuitem);
   }
@@ -1104,6 +1106,7 @@ main(int argc,
    * gtk_rc_parse ("filerc"); 
    */
 
+  CbInit();
   create_main_window();
 
   gtk_main();

@@ -20,13 +20,24 @@ What's new in 2.x (coming)
 -----------------
 o added "-R output.ro -prc" option
 - resources are bundled into a prc database (instead of .bin) !yay!
-- cr8r: 'pRES' type: 'data' (could be installed on device) :P
+- DEFAULT: cr8r: 'pRES' type: 'data' name: "PilRC resources"
+  o ability to custom specify the above using -creator -type and -name 
+  o added creationDate/modificationDate chunks
 o recursive includes (32-level deep) now supported
 o added src2unix.sh script, to strip ^M chars for UN*X users
+  - fixed to be "older unix" friendly
 o added srcindent.sh script, to indent all source files using indent tool
 o fixed strdup complaints
 o updated documentation (POPUPLIST example)
+o added support for non-32bit operating systems (alpha etc)
+o configure.in can decide if pilrcui is built
 o VC++ error/warning message syntax fix
+o added source migration support for CW_PLUGIN (for neil) :P
+o pilrcui compiles once again
+  - code assumes BA16 resource types (m68k resources), someone wanna fix?
+o misc documentation fixes
+o slider defaults of (MIN=0, MAX=100, PAGESIZE=10, VALUE=50) implemented
+o redhat 7.1 (new gcc) pre-processor madness fixup
 
 What's new in 2.8 (Tue, 1 May 2001)
 -----------------

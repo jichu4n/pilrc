@@ -33,10 +33,10 @@
 #pragma pack(2)
 #endif
 
+//#include <memory.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
-#include <memory.h>
 #include <string.h>
 #include <ctype.h>
 #include "pilrc.h"
@@ -53,6 +53,8 @@ typedef int bool;                                /* f */
 /*
  * Microsoft Windows .BMP file format  
  */
+// NCR: 16-feb-00 = bitmapfileheader already defined if compiling for windows
+#if !defined(CW_PLUGIN) || (CWPLUGIN_HOST != CWPLUGIN_HOST_WIN32)
 typedef struct tagBITMAPFILEHEADER
 {
 #ifdef __GNUC__
@@ -104,6 +106,7 @@ typedef struct tagBITMAPINFO
   RGBQUAD bmiColors[1];
 }
 BITMAPINFO;
+#endif
 
                                                                 // *INDENT-OFF*
 /*

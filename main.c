@@ -95,14 +95,14 @@ main(int cArg,
   char *szMacro;
   char *szValue;
   char *szIncFile;
-  int i;
+  int i, j;
   int fontType;
   int macroValue;
 
   // display the (c) string
-  printf("PilRC v2.8 patch release 1\n");
+  printf("PilRC v2.8 patch release 5\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
-  printf("  Copyright 2000-2001 Aaron Ardiri (ardiri@palmgear.com)\n");
+  printf("  Copyright 2000-2001 Aaron Ardiri (aaron@ardiri.com)\n");
 
   // initialize
   if (cArg < 2)
@@ -111,6 +111,10 @@ main(int cArg,
   szResFile = NULL;
   szIncFile = NULL;
   fontType = fontDefault;
+
+  strcpy(vfPrcName, DEFAULT_PRCNAME);
+  vfPrcCreator = DEFAULT_PRCCR8R;
+  vfPrcType = DEFAULT_PRCTYPE;
 
   // process as many command line arguments as possible
   for (i = 1; i < cArg; i++)
@@ -278,6 +282,52 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-prc"))
     {
       vfPrc = fTrue;
+      continue;
+    }
+
+    // name definition for prc output?
+    if (FSzEqI(rgszArg[i], "-name"))
+    {
+      if (i++ == cArg)
+        Usage();
+
+      strcpy(vfPrcName, rgszArg[i]);
+      continue;
+    }
+
+    // creator definition for prc output?
+    if (FSzEqI(rgszArg[i], "-creator"))
+    {
+      if (i++ == cArg)
+        Usage();
+
+      vfPrcCreator = 0;
+      if (strlen(rgszArg[i]) == 4)
+      {
+        for (j = 0; j < 4; j++)
+        {
+          vfPrcCreator = vfPrcCreator << 8;
+          vfPrcCreator |= (int)rgszArg[i][j];
+        }
+      }
+      continue;
+    }
+
+    // type definition for prc output?
+    if (FSzEqI(rgszArg[i], "-type"))
+    {
+      if (i++ == cArg)
+        Usage();
+
+      vfPrcType = 0;
+      if (strlen(rgszArg[i]) == 4)
+      {
+        for (j = 0; j < 4; j++)
+        {
+          vfPrcType = vfPrcType << 8;
+          vfPrcType |= (int)rgszArg[i][j];
+        }
+      }
       continue;
     }
 

@@ -29,9 +29,9 @@
  *                 GNU GPL documentation additions
  */
 
+// #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <memory.h>
 #include <string.h>
 #include <ctype.h>
 #include "pilrc.h"

@@ -461,7 +461,7 @@ FGetLex(LEX * plex,
         {
           int n, tmp;
 
-          n = (*pfnChkCode) (pchLex, &tmp);
+          n = (*pfnChkCode) ((unsigned char *)pchLex, &tmp);
           if (n >= 1)
           {
             while (n-- > 0)

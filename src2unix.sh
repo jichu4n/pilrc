@@ -2,9 +2,9 @@
 
 stripcr_inplace ()
 {
-    mv $1 $1.dos
-    cat $1.dos | tr -d \\r > $1
-    chmod --reference=$1.dos $1
+    cat $1 | tr -d \\r > $1.unx_
+    cat $1.unx_ > $1
+    rm $1.unx_
 }
 
 for file in *.c *.h; do
