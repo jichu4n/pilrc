@@ -95,6 +95,8 @@ VOID DumpBytes(void *pv,
 VOID PadBoundary();
 VOID PadWordBoundary();
 int IbOut();
+void AddAccessPath(const char *path);
+void FreeAccessPathsList(void);
 char *FindAndOpenFile(char *szIn,
                       char *mode,
                       FILE ** returnFile);
@@ -107,10 +109,6 @@ void FreeDependsList(void);
 
 extern char rgbZero[];
 extern FILE *vfhIn;
-
-extern const char **includePaths; // pointer to array of path pointers
-extern int totalIncludePaths;     // how many paths have we read
-extern int allocatedIncludePaths; // how many path pointers are allocated?
 
 #ifdef CW_PLUGIN
 // XXX ncr

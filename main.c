@@ -121,27 +121,6 @@ Usage(void)
 }
 
 /**
- * Adds a new access path to the end of the access path array
- *
- * @param path access path string to add to list, must remain available
- */
-static void
-AddAccessPath(const char *path)
-{
-	/* allocate memory for include paths in bundles of 32 */
-	if (totalIncludePaths == allocatedIncludePaths)
-	{
-		allocatedIncludePaths += 32;
-		includePaths = realloc(includePaths, allocatedIncludePaths * sizeof(const char *));
-		if (includePaths == NULL)
-		{
-			/* error: out of memory */
-		}
-	}
-   includePaths[totalIncludePaths++] = path;
-}
-
-/**
  * The main entry point of PilRC.
  *
  * @param cArg    the number of command line arguments.
@@ -541,7 +520,7 @@ main(int cArg,
 // bug fix: john marshall
 //ParseFile(szInputFile, szOutputPath, szResFile, szIncFile, fontType);
   FreeRcpfile(ParseFile(szInputFile, szOutputPath, szResFile, szIncFile, fontType));
-  free(includePaths);
+  FreeAccessPathsList();
   
   return 0;
 }

@@ -92,9 +92,39 @@ static PLEXRESOURCEDIR resdir;
 /*
  * Includes 
  */
-const char **includePaths = NULL;
-int totalIncludePaths = 0;
-int allocatedIncludePaths = 0;
+static const char **includePaths = NULL;
+static int totalIncludePaths = 0;
+static int allocatedIncludePaths = 0;
+
+/**
+ * Adds a new access path to the end of the access path array
+ *
+ * @param path access path string to add to list, must remain available
+ */
+void
+AddAccessPath(const char *path)
+{
+  /* allocate memory for include paths in bundles of 32 */
+  if (totalIncludePaths == allocatedIncludePaths)
+  {
+    allocatedIncludePaths += 32;
+    includePaths = realloc((void *)includePaths, allocatedIncludePaths * sizeof(const char *));
+    if (includePaths == NULL)
+    {
+      /* error: out of memory */
+    }
+  }
+  includePaths[totalIncludePaths++] = path;
+}
+
+void FreeAccessPathsList(void)
+{
+  free((void *)includePaths);
+
+  includePaths = NULL;
+  totalIncludePaths = 0;
+  allocatedIncludePaths = 0;
+}
 
 /*-----------------------------------------------------------------------------
 |	Error
