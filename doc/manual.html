@@ -33,13 +33,13 @@
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
   <a href="mailto:combee@techwood.org">Ben Combee</a> (combee@techwood.org)<br>
   <a href="mailto:johnm@falch.net">John Marshall</a> (johnm@falch.net)<br>
-  28 february 2003
+  1 March 2003
 </font>
 </td>
 </tr>
 </table>
 
-Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC Home Page</a> for the latest version.<p>
+Check the <a href="http://www.ardiri.com/index.php?redir=palm&cat=pilrc">PilRC Home Page</a> for the latest version.<p>
 
 <b><u>Description</u></b>
 <ul>
@@ -118,7 +118,7 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
 <td>
    [-L LANGUAGE] [-I INCLUDE PATH] [-D MACRO(=VAL)] 
 	[-R RESFILE] [-H INCLUDE PATH]<BR>[-ro] [-ts] [-q] [-V] [-Loc CODE] [-StripLoc]
-	[-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] [-allowEditID]<BR>[-LE32] [-noIFIH] 
+	[-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] [-Fc] [-allowEditID]<BR>[-LE32] [-noIFIH] 
 	<span class="palmInternal">[-AppIcon68K] [-amdc NAME]</span>[-noEllipsis] [-o OUTPUTPATH] [-M] [-MD] file.rcp [output path]
 </td>
 </tr>
@@ -325,6 +325,18 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
+  -Fc
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Use Cyrillic font widths for AUTO width calculations.
+  </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
   -allowEditID
   </font>
   </td>
@@ -468,7 +480,7 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
   </td>
   <td valign=top>
   <font face="Arial,Helvetica">
-  Specify the type to use when gerenating a prc directly (-ro). The type parameter MUST NOT be single quoted. Use abcd, not 'abcd'.
+  Specify the type to use when generating a prc directly (-ro). The type parameter MUST NOT be single quoted. Use abcd, not 'abcd'.
   </font>
   </td>
 </tr>
@@ -480,19 +492,19 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
   </td>
   <td valign=top>
   <font face="Arial,Helvetica">
-  Specify the creator to use when gerenating a prc directly (-ro). The creator parameter MUST NOT be single quoted. Use abcd, not 'abcd'.
+  Specify the creator to use when generating a prc directly (-ro). The creator parameter MUST NOT be single quoted. Use abcd, not 'abcd'.
   </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
-  -name FileName
+  -name Name
   </font>
   </td>
   <td valign=top>
   <font face="Arial,Helvetica">
-  Specify the output file name to use. If not specified, it will be deducted from the input filename.
+  Specify the database name to use when generating a prc directly (-ro).
   </font>
   </td>
 </tr>
@@ -516,7 +528,7 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
   </td>
   <td valign=top>
   <font face="Arial,Helvetica">
-  Generate dependency list only; supress all other output.
+  Generate dependency list only; suppress all other output.
   </font>
   </td>
 </tr>
@@ -651,7 +663,7 @@ Each field's required type is indicated by a suffix after the field name
     <font face="Arial,Helvetica">
     number <br>
     defined constant or simple arithmetic expression. Valid operators are
-    "+", "-", "*" and "/". Precendence is left to right, unless changed with
+    "+", "-", "*" and "/". Precedence is left to right, unless changed with
     the use of parenthesis. <br>
     <b>NOTE</b>: Math calculations are integer based. <br>
     example: <tt>23</tt> <br>
@@ -832,7 +844,7 @@ This allows a programmer to have one header file for their project
 containing pre-defined resource IDs. Source code can reference the 
 symbols as can <tt>PilRC</tt>. <p>
 
-<tt>PilRC</tt> understands three include file formats. <p> 
+<tt>PilRC</tt> understands four include file formats:<p> 
 
 <ul>
   <table border=0>
@@ -867,10 +879,28 @@ symbols as can <tt>PilRC</tt>. <p>
     } </tt>
     </td>
   </tr>
+  <tr>
+    <td valign=top width=100>
+    <tt>.rcp</tt>, <tt>.r*</tt>
+    </td>
+    <td valign=top>
+    General PilRC source code
+    </td>
+  </tr>
 </table> <p>
 </ul>
 
-Once defined, a symbol can be used in place of any number. <br>
+Files with any extension starting with <tt>.r</tt> will be included entirely
+as PilRC source code;
+files with the extension <tt>.java</tt> or <tt>.jav</tt> will be scanned for
+constants defined in Java syntax;
+and files with any other extension will be scanned for constants defined
+with either <tt>#define</tt> or <tt>equ</tt>.
+(All these filename extension comparisons are case-insensitive.)
+
+<p>
+Once defined, a symbol can be used in place of any number.
+<p>
 <b>NOTE</b>: <tt>#ifdef</tt> derivatives are ignored by <tt>PilRC</tt>.
 </ul>
 
@@ -1130,7 +1160,7 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     </td>
     <td valign=center>
     <font face="Arial,Helvetica">
-    Font Map extention for Font Resource (i.e. japan)
+    Font Map extension for Font Resource (i.e. japan)
     </font>
     </td>
   </tr>
@@ -1906,9 +1936,9 @@ VERSION "1.0 beta"</pre>
 
 <ul>
 <pre>
-STRING ID <font color="#00ff00">&lt;StringResourceId.n&gt;</font>&nbsp
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">&lt;String.ss&gt;</font>
-STRING ID <font color="#00ff00">&lt;StringResourceId.n&gt;</font>&nbsp
+STRING ID <font color="#00ff00">&lt;StringResourceId.n&gt;</font>&nbsp;
+[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;String.ss&gt;</font>
+STRING ID <font color="#00ff00">&lt;StringResourceId.n&gt;</font>&nbsp;
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;FILE <font color="#00ff00">&lt;StringFile.s&gt;</font></pre>
 </ul>
 
@@ -1936,8 +1966,8 @@ STRING ID 101 FILE "string.txt"</pre>
 
 <ul>
 <pre>
-STRINGTABLE ID <font color="#00ff00">&lt;StringTableResourceId.n&gt;</font>&nbsp
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">&lt;PrefixString.ss&gt; </font> ... <font color="#00ff00">&lt;String.ss&gt;</font></pre>
+STRINGTABLE ID <font color="#00ff00">&lt;StringTableResourceId.n&gt;</font>&nbsp;
+[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;PrefixString.ss&gt; </font> ... <font color="#00ff00">&lt;String.ss&gt;</font></pre>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -2013,7 +2043,7 @@ STRINGTABLE ID 100 "-" "One" "Two" "Three" "Four"</pre>
 
 <ul>
 <pre>
-CATEGORIES ID <font color="#00ff00">&lt;CategoryResourceId.n&gt;</font>&nbsp
+CATEGORIES ID <font color="#00ff00">&lt;CategoryResourceId.n&gt;</font>&nbsp;
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;Category1.s&gt; ... &lt;Category2.s&gt;</font></pre>
 </ul>
 
@@ -2042,7 +2072,7 @@ CATEGORIES ID 100 "Unfiled" "Business" "Personal"</pre>
 
 <ul>
 <pre>
-APPLICATIONICONNAME ID <font color="#00ff00">&lt;AINResourceId.n&gt;</font>&nbsp
+APPLICATIONICONNAME ID <font color="#00ff00">&lt;AINResourceId.n&gt;</font>&nbsp;
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;ApplicationName.s&gt;</font> </pre>
 </ul>
 
@@ -2062,7 +2092,7 @@ APPLICATIONICONNAME ID 100 "AlarmHack"</pre>
 
 <ul>
 <pre>
-APPLICATION ID <font color="#00ff00">&lt;ApplResourceId.n&gt;</font>&nbsp
+APPLICATION ID <font color="#00ff00">&lt;ApplResourceId.n&gt;</font>&nbsp;
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;APPL.s&gt;</font></pre>
 </ul>
 
@@ -2091,7 +2121,7 @@ APPLICATION ID 1 "PALM"</pre>
 
 <ul>
 <pre>
-LAUNCHERCATEGORY [ID <font color="#00ff00">&lt;LaunchCatResourceId.n&gt;</font>]&nbsp
+LAUNCHERCATEGORY [ID <font color="#00ff00">&lt;LaunchCatResourceId.n&gt;</font>]&nbsp;
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;APPL.s&gt;</font></pre>
 </ul>
 
@@ -2111,12 +2141,12 @@ LAUNCHERCATEGORY ID 1000 "Games"</pre>
 </font>
 <ul>
 <pre>
-ICON [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>]&nbsp
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">&lt;IconFileName.s&gt;</font>
+ICON [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>]&nbsp;
+[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;IconFileName.s&gt;</font>
 ICONFAMILY [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>] 
            <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
            [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-           [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]</pre>
+           [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]</pre>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -2160,12 +2190,12 @@ ICONFAMILY "icon1bpp.bmp" "" "" "icon8bpp.bmp" TRANSPARENTINDEX 255</pre>
 </font>
 <ul>
 <pre>
-SMALLICON [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>]&nbsp
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">&lt;IconFileName.s&gt;</font>
+SMALLICON [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>]&nbsp;
+[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;IconFileName.s&gt;</font>
 SMALLICONFAMILY [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>] 
                 <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
                 [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-                [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]</pre>
+                [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]</pre>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -2216,7 +2246,7 @@ ICONFAMILYEX [ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>]
 BEGIN
   BITMAP <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> BPP <font color="#00ff00">&lt;BitPerPixel.n&gt;</font>
          [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-         [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
+         [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
          [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
          [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
          [DENSITY <font color="#00ff00">&lt;BitmapResourceDensity.n&gt;</font>]
@@ -2273,7 +2303,7 @@ SMALLICONFAMILYEX [ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>]
 BEGIN
   BITMAP <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> BPP <font color="#00ff00">&lt;BitPerPixel.n&gt;</font>
          [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-         [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
+         [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
          [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
          [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
          [DENSITY <font color="#00ff00">&lt;BitmapResourceDensity.n&gt;</font>]
@@ -2322,41 +2352,41 @@ END
 
 <ul>
 <pre>
-BITMAP       [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">&lt;BitmapFileName.s&gt;</font> 
+BITMAP       [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
+             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;BitmapFileName.s&gt;</font> 
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPGREY   [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">&lt;BitmapFileName.s&gt;</font> 
+BITMAPGREY   [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
+             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;BitmapFileName.s&gt;</font> 
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPGREY16 [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">&lt;BitmapFileName.s&gt;</font> 
+BITMAPGREY16 [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
+             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;BitmapFileName.s&gt;</font> 
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPCOLOR16 [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">&lt;BitmapFileName.s&gt;</font> 
+BITMAPCOLOR16 [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
+             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;BitmapFileName.s&gt;</font> 
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPCOLOR  [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
+BITMAPCOLOR  [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
+             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
+             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPCOLOR16K [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
+BITMAPCOLOR16K [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
+             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
              [TRANSPARENT r g b] [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
 BITMAPFAMILY [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; 
              &lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
+             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
 BITMAPFAMILYSPECIAL [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; 
              &lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
+             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BOOTSCREENFAMILY [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp<font color="#00ff00">
+BOOTSCREENFAMILY [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
+             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">
              &lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
+             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
 </pre></ul>
 
@@ -2455,7 +2485,7 @@ BITMAPFAMILYEX [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="
 BEGIN
   BITMAP <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> BPP <font color="#00ff00">&lt;BitPerPixel.n&gt;</font>
          [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-         [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
+         [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
          [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
          [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
          [DENSITY <font color="#00ff00">&lt;BitmapResourceDensity.n&gt;</font>]
@@ -2532,7 +2562,7 @@ TRAP ID 1000 VALUE 367</pre>
 
 <ul>
 <pre>
-FONT ID <font color="#00ff00">&lt;FontResourceId.n&gt;</font>&nbsp
+FONT ID <font color="#00ff00">&lt;FontResourceId.n&gt;</font>&nbsp;
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;FONTID <font color="#00ff00">&lt;FontId.n&gt; &lt;FontFileName.s&gt;</font></pre>
 </ul>
 
@@ -2723,7 +2753,7 @@ FONT support in PilRC is not complete, and has been reverse engineered.
 </font>
 
 <ul><pre>
-FONTINDEX ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp
+FONTINDEX ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
 BEGIN
 	<font color="#00ff00">&lt;FontType.s&gt; &lt;ResId.n&gt;</font>
@@ -2763,7 +2793,7 @@ END
 </font>
 
 <ul><pre>
-FONTMAP ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+FONTMAP ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
 BEGIN
 	<font color="#00ff00">&lt;Flag.n&gt;&lt;State.n&gt;&lt;Value.n&gt;</font>
 	...
@@ -2794,7 +2824,7 @@ END
 
 <ul>
 <pre>
-HEX <font color="#00ff00">&lt;ResType.s&gt;</font> ID <font color="#00ff00">&lt;ResId.n&gt</font>&nbsp
+HEX <font color="#00ff00">&lt;ResType.s&gt;</font> ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
     <font color="#00ff00">&lt;Byte.n&gt; | &lt;String.s&gt;</font></pre>
 </ul>
@@ -2823,7 +2853,7 @@ HEX "junk" ID 1000
 
 <ul>
 <pre>
-DATA <font color="#00ff00">&lt;ResType.s&gt;</font> ID <font color="#00ff00">&lt;ResId.n&gt</font>&nbsp
+DATA <font color="#00ff00">&lt;ResType.s&gt;</font> ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>] <font color="#00ff00">&lt;FileName.s&gt;</font></pre>
 </ul>
 
@@ -2843,7 +2873,7 @@ DATA "junk" ID 1000 "binary.bin"</pre>
 
 <ul>
 <pre>
-INTEGER ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp
+INTEGER ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;[VALUE] <font color="#00ff00">&lt;Value.n&gt;</font></pre>
 </ul>
 <font face="Arial,Helvetica">
@@ -2867,7 +2897,7 @@ INTEGER ID 1000 VALUE 1966 </pre>
 </font>
 
 <ul><pre>
-BYTELIST ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp
+BYTELIST ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
 BEGIN
 	<font color="#00ff00">&lt;Value.n&gt;</font>
@@ -2894,7 +2924,7 @@ END
 </font>
 
 <ul><pre>
-WORDLIST ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp
+WORDLIST ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
 BEGIN
 	<font color="#00ff00">&lt;Value.n&gt;</font>
@@ -2920,7 +2950,7 @@ END
 </font>
 
 <ul><pre>
-LONGWORDLIST ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp
+LONGWORDLIST ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
 BEGIN
 	<font color="#00ff00">&lt;Value.n&gt;</font>
@@ -2970,8 +3000,8 @@ END </pre>
 </font>
 
 <ul><pre>
-FEATURE ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp
+FEATURE ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
+[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;
 BEGIN
 	[CREATOR <font color="#00ff00">&lt;creator.s&gt;</font>]
 	BEGIN
@@ -3004,7 +3034,7 @@ GRAFFITIINPUTAREA ID <font color="#00ff00">&lt;GraffitiInputAreaId.n&gt;</font>
   [VERSION <font color="#00ff00">&lt;version.n&gt;</font>]
   [CREATOR <font color="#00ff00">&lt;creator.s&gt;</font>]
   [LANGUAGE <font color="#00ff00">&lt;language.s&gt;</font>]
-  [COUNTRY <font color="#00ff00">&lt;conutry.s&gt;</font>]
+  [COUNTRY <font color="#00ff00">&lt;country.s&gt;</font>]
   [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
 BEGIN
   <font color="#00ff00">&lt;OBJECTS&gt;</font>
@@ -3091,8 +3121,8 @@ END
 
 <ul>
 <pre>
-COUNTRYLOCALISATION ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp
+COUNTRYLOCALISATION ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
+[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;
 BEGIN
   BEGIN
     [NUMBER <font color="#00ff00">&lt;number.n&gt;</font>]
@@ -3170,8 +3200,8 @@ END</pre>
 
 <ul>
 <pre>
-LOCALES ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp
+LOCALES ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
+[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;
 BEGIN
   [VERSION <font color="#00ff00">&lt;number.n&gt;</font>]
   BEGIN
@@ -3564,7 +3594,7 @@ END
 
 <ul><pre>
 CHARSETLIST ID <font color="#00ff00">&lt;ResId.n&gt;</font> [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
-BAGIN
+BEGIN
 	NAME <font color="#00ff00">&lt;Name.s&gt;</font> ID <font color="#00ff00">&lt;ID.n&gt;</font>
 	...
 END
@@ -3698,7 +3728,7 @@ is one or more of: <p>
 <u>Notes:</u> <p>
 <ul>
 <li>
-Declare a short keyword for long strings, and define native and foriegn 
+Declare a short keyword for long strings, and define native and foreign 
 translations for it.
 </ul> <p>
 
@@ -3767,7 +3797,7 @@ following websites: <p>
      Development resources for Palm OS developers with a CodeWarrior focus. <p>
 <li> <a href="http://www.massena.com/darrin/pilot/" target="_">http://www.massena.com/darrin/pilot/</a> <br>
      A great source of low level Palm Computing Platform information. <br>
-     Provided by David Massena. <p>
+     Provided by Darrin Massena. <p>
 </ul>
 
 </font>
