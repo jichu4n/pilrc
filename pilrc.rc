@@ -2,7 +2,7 @@
  * @(#)pilrc.rc
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2003, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -43,7 +43,7 @@ BEGIN
         BEGIN
             VALUE "FileDescription",		"PilRC resource compiler for Palm OS"
             VALUE "FileVersion", 			PILRC_VERSION_STR
-            VALUE "LegalCopyright",			"Copyright © 1997-1999 Wes Cherry; Copyright © 2000-2003 Aaron Ardiri\0"
+            VALUE "LegalCopyright",			"Copyright © 1997-1999 Wes Cherry; Copyright © 2000-2004 Aaron Ardiri\0"
             VALUE "LegalLicense",			"Licensed under GNU General Public License, version 2.  See LICENSE.TXT for details.\0"
             VALUE "ProductName",			"PilRC\0"
             VALUE "ProductVersion",			PILRC_VERSION_STR

@@ -2,7 +2,7 @@
  * @(#)version.h
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2003, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -33,7 +33,7 @@
  *	unix/pilrc.spec
  */
 
-#define PILRC_VERSION      3, 1, 0, 0
-#define PILRC_VERSION_STR  "3.1"
+#define PILRC_VERSION      3, 2, 0, 0
+#define PILRC_VERSION_STR  "3.2"
 
 #endif

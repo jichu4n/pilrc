@@ -1,5 +1,5 @@
 Name: pilrc
-Version: 3.1
+Version: 3.2
 Release: 1
 Summary: Palm OS resource compiler
 License: GPL

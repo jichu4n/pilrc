@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
- PilRC version 3.1                                         31 December 2003
+ PilRC version 3.2                                           1 February 2004
 ----------------------------------------------------------------------------
 
   INSTALLATION:
@@ -11,7 +11,7 @@
   resource file. 
 
   Copyright (C) 1997-1999 Wes Cherry
-  Copyright (C) 2000-2003 Aaron Ardiri
+  Copyright (C) 2000-2004 Aaron Ardiri
 
   This program is free software;  you can redistribute it and/or modify it 
   under the terms of the GNU  General  Public  License as published by the 
