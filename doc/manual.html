@@ -2,7 +2,10 @@
 <head>
 <title>PilRC</title>
 <style>
-.palmInternal { display:none; }	<-- none or block -->
+PRE.syntax { margin-left: 3em }
+PRE.syntax VAR, TT.syntax VAR { font-style: normal; color: #00ff00 }
+PRE.syntax STRONG, TT.syntax STRONG { font-weight: normal; color: #0000ff }
+.palmInternal { display: none }
 </style>
 </head>
 <body bgcolor="#00000" text="#ffffff" link="#7f3fff" vlink="#7f3fff">
@@ -855,8 +858,8 @@ symbols as can <tt>PilRC</tt>. <p>
     <tt>.h</tt>
     </td>
     <td valign=top>
-    <tt>
-    #define <font color="#00ff00">&lt;Symbol.i&gt;&lt;Value.n&gt;</font></tt>
+    <tt class=syntax>
+    #define <var>&lt;Symbol.i&gt;&lt;Value.n&gt;</var></tt>
     </td>
   </tr>
   <tr>
@@ -864,8 +867,8 @@ symbols as can <tt>PilRC</tt>. <p>
     <tt>.inc</tt>
     </td>
     <td valign=top>
-    <tt>
-    <font color="#00ff00">&lt;Symbol.i&gt;</font> equ <font color="#00ff00">&lt;Value.n&gt;</font></tt>
+    <tt class=syntax>
+    <var>&lt;Symbol.i&gt;</var> equ <var>&lt;Value.n&gt;</var></tt>
     </td>
   </tr>
   <tr>
@@ -873,11 +876,11 @@ symbols as can <tt>PilRC</tt>. <p>
     <tt>.java, .jav</tt>
     </td>
     <td valign=top>
-    <tt>
+    <tt class=syntax>
     package &lt;PackageName&gt; <p>
     public class &lt;ClassName&gt; { <br>
       &nbsp;&nbsp;&nbsp;&nbsp;
-      public static final short <font color="#00ff00">&lt;Symbol.i&gt;</font> = <font color="#00ff00">&lt;Value.n&gt;</font>; <br>
+      public static final short <var>&lt;Symbol.i&gt;</var> = <var>&lt;Value.n&gt;</var>; <br>
     } </tt>
     </td>
   </tr>
@@ -1449,25 +1452,23 @@ The <tt>.rcp</tt> file may also contain the following directives: <p>
 <b>FORM (tFRM)</b> <p>
 </font>
 
-<ul>
-<pre>
-FORM ID <font color="#00ff00">&lt;FormResourceId.n&gt;</font> AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>)
-  [<font color="#0000FF">FRAME</font>] [NOFRAME]
+<pre class=syntax>
+FORM ID <var>&lt;FormResourceId.n&gt;</var> AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>)
+  [<strong>FRAME</strong>] [NOFRAME]
   [MODAL]
-  [<font color="#0000FF">SAVEBEHIND</font>] [NOSAVEBEHIND]
-  [<font color="#0000FF">USABLE</font>]
-  [HELPID <font color="#00ff00">&lt;HelpId.n&gt;</font>]
-  [DEFAULTBTNID <font color="#00ff00">&lt;BtnId.n&gt;</font>]
-  [MENUID <font color="#00ff00">&lt;MenuId.n&gt;</font>]
-  [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+  [<strong>SAVEBEHIND</strong>] [NOSAVEBEHIND]
+  [<strong>USABLE</strong>]
+  [HELPID <var>&lt;HelpId.n&gt;</var>]
+  [DEFAULTBTNID <var>&lt;BtnId.n&gt;</var>]
+  [MENUID <var>&lt;MenuId.n&gt;</var>]
+  [LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
-  <font color="#00ff00">&lt;OBJECTS&gt;</font>
+  <var>&lt;OBJECTS&gt;</var>
 END </pre>
-</ul>
 
 <font face="Arial,Helvetica">
 Where 
-</font><tt><font color="#00ff00">&lt;OBJECTS&gt;</font></tt>
+</font><tt class=syntax><var>&lt;OBJECTS&gt;</var></tt>
 <font face="Arial,Helvetica">
 is one or more of: <p>
 
@@ -1478,8 +1479,8 @@ is one or more of: <p>
     <tt>TITLE</tt>
     </td>
     <td valign=top>
-    <tt>
-    <font color="#00ff00">&lt;Title.ss&gt;</font>
+    <tt class=syntax>
+    <var>&lt;Title.ss&gt;</var>
     </tt>
     </td>
   </tr>
@@ -1488,17 +1489,17 @@ is one or more of: <p>
     <tt>BUTTON</tt>
     </td>
     <td valign=top>
-    <tt>
-    <font color="#00ff00">&lt;Label.ss&gt;</font> 
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR] 
+    <tt class=syntax>
+    <var>&lt;Label.ss&gt;</var> 
+    ID <var>&lt;Id.n&gt;</var> 
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
+    [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] [LEFTANCHOR] 
     [RIGHTANCHOR] <br>
-    [<font color="#0000ff">FRAME</font>] [NOFRAME] [BOLDFRAME] [RECTFRAME] 
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] <br> 
+    [<strong>FRAME</strong>] [NOFRAME] [BOLDFRAME] [RECTFRAME] 
+    [FONT <var>&lt;FontId.n&gt;</var>] <br> 
     [GRAPHICAL]
-    [BITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
-    [SELECTEDBITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
+    [BITMAPID <var>&lt;BitmapId.n&gt;</var>]
+    [SELECTEDBITMAPID <var>&lt;BitmapId.n&gt;</var>]
     </tt>
     </td>
   </tr>
@@ -1507,17 +1508,17 @@ is one or more of: <p>
     <tt>PUSHBUTTON</tt>
     </td>
     <td valign=top>
-    <tt>
-    <font color="#00ff00">&lt;Label.ss&gt;</font> 
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>)<br>
-    [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR] 
+    <tt class=syntax>
+    <var>&lt;Label.ss&gt;</var> 
+    ID <var>&lt;Id.n&gt;</var> 
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>)<br>
+    [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] [LEFTANCHOR] 
     [RIGHTANCHOR] <br>
-    [FONT <font color="#00ff00">&lt;FontId&gt;</font>] 
-    [GROUP <font color="#00ff00">&lt;GroupId.n&gt;</font>] <br>
+    [FONT <var>&lt;FontId&gt;</var>] 
+    [GROUP <var>&lt;GroupId.n&gt;</var>] <br>
     [GRAPHICAL]
-    [BITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
-    [SELECTEDBITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
+    [BITMAPID <var>&lt;BitmapId.n&gt;</var>]
+    [SELECTEDBITMAPID <var>&lt;BitmapId.n&gt;</var>]
     </tt>
     </td>
   </tr>
@@ -1526,14 +1527,14 @@ is one or more of: <p>
     <tt>CHECKBOX</tt>
     </td>
     <td valign=top>
-    <tt>
-    <font color="#00ff00">&lt;Label.ss&gt;</font>
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
+    <tt class=syntax>
+    <var>&lt;Label.ss&gt;</var>
+    ID <var>&lt;Id.n&gt;</var> 
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
+    [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
     [RIGHTANCHOR] <br>
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] 
-    [GROUP <font color="#00ff00">&lt;GroupId.n&gt;</font>] [CHECKED]
+    [FONT <var>&lt;FontId.n&gt;</var>] 
+    [GROUP <var>&lt;GroupId.n&gt;</var>] [CHECKED]
     </tt>
     </td>
   </tr>
@@ -1542,16 +1543,16 @@ is one or more of: <p>
     <tt>POPUPTRIGGER</tt>
     </td>
     <td valign=top>
-    <tt>
-    <font color="#00ff00">&lt;Label.ss&gt;</font>
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
+    <tt class=syntax>
+    <var>&lt;Label.ss&gt;</var>
+    ID <var>&lt;Id.n&gt;</var> 
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
+    [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
     [RIGHTANCHOR] <br>
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] <br>
+    [FONT <var>&lt;FontId.n&gt;</var>] <br>
     [GRAPHICAL]
-    [BITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
-    [SELECTEDBITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
+    [BITMAPID <var>&lt;BitmapId.n&gt;</var>]
+    [SELECTEDBITMAPID <var>&lt;BitmapId.n&gt;</var>]
     </tt>
     </td>
   </tr>
@@ -1560,16 +1561,16 @@ is one or more of: <p>
     <tt>SELECTORTRIGGER</tt>
     </td>
     <td valign=top>
-    <tt>
-    <font color="#00ff00">&lt;Label.ss&gt;</font>
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
+    <tt class=syntax>
+    <var>&lt;Label.ss&gt;</var>
+    ID <var>&lt;Id.n&gt;</var> 
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
+    [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
     [RIGHTANCHOR] <br>
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] <br>
+    [FONT <var>&lt;FontId.n&gt;</var>] <br>
     [GRAPHICAL]
-    [BITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
-    [SELECTEDBITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
+    [BITMAPID <var>&lt;BitmapId.n&gt;</var>]
+    [SELECTEDBITMAPID <var>&lt;BitmapId.n&gt;</var>]
     </tt>
     </td>
   </tr>
@@ -1578,17 +1579,17 @@ is one or more of: <p>
     <tt>REPEATBUTTON</tt>
     </td>
     <td valign=top>
-    <tt>
-    <font color="#00ff00">&lt;Label.ss&gt;</font>
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
+    <tt class=syntax>
+    <var>&lt;Label.ss&gt;</var>
+    ID <var>&lt;Id.n&gt;</var> 
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
+    [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
     [RIGHTANCHOR] <br>
-    [<font color="#0000ff">FRAME</font>] [NOFRAME] [BOLDFRAME] [RECTFRAME]
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] <br>
+    [<strong>FRAME</strong>] [NOFRAME] [BOLDFRAME] [RECTFRAME]
+    [FONT <var>&lt;FontId.n&gt;</var>] <br>
     [GRAPHICAL]
-    [BITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
-    [SELECTEDBITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
+    [BITMAPID <var>&lt;BitmapId.n&gt;</var>]
+    [SELECTEDBITMAPID <var>&lt;BitmapId.n&gt;</var>]
     </tt>
     </td>
   </tr>
@@ -1597,12 +1598,12 @@ is one or more of: <p>
     <tt>LABEL</tt>
     </td>
     <td valign=top>
-    <tt>
-    <font color="#00ff00">&lt;Label.ss&gt;</font>
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt;</font>) <br>
-    [<font color="#0000ff">USABLE</font>] [NONUSABLE] 
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
+    <tt class=syntax>
+    <var>&lt;Label.ss&gt;</var>
+    ID <var>&lt;Id.n&gt;</var> 
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt;</var>) <br>
+    [<strong>USABLE</strong>] [NONUSABLE] 
+    [FONT <var>&lt;FontId.n&gt;</var>]
     </tt>
     </td>
   </tr>
@@ -1611,15 +1612,15 @@ is one or more of: <p>
     <tt>FIELD</tt>
     </td>
     <td valign=top>
-    <tt>
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] 
-    [<font color="#0000ff">LEFTALIGN</font>] [RIGHTALIGN] <br>
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
-    [<font color="#0000ff">EDITABLE</font>] [NONEDITABLE] [UNDERLINED]  <br>
-    [<font color="#0000ff">SINGLELINE</font>] [MULTIPLELINES] [DYNAMICSIZE] 
-    [MAXCHARS <font color="#00ff00">&lt;MaxChars.n&gt;</font>] <br>
+    <tt class=syntax>
+    ID <var>&lt;Id.n&gt;</var> 
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
+    [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] 
+    [<strong>LEFTALIGN</strong>] [RIGHTALIGN] <br>
+    [FONT <var>&lt;FontId.n&gt;</var>]
+    [<strong>EDITABLE</strong>] [NONEDITABLE] [UNDERLINED]  <br>
+    [<strong>SINGLELINE</strong>] [MULTIPLELINES] [DYNAMICSIZE] 
+    [MAXCHARS <var>&lt;MaxChars.n&gt;</var>] <br>
     [AUTOSHIFT] [NUMERIC] [HASSCROLLBAR] 
     </tt>
     </td>
@@ -1629,9 +1630,9 @@ is one or more of: <p>
     <tt>POPUPLIST</tt>
     </td>
     <td valign=top>
-    <tt>
+    <tt class=syntax>
     ID 
-    <font color="#00ff00">&lt;ControlId.n&gt; &lt;ListId.n&gt;</font>
+    <var>&lt;ControlId.n&gt; &lt;ListId.n&gt;</var>
     </tt>
     </td>
   </tr>
@@ -1640,14 +1641,14 @@ is one or more of: <p>
     <tt>LIST</tt>
     </td>
     <td valign=top>
-    <tt>
-    <font color="#00ff00">&lt;Item.s&gt;</font> ...
-    <font color="#00ff00">&lt;Item.s&gt;</font> <br>
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] 
-    [VISIBLEITEMS <font color="#00ff00">&lt;NumVisItems.n&gt;</font>] <br>
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] [SEARCH]
+    <tt class=syntax>
+    <var>&lt;Item.s&gt;</var> ...
+    <var>&lt;Item.s&gt;</var> <br>
+    ID <var>&lt;Id.n&gt;</var> 
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
+    [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] 
+    [VISIBLEITEMS <var>&lt;NumVisItems.n&gt;</var>] <br>
+    [FONT <var>&lt;FontId.n&gt;</var>] [SEARCH]
     </tt>
     </td>
   </tr>
@@ -1656,10 +1657,10 @@ is one or more of: <p>
     <tt>FORMBITMAP</tt>
     </td>
     <td valign=top>
-    <tt>
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt;</font>) <br>
-    [BITMAP <font color="#00ff00">&lt;BitmapId.n&gt;</font>] 
-    [<font color="#0000ff">USABLE</font>] [NONUSABLE]
+    <tt class=syntax>
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt;</var>) <br>
+    [BITMAP <var>&lt;BitmapId.n&gt;</var>] 
+    [<strong>USABLE</strong>] [NONUSABLE]
     </tt>
     </td>
   </tr>
@@ -1668,11 +1669,11 @@ is one or more of: <p>
     <tt>GADGET</tt>
     </td>
     <td valign=top>
-    <tt>
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [<font color="#0000ff">USABLE</font>] [NONUSABLE]
-    [<font color="#0000ff">NONEXTENDED</font>] [EXTENDED]
+    <tt class=syntax>
+    ID <var>&lt;Id.n&gt;</var> 
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
+    [<strong>USABLE</strong>] [NONUSABLE]
+    [<strong>NONEXTENDED</strong>] [EXTENDED]
     </tt>
     </td>
   </tr>
@@ -1681,13 +1682,13 @@ is one or more of: <p>
     <tt>TABLE</tt>
     </td>
     <td valign=top>
-    <tt>
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [ROWS <font color="#00ff00">&lt;NumRows.n&gt;</font>] 
-    [COLUMNS <font color="#00ff00">&lt;NumCols.n&gt;</font>] <br>
-    [COLUMNWIDTHS <font color="#00ff00">&lt;Col1Width.n&gt;</font> ...
-                  <font color="#00ff00">&lt;ColNWidth.n&gt;</font>] 
+    <tt class=syntax>
+    ID <var>&lt;Id.n&gt;</var> 
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
+    [ROWS <var>&lt;NumRows.n&gt;</var>] 
+    [COLUMNS <var>&lt;NumCols.n&gt;</var>] <br>
+    [COLUMNWIDTHS <var>&lt;Col1Width.n&gt;</var> ...
+                  <var>&lt;ColNWidth.n&gt;</var>] 
     </tt>
     </td>
   </tr>
@@ -1696,14 +1697,14 @@ is one or more of: <p>
     <tt>SCROLLBAR</tt>
     </td>
     <td valign=top>
-    <tt>
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [<font color="#0000ff">USABLE</font>] [NONUSABLE]
-    [VALUE <font color="#00ff00">&lt;Value.n&gt;</font>] 
-    [MIN <font color="#00ff00">&lt;MinValue.n&gt;</font>]  <br>
-    [MAX <font color="#00ff00">&lt;MaxValue.n&gt;</font>] 
-    [PAGESIZE <font color="#00ff00">&lt;PageSize.n&gt;</font>] 
+    <tt class=syntax>
+    ID <var>&lt;Id.n&gt;</var> 
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
+    [<strong>USABLE</strong>] [NONUSABLE]
+    [VALUE <var>&lt;Value.n&gt;</var>] 
+    [MIN <var>&lt;MinValue.n&gt;</var>]  <br>
+    [MAX <var>&lt;MaxValue.n&gt;</var>] 
+    [PAGESIZE <var>&lt;PageSize.n&gt;</var>] 
     </tt>
     </td>
   </tr>
@@ -1712,8 +1713,8 @@ is one or more of: <p>
     <tt>GRAFFITISTATEINDICATOR</tt>
     </td>
     <td valign=top>
-    <tt>
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt;</font>)
+    <tt class=syntax>
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt;</var>)
     </tt>
     </td>
   </tr>
@@ -1722,16 +1723,16 @@ is one or more of: <p>
     <tt>SLIDER</tt>
     </td>
     <td valign=top>
-    <tt>
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [<font color="#0000FF">USABLE</font>] [NONUSABLE] [DISABLED] [VERTICAL] [FEEDBACK] <br>
-    [THUMBID <font color="#00ff00">&lt;BitmapId.n&gt;</font>] 
-    [BACKGROUNDID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]  <br>
-    [VALUE <font color="#00ff00">&lt;Value.n&gt;</font>] 
-    [MIN <font color="#00ff00">&lt;MinValue.n&gt;</font>]  
-    [MAX <font color="#00ff00">&lt;MaxValue.n&gt;</font>] 
-    [PAGESIZE <font color="#00ff00">&lt;PageSize.n&gt;</font>] 
+    <tt class=syntax>
+    ID <var>&lt;Id.n&gt;</var> 
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
+    [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] [VERTICAL] [FEEDBACK] <br>
+    [THUMBID <var>&lt;BitmapId.n&gt;</var>] 
+    [BACKGROUNDID <var>&lt;BitmapId.n&gt;</var>]  <br>
+    [VALUE <var>&lt;Value.n&gt;</var>] 
+    [MIN <var>&lt;MinValue.n&gt;</var>]  
+    [MAX <var>&lt;MaxValue.n&gt;</var>] 
+    [PAGESIZE <var>&lt;PageSize.n&gt;</var>] 
     </tt>
     </td>
   </tr>
@@ -1741,7 +1742,7 @@ is one or more of: <p>
 <u>Notes:</u><p>
 <ul>
 <li>
-<tt>ID <font color="#00ff00">&lt;Id.n&gt;</font></tt> can be replaced with
+<tt class=syntax>ID <var>&lt;Id.n&gt;</var></tt> can be replaced with
 <tt>AUTOID</tt>. <tt>PilRC</tt> will assign an identifier for each control 
 which specifies <tt>AUTOID</tt>. This is useful for controls which you won't 
 refer to within the application (ie: LABEL's). Auto ID's begin at at 9000 
@@ -1802,42 +1803,36 @@ END</pre>
 <b>MENU (MBAR)</b> <p>
 </font>
 
-<ul>
-<pre>
-MENU ID <font color="#00ff00">&lt;MenuResourceId.n&gt;</font>
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+<pre class=syntax>
+MENU ID <var>&lt;MenuResourceId.n&gt;</var>
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
-  <font color="#00ff00">&lt;PULLDOWNS&gt;</font>
+  <var>&lt;PULLDOWNS&gt;</var>
 END</pre>
-</ul>
 
 <font face="Arial,Helvetica">
 Where 
-</font><tt><font color="#00ff00">&lt;PULLDOWNS&gt;</font></tt>
+</font><tt class=syntax><var>&lt;PULLDOWNS&gt;</var></tt>
 <font face="Arial,Helvetica">
 is one or more of: <p>
 </font>
 
-<ul>
-<pre>
-PULLDOWN <font color="#00ff00">&lt;PullDownTitle.s&gt;</font>
+<pre class=syntax>
+PULLDOWN <var>&lt;PullDownTitle.s&gt;</var>
 BEGIN
-  <font color="#00ff00">&lt;MENUITEMS&gt;</font>
+  <var>&lt;MENUITEMS&gt;</var>
 END</pre>
-</ul>
 
 <font face="Arial,Helvetica">
 Where 
-</font><tt><font color="#00ff00">&lt;MENUITEMS&gt;</font></tt>
+</font><tt class=syntax><var>&lt;MENUITEMS&gt;</var></tt>
 <font face="Arial,Helvetica">
 is one or more of: <p>
 </font>
 
-<ul>
-<pre>
-MENUITEM <font color="#00ff00">&lt;MenuItem.s&gt;</font> ID <font color="#00ff00">&lt;MenuItemId.n&gt;</font> [AccelChar.c]
-MENUITEM SEPARATOR [ID <font color="#00ff00">&lt;MenuItemId.n&gt;</font>]</pre>
-</ul>
+<pre class=syntax>
+MENUITEM <var>&lt;MenuItem.s&gt;</var> ID <var>&lt;MenuItemId.n&gt;</var> [AccelChar.c]
+MENUITEM SEPARATOR [ID <var>&lt;MenuItemId.n&gt;</var>]</pre>
 
 <font face="Arial,Helvetica">
 <u>Example:</u>
@@ -1866,19 +1861,17 @@ END</pre>
 <b>ALERT (Talt)</b><p>
 </font>
 
-<ul>
-<pre>
-ALERT ID <font color="#00ff00">&lt;AlertResrouceId.n&gt;</font>
-  [HELPID <font color="#00ff00">&lt;HelpId.n&gt;</font>]
-  [DEFAULTBUTTON <font color="#00ff00">&lt;ButtonIdx.n&gt;</font>]
+<pre class=syntax>
+ALERT ID <var>&lt;AlertResrouceId.n&gt;</var>
+  [HELPID <var>&lt;HelpId.n&gt;</var>]
+  [DEFAULTBUTTON <var>&lt;ButtonIdx.n&gt;</var>]
   [INFORMATION] [CONFIRMATION] [WARNING] [ERROR]
-  [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+  [LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
-  TITLE <font color="#00ff00">&lt;Title.s&gt;</font>
-  MESSAGE <font color="#00ff00">&lt;Message.ss&gt;</font>
-  BUTTONS <font color="#00ff00">&lt;Button.s&gt;</font> ... <font color="#00ff00">&lt;Button.s&gt;</font>
+  TITLE <var>&lt;Title.s&gt;</var>
+  MESSAGE <var>&lt;Message.ss&gt;</var>
+  BUTTONS <var>&lt;Button.s&gt;</var> ... <var>&lt;Button.s&gt;</var>
 END</pre>
-</ul>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u> <p>
@@ -1910,11 +1903,9 @@ END</pre>
 <b>VERSION (tver)</b><p>
 </font>
 
-<ul>
-<pre>
-VERSION ID <font color="#00ff00">&lt;VersionResourceId.n&gt; &lt;Version.s&gt;</font>
-VERSION <font color="#00ff00">&lt;Version.s&gt;</font></pre>
-</ul>
+<pre class=syntax>
+VERSION ID <var>&lt;VersionResourceId.n&gt; &lt;Version.s&gt;</var>
+VERSION <var>&lt;Version.s&gt;</var></pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u>
@@ -1936,13 +1927,11 @@ VERSION "1.0 beta"</pre>
 <b>STRING (tSTR)</b><p>
 </font>
 
-<ul>
-<pre>
-STRING ID <font color="#00ff00">&lt;StringResourceId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;String.ss&gt;</font>
-STRING ID <font color="#00ff00">&lt;StringResourceId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;FILE <font color="#00ff00">&lt;StringFile.s&gt;</font></pre>
-</ul>
+<pre class=syntax>
+STRING ID <var>&lt;StringResourceId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;String.ss&gt;</var>
+STRING ID <var>&lt;StringResourceId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;FILE <var>&lt;StringFile.s&gt;</var></pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u> <p>
@@ -1966,11 +1955,9 @@ STRING ID 101 FILE "string.txt"</pre>
 <b>STRINGTABLE (tSTL)</b><p>
 </font>
 
-<ul>
-<pre>
-STRINGTABLE ID <font color="#00ff00">&lt;StringTableResourceId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;PrefixString.ss&gt; </font> ... <font color="#00ff00">&lt;String.ss&gt;</font></pre>
-</ul>
+<pre class=syntax>
+STRINGTABLE ID <var>&lt;StringTableResourceId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;PrefixString.ss&gt; </var> ... <var>&lt;String.ss&gt;</var></pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u>
@@ -2043,11 +2030,9 @@ STRINGTABLE ID 100 "-" "One" "Two" "Three" "Four"</pre>
 <b>CATEGORIES (tAIS)</b><p>
 </font>
 
-<ul>
-<pre>
-CATEGORIES ID <font color="#00ff00">&lt;CategoryResourceId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;Category1.s&gt; ... &lt;Category2.s&gt;</font></pre>
-</ul>
+<pre class=syntax>
+CATEGORIES ID <var>&lt;CategoryResourceId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;Category1.s&gt; ... &lt;Category2.s&gt;</var></pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u>
@@ -2072,11 +2057,9 @@ CATEGORIES ID 100 "Unfiled" "Business" "Personal"</pre>
 <b>APPLICATIONICONNAME (tAIN)</b><p>
 </font>
 
-<ul>
-<pre>
-APPLICATIONICONNAME ID <font color="#00ff00">&lt;AINResourceId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;ApplicationName.s&gt;</font> </pre>
-</ul>
+<pre class=syntax>
+APPLICATIONICONNAME ID <var>&lt;AINResourceId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;ApplicationName.s&gt;</var> </pre>
 
 <font face="Arial,Helvetica">
 <u>Example:</u>
@@ -2092,11 +2075,9 @@ APPLICATIONICONNAME ID 100 "AlarmHack"</pre>
 <b>APPLICATION (APPL)</b><p>
 </font>
 
-<ul>
-<pre>
-APPLICATION ID <font color="#00ff00">&lt;ApplResourceId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;APPL.s&gt;</font></pre>
-</ul>
+<pre class=syntax>
+APPLICATION ID <var>&lt;ApplResourceId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;APPL.s&gt;</var></pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u>
@@ -2121,11 +2102,9 @@ APPLICATION ID 1 "PALM"</pre>
 <b>LAUNCHERCATEGORY (taic)</b><p>
 </font>
 
-<ul>
-<pre>
-LAUNCHERCATEGORY [ID <font color="#00ff00">&lt;LaunchCatResourceId.n&gt;</font>]&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;APPL.s&gt;</font></pre>
-</ul>
+<pre class=syntax>
+LAUNCHERCATEGORY [ID <var>&lt;LaunchCatResourceId.n&gt;</var>]&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;APPL.s&gt;</var></pre>
 
 <font face="Arial,Helvetica">
 <u>Example:</u>
@@ -2141,15 +2120,13 @@ LAUNCHERCATEGORY ID 1000 "Games"</pre>
 <b>ICON (tAIB)</b><p>
 
 </font>
-<ul>
-<pre>
-ICON [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>]&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;IconFileName.s&gt;</font>
-ICONFAMILY [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>] 
-           <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
-           [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-           [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]</pre>
-</ul>
+<pre class=syntax>
+ICON [ID <var>&lt;IconResourceId.n&gt;</var>]&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;IconFileName.s&gt;</var>
+ICONFAMILY [ID <var>&lt;IconResourceId.n&gt;</var>] 
+           <var>&lt;BitmapFileName.s&gt;</var> ... <var>&lt;BitmapFileName.s&gt; </var>
+           [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
+           [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u> <p>
@@ -2190,15 +2167,13 @@ ICONFAMILY "icon1bpp.bmp" "" "" "icon8bpp.bmp" TRANSPARENTINDEX 255</pre>
 <b>SMALLICON (tAIB)</b><p>
 
 </font>
-<ul>
-<pre>
-SMALLICON [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>]&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;IconFileName.s&gt;</font>
-SMALLICONFAMILY [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>] 
-                <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
-                [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-                [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]</pre>
-</ul>
+<pre class=syntax>
+SMALLICON [ID <var>&lt;IconResourceId.n&gt;</var>]&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;IconFileName.s&gt;</var>
+SMALLICONFAMILY [ID <var>&lt;IconResourceId.n&gt;</var>] 
+                <var>&lt;BitmapFileName.s&gt;</var> ... <var>&lt;BitmapFileName.s&gt; </var>
+                [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
+                [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u> <p>
@@ -2239,22 +2214,21 @@ SMALLICONFAMILY "smic1bpp.bmp" "" "" "smic8bpp.bmp" TRANSPARENTINDEX 255</pre>
 <b>ICONFAMILYEX (tAIB)</b><p>
 </font>
 
-<ul>
-<pre>
-ICONFAMILYEX [ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>]
-  [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
-  [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+<pre class=syntax>
+ICONFAMILYEX [ID <var>&lt;BitmapResourceId.n&gt;</var>]
+  [LOCALE <var>&lt;LocaleName.s&gt;</var>]
+  [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
   [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
 BEGIN
-  BITMAP <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> BPP <font color="#00ff00">&lt;BitPerPixel.n&gt;</font>
-         [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-         [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
-         [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+  BITMAP <var>&lt;BitmapFileName.s&gt;</var> BPP <var>&lt;BitPerPixel.n&gt;</var>
+         [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
+         [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]				 
+         [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
          [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
-         [DENSITY <font color="#00ff00">&lt;BitmapResourceDensity.n&gt;</font>]
+         [DENSITY <var>&lt;BitmapResourceDensity.n&gt;</var>]
   ...
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u> <p>
@@ -2296,22 +2270,21 @@ END
 <b>SMALLICONFAMILYEX (tAIB)</b><p>
 </font>
 
-<ul>
-<pre>
-SMALLICONFAMILYEX [ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>]
-  [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
-  [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+<pre class=syntax>
+SMALLICONFAMILYEX [ID <var>&lt;BitmapResourceId.n&gt;</var>]
+  [LOCALE <var>&lt;LocaleName.s&gt;</var>]
+  [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
   [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
 BEGIN
-  BITMAP <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> BPP <font color="#00ff00">&lt;BitPerPixel.n&gt;</font>
-         [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-         [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
-         [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+  BITMAP <var>&lt;BitmapFileName.s&gt;</var> BPP <var>&lt;BitPerPixel.n&gt;</var>
+         [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
+         [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]				 
+         [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
          [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
-         [DENSITY <font color="#00ff00">&lt;BitmapResourceDensity.n&gt;</font>]
+         [DENSITY <var>&lt;BitmapResourceDensity.n&gt;</var>]
   ...
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u> <p>
@@ -2352,45 +2325,43 @@ END
 <b>BITMAP (Tbmp) (Tbsb) (Sbmp)</b><p>
 </font>
 
-<ul>
-<pre>
-BITMAP       [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;BitmapFileName.s&gt;</font> 
-             [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPGREY   [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;BitmapFileName.s&gt;</font> 
-             [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPGREY16 [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;BitmapFileName.s&gt;</font> 
-             [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPCOLOR16 [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;BitmapFileName.s&gt;</font> 
-             [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPCOLOR  [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
-             [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
-             [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPCOLOR16K [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
-             [TRANSPARENT r g b] [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPFAMILY [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; 
-             &lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
-             [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
-             [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPFAMILYSPECIAL [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; 
-             &lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
-             [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
-             [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BOOTSCREENFAMILY [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font>&nbsp;
-             [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;<font color="#00ff00">
-             &lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
-             [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-             [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]
-             [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-</pre></ul>
+<pre class=syntax>
+BITMAP       [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
+             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt;</var> 
+             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
+BITMAPGREY   [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
+             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt;</var> 
+             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
+BITMAPGREY16 [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
+             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt;</var> 
+             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
+BITMAPCOLOR16 [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
+             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt;</var> 
+             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
+BITMAPCOLOR  [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
+             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt; </var>
+             [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
+             [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]
+             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
+BITMAPCOLOR16K [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
+             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt; </var>
+             [TRANSPARENT r g b] [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
+BITMAPFAMILY [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt; 
+             &lt;BitmapFileName.s&gt;</var> ... <var>&lt;BitmapFileName.s&gt; </var>
+             [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
+             [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]
+             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
+BITMAPFAMILYSPECIAL [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt; 
+             &lt;BitmapFileName.s&gt;</var> ... <var>&lt;BitmapFileName.s&gt; </var>
+             [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
+             [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]
+             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
+BOOTSCREENFAMILY [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
+             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt;</var> ... <var>&lt;BitmapFileName.s&gt; </var>
+             [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
+             [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]
+             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u> <p>
@@ -2478,22 +2449,21 @@ BITMAPFAMILY  ID 9 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENTINDEX 2
 <b>BITMAPFAMILYEX (Tbmp) (Sbmp) (Tbsb)</b><p>
 </font>
 
-<ul>
-<pre>
-BITMAPFAMILYEX [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt;</font> 
-  [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
-  [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+<pre class=syntax>
+BITMAPFAMILYEX [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var> 
+  [LOCALE <var>&lt;LocaleName.s&gt;</var>]
+  [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
   [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
 BEGIN
-  BITMAP <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> BPP <font color="#00ff00">&lt;BitPerPixel.n&gt;</font>
-         [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
-         [TRANSPARENT <font color="#00ff00">&lt;r.n&gt;</font> <font color="#00ff00">&lt;g.n&gt;</font> <font color="#00ff00">&lt;b.n&gt;</font>]&nbsp;[TRANSPARENTINDEX <font color="#00ff00">&lt;index.n&gt;</font>]				 
-         [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+  BITMAP <var>&lt;BitmapFileName.s&gt;</var> BPP <var>&lt;BitPerPixel.n&gt;</var>
+         [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
+         [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]				 
+         [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
          [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
-         [DENSITY <font color="#00ff00">&lt;BitmapResourceDensity.n&gt;</font>]
+         [DENSITY <var>&lt;BitmapResourceDensity.n&gt;</var>]
   ...
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u> <p>
@@ -2536,10 +2506,8 @@ END
 <b>TRAP (TRAP)</b><p>
 </font>
 
-<ul>
-<pre>
-TRAP ID <font color="#00ff00">&lt;TrapId.n&gt;</font> [VALUE] <font color="#00ff00">&lt;TrapNumber.n&gt;</font></pre>
-</ul>
+<pre class=syntax>
+TRAP ID <var>&lt;TrapId.n&gt;</var> [VALUE] <var>&lt;TrapNumber.n&gt;</var></pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u>
@@ -2562,11 +2530,9 @@ TRAP ID 1000 VALUE 367</pre>
 <b>FONT (NFNT)</b><p>
 </font>
 
-<ul>
-<pre>
-FONT ID <font color="#00ff00">&lt;FontResourceId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;FONTID <font color="#00ff00">&lt;FontId.n&gt; &lt;FontFileName.s&gt;</font></pre>
-</ul>
+<pre class=syntax>
+FONT ID <var>&lt;FontResourceId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;FONTID <var>&lt;FontId.n&gt; &lt;FontFileName.s&gt;</var></pre>
 
 <font face="Arial,Helvetica">
 <u>FONT file format</u><p>
@@ -2754,18 +2720,18 @@ FONT support in PilRC is not complete, and has been reverse engineered.
 <b>FONTINDEX (fnti)</b><p>
 </font>
 
-<ul><pre>
-FONTINDEX ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+<pre class=syntax>
+FONTINDEX ID <var>&lt;ResId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
-	<font color="#00ff00">&lt;FontType.s&gt; &lt;ResId.n&gt;</font>
+	<var>&lt;FontType.s&gt; &lt;ResId.n&gt;</var>
 	...
 	[BEGIN
-		<font color="#00ff00">&lt;FontId.n&gt;</font>
+		<var>&lt;FontId.n&gt;</var>
 		...
 	END]
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
@@ -2794,13 +2760,13 @@ END
 <b>FONTMAP (fntm)</b><p>
 </font>
 
-<ul><pre>
-FONTMAP ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+<pre class=syntax>
+FONTMAP ID <var>&lt;ResId.n&gt;</var>&nbsp;[LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
-	<font color="#00ff00">&lt;Flag.n&gt;&lt;State.n&gt;&lt;Value.n&gt;</font>
+	<var>&lt;Flag.n&gt;&lt;State.n&gt;&lt;Value.n&gt;</var>
 	...
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
@@ -2824,12 +2790,10 @@ END
 <b>HEX</b><p>
 </font>
 
-<ul>
-<pre>
-HEX <font color="#00ff00">&lt;ResType.s&gt;</font> ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
-    <font color="#00ff00">&lt;Byte.n&gt; | &lt;String.s&gt;</font></pre>
-</ul>
+<pre class=syntax>
+HEX <var>&lt;ResType.s&gt;</var> ID <var>&lt;ResId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]
+    <var>&lt;Byte.n&gt; | &lt;String.s&gt;</var></pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
@@ -2853,11 +2817,9 @@ HEX "junk" ID 1000
 <b>DATA</b><p>
 </font>
 
-<ul>
-<pre>
-DATA <font color="#00ff00">&lt;ResType.s&gt;</font> ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>] <font color="#00ff00">&lt;FileName.s&gt;</font></pre>
-</ul>
+<pre class=syntax>
+DATA <var>&lt;ResType.s&gt;</var> ID <var>&lt;ResId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>] <var>&lt;FileName.s&gt;</var></pre>
 
 <font face="Arial,Helvetica">
 <u>Example:</u>
@@ -2873,11 +2835,9 @@ DATA "junk" ID 1000 "binary.bin"</pre>
 <b>INTEGER (tint)</b><p>
 </font>
 
-<ul>
-<pre>
-INTEGER ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;[VALUE] <font color="#00ff00">&lt;Value.n&gt;</font></pre>
-</ul>
+<pre class=syntax>
+INTEGER ID <var>&lt;ResId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;[VALUE] <var>&lt;Value.n&gt;</var></pre>
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
@@ -2898,14 +2858,14 @@ INTEGER ID 1000 VALUE 1966 </pre>
 <b>BYTELIST (BLST)</b><p>
 </font>
 
-<ul><pre>
-BYTELIST ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+<pre class=syntax>
+BYTELIST ID <var>&lt;ResId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
-	<font color="#00ff00">&lt;Value.n&gt;</font>
+	<var>&lt;Value.n&gt;</var>
 	...
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Example:</u>
@@ -2925,14 +2885,14 @@ END
 <b>WORDLIST (wrdl)</b><p>
 </font>
 
-<ul><pre>
-WORDLIST ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+<pre class=syntax>
+WORDLIST ID <var>&lt;ResId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
-	<font color="#00ff00">&lt;Value.n&gt;</font>
+	<var>&lt;Value.n&gt;</var>
 	...
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Example:</u>
@@ -2951,14 +2911,14 @@ END
 <b>LONGWORDLIST (DLST)</b><p>
 </font>
 
-<ul><pre>
-LONGWORDLIST ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+<pre class=syntax>
+LONGWORDLIST ID <var>&lt;ResId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
-	<font color="#00ff00">&lt;Value.n&gt;</font>
+	<var>&lt;Value.n&gt;</var>
 	...
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Example:</u>
@@ -2978,13 +2938,13 @@ END
 <b>PALETTETABLE (tclt)</b><p>
 </font>
 
-<ul><pre>
-PALETTETABLE ID <font color="#00ff00">&lt;ResId.n&gt;</font>
+<pre class=syntax>
+PALETTETABLE ID <var>&lt;ResId.n&gt;</var>
 BEGIN
-	<font color="#00ff00">&lt;index.n&gt; &lt;red.n&gt; &lt;green.n&gt; &lt;blue.n&gt;</font>
+	<var>&lt;index.n&gt; &lt;red.n&gt; &lt;green.n&gt; &lt;blue.n&gt;</var>
 	...
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Example:</u>
@@ -3001,24 +2961,24 @@ END </pre>
 <b>FEATURE (feat)</b><p>
 </font>
 
-<ul><pre>
-FEATURE ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;
+<pre class=syntax>
+FEATURE ID <var>&lt;ResId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;
 BEGIN
-	[CREATOR <font color="#00ff00">&lt;creator.s&gt;</font>]
+	[CREATOR <var>&lt;creator.s&gt;</var>]
 	BEGIN
-		[ENTRY] [NUMBER <font color="#00ff00">&lt;number.n&gt;</font>] [VALUE <font color="#00ff00">&lt;value.n&gt;</font>]
+		[ENTRY] [NUMBER <var>&lt;number.n&gt;</var>] [VALUE <var>&lt;value.n&gt;</var>]
 		...
 	END
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Example:</u>
 </font><pre>
 FEATURE ID 1000
 BEGIN
-	[CREATOR <font color="#00ff00">&lt;creator.s&gt;</font>]
+	CREATOR "psys"
 	BEGIN
 		ENTRY NUMBER 5 VALUE 0
 		ENTRY NUMBER 6 VALUE 0
@@ -3031,21 +2991,20 @@ END</pre>
 <b>GRAFFITIINPUTAREA (silk)</b><p>
 </font>
 
-<ul><pre>
-GRAFFITIINPUTAREA ID <font color="#00ff00">&lt;GraffitiInputAreaId.n&gt;</font>
-  [VERSION <font color="#00ff00">&lt;version.n&gt;</font>]
-  [CREATOR <font color="#00ff00">&lt;creator.s&gt;</font>]
-  [LANGUAGE <font color="#00ff00">&lt;language.s&gt;</font>]
-  [COUNTRY <font color="#00ff00">&lt;country.s&gt;</font>]
-  [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+<pre class=syntax>
+GRAFFITIINPUTAREA ID <var>&lt;GraffitiInputAreaId.n&gt;</var>
+  [VERSION <var>&lt;version.n&gt;</var>]
+  [CREATOR <var>&lt;creator.s&gt;</var>]
+  [LANGUAGE <var>&lt;language.s&gt;</var>]
+  [COUNTRY <var>&lt;country.s&gt;</var>]
+  [LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
-  <font color="#00ff00">&lt;OBJECTS&gt;</font>
+  <var>&lt;OBJECTS&gt;</var>
 END </pre>
-</ul>
 
 <font face="Arial,Helvetica">
 Where 
-</font><tt><font color="#00ff00">&lt;OBJECTS&gt;</font></tt>
+</font><tt class=syntax><var>&lt;OBJECTS&gt;</var></tt>
 <font face="Arial,Helvetica">
 is one or more of: <p>
 
@@ -3056,9 +3015,9 @@ is one or more of: <p>
 	<tt>AREA</tt>
     </td>
     <td valign=top>
-    <tt>
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [SCREEN] [GRAFFITI] [INDEX <font color="#00ff00">&lt;index.n&gt;</font>]
+    <tt class=syntax>
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
+    [SCREEN] [GRAFFITI] [INDEX <var>&lt;index.n&gt;</var>]
     </tt>
     </td>
   </tr>
@@ -3067,11 +3026,11 @@ is one or more of: <p>
     <tt>BUTTON		</tt>
     </td>
     <td valign=top>
-    <tt>
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [KEYDOWNCHR <font color="#00ff00">&lt;keydownchr.n&gt;</font>] <br> 
-    [KEYDOWNKEYCODE <font color="#00ff00">&lt;keydownkeycode.n&gt;</font>] <br> 
-    [KEYDOWNMODIFIERS <font color="#00ff00">&lt;keydownmodifiers.n&gt;</font>]
+    <tt class=syntax>
+    AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
+    [KEYDOWNCHR <var>&lt;keydownchr.n&gt;</var>] <br> 
+    [KEYDOWNKEYCODE <var>&lt;keydownkeycode.n&gt;</var>] <br> 
+    [KEYDOWNMODIFIERS <var>&lt;keydownmodifiers.n&gt;</var>]
     </tt>
     </td>
   </tr>
@@ -3121,33 +3080,31 @@ END
 <b>COUNTRYLOCALISATION (cnty)</b><p>
 </font>
 
-<ul>
-<pre>
-COUNTRYLOCALISATION ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;
+<pre class=syntax>
+COUNTRYLOCALISATION ID <var>&lt;ResId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;
 BEGIN
   BEGIN
-    [NUMBER <font color="#00ff00">&lt;number.n&gt;</font>]
-    [NAME <font color="#00ff00">&lt;name.s&gt;</font>]
-    [DATEFORMAT <font color="#00ff00">&lt;dateformat.n&gt;</font>]
-    [LONGDATEFORMAT <font color="#00ff00">&lt;longdateformat.n&gt;</font>]
-    [WEEKSTARTDAY <font color="#00ff00">&lt;weekstartday.n&gt;</font>]
-    [TIMEFORMAT <font color="#00ff00">&lt;timeformat.n&gt;</font>]
-    [NUMBERFORMAT <font color="#00ff00">&lt;numberformat.n&gt;</font>]
-    [CURRENCYNAME <font color="#00ff00">&lt;currencyname.s&gt;</font>]
-    [CURRENCYSYMBOL <font color="#00ff00">&lt;currencysymbol.s&gt;</font>]
-    [CURRENCYUNIQUESYMBOL <font color="#00ff00">&lt;currencyuniquesymbol.s&gt;</font>]
-    [CURRENCYDECIMALPLACES <font color="#00ff00">&lt;currencydecimalplaces.n&gt;</font>]
-    [DAYLIGHTSAVINGS <font color="#00ff00">&lt;daylightsavings.n&gt;</font>]
-    [MINUTESWESTOFGMT <font color="#00ff00">&lt;minuteswestofgmt.n&gt;</font>]
-    [MEASUREMENTSYSTEM <font color="#00ff00">&lt;measuresystem.n&gt;</font>]
+    [NUMBER <var>&lt;number.n&gt;</var>]
+    [NAME <var>&lt;name.s&gt;</var>]
+    [DATEFORMAT <var>&lt;dateformat.n&gt;</var>]
+    [LONGDATEFORMAT <var>&lt;longdateformat.n&gt;</var>]
+    [WEEKSTARTDAY <var>&lt;weekstartday.n&gt;</var>]
+    [TIMEFORMAT <var>&lt;timeformat.n&gt;</var>]
+    [NUMBERFORMAT <var>&lt;numberformat.n&gt;</var>]
+    [CURRENCYNAME <var>&lt;currencyname.s&gt;</var>]
+    [CURRENCYSYMBOL <var>&lt;currencysymbol.s&gt;</var>]
+    [CURRENCYUNIQUESYMBOL <var>&lt;currencyuniquesymbol.s&gt;</var>]
+    [CURRENCYDECIMALPLACES <var>&lt;currencydecimalplaces.n&gt;</var>]
+    [DAYLIGHTSAVINGS <var>&lt;daylightsavings.n&gt;</var>]
+    [MINUTESWESTOFGMT <var>&lt;minuteswestofgmt.n&gt;</var>]
+    [MEASUREMENTSYSTEM <var>&lt;measuresystem.n&gt;</var>]
   END
   BEGIN
     ...
   END
   ...
 END</pre>
-</ul>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
@@ -3200,34 +3157,32 @@ END</pre>
 <b>LOCALES (locs)</b><p>
 </font>
 
-<ul>
-<pre>
-LOCALES ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp;
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;
+<pre class=syntax>
+LOCALES ID <var>&lt;ResId.n&gt;</var>&nbsp;
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;
 BEGIN
-  [VERSION <font color="#00ff00">&lt;number.n&gt;</font>]
+  [VERSION <var>&lt;number.n&gt;</var>]
   BEGIN
-    [LANGUAGES <font color="#00ff00">&lt;languages.n&gt;</font>]
-    [COUNTRYS <font color="#00ff00">&lt;countrys.n&gt;</font>]
-    [COUNTRYNAME <font color="#00ff00">&lt;countryname.s&gt;</font>]
-    [DATEFORMAT <font color="#00ff00">&lt;dateformat.n&gt;</font>]
-    [LONGDATEFORMAT <font color="#00ff00">&lt;longdateformat.n&gt;</font>]
-    [TIMEFORMAT <font color="#00ff00">&lt;timeformat.n&gt;</font>]
-    [WEEKSTARTDAY <font color="#00ff00">&lt;weekstartday.n&gt;</font>]
-    [TIMEZONE <font color="#00ff00">&lt;timezone.n&gt;</font>]
-    [NUMBERFORMAT <font color="#00ff00">&lt;numberformat.n&gt;</font>]
-    [CURRENCYNAME <font color="#00ff00">&lt;currencyname.s&gt;</font>]
-    [CURRENCYSYMBOL <font color="#00ff00">&lt;currencysymbol.s&gt;</font>]
-    [CURRENCYUNIQUESYMBOL <font color="#00ff00">&lt;currencyuniquesymbol.s&gt;</font>]
-    [CURRENCYDECIMALPLACES <font color="#00ff00">&lt;currencydecimalplaces.n&gt;</font>]
-    [MEASUREMENTSYSTEM <font color="#00ff00">&lt;measuresystem.n&gt;</font>]
+    [LANGUAGES <var>&lt;languages.n&gt;</var>]
+    [COUNTRYS <var>&lt;countrys.n&gt;</var>]
+    [COUNTRYNAME <var>&lt;countryname.s&gt;</var>]
+    [DATEFORMAT <var>&lt;dateformat.n&gt;</var>]
+    [LONGDATEFORMAT <var>&lt;longdateformat.n&gt;</var>]
+    [TIMEFORMAT <var>&lt;timeformat.n&gt;</var>]
+    [WEEKSTARTDAY <var>&lt;weekstartday.n&gt;</var>]
+    [TIMEZONE <var>&lt;timezone.n&gt;</var>]
+    [NUMBERFORMAT <var>&lt;numberformat.n&gt;</var>]
+    [CURRENCYNAME <var>&lt;currencyname.s&gt;</var>]
+    [CURRENCYSYMBOL <var>&lt;currencysymbol.s&gt;</var>]
+    [CURRENCYUNIQUESYMBOL <var>&lt;currencyuniquesymbol.s&gt;</var>]
+    [CURRENCYDECIMALPLACES <var>&lt;currencydecimalplaces.n&gt;</var>]
+    [MEASUREMENTSYSTEM <var>&lt;measuresystem.n&gt;</var>]
   END
   BEGIN
     ...
   END
   ...
 END</pre>
-</ul>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
@@ -3281,11 +3236,9 @@ END</pre>
 <b>KEYBOARD (tkbd)</b><p>
 </font>
 
-<ul>
-<pre>
-KEYBOARD ID <font color="#00ff00">&lt;ResId.n&gt;</font>
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>] VALUE <font color="#00ff00">&lt;Value.n&gt;</font></pre>
-</ul>
+<pre class=syntax>
+KEYBOARD ID <var>&lt;ResId.n&gt;</var>
+[LOCALE <var>&lt;LocaleName.s&gt;</var>] VALUE <var>&lt;Value.n&gt;</var></pre>
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul><li>
@@ -3311,10 +3264,8 @@ KEYBOARD ID 1000 VALUE 0
 <b>MIDI (MIDI)</b><p>
 </font>
 
-<ul>
-<pre>
-MIDI ID <font color="#00ff00">&lt;ResId.n&gt; &lt;string.s&gt;</font></pre>
-</ul>
+<pre class=syntax>
+MIDI ID <var>&lt;ResId.n&gt; &lt;string.s&gt;</var></pre>
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul><li>
@@ -3334,17 +3285,17 @@ MIDI ID 1000 "trompette.mid"
 <b>HARDSOFTBUTTONDEFAULT (hsbd)</b><p>
 </font>
 
-<ul><pre>
-HARDSOFTBUTTONDEFAULT ID <font color="#00ff00">&lt;ResId.n&gt;</font>
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+<pre class=syntax>
+HARDSOFTBUTTONDEFAULT ID <var>&lt;ResId.n&gt;</var>
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
 	BEGIN
-		[NUMBER <font color="#00ff00">&lt;number.n&gt;</font>]
-		[CREATOR <font color="#00ff00">&lt;creator.s&gt;</font>]
+		[NUMBER <var>&lt;number.n&gt;</var>]
+		[CREATOR <var>&lt;creator.s&gt;</var>]
 	END
 	...
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
@@ -3395,13 +3346,13 @@ END</pre>
 <b>SYSAPPLICATIONPREFERENCES (pref)</b><p>
 </font>
 
-<ul><pre>
-SYSAPPLICATIONPREFERENCES ID <font color="#00ff00">&lt;ResId.n&gt;</font>
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
-		PRIORITY <font color="#00ff00">&lt;Priority.n&gt;</font>
-		STACKSIZE <font color="#00ff00">&lt;StackSize.n&gt;</font>
-		MINHEAPSPACE <font color="#00ff00">&lt;MinHeapSpace.n&gt;</font>
-</pre></ul>
+<pre class=syntax>
+SYSAPPLICATIONPREFERENCES ID <var>&lt;ResId.n&gt;</var>
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]
+		PRIORITY <var>&lt;Priority.n&gt;</var>
+		STACKSIZE <var>&lt;StackSize.n&gt;</var>
+		MINHEAPSPACE <var>&lt;MinHeapSpace.n&gt;</var>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
@@ -3421,56 +3372,56 @@ SYSAPPLICATIONPREFERENCES ID 1000 PRIORITY 30 STACKSIZE 0x1000 MINHEAPSPACE 0x10
 <b>SEARCHTABLE (tSCH)</b><p>
 </font>
 
-<ul><pre>
-SEARCHTABLE ID <font color="#00ff00">&lt;ResId.n&gt;</font> [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+<pre class=syntax>
+SEARCHTABLE ID <var>&lt;ResId.n&gt;</var> [LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
-	OFFSET_s0 <font color="#00ff00">&lt;Offset_s0.n&gt;</font>
-	OFFSET_sD <font color="#00ff00">&lt;Offset_sD.n&gt;</font>
-	OFFSET_sK <font color="#00ff00">&lt;Offset_sK.n&gt;</font>
-	OFFSET_sM <font color="#00ff00">&lt;Offset_sM.n&gt;</font>
-	OFFSET_sU <font color="#00ff00">&lt;Offset_sU.n&gt;</font>
-	OFFSET_sP <font color="#00ff00">&lt;Offset_sP.n&gt;</font>
-	OFFSET_sA <font color="#00ff00">&lt;Offset_sA.n&gt;</font>
-	OFFSET_sG <font color="#00ff00">&lt;Offset_sG.n&gt;</font>
-	OFFSET_sR <font color="#00ff00">&lt;Offset_sR.n&gt;</font>
+	OFFSET_s0 <var>&lt;Offset_s0.n&gt;</var>
+	OFFSET_sD <var>&lt;Offset_sD.n&gt;</var>
+	OFFSET_sK <var>&lt;Offset_sK.n&gt;</var>
+	OFFSET_sM <var>&lt;Offset_sM.n&gt;</var>
+	OFFSET_sU <var>&lt;Offset_sU.n&gt;</var>
+	OFFSET_sP <var>&lt;Offset_sP.n&gt;</var>
+	OFFSET_sA <var>&lt;Offset_sA.n&gt;</var>
+	OFFSET_sG <var>&lt;Offset_sG.n&gt;</var>
+	OFFSET_sR <var>&lt;Offset_sR.n&gt;</var>
 	BEGIN
-		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		ACTION <var>&lt;Action.n&gt;</var> NEXTSTATE <var>&lt;NextState.n&gt;</var> DATA <var>&lt;data.n&gt;</var>
 		...
 	END
 	BEGIN
-		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		ACTION <var>&lt;Action.n&gt;</var> NEXTSTATE <var>&lt;NextState.n&gt;</var> DATA <var>&lt;data.n&gt;</var>
 		...
 	END
 	BEGIN
-		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		ACTION <var>&lt;Action.n&gt;</var> NEXTSTATE <var>&lt;NextState.n&gt;</var> DATA <var>&lt;data.n&gt;</var>
 		...
 	END
 	BEGIN
-		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		ACTION <var>&lt;Action.n&gt;</var> NEXTSTATE <var>&lt;NextState.n&gt;</var> DATA <var>&lt;data.n&gt;</var>
 		...
 	END
 	BEGIN
-		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		ACTION <var>&lt;Action.n&gt;</var> NEXTSTATE <var>&lt;NextState.n&gt;</var> DATA <var>&lt;data.n&gt;</var>
 		...
 	END
 	BEGIN
-		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		ACTION <var>&lt;Action.n&gt;</var> NEXTSTATE <var>&lt;NextState.n&gt;</var> DATA <var>&lt;data.n&gt;</var>
 		...
 	END
 	BEGIN
-		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		ACTION <var>&lt;Action.n&gt;</var> NEXTSTATE <var>&lt;NextState.n&gt;</var> DATA <var>&lt;data.n&gt;</var>
 		...
 	END
 	BEGIN
-		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		ACTION <var>&lt;Action.n&gt;</var> NEXTSTATE <var>&lt;NextState.n&gt;</var> DATA <var>&lt;data.n&gt;</var>
 		...
 	END
 	BEGIN
-		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		ACTION <var>&lt;Action.n&gt;</var> NEXTSTATE <var>&lt;NextState.n&gt;</var> DATA <var>&lt;data.n&gt;</var>
 		...
 	END
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
@@ -3507,22 +3458,22 @@ END
 <b>TEXTTABLE (ttbl)</b><p>
 </font>
 
-<ul><pre>
-TEXTTABLE ID <font color="#00ff00">&lt;ResId.n&gt;</font> [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>] [COMPRESS]
-VERSION <font color="#00ff00">&lt;Version.n&gt;</font>	9 or 10
-TABLETYPE <font color="#00ff00">&lt;TableType.n&gt;</font> 1 .. 17
-FLAG <font color="#00ff00">&lt;Flag.n&gt;</font>
-MIN <font color="#00ff00">&lt;Min.n&gt;</font>
-MAX <font color="#00ff00">&lt;Max.n&gt;</font>
-DEFAULTOUTPUT <font color="#00ff00">&lt;DefaultOutput.n&gt;</font>
-NUMELEMENTBITS <font color="#00ff00">&lt;NumElementBits.n&gt;</font>
-NUMINDEXEDDATALENBITS <font color="#00ff00">&lt;NumIndexedDataLenBits.n&gt;</font>
-NUMRESULTBITS <font color="#00ff00">&lt;NumResultBits.n&gt;</font>
-INDEXDATAOFFSET <font color="#00ff00">&lt;IndexDataOffset.n&gt;</font>
+<pre class=syntax>
+TEXTTABLE ID <var>&lt;ResId.n&gt;</var> [LOCALE <var>&lt;LocaleName.s&gt;</var>] [COMPRESS]
+VERSION <var>&lt;Version.n&gt;</var>	9 or 10
+TABLETYPE <var>&lt;TableType.n&gt;</var> 1 .. 17
+FLAG <var>&lt;Flag.n&gt;</var>
+MIN <var>&lt;Min.n&gt;</var>
+MAX <var>&lt;Max.n&gt;</var>
+DEFAULTOUTPUT <var>&lt;DefaultOutput.n&gt;</var>
+NUMELEMENTBITS <var>&lt;NumElementBits.n&gt;</var>
+NUMINDEXEDDATALENBITS <var>&lt;NumIndexedDataLenBits.n&gt;</var>
+NUMRESULTBITS <var>&lt;NumResultBits.n&gt;</var>
+INDEXDATAOFFSET <var>&lt;IndexDataOffset.n&gt;</var>
 BEGIN
 	...
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
@@ -3554,13 +3505,13 @@ END
 <b>TABLELIST (ttli)</b><p>
 </font>
 
-<ul><pre>
-TABLELIST ID <font color="#00ff00">&lt;ResId.n&gt;</font> [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+<pre class=syntax>
+TABLELIST ID <var>&lt;ResId.n&gt;</var> [LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
-	TYPE <font color="#00ff00">&lt;ResType.s&gt;</font> ID <font color="#00ff00">&lt;ID.n&gt;</font> INDEX <font color="#00ff00">&lt;Index.n&gt;</font>
+	TYPE <var>&lt;ResType.s&gt;</var> ID <var>&lt;ID.n&gt;</var> INDEX <var>&lt;Index.n&gt;</var>
 	...
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
@@ -3594,13 +3545,13 @@ END
 <b>CHARSETLIST (csli)</b><p>
 </font>
 
-<ul><pre>
-CHARSETLIST ID <font color="#00ff00">&lt;ResId.n&gt;</font> [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+<pre class=syntax>
+CHARSETLIST ID <var>&lt;ResId.n&gt;</var> [LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
-	NAME <font color="#00ff00">&lt;Name.s&gt;</font> ID <font color="#00ff00">&lt;ID.n&gt;</font>
+	NAME <var>&lt;Name.s&gt;</var> ID <var>&lt;ID.n&gt;</var>
 	...
 END
-</pre></ul>
+</pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
@@ -3649,10 +3600,8 @@ number before each form to the next multiple of 100.<p>
 <b>GENERATEHEADER</b><p>
 </font>
 
-<ul>
-<pre>
-GENERATEHEADER <font color="#00ff00">&lt;HeaderFile.s&gt;</font></pre>
-</ul>
+<pre class=syntax>
+GENERATEHEADER <var>&lt;HeaderFile.s&gt;</var></pre>
 <u>Example:</u>
 </font>
 
@@ -3666,10 +3615,8 @@ GENERATEHEADER "ApplicationRsc.h"</pre>
 <b>RESETAUTOID</b><p>
 </font>
 
-<ul>
-<pre>
-RESETAUTOID <font color="#00ff00">&lt;IDBase.n&gt;</font></pre>
-</ul>
+<pre class=syntax>
+RESETAUTOID <var>&lt;IDBase.n&gt;</var></pre>
 <u>Example:</u>
 </font>
 
@@ -3712,25 +3659,21 @@ pilrc -L FRENCH myscript.rcp res</pre>
 <b>TRANSLATION</b><p>
 </font>
 
-<ul>
-<pre>
-TRANSLATION <font color="#00ff00">&lt;Language.s&gt;</font>
+<pre class=syntax>
+TRANSLATION <var>&lt;Language.s&gt;</var>
 BEGIN
-  <font color="#00ff00">&lt;STRINGTRANSLATIONS&gt;</font>
+  <var>&lt;STRINGTRANSLATIONS&gt;</var>
 END</pre>
-</ul>
 
 <font face="Arial,Helvetica">
 Where 
-</font><tt><font color="#00ff00">&lt;STRINGTRANSLATIONS&gt;</font></tt>
+</font><tt class=syntax><var>&lt;STRINGTRANSLATIONS&gt;</var></tt>
 <font face="Arial,Helvetica">
 is one or more of: <p>
 </font>
 
-<ul>
-<pre>
-<font color="#00ff00">&lt;Original.s&gt;</font> = <font color="#00ff00">&lt;Translated.ss&gt;</font></pre>
-</ul>
+<pre class=syntax>
+<var>&lt;Original.s&gt;</var> = <var>&lt;Translated.ss&gt;</var></pre>
 
 <font face="Arial,Helvetica">
 <u>Notes:</u> <p>
