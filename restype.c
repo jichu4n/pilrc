@@ -52,6 +52,7 @@ ResTypeInit(void)
   kPalmResType[22] = "tTTL";
   kPalmResType[23] = "tLBL";
   kPalmResType[37] = "tSCH";
+  kPalmResType[39] = "fnav";
   if (vfLE32)
   {
     kPalmResType[6] = "aaib";

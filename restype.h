@@ -36,7 +36,6 @@
 #define kAppInfoStringsRscType	3
 #define kDefaultCategoryRscType	4
 #define kStrListRscType			5
-
 #define kIconType				6
 #define kBitmapRscType			7
 #define kBsBitmapRscType		8
@@ -58,20 +57,21 @@
 #define kGraffitiInputAreaType	24
 #define kCountryType			25
 #define kFeatureType			26
-#define kKeyboardType		27
-#define kLongWrdListRscType	28
+#define kKeyboardType		    27
+#define kLongWrdListRscType	    28
 #define kByteListRscType		29
 #define kLocalesType			30
-#define kHardSoftButtonType	31
-#define kAppPrefsType		32
+#define kHardSoftButtonType	    31
+#define kAppPrefsType		    32
 #define kFontMapType			33
 #define kTableListType			34
 #define kCharListType			35
 #define kTextTableType			36
-#define kSearchTable				37
+#define kSearchTable			37
 #define kFontFamilyRscType		38
+#define kNavigationType         39
  
-#define kMaxNumberResType		39
+#define kMaxNumberResType		40
 
 extern char *kPalmResType[kMaxNumberResType];
 
