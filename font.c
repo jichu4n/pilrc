@@ -511,7 +511,7 @@ DumpFont(char *pchFileName,
     header[h_rowWords] * header[h_fRectHeight] + 8 + header[h_lastChar] -
     header[h_firstChar];
 
-  CbEmitStruct(header, "wwwwwwwwwwwww", NULL, fTrue);
+  CbEmitStruct(header, szRCFONT, NULL, fTrue);
 
   for (x = 0; x < (size_t) header[h_fRectHeight]; x++)
   {
@@ -519,10 +519,20 @@ DumpFont(char *pchFileName,
     free(bitmap[x]);
   }
 
+/*
+ * adjusted: 12-Nov-2001
+ *
+ * see doc/2.8p8emails/henke for explanation
+ *
   for (x = header[h_firstChar]; x <= (size_t) header[h_lastChar] + 1; x++)
     EmitW(coltable[x]);
   EmitW((unsigned short)col);
-  //      EmitW(0);                       /* RMa Remove this bug value */
+  // EmitW(0);
+ */
+  for (x = header[h_firstChar]; x <= (size_t) header[h_lastChar]; x++)
+    EmitW(coltable[x]);
+  EmitW((unsigned short)col);
+  EmitW(0);
 
   DumpBytes(&fntOW[fntNo][header[h_firstChar]],
             (header[h_lastChar] - header[h_firstChar] + 2) * 2);

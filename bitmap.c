@@ -221,6 +221,15 @@ int PalmPalette8bpp[256][3] =
 
 #define LE_BITMAP_VERSION_MASK 0x80
 
+/*
+ * The 4bit-16 color user palette for Palm Computing Devices.
+ */
+int UserPalette4bpp[16][3];
+
+/*
+ * The 8bit-256 color user palette for Palm Computing Devices.
+ */
+int UserPalette8bpp[256][3];
                                                                 // *INDENT-ON*
 
 // 
@@ -265,6 +274,84 @@ static void BMP_InvalidExtension(char *);
 // 
 // code
 // 
+
+/**
+ * Set the 4bpp user palette.
+ *
+ * @param p palette
+ * @param nColors the number of colors
+ */
+void
+SetUserPalette4bpp(int p[][3], int nColors)
+{
+  int c;
+
+  nColors = (nColors > 16) ? 16 : nColors;
+
+  // copy colors
+  for (c=0; c<nColors; c++) 
+  {
+    UserPalette4bpp[c][0] = p[c][0];
+    UserPalette4bpp[c][1] = p[c][1];
+    UserPalette4bpp[c][2] = p[c][2];
+  }
+
+  // fill remainder with blacks
+  for (c=nColors; c<16; c++) 
+  {
+    UserPalette4bpp[c][0] = 0;
+    UserPalette4bpp[c][1] = 0;
+    UserPalette4bpp[c][2] = 0;
+  }
+}
+
+/**
+ * Set the 4bpp user palette to the system palette
+ */
+void
+SetUserPalette4bppToDefault4bpp()
+{
+  SetUserPalette4bpp(PalmPalette4bppColor, 16);
+}
+
+/**
+ * Set the 8bpp user palette.
+ *
+ * @param p palette
+ * @param nColors the number of colors
+ */
+void
+SetUserPalette8bpp(int p[][3], int nColors)
+{
+  int c;
+
+  nColors = (nColors > 256) ? 256 : nColors;
+
+  // copy colors
+  for (c=0; c<nColors; c++) 
+  {
+    UserPalette8bpp[c][0] = p[c][0];
+    UserPalette8bpp[c][1] = p[c][1];
+    UserPalette8bpp[c][2] = p[c][2];
+  }
+
+  // fill remainder with blacks
+  for (c=nColors; c<256; c++) 
+  {
+    UserPalette8bpp[c][0] = 0;
+    UserPalette8bpp[c][1] = 0;
+    UserPalette8bpp[c][2] = 0;
+  }
+}
+
+/**
+ * Set the 8bpp user palette to the system palette
+ */
+void
+SetUserPalette8bppToDefault8bpp()
+{
+  SetUserPalette8bpp(PalmPalette8bpp, 256);
+}
 
 /**
  * Convert a RGB triplet to a index within the PalmPalette256[][] table.
@@ -941,9 +1028,9 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
       dstPaletteSize = 16;
       for (i = 0; i < dstPaletteSize; i++)
       {
-        dstPalette[i][0] = PalmPalette4bppColor[i][0];
-        dstPalette[i][1] = PalmPalette4bppColor[i][1];
-        dstPalette[i][2] = PalmPalette4bppColor[i][2];
+        dstPalette[i][0] = UserPalette4bpp[i][0];
+        dstPalette[i][1] = UserPalette4bpp[i][1];
+        dstPalette[i][2] = UserPalette4bpp[i][2];
       }
       break;
 
@@ -952,9 +1039,9 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
       dstPaletteSize = 256;
       for (i = 0; i < dstPaletteSize; i++)
       {
-        dstPalette[i][0] = PalmPalette8bpp[i][0];
-        dstPalette[i][1] = PalmPalette8bpp[i][1];
-        dstPalette[i][2] = PalmPalette8bpp[i][2];
+        dstPalette[i][0] = UserPalette8bpp[i][0];
+        dstPalette[i][1] = UserPalette8bpp[i][1];
+        dstPalette[i][2] = UserPalette8bpp[i][2];
       }
       if (colortable)
         colorDat = COLOR_TABLE_SIZE;
@@ -1093,9 +1180,7 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
             tmpPtr++;
             *tmpPtr++ = transparencyData[1];
             *tmpPtr++ = transparencyData[2];
-            *tmpPtr++ = transparencyData[3];     // set the
-            // transparent
-            // color
+            *tmpPtr++ = transparencyData[3];     // set the transparent color
 
             break;
 
@@ -1134,9 +1219,7 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
             tmpPtr++;
             *tmpPtr++ = transparencyData[1];
             *tmpPtr++ = transparencyData[2];
-            *tmpPtr++ = transparencyData[3];     // set the
-            // transparent
-            // color
+            *tmpPtr++ = transparencyData[3];     // set the transparent color
 
             break;
 
@@ -1593,7 +1676,7 @@ WriteIndexedColorTbmp(RCBITMAP * rcbmp,
           }
           else
             index = BMP_RGBToColorIndex(cs.r, cs.g, cs.b,
-                                        PalmPalette8bpp, 256);
+                                        UserPalette8bpp, 256);
 
           ninputcolors++;
 
@@ -1788,6 +1871,7 @@ ReadPNMInt(struct foreign_reader *r)
  * but they probably will return random colors.  But running out of input
  * indicates that the input is corrupted, so this doesn't really matter.  
  */
+int UserPalette8bpp[256][3];
 
 static void
 ReadP1(struct foreign_reader *r,
@@ -2208,8 +2292,13 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
     int dataSize;
     int bootScreenHeaderSize = (vfLE32) ? 8 : 6;
     unsigned short crc;
+	int	test;
 
-    fseek(outputFile, currentPosInFile + bootScreenHeaderSize, SEEK_SET);       /* jump after the header */
+	EmitL(0);                             
+	EmitW(0);
+	if (vfLE32)
+		EmitW(0);
+
     structureSize = CbEmitStruct(rcbmp, szRCBITMAP, NULL, fTrue);       /* write structure tbmp */
     DumpBytes(rcbmp->pbBits, rcbmp->cbDst);      /* write data tbmp */
     PadBoundary();
@@ -2218,18 +2307,18 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
     dataSize = newPosInFile - (currentPosInFile + bootScreenHeaderSize);
     pData = malloc(dataSize);
     fseek(outputFile, currentPosInFile + bootScreenHeaderSize, SEEK_SET);       /* jump after the header */
-    fread(pData, 1, dataSize, outputFile);
+    if ((test = fread(pData, 1, dataSize, outputFile)) != dataSize)
+	{
+		fprintf(stderr, "Read: %lu\n", test);
+		abort();
+	}
     crc = Crc16CalcBlock(pData, (unsigned short)dataSize, 0);
 
     fseek(outputFile, currentPosInFile, SEEK_SET);      /* jump before the header */
     EmitL(dataSize);                             /* write header size of data */
-    if (vfLE32)                                  /* write header crc of data */
-      EmitL((unsigned int)crc);
-    else
       EmitW(crc);
 
     fseek(outputFile, newPosInFile, SEEK_SET);   /* jump afer header + bmp */
-    if (pData)
       free(pData);
   }
   else
@@ -2239,6 +2328,7 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
     DumpBytes(rcbmp->pbBits, rcbmp->cbDst);
     PadBoundary();                               /* RMa add: BUG correction */
   }
+
   // clean up
   free(rcbmp->pbBits);
 }

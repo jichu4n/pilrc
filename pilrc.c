@@ -71,6 +71,10 @@
  *                 Added 'pref' resource support
  *     23-Jui-2001 Renaud Malaval
  *                 Added localisation support
+ *     31-Aou-2001 Laurent Dutour
+ *                 Re-Added recursive include support
+ *     08-Sep-2001 Renaud Malaval
+ *                 Added 'tSCH' resource support
  */
 
 #include <stdio.h>
@@ -85,11 +89,15 @@ char *strdup(const char *s);
 
 #define EMITRWT
 #include "pilrc.h"
+#undef EMITRWT
 #include "bitmap.h"
 #include "font.h"
 
 #include "restype.h"                             // RMa
-#include "makeKbd.h"                             // RMa
+
+#ifdef PALM_INTERNAL
+	#include "PalmRC.h"
+#endif
 
 #define idAutoInit 9999
 #define idPalmOSReservedMin 10000
@@ -119,6 +127,11 @@ BOOL vfPalmRez;
  * Allow edit ID's (10000-10007 inclusive)
  */
 BOOL vfAllowEditIDs;
+
+/*
+ * Disables ellipsis processing
+ */
+BOOL vfNoEllipsis;
 
 /*
  * Quiet output 
@@ -181,6 +194,8 @@ FRM *vpfrm;
  */
 BOOL vfLE32 = fFalse;
 
+BOOL vfAppIcon68K = fFalse;
+
 /*
  * LDu Output a Prc File
  */
@@ -188,6 +203,11 @@ BOOL vfPrc = fFalse;
 const char *vfPrcName;
 const char *vfPrcCreator;
 const char *vfPrcType;
+
+/*
+ * LDu Ignore Include File In Header Files
+ */
+BOOL vfIFIH = fFalse;
 
 /*
  * Menu globals 
@@ -431,8 +451,7 @@ NextLine(void)
 |	Consistency issue -- takes a ptok, but some other other routines don't.
 |	only one global tok...
 -------------------------------------------------------------WESC------------*/
-static BOOL
-FGetTok(TOK * ptok)
+BOOL FGetTok(TOK * ptok)
 {
   BOOL fInComment;
 
@@ -494,7 +513,7 @@ FGetTok(TOK * ptok)
 |		Pushback one token.  Note! that this is 1 level only!
 -------------------------------------------------------------WESC------------*/
 VOID
-UngetTok()
+UngetTok(void)
 {
   tok = tokPrev;
   fTokUngotten = fTrue;
@@ -798,55 +817,6 @@ WGetConstEx(char *szErr)
   return wVal;
 }
 
-/*-----------------------------------------------------------------------------
-|	Various Konstant types -- basically deferred evaluation of constants
-|	mainly for AUTO and CENTER because we can't evaluate them until we know
-|	the font for the particular item.
--------------------------------------------------------------WESC------------*/
-
-/*
- * Konstant Type 
- */
-typedef enum _kt
-{
-  ktConst,
-  ktCenter,
-  ktAuto,
-  ktCenterAt,
-  ktRightAt,
-  ktBottomAt
-}
-KT;
-
-/*
- * Konstant 
- */
-typedef struct _k
-{
-  KT kt;
-  int wVal;
-}
-K;
-
-/*
- * Konstant Point 
- */
-typedef struct _kpt
-{
-  K kX;
-  K kY;
-}
-KPT;
-
-/*
- * Konstant Rect 
- */
-typedef struct _krc
-{
-  KPT kptUpperLeft;
-  KPT kptExtent;
-}
-KRC;
 
 /*-----------------------------------------------------------------------------
 |	KtGetK
@@ -923,223 +893,126 @@ ParseKrc(KRC * pkrc)
   KtGetK(&pkrc->kptExtent.kY, "rect height");
 }
 
-/*-----------------------------------------------------------------------------
-|	ITM
-|		an item in a form -- grif and grif2 define the syntax of the item
-|	and what to expect.
--------------------------------------------------------------WESC------------*/
-typedef struct _itm
+/*---------------------------------------------------------------------------
+| ParsePaletteFile
+|
+|
+------------------------------------------------------------CD----------------*/
+static void
+ParsePaletteFile (char *pchFileName, int p[256][3], int *nColors)
 {
-  int grif;
-  int grifOut;
-  int grif2;
-  int grif2Out;
-  int grif3;
-  int grif3Out;
-  char *text;
-  int cbText;                                    /* length of text including nul terminator */
-  int id;
-  int listid;
-  KRC krc;
-  /*
-   * RectangleType rc; 
-   */
-  RCRECT rc;
-  KPT kpt;
-  /*
-   * PointType pt; 
-   */
-  RCPOINT pt;
-  BOOL usable;
-  BOOL leftAnchor;
-  int frame;
-  BOOL enabled;
-  BOOL on;                                       /* checked */
-  BOOL editable;
-  BOOL underlined;
-  BOOL singleLine;
-  BOOL dynamicSize;
-  BOOL vertical;                                 /* RMa add: slider */
-  BOOL graphical;                                /* RMa add: slider */
-  int justification;
-  int maxChars;
-  int autoShift;
-  BOOL hasScrollBar;
-  BOOL numeric;
-  int numItems;
-  int cvis;
-  int group;
-  int font;
-  int rscID;
-  BOOL modal;
-  BOOL saveBehind;
-  int helpId;
-  int defaultBtnId;
-  int menuId;
-  int numRows;
-  int numColumns;
-  int rgdxcol[64];
-  int value;                                     /* scrollbar */
-  int minValue;                                  /* scrollbar */
-  int maxValue;                                  /* scrollbar */
-  int pageSize;                                  /* scrollbar */
-  int thumbid;                                   /* RMa add: slider */
-  int backgroundid;                              /* RMa add: slider */
-  BOOL feedback;                                 /* RMa add: slider */
-  int bitmapid;                                  /* RMa add: graphical button */
-  int selectedbitmapid;                          /* RMa add: graphical button */
-  int version;                                   /* RMa add: GraffitiInputArea 'silk', 'locs' */
-  char *creator;                                 /* RMa add: GraffitiInputArea 'silk' */
-  char *language;                                /* RMa add: GraffitiInputArea 'silk' */
-  char *country;                                 /* RMa add: GraffitiInputArea 'silk' */
-  int areaType;                                  /* RMa add: GraffitiInputArea 'silk' */
-  int areaIndex;                                 /* RMa add: GraffitiInputArea 'silk' */
-  int keyDownChr;                                /* RMa add: GraffitiInputArea 'silk' */
-  int keyDownKeyCode;                            /* RMa add: GraffitiInputArea 'silk' */
-  int keyDownModifiers;                          /* RMa add: GraffitiInputArea 'silk' */
-  int Number;                                    /* RMa add: country 'cnty' */
-  char *Name;                                    /* RMa add: country 'cnty', 'locs' */
-  int DateFormat;                                /* RMa add: country 'cnty', 'locs' */
-  int LongDateFormat;                            /* RMa add: country 'cnty', 'locs' */
-  int WeekStartDay;                              /* RMa add: country 'cnty', 'locs' */
-  int TimeFormat;                                /* RMa add: country 'cnty', 'locs' */
-  int NumberFormat;                              /* RMa add: country 'cnty', 'locs' */
-  char *CurrencyName;                            /* RMa add: country 'cnty', 'locs' */
-  char *CurrencySymbol;                          /* RMa add: country 'cnty', 'locs' */
-  char *CurrencyUniqueSymbol;                    /* RMa add: country 'cnty', 'locs' */
-  int CurrencyDecimalPlaces;                     /* RMa add: country 'cnty', 'locs' */
-  int DaylightSavings;                           /* RMa add: country 'cnty', 'locs' */
-  int MinutesWestOfGmt;                          /* RMa add: country 'cnty' */
-  int MeasurementSystem;                         /* RMa add: country 'cnty', 'locs' */
-  int TimeZone;                                  /* RMa add: locales         'locs' */
-  char *CountryName;                             /* RMa add: locales         'locs' */
-  int Languages;                                 /* RMa add: locales         'locs' */
-  int Countrys;                                  /* RMa add: locales         'locs' */
-  int DefaultItem;                               /* RMa add: 'pref' */
-  int Priority;                                  /* RMa add: 'pref' */
-  int StackSize;                                 /* RMa add: 'pref' */
-  int MinHeapSpace;                              /* RMa add: 'pref' */
-  char *Locale;                                  /* RMa localisation management */
-  int AlertType;                                 /* RMA alert */
+  int  cch;
+  char *data;
+  FILE *fh;
+  int  c=0, i=0;
+  int  status = 0;
+  char tcolor[10];
+  int  tcolorindex = 0;
+  int  r=0, g=0, b=0;
+
+  FindAndOpenFile(pchFileName, "rb", &fh);
+  if (fh == NULL)
+    ErrorLine2("Unable to open palette file ", pchFileName);
+ 
+  data = malloc(16384);
+  cch = fread(data, 1, 16384, fh);
+  fclose(fh);
+
+  // Start parse of file
+  memset (tcolor, 0, 10);
+  for (c=0; c<cch; c++) 
+  {
+    switch (status) 
+    {
+      case 0:
+           if (data[c] >= '0' && data[c] <= '9') 
+           {
+             tcolor[tcolorindex++] = data[c];
+           }
+
+           if (data[c] == ' ' || data[c] == '\t') 
+           {
+             status = 1;
+             r = atoi (tcolor);
+             if (r > 255) {
+               ErrorLine("Color component must be BYTE (0..255)");
+             }
+             memset (tcolor, 0, 10);
+             tcolorindex = 0;
+           }
+           break;
+
+      case 1:
+           if (data[c] >= '0' && data[c] <= '9') 
+           {
+             tcolor[tcolorindex++] = data[c];
+           }
+
+           if (data[c] == ' ' || data[c] == '\t') 
+           {
+             status = 2;
+             g = atoi (tcolor);
+             if (g > 255) {
+               ErrorLine("Color component must be BYTE (0..255)");
+             }
+             memset (tcolor, 0, 10);
+             tcolorindex = 0;
+           }
+           break;
+
+      case 2:
+           if (data[c] >= '0' && data[c] <= '9') 
+           {
+             tcolor[tcolorindex++] = data[c];
+           }
+
+           if (data[c] == ' ' || data[c] == '\t') 
+           {
+             status = 3;
+             b = atoi (tcolor);
+             if (b > 255) {
+               ErrorLine("Color component must be BYTE (0..255)");
+             }
+             memset (tcolor, 0, 10);
+             tcolorindex = 0;
+
+             if (data[c] == '\n') 
+             {
+               status = 4;
+             }
+           }
+           break;
+
+      default:
+      case 3:
+           if (data[c] == '\n') 
+           {
+             status = 4;
+           }
+           break;
+    }
+
+    if (status == 4)
+    {
+      p[i][0] = r;
+      p[i][1] = g;
+      p[i][2] = b;
+      i++;
+
+      if (i == 257) 
+      {
+        c = cch;
+      }
+      status = 0;
+    }
+  }
+
+  free(data);
+  *nColors = i;
 }
-ITM;
-
-/*
- * Item Flags 
- */
-#define ifNull			  0x00000000
-#define ifText         0x00000001
-#define ifMultText     0x00000002
-#define ifId           0x00000004
-#define ifRc           0x00000008
-#define ifPt           0x00000010
-#define ifUsable       0x00000020
-#define ifAnchor       0x00000040
-#define ifFrame        0x00000080
-#define ifEnabled      0x00000100
-#define ifOn           0x00000200
-#define ifEditable     0x00000400
-#define ifSingleLine   0x00000800
-#define ifDynamicSize  0x00001000
-#define ifMaxChars     0x00002000
-#define ifCvis         0x00004000
-#define ifGroup        0x00008000
-#define ifFont         0x00010000
-#define ifAlign        0x00020000
-#define ifUnderlined   0x00040000
-#define ifListId       0x00080000
-#define ifBitmap       0x00100000
-
-/*
- * Form ifs 
- */
-#define ifModal        0x00200000
-#define ifSaveBehind   0x00400000
-#define ifHelpId       0x00800000
-#define ifDefaultBtnId 0x01000000
-#define ifMenuId       0x02000000
-
-/*
- * Ifs defining margins -- extra width to add to an item in addition to it's string width 
- */
-#define ifSmallMargin  0x80000000
-#define ifBigMargin    0x40000000
-
-/*
- * if2s -- ran out of bits in if! 
- */
-#define if2Null					0x00000000
-#define if2NumColumns			0x00000001
-#define if2NumRows				0x00000002
-#define if2ColumnWidths			0x00000004
-#define if2Value					0x00000008
-#define if2MinValue				0x00000010
-#define if2MaxValue				0x00000020
-#define if2PageSize				0x00000040
-#define if2AutoShift				0x00000080
-#define if2Scrollbar				0x00000100
-#define if2Numeric				0x00000200
-
-#define if2Type 					0x00000800      /* RMa add */
-#define if2File 					0x00001000      /* RMa add */
-#define if2CreatorID				0x00002000      /* RMa add */
-#define if2AppType				0x00004000      /* RMa add */
-#define if2CreateTime			0x00008000      /* RMa add */
-#define if2ModTime				0x00010000      /* RMa add */
-#define if2BackupTime			0x00020000      /* RMa add */
-#define if2AppInfo				0x00040000      /* RMa add */
-#define if2SortInfo				0x00080000      /* RMa add */
-#define if2ReadOnly				0x00100000      /* RMa add */
-#define if2Backup					0x00200000      /* RMa add */
-#define if2CopyProtect			0x00400000      /* RMa add */
-#define if2Priority				0x00800000      /* RMa add */
-#define if2ThumbID				0x01000000      /* RMa add */
-#define if2BackgroundID			0x02000000      /* RMa add */
-#define if2Vertical				0x04000000      /* RMa add */
-#define if2Graphical				0x08000000      /* RMa add */
-#define if2BitmapID				0x10000000      /* RMa add */
-#define if2SelectedBitmapID	0x20000000       /* RMa add */
-#define if2Feedback				0x40000000      /* RMa add */
-
-/*
- * if3s -- ran out of bits in if and if2!       RMa add 
- */
-#define if3Null					0x00000000
-#define if3Vers					0x00000001
-#define if3Creator				0x00000002
-#define if3Language				0x00000004
-#define if3Country				0x00000008
-#define if3areaType				0x00000010
-#define if3areaIndex				0x00000020
-#define if3keyDownChr			0x00000040
-#define if3keyDownKeyCode		0x00000080
-#define if3keyDownModifiers	0x00000100
-#define if3Number							0x00000200
-#define if3Name							0x00000400
-#define if3DateFormat					0x00000800
-#define if3LongDateFormat				0x00001000
-#define if3WeekStartDay					0x00002000
-#define if3TimeFormat					0x00004000
-#define if3NumberFormat					0x00008000
-#define if3CurrencyName					0x00010000
-#define if3CurrencySymbol				0x00020000
-#define if3CurrencyUniqueSymbol		0x00040000
-#define if3CurrencyDecimalPlaces		0x00080000
-#define if3DayLightSaving				0x00100000
-#define if3MinutesWestOfGmt			0x00200000
-#define if3MeasurementSystem			0x00400000
-#define if3DefaultItm					0x00800000
-#define if3TimeZone  					0x01000000
-#define if3Languages			   		0x02000000
-#define if3Countrys						0x04000000
-#define if3CountryName					0x08000000
-#define if3StackSize						0x10000000
-#define if3MinHeapSpace					0x20000000
-#define if3Locale							0x40000000      /* RMa Localisation Management */
-#define if3AlertType						0x80000000      /* RMa alert */
 
  /*
-  * * Semi-arbitrary margins 
+  * Semi-arbitrary margins 
   */
 #define dxObjSmallMargin 3
 #define dxObjBigMargin 6
@@ -1168,7 +1041,24 @@ WResolveK(K * pk,
     case ktAuto:
       if (fHoriz)
       {
-        wVal = DxCalcExtent((unsigned char *)pitm->text, pitm->font);
+        /* added 2.8p8 - "auto" should give longest width, not first */
+        if (pitm->grif & ifMultText) 
+        {
+          char *text = pitm->text;
+          wVal = 0;
+          while (text < pitm->text + pitm->cbText) 
+          {
+            int extlen = DxCalcExtent((unsigned char *)text, pitm->font);
+            text += strlen(text) + 1;
+            if (extlen > wVal)
+              wVal = extlen;
+          }
+        } 
+        else 
+        {
+          wVal = DxCalcExtent((unsigned char *)pitm->text, pitm->font);
+        }
+
         if (pitm->grif & ifSmallMargin)
           wVal += 2 * dxObjSmallMargin;
         if (pitm->grif & ifBigMargin)
@@ -1282,6 +1172,7 @@ WGetId(char *szErr,
 #define CheckGrif(ifP) do {DoCheckGrif(pitm->grif, ifP); pitm->grifOut |= ifP;} while (0);
 #define CheckGrif2(ifP) do {DoCheckGrif(pitm->grif2, ifP); pitm->grif2Out |= ifP;} while (0);
 #define CheckGrif3(ifP) do {DoCheckGrif(pitm->grif3, ifP); pitm->grif3Out |= ifP;} while (0);
+#define CheckGrif4(ifP) do {DoCheckGrif(pitm->grif4, ifP); pitm->grif4Out |= ifP;} while (0);
 
 /*-----------------------------------------------------------------------------
 |	ParseItm
@@ -1296,7 +1187,8 @@ void
 ParseItm(ITM * pitm,
          int grif,
          int grif2,
-         int grif3)
+         int grif3,
+			int grif4)
 {
   BOOL fAt;
   int icol;
@@ -1306,6 +1198,7 @@ ParseItm(ITM * pitm,
   pitm->grif = grif;
   pitm->grif2 = grif2;
   pitm->grif3 = grif3;
+  pitm->grif4 = grif4;
   /*
    * defaults 
    */
@@ -1341,12 +1234,14 @@ ParseItm(ITM * pitm,
       strcpy(pch, tok.lex.szId);
       if (pch)                                   // RMa add test. Bug in LIST with no element pitm->numItems must = 0
         pitm->numItems++;                        // RMa test pch instead of *pch
-      pch = pch + strlen(tok.lex.szId) + 1;
+			pch += strlen(tok.lex.szId) + 1;
       if (!FGetTok(&tok))
         return;
       if (tok.lex.lt != ltStr)
         break;
     }
+		if (pch - rgb >= 16384)
+			ErrorLine("Hex string or String are too big");
     pitm->text = malloc(pch - rgb);
     pitm->cbText = pch - rgb;
     memcpy(pitm->text, rgb, pch - rgb);
@@ -1570,6 +1465,14 @@ ParseItm(ITM * pitm,
         CheckGrif3(if3Vers);
         pitm->version = WGetConstEx("version");
         break;
+      case rwInformation:                       /* RMa alert */
+      case rwConfirmation:
+      case rwWarning:
+      case rwError:
+        pitm->AlertType = tok.rw - rwInformation;
+        break;
+
+#ifdef PALM_INTERNAL
       case rwCreator:                           /* RMa addition */
         CheckGrif3(if3Creator);
         pitm->creator = PchGetSz("creator");
@@ -1614,6 +1517,10 @@ ParseItm(ITM * pitm,
       case rwCountrys:                          /* RMa addition */
         CheckGrif3(if3Countrys);
         pitm->Countrys = WGetConstEx("countrys");
+        break;
+      case rwDefaultItem:
+        CheckGrif3(if3DefaultItm);
+        pitm->DefaultItem = WGetConstEx("defaultitem");
         break;
       case rwTimeZone:                          /* RMa addition */
         CheckGrif3(if3TimeZone);
@@ -1691,17 +1598,95 @@ ParseItm(ITM * pitm,
         CheckGrif3(if3Locale);
         pitm->Locale = PchGetSz("locale");
         break;
-      case rwInformation:                       /* RMa alert */
-      case rwConfirmation:
-      case rwWarning:
-      case rwError:
-        pitm->AlertType = tok.rw - rwInformation;
-        break;
-
-      case rwDefaultItem:
-        CheckGrif3(if3DefaultItm);
-        pitm->DefaultItem = WGetConstEx("defaultitem");
-        break;
+		case rwFontType:									/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4FontType);
+			pitm->FontType = WGetConstEx("fonttype");
+			break;
+		case rwFirstChar:									/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4firstChar);
+			pitm->FirstChar = WGetConstEx("firstchar");
+			break;
+		case rwLastChar:									/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4lastChar);
+			pitm->LastChar = WGetConstEx("lastchar");
+			break;
+		case rwmaxWidth:									/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4maxWidth);
+			pitm->maxWidth = WGetConstEx("maxwidth");
+			break;
+		case rwkernMax:									/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4kernMax);
+			pitm->kernMax = WGetConstEx("kernmax");
+			break;
+		case rwnDescent:									/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4nDescent);
+			pitm->nDescent = WGetConstEx("ndescent");
+			break;
+		case rwfRectWidth:								/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4fRectWidth);
+			pitm->fRectWidth = WGetConstEx("frectwidth");
+			break;
+		case rwfRectHeight:								/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4fRectHeight);
+			pitm->fRectHeight = WGetConstEx("frectheight");
+			break;
+		case rwOwTLoc:										/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4owTLoc);
+			pitm->owTLoc = WGetConstEx("owtloc");
+			break;
+		case rwAscent:										/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4Ascent);
+			pitm->Ascent = WGetConstEx("ascent");
+			break;
+		case rwDescent:									/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4Descent);
+			pitm->Descent = WGetConstEx("descent");
+			break;
+		case rwLeading:									/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4Leading);
+			pitm->Leading = WGetConstEx("leading");
+			break;
+		case rwRowWords:									/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4rowWords);
+			pitm->rowWords = WGetConstEx("rowwords");
+			break;
+		case rwFlag:										/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4flag);
+			pitm->flag = WGetConstEx("flag");
+			break;
+		case rwState:										/* RMa 'NFNT' & 'fntm' */
+			CheckGrif4(if4state);
+			pitm->state = WGetConstEx("state");
+			break;
+		case rwAutoCompress:								/* RMa 'ttbl' */
+			CheckGrif4(if4compressed);
+			pitm->compress = tok.rw == rwAutoCompress;
+			break;
+		case rwTableType:									/* RMa 'ttbl' */
+			CheckGrif4(if4tableType);
+			pitm->tableType = WGetConstEx("tabletype");
+			break;
+		case rwDefaultOutput:							/* RMa 'ttbl' */
+			CheckGrif4(if4defaultOutput);
+			pitm->defaultOutput = WGetConstEx("defaultoutput");
+			break;
+		case rwNumElementBits:							/* RMa 'ttbl' */
+			CheckGrif4(if4numElementBits);
+			pitm->numElementBits = WGetConstEx("numelementbits");
+			break;
+		case rwNumIndexedDataLenBits:					/* RMa 'ttbl' */
+			CheckGrif4(if4numIndexedDataLenBits);
+			pitm->numIndexedDataLenBits = WGetConstEx("numindexeddatalenbits");
+			break;
+		case rwNumResultBits:							/* RMa 'ttbl' */
+			CheckGrif4(if4numResultBits);
+			pitm->numResultBits = WGetConstEx("numresultbits");
+			break;
+		case rwIndexDataOffset:							/* RMa 'ttbl' */
+			CheckGrif4(if4indexDataOffset);
+			pitm->indexDataOffset = WGetConstEx("indexdataoffset");
+			break;
+#endif
     }
   }
 }
@@ -1719,7 +1704,6 @@ ParseToFinalEnd(void)
   {
     if (tok.rw == rwBegin)
       encapsulation++;
-
     if (tok.rw == rwEnd)
     {
       if (encapsulation == 0)
@@ -1728,6 +1712,24 @@ ParseToFinalEnd(void)
         encapsulation--;
     }
   }
+}
+
+/*
+ * RMa add & debug : Code cleaning thank to JMa 
+ *  add '->' instead of '.' for itm usage and remove not before vfStripNoLocRes
+ *
+ */
+BOOL
+ObjectDesiredInOutputLocale (const ITM *itm)
+{
+	if (itm->Locale)
+		if (szLocaleP)
+			return strcmp (itm->Locale, szLocaleP);
+		else
+			return fTrue;
+//		return szLocaleP == NULL || strcmp (itm->Locale, szLocaleP) == 0;
+	else
+		return vfStripNoLocRes;
 }
 
 #define CondEmitB(b) do {if (fEmit) EmitB(b);} while (0)
@@ -1785,7 +1787,7 @@ CbEmitStruct(void *pv,
     fZero = *pch == 'z';
     if (fZero)
       pch++;
-    ch = *pch++;
+    ch = *pch++;				/* get the leter of output type */
     c = 0;
     while (isdigit((p_int) * pch))
     {
@@ -2358,44 +2360,9 @@ FParseObjects()
       case rwEnd:
         return fTrue;
       case rwTTL:                               /* Yuck, should just do this in FORM line! */
-        while (FGetTok(&tok))                    // RMa add support for form title on hex format
-        {
-          // we have a constant?
-          if (tok.lex.lt == ltConst)
-          {
-            char tmpBuffer[255];
-            int i = 0;
-
-            if (tok.lex.val > 0xff)
-              ErrorLine("HEX data must be BYTE (0..255)");
-
-            do
-            {
-              tmpBuffer[i] = tok.lex.val;
-              if (tmpBuffer[i] == 0)
-                break;
-              i++;
-              if (i >= 255)
-              {
-                tmpBuffer[i] = 0;
-                break;
-              }
-            } while (FGetTok(&tok));
             obj.title = calloc(1, sizeof(RCFORMTITLE));
-            obj.title->text = strdup((char *)tmpBuffer);
-            break;
-          }
-
-          // we have a string?
-          else if (tok.lex.lt == ltStr)
-          {
-            UngetTok();
-            ParseItm(&itm, ifText, if2Null, if3Null);
-            obj.title = calloc(1, sizeof(RCFORMTITLE));
+            ParseItm(&itm, ifText, if2Null, if3Null, if4Null);
             obj.title->text = itm.text;
-            break;
-          }
-        }
         fok = frmTitleObj;
         break;
 
@@ -2403,34 +2370,38 @@ FParseObjects()
         ParseItm(&itm,
                  ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont |
                  ifAnchor | ifFrame | ifBigMargin,
-                 if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null);
+                 if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null, if4Null);
         goto Control;
       case rwPBN:                               /* pushbutton */
         ParseItm(&itm,
                  ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont |
                  ifAnchor | ifGroup | ifSmallMargin | ifFrame,
-                 if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null);
+                 if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null, if4Null);
         goto Control;
       case rwCBX:                               /* check box */
-        ParseItm(&itm, ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont | ifAnchor | ifGroup | ifOn | ifBigMargin | ifSmallMargin, if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null);      /* BUG! need to add checkbox extra! */
+        ParseItm(&itm, ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont |
+						ifAnchor | ifGroup | ifOn | ifBigMargin | ifSmallMargin,
+						if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null, if4Null);      /* BUG! need to add checkbox extra! */
         itm.frame = 0;
         if (itm.graphical)                       /* RMa add some compilation test */
           ErrorLine("PalmOS 3.5 Graphic control can be a check box control");
         goto Control;
       case rwPUT:                               /* popuptrigger */
-        ParseItm(&itm, ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont | ifAnchor | ifBigMargin | ifSmallMargin | ifFrame, if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null);     /* SAME! */
+        ParseItm(&itm, ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont |
+						ifAnchor | ifBigMargin | ifSmallMargin | ifFrame, if2Graphical |
+						if2BitmapID | if2SelectedBitmapID, if3Null, if4Null);     /* SAME! */
         goto Control;
       case rwSLT:                               /* selectortrigger */
         ParseItm(&itm,
                  ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont |
                  ifAnchor | ifSmallMargin | ifFrame,
-                 if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null);
+                 if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null, if4Null);
         goto Control;
       case rwREP:                               /* repeating control */
         ParseItm(&itm,
                  ifText | ifId | ifRc | ifUsable | ifEnabled | ifFrame |
                  ifFont | ifAnchor | ifBigMargin,
-                 if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null);
+                 if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null, if4Null);
       Control:
         obj.control = calloc(1, sizeof(RCControlType));
         SETPBAFIELD(obj.control, style, rwSav - rwBTN);
@@ -2455,11 +2426,11 @@ FParseObjects()
           // To prevent problem of byte ordering on a pc.
           // I echange the low and hight word of this 2 param in one 
 #ifdef HOST_LITTLE_ENDIAN                        // little endian
-          SETPBAFIELD(obj.control, u.ids.thumbid, itm.selectedbitmapid);
-          SETPBAFIELD(obj.control, u.ids.backgroundid, itm.bitmapid);
-#else                                            // big endian
           SETPBAFIELD(obj.control, u.ids.thumbid, itm.bitmapid);
           SETPBAFIELD(obj.control, u.ids.backgroundid, itm.selectedbitmapid);
+#else                                            // big endian
+          SETPBAFIELD(obj.control, u.ids.thumbid, itm.selectedbitmapid);
+          SETPBAFIELD(obj.control, u.ids.backgroundid, itm.bitmapid);
 #endif
           fok = frmGraphicalControlObj;
           if ((rwSav != rwBTN) && (itm.frame != noButtonFrame))
@@ -2491,7 +2462,7 @@ FParseObjects()
 
       case rwLBL:                               /* label */
         ParseItm(&itm, ifText | ifId | ifPt | ifFont | ifUsable, if2Null,
-                 if3Null);
+                 if3Null, if4Null);
         obj.label = calloc(1, sizeof(RCFormLabelType));
         SETPBAFIELD(obj.label, text, itm.text);
         SETPBAFIELD(obj.label, id, itm.id);
@@ -2506,7 +2477,7 @@ FParseObjects()
                  ifId | ifRc | ifUsable | ifAlign | ifFont | ifEnabled |
                  ifUnderlined | ifSingleLine | ifEditable | ifDynamicSize |
                  ifMaxChars, if2AutoShift | if2Scrollbar | if2Numeric,
-                 if3Null);
+                 if3Null, if4Null);
         obj.field = calloc(1, sizeof(RCFieldType));
         SETPBAFIELD(obj.field, id, itm.id);
         SETPBAFIELD(obj.field, rect, itm.rc);
@@ -2526,7 +2497,7 @@ FParseObjects()
         break;
 
       case rwPUL:                               /* popuplist */
-        ParseItm(&itm, ifId | ifListId, if2Null, if3Null);
+        ParseItm(&itm, ifId | ifListId, if2Null, if3Null, if4Null);
         obj.popup = calloc(1, sizeof(RCFORMPOPUP));
         obj.popup->controlID = itm.id;
         obj.popup->listID = itm.listid;
@@ -2536,7 +2507,7 @@ FParseObjects()
       case rwLST:                               /* list */
         ParseItm(&itm,
                  ifMultText | ifId | ifRc | ifUsable | ifFont | ifEnabled |
-                 ifCvis | ifSmallMargin, if2Null, if3Null);
+                 ifCvis | ifSmallMargin, if2Null, if3Null, if4Null);
 
         obj.list = calloc(1, sizeof(RCListType));
         SETPBAFIELD(obj.list, itemsText, itm.text);
@@ -2552,7 +2523,9 @@ FParseObjects()
 
         SETPBAFIELD(obj.list, font, itm.font);
         if ( /*vfPalmRez && */ itm.rc.extent.y == 0 && itm.cvis == -1)  // RNi: PalmRez automatically compute height of lists set with a height of 0
-          itm.cvis = WMin(itm.numItems, 10);
+//          itm.cvis = WMin(itm.numItems, 10);
+//			RNi: limiting to 10 is arbitrary and does not work. I limited to 156 pixels height total. Is 156 the best ?
+          itm.cvis = WMin(itm.numItems, 156 / (PBAFIELD(obj.list, font) == largeFont ? 14 : 11));
         if (itm.cvis != -1)
         {
 
@@ -2567,8 +2540,14 @@ FParseObjects()
             (PBAFIELD(obj.list, font) == largeFont ? 14 : 11) * itm.cvis;
           if (height >= 160)
             height = 160;
+/*
+ * removed: 12-Nov-2001
+ *
+ * see doc/2.8p8emails/helge for explanation
+ *
           if (itm.rc.topLeft.y + height >= 160)
             height = 160 - itm.rc.topLeft.y;
+ */
           SETPBAFIELD(obj.list, bounds.extent.y, height);
           rcPrev.extent.y = height;
         }
@@ -2576,14 +2555,14 @@ FParseObjects()
         break;
 
       case rwGSI:                               /* graffitistateindicator */
-        ParseItm(&itm, ifPt, if2Null, if3Null);
+        ParseItm(&itm, ifPt, if2Null, if3Null, if4Null);
         obj.grfState = calloc(1, sizeof(RCFORMGRAFFITISTATE));
         obj.grfState->pos = itm.pt;
         fok = frmGraffitiStateObj;
         break;
 
       case rwGDT:                               /* gadget */
-        ParseItm(&itm, ifId | ifRc | ifUsable, if2Null, if3Null);
+        ParseItm(&itm, ifId | ifRc | ifUsable, if2Null, if3Null, if4Null);
         obj.gadget = calloc(1, sizeof(RCFORMGADGET));
         obj.gadget->id = itm.id;
         obj.gadget->rect = itm.rc;
@@ -2593,7 +2572,7 @@ FParseObjects()
         break;
 
       case rwFBM:                               /* formbitmap */
-        ParseItm(&itm, ifPt | ifUsable | ifBitmap, if2Null, if3Null);
+        ParseItm(&itm, ifPt | ifUsable | ifBitmap, if2Null, if3Null, if4Null);
         obj.bitmap = calloc(1, sizeof(RCFormBitMapType));
         /*
          * obj.bitmap->id = itm.id; 
@@ -2606,7 +2585,7 @@ FParseObjects()
 
       case rwTBL:                               /* table */
         ParseItm(&itm, ifId | ifRc | ifEditable,
-                 if2NumColumns | if2NumRows | if2ColumnWidths, if3Null);
+                 if2NumColumns | if2NumRows | if2ColumnWidths, if3Null, if4Null);
         obj.table = calloc(1, sizeof(RCTableType));
         SETPBAFIELD(obj.table, id, itm.id);
         SETPBAFIELD(obj.table, bounds, itm.rc);
@@ -2625,7 +2604,7 @@ FParseObjects()
 
       case rwSCL:                               /* scrollbar */
         ParseItm(&itm, ifId | ifRc | ifUsable,
-                 if2Value | if2MinValue | if2MaxValue | if2PageSize, if3Null);
+                 if2Value | if2MinValue | if2MaxValue | if2PageSize, if3Null, if4Null);
         obj.scrollbar = calloc(1, sizeof(RCSCROLLBAR));
         obj.scrollbar->id = itm.id;
         obj.scrollbar->bounds = itm.rc;
@@ -2643,7 +2622,7 @@ FParseObjects()
         ParseItm(&itm, ifId | ifRc | ifUsable | ifEnabled,
                  if2Value | if2MinValue | if2MaxValue | if2PageSize |
                  if2ThumbID | if2BackgroundID | if2Vertical | if2Feedback,
-                 if3Null);
+                 if3Null, if4Null);
         obj.slider = calloc(1, sizeof(RCSliderControlType));
         SETPBAFIELD(obj.slider, id, itm.id);
         if (itm.feedback)
@@ -2737,24 +2716,13 @@ FParseForm(RCPFILE * prcpf)
   ParseItm(&itm,
            ifId | ifRc | ifEnabled | ifUsable | ifFrame | ifModal |
            ifSaveBehind | ifHelpId | ifDefaultBtnId | ifMenuId, if2Null,
-           if3Locale);
+           if3Locale, if4Null);
   GetExpectRw(rwBegin);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
+	if (ObjectDesiredInOutputLocale (&itm))
   {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SOMESTUFF;
-    }
-    else
-      goto SOMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SOMESTUFF:
     ParseToFinalEnd();
     return fFalse;
   }
@@ -2988,6 +2956,7 @@ FParsePullDown()
 
   memset(&mpd, 0, sizeof(RCMENUPULLDOWN));
   SETBAFIELD(mpd, title, PchGetSz("Popup title"));
+
   GetExpectRw(rwBegin);
   while (FGetTok(&tok))
   {
@@ -3015,20 +2984,25 @@ FParsePullDown()
           UngetTok();
           mi.itemStr = PchGetSz("Item Text");
           cch = strlen(mi.itemStr);
-          // pilot has a special ... character
-          // the ASCII value can be 0x18 or 0x85
-          if (cch >= 3 && strcmp(&mi.itemStr[cch - 3], "...") == 0)
+
+          // only apply special treatment if not requested
+          if (!vfNoEllipsis)
           {
-            if (vfPalmRez)
-              mi.itemStr[cch - 3] = (char)0x18;
-            else
-              mi.itemStr[cch - 3] = (char)0x85;
-            mi.itemStr[cch - 2] = 0;
-          }
-          else                                   // RMa
-          if ((vfPalmRez) && (mi.itemStr[cch - 1] == (char)0x85))
-          {
-            mi.itemStr[cch - 1] = (char)0x18;
+            // pilot has a special ... character
+            // the ASCII value can be 0x18 or 0x85
+            if (cch >= 3 && strcmp(&mi.itemStr[cch - 3], "...") == 0)
+            {
+              if (vfPalmRez)
+                mi.itemStr[cch - 3] = (char)0x18;
+              else
+                mi.itemStr[cch - 3] = (char)0x85;
+              mi.itemStr[cch - 2] = 0;
+            }
+            else                                   // RMa
+            if ((vfPalmRez) && (mi.itemStr[cch - 1] == (char)0x85))
+            {
+              mi.itemStr[cch - 1] = (char)0x18;
+            }
           }
           mi.id = WGetId("CommandId", fFalse);
           if (vfPalmRez)
@@ -3098,24 +3072,13 @@ FParseMenu()
   memset(&menu, 0, sizeof(RCMENUBAR));
   imiMac = 0;
 
-  ParseItm(&itm, ifId, if2Null, if3Locale);
+  ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
   GetExpectRw(rwBegin);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
+	if (ObjectDesiredInOutputLocale (&itm))
   {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SOMESTUFF;
-    }
-    else
-      goto SOMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SOMESTUFF:
     ParseToFinalEnd();
     return fFalse;
   }
@@ -3199,7 +3162,7 @@ ParseDumpAlert()
 
   //      idAlert = WGetId("AlertId", fFalse);
   ParseItm(&itm, ifId | ifHelpId | ifDefaultBtnId, if2Null,
-           if3Locale | if3AlertType);
+           if3Locale | if3AlertType, if4Null);
   GetExpectRw(rwBegin);
 
   idAlert = itm.id;
@@ -3209,19 +3172,8 @@ ParseDumpAlert()
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
+	if (ObjectDesiredInOutputLocale (&itm))
     {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SOMESTUFF;
-    }
-    else
-      goto SOMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SOMESTUFF:
     ParseToFinalEnd();
     return;
   }
@@ -3250,25 +3202,30 @@ ParseDumpAlert()
       case rwEnd:
         goto WriteAlert;
       case rwTTL:
-        pchTitle = PchGetSz("Title Text");
+			pchTitle = PchGetSzMultiLine("Title Text");			// RMa change PchGetSz to PchGetSzMultiLine
         break;
       case rwMessage:
         pchMessage = PchGetSzMultiLine("Message Text");
         break;
       case rwBTN:
       case rwButtons:                           /* button */
-        ParseItm(&itm, ifMultText, if2Null, if3Null);
+			ParseItm(&itm, ifMultText, if2Null, if3Null, if4Null);
         break;
     }
   }
 
 WriteAlert:
   at.numButtons = itm.numItems;
-  if (at.numButtons > 0 && at.defaultButton > at.numButtons)
+  if (at.numButtons > 0 && at.defaultButton >= at.numButtons)
     ErrorLine("Invalid default button number");
+/*
+ * removed 2.8p8, 12-Nov-2001
+ *
+ * see doc/2.8p8emails/neil for explanation
 
   if ((!at.defaultButton) && (at.numButtons == 1))
     at.defaultButton = 1;
+ */
 
   OpenOutput(kPalmResType[kAlertRscType], idAlert);     /* RMa "Talt" */
   CbEmitStruct(&at, szRCALERTTEMPLATE, NULL, fTrue);
@@ -3339,26 +3296,20 @@ ParseDumpStringTable()
 
   buf = malloc(32768);
 
-  ParseItm(&itm, ifId, if2Null, if3Locale);
+	ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
+	if (ObjectDesiredInOutputLocale (&itm))
   {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SOMESTUFF;
-    }
-    else
-      goto SOMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SOMESTUFF:
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
-      if (tok.lex.lt != ltStr)
+			if (tok.lex.lt == ltConst)
+//				if (tok.lex.val == 0)
+//					break;
+//				else
+					continue;
+			else if (tok.lex.lt != ltStr)
       {
         UngetTok();
         break;
@@ -3434,26 +3385,16 @@ ParseDumpString()
 {
   int id;
   char *pchString;
+  char *pString;
   int cch;
   ITM itm;
 
-  ParseItm(&itm, ifId, if2Null, if3Locale);
+	ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
+	if (ObjectDesiredInOutputLocale (&itm))
     {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SOMESTUFF;
-    }
-    else
-      goto SOMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SOMESTUFF:
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
       if ((tok.rw == rwFile) || (tok.lex.lt == ltBSlash)
@@ -3513,59 +3454,39 @@ ParseDumpString()
   else
   {
     UngetTok();
-    while (FGetTok(&tok))                        // RMa add support for form title on hex format
-    {
-      // we have a constant?
-      if (tok.lex.lt == ltConst)
-      {
-        char tmpBuffer[255];
-        int i = 0;
-
-        if (tok.lex.val > 0xff)
-          ErrorLine("HEX data must be BYTE (0..255)");
-
-        do
-        {
-          tmpBuffer[i] = tok.lex.val;
-          if (tmpBuffer[i] == 0)
-            break;
-          i++;
-          if (i >= 255)
-          {
-            tmpBuffer[i] = 0;
-            break;
-          }
-        } while (FGetTok(&tok));
-        pchString = strdup((char *)tmpBuffer);
-        break;
-      }
-
-      // we have a string?
-      else if (tok.lex.lt == ltStr)
-      {
-        UngetTok();
-        pchString = PchGetSzMultiLine("String Text");
-        break;
-      }
-    }
+    pchString = PchGetSzMultiLine("String Text");
   }
 
   cch = strlen(pchString);                       // RMa add 
-  // pilot has a special ... character
-  // the ASCII value can be 0x18 or 0x85
-  if (cch >= 3 && strcmp((pchString + cch - 3), "...") == 0)
+
+  // only apply special treatment if not requested
+  if (!vfNoEllipsis)
   {
-    if (vfPalmRez)
-      *(pchString + cch - 3) = (char)0x18;
-    else
-      *(pchString + cch - 3) = (char)0x85;
-    *(pchString + cch - 2) = 0;
+    // pilot has a special ... character
+    // the ASCII value can be 0x18 or 0x85
+    if (cch >= 3 && strcmp((pchString + cch - 3), "...") == 0)
+    {
+      if (vfPalmRez)
+        *(pchString + cch - 3) = (char)0x18;
+      else
+        *(pchString + cch - 3) = (char)0x85;
+      *(pchString + cch - 2) = 0;
+    }
+    else                                           // RMa
+    if ((vfPalmRez) && (*(pchString + cch - 1) == (char)0x85))
+    {
+      *(pchString + cch - 1) = (char)0x18;
+    }
   }
-  else                                           // RMa
-  if ((vfPalmRez) && (*(pchString + cch - 1) == (char)0x85))
-  {
-    *(pchString + cch - 1) = (char)0x18;
-  }
+
+	// character filtering for '\r'=0x0D to '\n'=0x0A
+	pString = pchString;
+	while (*pString)
+	{
+		if (*pString == 0x0D)
+			*pString = 0x0A;
+		pString++;
+	}
 
   OpenOutput(kPalmResType[kStrRscType], id);     /* RMa "tSTR" */
   DumpBytes(pchString, strlen(pchString) + 1);
@@ -3583,23 +3504,12 @@ ParseDumpCategories()
   char *string;
   ITM itm;
 
-  ParseItm(&itm, ifId, if2Null, if3Locale);
+	ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
+	if (ObjectDesiredInOutputLocale (&itm))
   {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SOMESTUFF;
-    }
-    else
-      goto SOMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SOMESTUFF:
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
       if (tok.lex.lt != ltStr)
@@ -3610,8 +3520,8 @@ ParseDumpCategories()
     }
     return;
   }
-  id = itm.id;
 
+  id = itm.id;
   if (vfCheckDupes)
   {
     int iid;
@@ -3698,11 +3608,15 @@ ParseDumpBitmapFile(int bitmapType)
 {
 #define MAXDEPTH 7
   char *pchFileName[MAXDEPTH] = { NULL };
+  char *pchPaletteFileName = NULL;
   int compress;
   BOOL colortable;
   int id, i;
   char *pchResType;
   int transparencyData[4];
+  int palette[256][3];
+  int nColors;
+  BOOL haspalette;
   ITM itm;
 
   pchResType = NULL;
@@ -3713,7 +3627,7 @@ ParseDumpBitmapFile(int bitmapType)
       pchResType = PchGetSz("Resource Type");
   }
 
-  ParseItm(&itm, ifId, if2Null, if3Locale);
+	ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
   id = itm.id;
 
   pchFileName[0] = PchGetSz("Bitmap Filename");
@@ -3737,6 +3651,7 @@ ParseDumpBitmapFile(int bitmapType)
     }
   }
 
+  haspalette = fFalse;
   compress = rwNoCompress;
   colortable = fFalse;
   transparencyData[0] = 0;
@@ -3763,11 +3678,45 @@ ParseDumpBitmapFile(int bitmapType)
       transparencyData[0] = rwTransparencyIndex;
       transparencyData[1] = WGetConst("transparency index");
     }
+    else if (tok.rw == rwBitmapPalette) 
+    {
+      pchPaletteFileName = PchGetSz("Palette Filename");
+      if ((pchPaletteFileName == NULL) || (strcmp(pchPaletteFileName, "") == 0))
+        ErrorLine("Empty or no file name provided");
+
+      haspalette = fTrue;
+      ParsePaletteFile (pchPaletteFileName, palette, &nColors);
+    }
     else
     {
       UngetTok();
       break;
     }
+  }
+
+  if (haspalette)
+  {
+    // 4bpc
+    if (((bitmapType == rwBitmapFamily_special) || 
+        (bitmapType == rwBitmapColor16)) && (nColors < 17))
+      SetUserPalette4bpp(palette, nColors);
+
+    // 8bpp
+    if (((bitmapType == rwBitmapFamily) || 
+        (bitmapType == rwBitmapColor256)) && (nColors < 256))
+      SetUserPalette8bpp(palette, nColors);
+  }
+  else
+  {
+    // 4bpc
+    if ((bitmapType == rwBitmapFamily_special) || 
+        (bitmapType == rwBitmapColor16)) 
+      SetUserPalette4bppToDefault4bpp();
+
+    // 8bpp
+    if ((bitmapType == rwBitmapFamily) || 
+        (bitmapType == rwBitmapColor256))
+      SetUserPalette8bppToDefault8bpp();
   }
 
   /*
@@ -3779,6 +3728,11 @@ ParseDumpBitmapFile(int bitmapType)
     if ((szLocaleP) && (vfStripNoLocRes))
       goto CLEANUP;
   }
+	else if (bitmapType == rwBootScreenFamily)
+	{
+		if (ObjectDesiredInOutputLocale (&itm))
+			goto CLEANUP;
+	}
   else if (itm.Locale)
   {
     if ((szLocaleP) && (vfStripNoLocRes))
@@ -3876,11 +3830,27 @@ ParseDumpBitmapFile(int bitmapType)
   CloseOutput();
 
 CLEANUP:
+
+  if (haspalette)
+  {
+    // 4bpc
+    if ((bitmapType == rwBitmapFamily_special) || 
+        (bitmapType = rwBitmapColor16))
+      SetUserPalette4bppToDefault4bpp();
+
+    // 8bpp
+    if ((bitmapType == rwBitmapFamily) || 
+        (bitmapType = rwBitmapColor256))
+      SetUserPalette8bppToDefault8bpp();
+  }
+
   // clean up
   for (i = 0; i < MAXDEPTH; i++)
     if (pchFileName[i] != NULL)
       free(pchFileName[i]);
 
+  if (pchPaletteFileName != NULL)
+    free(pchPaletteFileName);
 #undef MAXDEPTH
 }
 
@@ -3924,7 +3894,7 @@ ParseDumpIcon(BOOL fSmall,
   /*
    * ITM itm;
    * 
-   * ParseItm(&itm, ifId, if2Null, if3Locale);
+   * ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
    * id = itm.id;
    * 
    * if (id != (fSmall ? 1001 : 1000))
@@ -3951,6 +3921,9 @@ ParseDumpIcon(BOOL fSmall,
       }
     }
   }
+
+  // reset the color palette
+  SetUserPalette8bppToDefault8bpp();
 
   transparencyData[0] = 0;
   colortable = fFalse;
@@ -4000,7 +3973,11 @@ ParseDumpIcon(BOOL fSmall,
   else if (vfStripNoLocRes)
     goto CLEANUP;
 
-  OpenOutput(kPalmResType[kIconType], id);       /* RMa "tAIB" */
+	if (vfAppIcon68K)
+		OpenOutput("tAIB", id);       /* RMa forced "tAIB" resource */
+	else 
+		OpenOutput(kPalmResType[kIconType], id);       /* RMa "tAIB" */
+
   if (bitmapType == rwBitmapFamily)
   {
 
@@ -4056,33 +4033,22 @@ CLEANUP:
 #undef MAXDEPTH
 }
 
-/*-----------------------------------------------------------------------------
+/*---------------------------------------------------------------------------
 |	ParseDumpLauncherCategory
 -------------------------------------------------------------RMa------------*/
 void
-ParseDumpLauncherCategory()
+ParseDumpLauncherCategory(void)
 {
   int id;
-  char *pchString;
+  char *pString;
   ITM itm;
 
-  ParseItm(&itm, ifId, if2Null, if3Locale);
+  ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
+	if (ObjectDesiredInOutputLocale (&itm))
   {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SOMESTUFF;
-    }
-    else
-      goto SOMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SOMESTUFF:
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
       if (tok.lex.lt != ltStr)
@@ -4099,13 +4065,13 @@ ParseDumpLauncherCategory()
     WarningLine
       ("Default Launcher Category ID is 1000 (it dont work otherwise)");
 
-  pchString = PchGetSz("taic");
+  pString = PchGetSz("taic");
   OpenOutput(kPalmResType[kDefaultCategoryRscType], id);        /* RMa "taic" */
-  DumpBytes(pchString, strlen(pchString) + 1);
+  DumpBytes(pString, strlen(pString) + 1);
   //      RMa Remove padding is it no necessary padding. it done by prcbuild if needded
   //      PadBoundary();
   CloseOutput();
-  free(pchString);
+  free(pString);
 }
 
 /*-----------------------------------------------------------------------------
@@ -4118,23 +4084,12 @@ ParseDumpApplicationIconName()
   char *pchString;
   ITM itm;
 
-  ParseItm(&itm, ifId, if2Null, if3Locale);
+	ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
+	if (ObjectDesiredInOutputLocale (&itm))
     {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SOMESTUFF;
-    }
-    else
-      goto SOMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SOMESTUFF:
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
       if (tok.lex.lt != ltStr)
@@ -4147,7 +4102,6 @@ ParseDumpApplicationIconName()
   }
 
   id = itm.id;
-
   pchString = PchGetSz("Icon Name Text");
   OpenOutput(kPalmResType[kAinRscType], id);     /* RMa "tAIN" */
   DumpBytes(pchString, strlen(pchString) + 1);
@@ -4170,23 +4124,12 @@ ParseDumpApplication()
   char *pchString;
   ITM itm;
 
-  ParseItm(&itm, ifId, if2Null, if3Locale);
+	ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
+	if (ObjectDesiredInOutputLocale (&itm))
     {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SOMESTUFF;
-    }
-    else
-      goto SOMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SOMESTUFF:
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
       if (tok.lex.lt != ltStr)
@@ -4218,7 +4161,13 @@ ParseDumpTrap()
   int wTrap;
 
   id = WGetId("TRAP ResourceId", fFalse);
-  GetExpectRw(rwValue);                          // RMa july 2001 add a tag  
+
+	if (FGetTok(&tok))	/* RMa tag value become optional */
+	{
+		if (tok.rw != rwValue)
+			UngetTok();
+	}
+
   wTrap = WGetConst("Trap number");
   if (id < 1000)
     ErrorLine
@@ -4245,7 +4194,7 @@ ParseDumpFont()
   char *pchFileName;
   ITM itm;
 
-  ParseItm(&itm, ifId | ifFont, if2Null, if3Locale);
+	ParseItm(&itm, ifId | ifFont, if2Null, if3Locale, if4Null);
   id = itm.id;
   fontid = itm.font;
 
@@ -4256,155 +4205,19 @@ ParseDumpFont()
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
+	if (ObjectDesiredInOutputLocale (&itm))
     {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto CLEANUP;
     }
     else
-      goto CLEANUP;
-  }
-  else if (vfStripNoLocRes)
-    goto CLEANUP;
-
-  OpenOutput(kPalmResType[kFontRscType], id);    /* RMa "NFNT" */
-  DumpFont(pchFileName, fontid);
-  CloseOutput();
-
-CLEANUP:
+	{
+    OpenOutput(kPalmResType[kFontRscType], id);    /* RMa "NFNT" */
+    DumpFont(pchFileName, fontid);
+    CloseOutput();
+	}
   if (pchFileName)
     free(pchFileName);
 }
 
-/*-----------------------------------------------------------------------------
-|     ParseDumpFontIndex
--------------------------------------------------------------RMa-------------*/
-void
-ParseDumpFontIndex()
-{
-  int id;
-  unsigned int entriesNumber = 0;
-  unsigned char *runningP;
-  unsigned int bufferSize = 256 * 4;
-  char *dataP = NULL;
-  int validate = ltConst;
-  unsigned int i;
-  ITM itm;
-
-  ParseItm(&itm, ifId, if2Null, if3Locale);
-  GetExpectRw(rwBegin);
-  /*
-   * RMa localisation 
-   */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SOMESTUFF;
-    }
-    else
-      goto SOMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SOMESTUFF:
-    ParseToFinalEnd();
-    goto CLEANUP;
-  }
-
-  dataP = malloc(bufferSize);
-  runningP = (unsigned char *)dataP;
-  id = itm.id;
-
-  while (FGetTok(&tok))
-  {
-    if (tok.lex.lt == ltStr)
-    {
-      if (validate == ltConst)
-      {
-        *(unsigned int *)runningP = *(unsigned int *)tok.lex.szId;
-        runningP += 4;
-        validate = ltStr;
-      }
-      else
-        ErrorLine("A font index must have a Type and an ID");
-    }
-    else if (tok.lex.lt == ltConst)
-    {
-      if (validate == ltStr)
-      {
-        *(unsigned int *)runningP = (unsigned int)tok.lex.val;
-        runningP += 4;
-        validate = ltConst;
-        entriesNumber++;
-      }
-      else
-        ErrorLine("A font index must have a Type and an ID");
-    }
-    // we dunno, assume "end" of resource
-    else if (tok.rw == rwEnd)
-      break;
-
-    if ((entriesNumber * 4) >= bufferSize)
-    {
-      int offset = bufferSize;
-
-      bufferSize *= 2;
-      dataP = realloc(dataP, bufferSize);
-      runningP = (unsigned char *)(dataP + offset);
-    }
-  }
-  OpenOutput(kPalmResType[kFontIndexType], id);  /* RMa "fnti" */
-  runningP = (unsigned char *)dataP;
-
-  if (vfLE32)
-    EmitL(entriesNumber);
-  else
-    EmitW((unsigned short)entriesNumber);
-
-  runningP = (unsigned char *)dataP;
-  for (i = 1; i <= entriesNumber; i++)           /* RMa dump each value */
-  {
-    if (vfLE32)
-    {
-      if (!strncmp("NFNT", (char *)runningP, 4))
-      {
-        EmitB((unsigned
-               char)((*(unsigned int *)kPalmResType[kFontRscType] &
-                      0xff000000) >> 24));
-        EmitB((unsigned
-               char)((*(unsigned int *)kPalmResType[kFontRscType] & 0xff0000)
-                     >> 16));
-        EmitB((unsigned
-               char)((*(unsigned int *)kPalmResType[kFontRscType] & 0xff00) >>
-                     8));
-        EmitB((unsigned char)(*(unsigned int *)kPalmResType[kFontRscType] &
-                              0xff));
-      }
-      else
-        EmitL(*(unsigned int *)runningP);
-      runningP += 4;
-      EmitL(*(unsigned int *)runningP);
-      runningP += 4;
-    }
-    else
-    {
-      EmitL(*(unsigned int *)runningP);
-      runningP += 4;
-      EmitW(*(unsigned short *)runningP);
-      runningP += 4;
-    }
-  }
-
-  CloseOutput();
-
-CLEANUP:
-  if (dataP)
-    free(dataP);
-}
 
 /*-----------------------------------------------------------------------------
 |     ParseDumpHex
@@ -4418,23 +4231,12 @@ ParseDumpHex()
 
   // get the information from the .rcp entry
   pchResType = PchGetSz("Resource Type");
-  ParseItm(&itm, ifId, if2Null, if3Locale);
+	ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
+	if (ObjectDesiredInOutputLocale (&itm))
   {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SAMESTUFF;
-    }
-    else
-      goto SAMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SAMESTUFF:
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
       if ((tok.lex.lt != ltConst) && (tok.lex.lt != ltStr))
@@ -4443,8 +4245,9 @@ ParseDumpHex()
         break;
       }
     }
-    goto CLEANUP;
   }
+	else
+	{
   id = itm.id;
   // write the data to file
   OpenOutput(pchResType, id);
@@ -4478,7 +4281,7 @@ ParseDumpHex()
     }
   }
   CloseOutput();
-CLEANUP:
+	}
   free(pchResType);
 }
 
@@ -4495,23 +4298,12 @@ ParseDumpData()
 
   // get the information from the .rcp entry
   pchResType = PchGetSz("Resource Type");
-  ParseItm(&itm, ifId, if2Null, if3Locale);
+	ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
+	if (ObjectDesiredInOutputLocale (&itm))
     {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SAMESTUFF;
-    }
-    else
-      goto SAMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SAMESTUFF:
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
       if (tok.lex.lt != ltStr)
@@ -4520,8 +4312,9 @@ ParseDumpData()
         break;
       }
     }
-    goto CLEANUP;
   }
+	else
+	{
   id = itm.id;
   pchFileName = PchGetSz("Data Filename");
 
@@ -4552,7 +4345,7 @@ ParseDumpData()
     }
     CloseOutput();
   }
-CLEANUP:
+	}
   if (pchResType != NULL)
     free(pchResType);
   if (pchFileName != NULL)
@@ -4569,24 +4362,26 @@ ParseDumpInteger()
   long nInteger;
   ITM itm;
 
-  ParseItm(&itm, ifId, if2Value, if3Locale);
+	ParseItm(&itm, ifId, if2Value, if3Locale, if4Null);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
+	if (ObjectDesiredInOutputLocale (&itm))
   {
-    if (szLocaleP)
+		return;
+	}
+
+	if (FGetTok(&tok))	/* RMa tag value become optional */
+	{
+		if (tok.lex.lt == ltConst)
     {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        return;
+			itm.value = (unsigned int)tok.lex.val;
     }
     else
     {
-      return;
+			UngetTok();
     }
   }
-  else if (vfStripNoLocRes)
-    return;
 
   id = itm.id;
   nInteger = itm.value;
@@ -4600,57 +4395,47 @@ ParseDumpInteger()
 |	ParseDumpWordList
 -------------------------------------------------------------RMa-------------*/
 void
-ParseDumpWordList()
+ParseDumpWordList(void)
 {
   int id;
   int i;
-  char *dataP;
-  unsigned short *runningP;
+  char *pData;
+  unsigned short *pRunning;
   int bufferSize = 256 * 2;
   unsigned short counter = 0;
   ITM itm;
 
-  ParseItm(&itm, ifId, if2Null, if3Locale);
+  ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
   GetExpectRw(rwBegin);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
+	if (ObjectDesiredInOutputLocale (&itm))
     {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SAMESTUFF;
-    }
-    else
-      goto SAMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SAMESTUFF:
     ParseToFinalEnd();
     return;
   }
+
   id = itm.id;
 
-  dataP = malloc(bufferSize);
-  runningP = (unsigned short *)dataP;
+  pData = malloc(bufferSize);
+  pRunning = (unsigned short *)pData;
 
   while (FGetTok(&tok))
   {
     // we have a constant? 
     if (tok.lex.lt == ltConst)
     {
-      *runningP = (unsigned short)tok.lex.val;
-      runningP++;
+      *pRunning = (unsigned short)tok.lex.val;
+      pRunning++;
       counter++;
       if ((counter * 2) >= bufferSize)
       {
         int offset = bufferSize;
 
         bufferSize *= 2;
-        dataP = realloc(dataP, bufferSize);
-        runningP = (unsigned short *)dataP + offset;
+        pData = realloc(pData, bufferSize);
+        pRunning = (unsigned short *)pData + offset;
       }
     }
     // we dunno, assume "end" of resource
@@ -4659,12 +4444,12 @@ ParseDumpWordList()
   }
 
   OpenOutput(kPalmResType[kWrdListRscType], id); /* RMa "wrdl" */
-  runningP = (unsigned short *)dataP;
+  pRunning = (unsigned short *)pData;
   EmitW(counter);                                /* RMa element in list */
   for (i = 1; i <= counter; i++)                 /* RMa dump each value */
   {
-    EmitW(*runningP);
-    runningP++;
+    EmitW(*pRunning);
+    pRunning++;
   }
   CloseOutput();
 }
@@ -4673,64 +4458,49 @@ ParseDumpWordList()
 |	ParseDumpLongWordList
 -------------------------------------------------------------RMa-------------*/
 void
-ParseDumpLongWordList()
+ParseDumpLongWordList(void)
 {
   int id;
   int defaultItem;
   int i;
-  char *dataP;
-  unsigned int *runningP;
+  char *pData;
+  unsigned int *pRunning;
   int bufferSize = 256 * 4;
   int counter = 0;
   ITM itm;
 
   memset(&itm, 0, sizeof(itm));
-  ParseItm(&itm, ifId, if2Null, if3Locale | if3DefaultItm);
+  ParseItm(&itm, ifId, if2Null, if3Locale | if3DefaultItm, if4Null);
   GetExpectRw(rwBegin);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
+	if (ObjectDesiredInOutputLocale (&itm))
       {
-        goto SAMESTUFF;
-      }
-    }
-    else
-    {
-      goto SAMESTUFF;
-    }
-  }
-  else if (vfStripNoLocRes)
-  {
-  SAMESTUFF:
     ParseToFinalEnd();
     return;
   }
 
   id = itm.id;
   defaultItem = itm.DefaultItem;
-  dataP = malloc(bufferSize);
-  runningP = (unsigned int *)dataP;
+  pData = malloc(bufferSize);
+  pRunning = (unsigned int *)pData;
 
   while (FGetTok(&tok))
   {
     // we have a constant? 
     if (tok.lex.lt == ltConst)
     {
-      *runningP = (unsigned int)tok.lex.val;
-      runningP++;
+      *pRunning = (unsigned int)tok.lex.val;
+      pRunning++;
       counter++;
       if ((counter * 2) >= bufferSize)
       {
         int offset = bufferSize;
 
         bufferSize *= 2;
-        dataP = realloc(dataP, bufferSize);
-        runningP = (unsigned int *)dataP + offset;
+        pData = realloc(pData, bufferSize);
+        pRunning = (unsigned int *)pData + offset;
       }
     }
     // we dunno, assume "end" of resource
@@ -4739,13 +4509,13 @@ ParseDumpLongWordList()
   }
 
   OpenOutput(kPalmResType[kLongWrdListRscType], id);    /* RMa "DLST" */
-  runningP = (unsigned int *)dataP;
+  pRunning = (unsigned int *)pData;
   EmitW((unsigned short)defaultItem);            /* RMa default item */
   EmitW((unsigned short)counter);                /* RMa element in list */
   for (i = 1; i <= counter; i++)                 /* RMa dump each value */
   {
-    EmitL(*runningP);
-    runningP++;
+    EmitL(*pRunning);
+    pRunning++;
   }
   CloseOutput();
 }
@@ -4754,59 +4524,49 @@ ParseDumpLongWordList()
 |	ParseDumpByteList
 -------------------------------------------------------------RMa-------------*/
 void
-ParseDumpByteList()
+ParseDumpByteList(void)
 {
   int id;
   int defaultItem;
   int i;
-  char *dataP;
-  unsigned char *runningP;
+  char *pData;
+  unsigned char *pRunning;
   int bufferSize = 256 * 1;
   int counter = 0;
   ITM itm;
 
   memset(&itm, 0, sizeof(itm));
-  ParseItm(&itm, ifId, if2Null, if3Locale | if3DefaultItm);
+  ParseItm(&itm, ifId, if2Null, if3Locale | if3DefaultItm, if4Null);
   GetExpectRw(rwBegin);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
+	if (ObjectDesiredInOutputLocale (&itm))
   {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SAMESTUFF;
-    }
-    else
-      goto SAMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SAMESTUFF:
     ParseToFinalEnd();
     return;
   }
+
   id = itm.id;
   defaultItem = itm.DefaultItem;
-  dataP = malloc(bufferSize);
-  runningP = (unsigned char *)dataP;
+  pData = malloc(bufferSize);
+  pRunning = (unsigned char *)pData;
 
   while (FGetTok(&tok))
   {
     // we have a constant? 
     if (tok.lex.lt == ltConst)
     {
-      *runningP = (unsigned int)tok.lex.val;
-      runningP++;
+      *pRunning = (unsigned int)tok.lex.val;
+      pRunning++;
       counter++;
       if ((counter * 2) >= bufferSize)
       {
         int offset = bufferSize;
 
         bufferSize *= 2;
-        dataP = realloc(dataP, bufferSize);
-        runningP = (unsigned char *)dataP + offset;
+        pData = realloc(pData, bufferSize);
+        pRunning = (unsigned char *)pData + offset;
       }
     }
     // we dunno, assume "end" of resource
@@ -4815,13 +4575,13 @@ ParseDumpByteList()
   }
 
   OpenOutput(kPalmResType[kByteListRscType], id);       /* RMa "BLST" */
-  runningP = (unsigned char *)dataP;
+  pRunning = (unsigned char *)pData;
   EmitW((unsigned short)defaultItem);            /* RMa default item */
   EmitW((unsigned short)counter);                /* RMa element in list */
   for (i = 1; i <= counter; i++)                 /* RMa dump each value */
   {
-    EmitB(*runningP);
-    runningP++;
+    EmitB(*pRunning);
+    pRunning++;
   }
   CloseOutput();
 }
@@ -4830,19 +4590,19 @@ ParseDumpByteList()
 |	ParseDumpPaletteTable
 -------------------------------------------------------------RMa-------------*/
 void
-ParseDumpPaletteTable()
+ParseDumpPaletteTable(void)
 {
   int id;
   int counter = 0;                               /* RMa number of color in a palette. (a color is 4 bytes) */
   int component = 0;
-  char *dataP;
-  char *runningP;
+  char *pData;
+  char *pRunning;
   int bufferSize = 256 * 4;
 
   id = WGetId("Integer ResourceId", fFalse);
   GetExpectRw(rwBegin);
-  dataP = malloc(bufferSize);
-  runningP = dataP;
+  pData = malloc(bufferSize);
+  pRunning = pData;
 
   while (FGetTok(&tok))
   {
@@ -4852,8 +4612,8 @@ ParseDumpPaletteTable()
       if (tok.lex.val > 0xff)
         ErrorLine("Color conponent must be BYTE (0..255)");
 
-      *runningP = (unsigned char)tok.lex.val;
-      runningP++;
+      *pRunning = (unsigned char)tok.lex.val;
+      pRunning++;
       component++;
       if (component >= 4)
       {
@@ -4864,8 +4624,8 @@ ParseDumpPaletteTable()
           int offset = bufferSize;
 
           bufferSize *= 2;
-          dataP = realloc(dataP, bufferSize);
-          runningP = dataP + offset;
+          pData = realloc(pData, bufferSize);
+          pRunning = pData + offset;
         }
       }
     }
@@ -4882,8 +4642,8 @@ ParseDumpPaletteTable()
    */
   if ((szLocaleP) && (vfStripNoLocRes))
   {
-    if (dataP)
-      free(dataP);
+    if (pData)
+      free(pData);
     return;
   }
   /*
@@ -4894,732 +4654,80 @@ ParseDumpPaletteTable()
     EmitL(counter);
   else
     EmitW((unsigned short)counter);
-  DumpBytes(dataP, (counter * 4));
+  DumpBytes(pData, (counter * 4));
   CloseOutput();
-  free(dataP);
+  free(pData);
 }
 
 /*-----------------------------------------------------------------------------
-|	ParseDumpGraffitiInputArea 'silk'
+|      ParseDumpPalette
 -------------------------------------------------------------RMa-------------*/
 void
-ParseDumpGraffitiInputArea()
+ParseDumpPalette()
 {
-  int i;
-  char *dataAreaP = NULL;
-  char *dataButtonP = NULL;
-  RCSILKAREA *runningAreaP;
-  RCSILKBUTTON *runningButtonP;
-  int dataAreaSize = 0;
-  int dataButtonSize = 0;
+  char *pchFileName;
+  int id;
 
-  //      int                             bufferSize = 255 * 4;
-  int numberOfArea = 0;
-  int numberOfButton = 0;
-  int ResID = 0;
-  ITM itm;
-  BOOL f;
-  RCSILK silk;
-  char *localeLanguage[6] = { "English", "French", "German",
-    "Italian", "Spanish", "Japanese"
-  };
-  char *localeCountry[33] = { "Australia", "Austria", "Belgium",
-    "Brazil", "Canada", "Denmark",
-    "Finland", "France", "Germany",
-    "HongKong", "Iceland", "Ireland",
-    "Italy", "Japan", "Luxembourg",
-    "Mexico", "Netherlands", "NewZealand",
-    "Norway", "Spain", "Sweden",
-    "Switzerland", "UnitedKingdom", "UnitedStates",
-    "India", "Indonesia", "Korea",
-    "Malaysia", "RepChina", "Philippines",
-    "Singapore", "Thailand", "Taiwan"
-  };
+  id = WGetId("Data ResourceId", fFalse);
 
-  //int areaType[2] = { 'scrn', 'graf' };
-  int areaType[2] = { 0x7363726E, 0x67726166 };
+  // get the information from the .rcp entry
+  pchFileName = PchGetSz("Palette Filename");
 
-  memset(&silk, 0, sizeof(RCSILK));
-  ParseItm(&itm, ifId, if2Null,
-           if3Vers | if3Creator | if3Language | if3Country | if3Locale);
-  GetExpectRw(rwBegin);
-  /*
-   * RMa localisation 
-   */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SAMESTUFF;
-    }
-    else
-      goto SAMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SAMESTUFF:
-    ParseToFinalEnd();
-    return;
-  }
-
-  ResID = itm.id;
-  SETBAFIELD(silk, version, itm.version);
-  if (itm.version != 1)
-    ErrorLine("Silk : invalid version");
-  if (vfLE32)
-    *(int *)itm.creator = (((*(int *)itm.creator & 0x000000FF) << 24) |
-                           ((*(int *)itm.creator & 0x0000FF00) << 8) |
-                           ((*(int *)itm.creator & 0x00FF0000) >> 8) |
-                           ((*(int *)itm.creator & 0xFF000000) >> 24));
-  SETBAFIELD(silk, vendorCreator, *(int *)itm.creator);
-  f = fFalse;
-  for (i = 0; i <= 6; i++)
-  {                                              /* RMa dump each value */
-    if (!strcmp(localeLanguage[i], itm.language))
-    {
-      SETBAFIELD(silk, localeLanguage, i);
-      f = fTrue;
-      break;
-    }
-  }
-  if (!f)
-    ErrorLine("SILK: can't found locale language");
-
-  f = fFalse;
-  for (i = 0; i <= 33; i++)
-  {                                              /* RMa dump each value */
-    if (!strcmp(localeCountry[i], itm.country))
-    {
-      SETBAFIELD(silk, localeCountry, i);
-      f = fTrue;
-      break;
-    }
-  }
-  if (!f)
-    ErrorLine("SILK: can't found locale country");
-
-  f = fFalse;
-  /*
-   * add objects to object table until we see a rwEnd 
-   */
-  while (FGetTok(&tok))
-  {
-    switch (tok.rw)
-    {
-      case rwEnd:
-        f = fTrue;
-        break;
-      case rwArea:
-        numberOfArea++;
-        ParseItm(&itm, ifRc, if2Null, if3areaType | if3areaIndex);
-        if (dataAreaP)
-          dataAreaP = realloc(dataAreaP, dataAreaSize + sizeof(RCSILKAREA));
-        else
-          dataAreaP = malloc(dataAreaSize + sizeof(RCSILKAREA));
-        runningAreaP = (RCSILKAREA *) (dataAreaP + dataAreaSize);
-        dataAreaSize += sizeof(RCSILKAREA);
-        SETPBAFIELD(runningAreaP, bounds, itm.rc);
-        SETPBAFIELD(runningAreaP, areaType, areaType[itm.areaType]);
-        SETPBAFIELD(runningAreaP, areaIndex, itm.areaIndex);
-        break;
-      case rwBTN:
-        numberOfButton++;
-        ParseItm(&itm, ifRc, if2Null,
-                 if3keyDownChr | if3keyDownKeyCode | if3keyDownModifiers);
-        if (dataButtonP)
-          dataButtonP =
-            realloc(dataButtonP, dataButtonSize + sizeof(RCSILKBUTTON));
-        else
-          dataButtonP = malloc(dataButtonSize + sizeof(RCSILKBUTTON));
-        runningButtonP = (RCSILKBUTTON *) (dataButtonP + dataButtonSize);
-        dataButtonSize += sizeof(RCSILKBUTTON);
-        SETPBAFIELD(runningButtonP, bounds, itm.rc);
-
-        if (!((itm.keyDownChr == 0x0105) || (itm.keyDownChr == 0x0108) ||
-              (itm.keyDownChr == 0x0109) || (itm.keyDownChr == 0x010a) ||
-              (itm.keyDownChr == 0x010b) || (itm.keyDownChr == 0x0110) ||
-              (itm.keyDownChr == 0x0111) || (itm.keyDownChr == 0x0118) ||
-              (itm.keyDownChr == 0x0119) || (itm.keyDownChr == 0x011a) ||
-              (itm.keyDownChr == 0x011b)))
-          ErrorLine("Silk : invalid keyDownChr in button");
-        SETPBAFIELD(runningButtonP, keyDownChr, itm.keyDownChr);
-        SETPBAFIELD(runningButtonP, keyDownKeyCode, itm.keyDownKeyCode);
-        if (itm.keyDownModifiers != 0x0008)
-          ErrorLine("Silk : invalid keyDownModifiers");
-        SETPBAFIELD(runningButtonP, keyDownModifiers, itm.keyDownModifiers);
-        break;
-      default:
-        ErrorLine("SILK: bad entry");
-        break;
-    }
-    if (f)
-      break;
-  }
-
-  SETBAFIELD(silk, areaCount, numberOfArea);
-
-  // We write the datas to disk
-  OpenOutput(kPalmResType[kGraffitiInputAreaType], ResID);      /* RMa "silk" */
-  if (vfLE32)
-    CbEmitStruct(&(silk.s32), szRCSILK, NULL, fTrue);
+  // file name available?
+  if ((pchFileName == NULL) || (strcmp(pchFileName, "") == 0))
+    ErrorLine("Empty or no file name provided");
   else
-    CbEmitStruct(&(silk.s16), szRCSILK, NULL, fTrue);
-  runningAreaP = (RCSILKAREA *) dataAreaP;
-  for (i = 0; i < numberOfArea; i++)
-  {                                              /* Emit aera definitions */
-    if (vfLE32)
-      CbEmitStruct(&(runningAreaP->s32), szRCSILKAREA, NULL, fTrue);
-    else
-      CbEmitStruct(&(runningAreaP->s16), szRCSILKAREA, NULL, fTrue);
-    runningAreaP++;
+  {
+    int palette[256][3];
+    int nColors;
+    int c;
+
+    OpenOutput("PALT", id);
+    ParsePaletteFile (pchFileName, palette, &nColors);
+
+    for (c=0; c<nColors; c++) 
+    {
+      DumpBytes (&c, 1);
+      DumpBytes (&palette[c][0], 1);
+      DumpBytes (&palette[c][1], 1);
+      DumpBytes (&palette[c][2], 1);
+    }
+
+    CloseOutput();
   }
-  if (vfLE32)                                    /* Emit number of button */
-    EmitL(numberOfButton);
-  else
-    EmitW((unsigned short)numberOfButton);
-  runningButtonP = (RCSILKBUTTON *) dataButtonP;
-  for (i = 0; i < numberOfButton; i++)
-  {                                              /* Emit button definitions */
-    if (vfLE32)
-      CbEmitStruct(&(runningButtonP->s32), szRCSILKBUTTON, NULL, fTrue);
-    else
-      CbEmitStruct(&(runningButtonP->s16), szRCSILKBUTTON, NULL, fTrue);
-    runningButtonP++;
+
+  if (pchFileName != NULL) 
+  {
+    free(pchFileName);
   }
-  if (vfLE32)
-  {                                              /* RMa add 20 bytes at the end of the ressouce ??? */
-    EmitL(0);
-    EmitL(0);
-    EmitL(0);
-    EmitL(0);
-    EmitL(0);
-  }
-  CloseOutput();
-  if (dataAreaP)
-    free(dataAreaP);
-  if (dataButtonP)
-    free(dataButtonP);
 }
 
-/*-----------------------------------------------------------------------------
-|	ParseDumpCountry : 'cnty'
--------------------------------------------------------------RMa-------------*/
-void
-ParseDumpCountry()
-{
-  RCCOUNTRY *country;
-  ITM itm;
-  int *runningDstP;
-  char *runningSrcP;
-  int i;
-  int maxLen;
-  int resID = 0;
-  char *dataCountryP = NULL;
-  int dataCountrySize = 0;
-  int numberOfElement = 0;
-  BOOL f;
-
-  ParseItm(&itm, ifId, if2Null, if3Locale);
-  GetExpectRw(rwBegin);
-  /*
-   * RMa localisation 
-   */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SAMESTUFF;
-    }
-    else
-      goto SAMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SAMESTUFF:
-    ParseToFinalEnd();
-    return;
-  }
-
-  resID = itm.id;
-  f = fFalse;
-  /*
-   * add objects to object table until we see a rwEnd 
-   */
-  while (FGetTok(&tok))
-  {
-    switch (tok.rw)
-    {
-      case rwEnd:
-        f = fTrue;
-        break;
-      case rwBegin:
-        numberOfElement++;
-        ParseItm(&itm, ifNull, if2Null,
-                 if3Number | if3Name | if3DateFormat | if3LongDateFormat |
-                 if3WeekStartDay | if3TimeFormat | if3NumberFormat |
-                 if3CurrencyName | if3CurrencySymbol |
-                 if3CurrencyUniqueSymbol | if3CurrencyDecimalPlaces |
-                 if3DayLightSaving | if3MinutesWestOfGmt |
-                 if3MeasurementSystem);
-        GetExpectRw(rwEnd);
-        if (dataCountryP)
-          dataCountryP =
-            realloc(dataCountryP, dataCountrySize + sizeof(RCCOUNTRY));
-        else
-          dataCountryP = malloc(dataCountrySize + sizeof(RCCOUNTRY));
-        country = (RCCOUNTRY *) (dataCountryP + dataCountrySize);
-        memset(country, 0, sizeof(RCCOUNTRY));
-        dataCountrySize += sizeof(RCCOUNTRY);
-        SETPBAFIELD(country, country, itm.Number);
-        SETPBAFIELD(country, dateFormat, itm.DateFormat);
-        SETPBAFIELD(country, longDateFormat, itm.LongDateFormat);
-        SETPBAFIELD(country, weekStartDay, itm.WeekStartDay);
-        SETPBAFIELD(country, timeFormat, itm.TimeFormat);
-        SETPBAFIELD(country, numberFormat, itm.NumberFormat);
-        SETPBAFIELD(country, daylightSavings, itm.DaylightSavings);
-        SETPBAFIELD(country, currencyDecimalPlaces,
-                    itm.CurrencyDecimalPlaces);
-        SETPBAFIELD(country, minutesWestOfGMT, itm.MinutesWestOfGmt);
-        SETPBAFIELD(country, measurementSystem, itm.MeasurementSystem);
-        if (itm.CountryName)                     // RMa converting array of char in array of int
-        {
-          maxLen = WMin(strlen(itm.CountryName), countryNameLength);
-          if (vfLE32)
-            runningDstP = (int *)&PBAFIELD32(country, countryName);
-          else
-            runningDstP = (int *)&PBAFIELD16(country, countryName);
-          runningSrcP = itm.CountryName;
-          for (i = 0; i <= maxLen; i++)
-            *runningDstP++ = *runningSrcP++;
-          for (; i < countryNameLength; i++)
-            *runningDstP++ = 0;
-        }
-        if (itm.CurrencyName)
-        {
-          maxLen = WMin(strlen(itm.CurrencyName), currencyNameLength);
-          if (vfLE32)
-            runningDstP = (int *)&PBAFIELD32(country, currencyName);
-          else
-            runningDstP = (int *)&PBAFIELD16(country, currencyName);
-          runningSrcP = itm.CurrencyName;
-          for (i = 0; i <= maxLen; i++)
-            *runningDstP++ = *runningSrcP++;
-          for (; i < currencyNameLength; i++)
-            *runningDstP++ = 0;
-        }
-        if (itm.CurrencySymbol)
-        {
-          maxLen = WMin(strlen(itm.CurrencySymbol), currencySymbolLength);
-          if (vfLE32)
-            runningDstP = (int *)&PBAFIELD32(country, currencySymbol);
-          else
-            runningDstP = (int *)&PBAFIELD16(country, currencySymbol);
-          runningSrcP = itm.CurrencySymbol;
-          for (i = 0; i <= maxLen; i++)
-            *runningDstP++ = *runningSrcP++;
-          for (; i < currencySymbolLength; i++)
-            *runningDstP++ = 0;
-        }
-        if (itm.CurrencyUniqueSymbol)
-        {
-          maxLen =
-            WMin(strlen(itm.CurrencyUniqueSymbol), currencySymbolLength);
-          if (vfLE32)
-            runningDstP = (int *)&PBAFIELD32(country, uniqueCurrencySymbol);
-          else
-            runningDstP = (int *)&PBAFIELD16(country, uniqueCurrencySymbol);
-          runningSrcP = itm.CurrencyUniqueSymbol;
-          for (i = 0; i <= maxLen; i++)
-            *runningDstP++ = *runningSrcP++;
-          for (; i < currencySymbolLength; i++)
-            *runningDstP++ = 0;
-        }
-        break;
-      default:
-        ErrorLine("cnty: bad entry");
-        break;
-    }
-    if (f)
-      break;
-  }
-
-  // We write the datas to disk
-  OpenOutput(kPalmResType[kCountryType], resID); /* RMa "cnty" */
-  country = (RCCOUNTRY *) (dataCountryP);
-  for (i = 0; i < numberOfElement; i++)
-  {
-    if (vfLE32)
-      CbEmitStruct(&(country->s32), szRCCOUNTRY, NULL, fTrue);
-    else
-      CbEmitStruct(&(country->s16), szRCCOUNTRY, NULL, fTrue);
-    country++;
-  }
-  CloseOutput();
-  if (dataCountryP)
-    free(dataCountryP);
-}
-
-/*-----------------------------------------------------------------------------
-|	ParseDumpLocales : 'locs'
--------------------------------------------------------------RMa-------------*/
-void
-ParseDumpLocales()
-{
-  RCLOCALES *localesP;
-  LmSettingsType localesHeaders;
-  ITM itm;
-  int *runningDstP;
-  char *runningSrcP;
-  int i;
-  int maxLen;
-  int resID = 0;
-  char *dataCountryP = NULL;
-  int dataCountrySize = 0;
-  int numberOfElement = 0;
-  BOOL fin;
-
-  ParseItm(&itm, ifId, if2Null, if3Locale);
-  GetExpectRw(rwBegin);
-  /*
-   * RMa localisation 
-   */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SAMESTUFF;
-    }
-    else
-      goto SAMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SAMESTUFF:
-    ParseToFinalEnd();
-    return;
-  }
-
-  resID = itm.id;
-
-  fin = fFalse;
-  GetExpectRw(rwVersion);
-  localesHeaders.version = WGetConstEx("Constant");
-  /*
-   * add objects to object table until we see a rwEnd 
-   */
-  while (FGetTok(&tok))
-  {
-    switch (tok.rw)
-    {
-      case rwEnd:
-        fin = fTrue;
-        break;
-      case rwBegin:
-        numberOfElement++;
-        ParseItm(&itm, ifNull, if2Null,
-                 if3Languages | if3Countrys | if3CountryName | if3DateFormat |
-                 if3LongDateFormat | if3TimeFormat | if3WeekStartDay |
-                 if3TimeZone | if3NumberFormat | if3CurrencyName |
-                 if3CurrencySymbol | if3CurrencyUniqueSymbol |
-                 if3CurrencyDecimalPlaces | if3MeasurementSystem);
-        GetExpectRw(rwEnd);
-        if (dataCountryP)
-          dataCountryP =
-            realloc(dataCountryP, dataCountrySize + sizeof(RCLOCALES));
-        else
-          dataCountryP = malloc(dataCountrySize + sizeof(RCLOCALES));
-        localesP = (RCLOCALES *) (dataCountryP + dataCountrySize);
-        memset(localesP, 0, sizeof(RCLOCALES));
-        dataCountrySize += sizeof(RCLOCALES);
-        SETPBAFIELD(localesP, dateFormat, itm.DateFormat);
-        SETPBAFIELD(localesP, longDateFormat, itm.LongDateFormat);
-        SETPBAFIELD(localesP, weekStartDay, itm.WeekStartDay);
-        SETPBAFIELD(localesP, timeFormat, itm.TimeFormat);
-        SETPBAFIELD(localesP, numberFormat, itm.NumberFormat);
-        SETPBAFIELD(localesP, currencyDecimalPlaces,
-                    itm.CurrencyDecimalPlaces);
-        SETPBAFIELD(localesP, timeZone, itm.TimeZone);
-        SETPBAFIELD(localesP, measurementSystem, itm.MeasurementSystem);
-        SETPBAFIELD(localesP, language, itm.Languages);
-        SETPBAFIELD(localesP, country, itm.Countrys);
-        if (itm.CountryName)                     // RMa converting array of char in array of int
-        {
-          maxLen = WMin(strlen(itm.CountryName), countryNameLength);
-          if (vfLE32)
-            runningDstP = (int *)&PBAFIELD32(localesP, countryName);
-          else
-            runningDstP = (int *)&PBAFIELD16(localesP, countryName);
-          runningSrcP = itm.CountryName;
-          for (i = 0; i <= maxLen; i++)
-            *runningDstP++ = *runningSrcP++;
-          for (; i < countryNameLength; i++)
-            *runningDstP++ = 0;
-        }
-        if (itm.CurrencyName)
-        {
-          maxLen = WMin(strlen(itm.CurrencyName), currencyNameLength);
-          if (vfLE32)
-            runningDstP = (int *)&PBAFIELD32(localesP, currencyName);
-          else
-            runningDstP = (int *)&PBAFIELD16(localesP, currencyName);
-          runningSrcP = itm.CurrencyName;
-          for (i = 0; i <= maxLen; i++)
-            *runningDstP++ = *runningSrcP++;
-          for (; i < currencyNameLength; i++)
-            *runningDstP++ = 0;
-        }
-        if (itm.CurrencySymbol)
-        {
-          maxLen = WMin(strlen(itm.CurrencySymbol), currencySymbolLength);
-          if (vfLE32)
-            runningDstP = (int *)&PBAFIELD32(localesP, currencySymbol);
-          else
-            runningDstP = (int *)&PBAFIELD16(localesP, currencySymbol);
-          runningSrcP = itm.CurrencySymbol;
-          for (i = 0; i <= maxLen; i++)
-            *runningDstP++ = *runningSrcP++;
-          for (; i < currencySymbolLength; i++)
-            *runningDstP++ = 0;
-        }
-        if (itm.CurrencyUniqueSymbol)
-        {
-          maxLen =
-            WMin(strlen(itm.CurrencyUniqueSymbol), currencySymbolLength);
-          if (vfLE32)
-            runningDstP = (int *)&PBAFIELD32(localesP, uniqueCurrencySymbol);
-          else
-            runningDstP = (int *)&PBAFIELD16(localesP, uniqueCurrencySymbol);
-          runningSrcP = itm.CurrencyUniqueSymbol;
-          for (i = 0; i <= maxLen; i++)
-            *runningDstP++ = *runningSrcP++;
-          for (; i < currencySymbolLength; i++)
-            *runningDstP++ = 0;
-        }
-        break;
-      default:
-        ErrorLine("locs: bad entry");
-        break;
-    }
-    if (fin)
-      break;
-  }
-
-  // We write the datas to disk
-  OpenOutput(kPalmResType[kLocalesType], resID); /* RMa 'locs' */
-  localesHeaders.numLocales = numberOfElement;
-  CbEmitStruct(&localesHeaders, szRCSettingsEmitStr, NULL, fTrue);
-  localesP = (RCLOCALES *) (dataCountryP);
-  for (i = 0; i < numberOfElement; i++)
-  {
-    if (vfLE32)
-      CbEmitStruct(&(localesP->s32), szRCLocaleSettingsBA32EmitStr, NULL,
-                   fTrue);
-    else
-      CbEmitStruct(&(localesP->s16), szRCLocaleSettingsBA16EmitStr, NULL,
-                   fTrue);
-    localesP++;
-  }
-  CloseOutput();
-  if (dataCountryP)
-    free(dataCountryP);
-}
-
-/*-----------------------------------------------------------------------------
-|	ParseDumpFeature : 'feat'
--------------------------------------------------------------RMa-------------*/
-void
-ParseDumpFeature()
-{
-  ITM itm;
-  int resID = 0;
-  char *pDataCreator = NULL;
-  int *pRunning = NULL;
-  int *pEntryNumber = NULL;
-  int dataCreatorSize = 512;
-  int creatorCounter = 0;
-  int creatorName;
-  int entryCounter = 0;
-  int i;
-  int j;
-  BOOL f = fFalse;
-  BOOL g = fFalse;
-
-  ParseItm(&itm, ifId, if2Null, if3Locale);
-  GetExpectRw(rwBegin);
-  /*
-   * RMa localisation 
-   */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SAMESTUFF;
-    }
-    else
-      goto SAMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SAMESTUFF:
-    ParseToFinalEnd();
-    return;
-  }
-
-  resID = itm.id;
-  pDataCreator = malloc(dataCreatorSize);
-  pRunning = (int *)pDataCreator;
-  pRunning++;                                    /* reserve place for creator number */
-  /*
-   * add objects to object table until we see a rwEnd 
-   */
-  while (FGetTok(&tok))
-  {
-    switch (tok.rw)
-    {
-      case rwEnd:
-        if (g)
-        {
-          g = fFalse;
-          SETPBAFIELD(((RCFEATURECREATOR *) pEntryNumber), numEntries,
-                      entryCounter);
-          pEntryNumber = NULL;
-          entryCounter = 0;
-        }
-        else
-        {
-          f = fTrue;
-        }
-        break;
-      case rwBegin:
-        break;
-      case rwCreator:
-        creatorName = *(int *)PchGetSz("item string");
-        if (vfLE32)
-          creatorName = (((creatorName & 0x000000FF) << 24) |
-                         ((creatorName & 0x0000FF00) << 8) |
-                         ((creatorName & 0x00FF0000) >> 8) |
-                         ((creatorName & 0xFF000000) >> 24));
-        SETPBAFIELD(((RCFEATURECREATOR *) pRunning), creator, creatorName);
-        pEntryNumber = pRunning;                 /* keep place to store entry number */
-        (char *)pRunning += sizeof(RCFEATURECREATOR);
-        printf("creatorSize= %ld\n", (long)sizeof(RCFEATURECREATOR));
-        creatorCounter++;
-        g = fTrue;
-        break;
-      case rwEntry:
-        if (!pDataCreator)
-        {
-          ErrorLine("feat: bad entry");
-          break;
-        }
-        ParseItm(&itm, ifNull, if2Value, if3Number);
-        SETPBAFIELD(((RCFEATUREFEATURE *) pRunning), num, itm.Number);
-        SETPBAFIELD(((RCFEATUREFEATURE *) pRunning), value, itm.value);
-        (char *)pRunning += sizeof(RCFEATUREFEATURE);
-        printf("featureEntrySize= %ld\n", (long)sizeof(RCFEATUREFEATURE));
-        entryCounter++;
-        break;
-      default:
-        ErrorLine("feat: bad entry");
-        break;
-    }
-    if (f)
-      break;
-  }
-
-  // We write the datas to disk
-  OpenOutput(kPalmResType[kFeatureType], resID); /* RMa "feat" */
-  pRunning = (int *)pDataCreator;
-  SETPBAFIELD(((RCFEATURE *) pRunning), numEntries, creatorCounter);
-  CbEmitStruct(pRunning, szRCFEATURE, NULL, fTrue);
-  (char *)pRunning += sizeof(RCFEATURE);
-  for (i = 0; i < creatorCounter; i++)
-  {
-    CbEmitStruct(pRunning, szRCFEATURECREATOR, NULL, fTrue);
-    entryCounter = PBAFIELD(((RCFEATURECREATOR *) pRunning), numEntries);
-    (char *)pRunning += sizeof(RCFEATURECREATOR);
-    for (j = 0; j < entryCounter; j++)
-    {
-      CbEmitStruct(pRunning, szRCFEATUREFEATURE, NULL, fTrue);
-      (char *)pRunning += sizeof(RCFEATUREFEATURE);
-    }
-  }
-  if (vfLE32)
-  {                                              /* RMa add 8 bytes at the end of the ressouce ??? */
-    EmitL(0);
-    EmitL(0);
-  }
-
-  CloseOutput();
-  if (pDataCreator)
-    free(pDataCreator);
-}
-
-/*-----------------------------------------------------------------------------
-|	ParseDumpKeyboard 'tkbd'
--------------------------------------------------------------RMa------------*/
-void
-ParseDumpKeyboard()
-{
-  ITM itm;
-  int resID = 0;
-  int country = 0;
-
-  ParseItm(&itm, ifId, if2Value, if3Locale);
-  /*
-   * RMa localisation 
-   */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SAMESTUFF;
-    }
-    else
-      goto SAMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SAMESTUFF:
-    return;
-  }
-
-  resID = itm.id;
-  country = itm.value;
-
-  createAndSaveCountryKeyboard(country, resID);
-}
 
 /*-----------------------------------------------------------------------------
 |	ParseDumpMidi 'MIDI'
 -------------------------------------------------------------RMa------------*/
 void
-ParseDumpMidi()
+ParseDumpMidi(void)
 {
   int resId;
-  char *pchFileName;
+  char *pFileName;
 
   // get the information from the .rcp entry
   resId = WGetId("Midi ResourceId", fFalse);
-  pchFileName = PchGetSz("Data Filename");
+  pFileName = PchGetSz("Data Filename");
 
   /*
    * RMa localisation 
    */
   if ((szLocaleP) && (vfStripNoLocRes))
   {
-    if (pchFileName != NULL)
-      free(pchFileName);
+    if (pFileName != NULL)
+      free(pFileName);
     return;
   }
 
   // file name available?
-  if ((pchFileName == NULL) || (strcmp(pchFileName, "") == 0))  /* RMa bug correction invert test */
+  if ((pFileName == NULL) || (strcmp(pFileName, "") == 0))  /* RMa bug correction invert test */
   {
     ErrorLine("Empty or no file name provided");
   }
@@ -5629,9 +4737,9 @@ ParseDumpMidi()
     char *pData;
     int fileSize;
 
-    FindAndOpenFile(pchFileName, "rb", &pFh);    /* open file in read and binary */
+    FindAndOpenFile(pFileName, "rb", &pFh);    /* open file in read and binary */
     if (pFh == NULL)
-      ErrorLine2("Unable to open midi file ", pchFileName);
+      ErrorLine2("Unable to open midi file ", pFileName);
 
     fileSize = ftell(pFh);                       /* compute the file size */
     fseek(pFh, 0, SEEK_END);                     /* jump to the end of file */
@@ -5661,148 +4769,30 @@ ParseDumpMidi()
     }
     else
     {
-      ErrorLine2("Unable to read empty midi file ", pchFileName);
+      ErrorLine2("Unable to read empty midi file ", pFileName);
     }
   }
-  if (pchFileName != NULL)
-    free(pchFileName);
-}
-
-/*-----------------------------------------------------------------------------
-|	ParseDumpHardSoftButtonSoft : 'hsbd'
--------------------------------------------------------------RMa-------------*/
-void
-ParseDumpHardSoftButtonSoft()
-{
-  RCHARDSOFTBUTTONDEFAULT *hardSoftButtonP;
-  RCHARDSOFTBUTTONLIST hardSoftButtonApp;
-  ITM itm;
-  int i;
-  int resID = 0;
-  char *dataHardSoftButtonP = NULL;
-  int dataHardSoftButtonSize = 0;
-  int numberOfElement = 0;
-  BOOL f;
-
-  ParseItm(&itm, ifId, if2Null, if3Locale);
-  GetExpectRw(rwBegin);
-  /*
-   * RMa localisation 
-   */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
-    {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SAMESTUFF;
-    }
-    else
-      goto SAMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SAMESTUFF:
-    ParseToFinalEnd();
-    return;
-  }
-
-  resID = itm.id;
-  f = fFalse;
-  /*
-   * add objects to object table until we see a rwEnd 
-   */
-  while (FGetTok(&tok))
-  {
-    switch (tok.rw)
-    {
-      case rwEnd:
-        f = fTrue;
-        break;
-      case rwBegin:
-        numberOfElement++;
-        ParseItm(&itm, ifNull, if2Null, if3Creator | if3Number);
-        if (vfLE32)
-          *(int *)itm.creator = (((*(int *)itm.creator & 0x000000FF) << 24) |
-                                 ((*(int *)itm.creator & 0x0000FF00) << 8) |
-                                 ((*(int *)itm.creator & 0x00FF0000) >> 8) |
-                                 ((*(int *)itm.creator & 0xFF000000) >> 24));
-        GetExpectRw(rwEnd);
-        if (dataHardSoftButtonP)
-          dataHardSoftButtonP =
-            realloc(dataHardSoftButtonP,
-                    dataHardSoftButtonSize + sizeof(RCHARDSOFTBUTTONDEFAULT));
-        else
-          dataHardSoftButtonP =
-            malloc(dataHardSoftButtonSize + sizeof(RCHARDSOFTBUTTONDEFAULT));
-        hardSoftButtonP =
-          (RCHARDSOFTBUTTONDEFAULT *) (dataHardSoftButtonP +
-                                       dataHardSoftButtonSize);
-        memset(hardSoftButtonP, 0, sizeof(RCHARDSOFTBUTTONDEFAULT));
-        dataHardSoftButtonSize += sizeof(RCHARDSOFTBUTTONDEFAULT);
-        SETPBAFIELD(hardSoftButtonP, keyCode, itm.Number);
-        SETPBAFIELD(hardSoftButtonP, creator, *(int *)itm.creator);
-        break;
-      default:
-        ErrorLine("hsbd: bad entry");
-        break;
-    }
-    if (f)
-      break;
-  }
-
-  // We write the datas to disk
-  OpenOutput(kPalmResType[kHardSoftButtonType], resID); /* RMa "hsbd" */
-
-  SETBAFIELD(hardSoftButtonApp, numButtons, numberOfElement);
-  if (vfLE32)
-    CbEmitStruct(&(hardSoftButtonApp.s32), szHARDSOFTBUTTONLIST, NULL, fTrue);
-  else
-    CbEmitStruct(&(hardSoftButtonApp.s16), szHARDSOFTBUTTONLIST, NULL, fTrue);
-
-  hardSoftButtonP = (RCHARDSOFTBUTTONDEFAULT *) (dataHardSoftButtonP);
-  for (i = 0; i < numberOfElement; i++)
-  {
-    if (vfLE32)
-      CbEmitStruct(&(hardSoftButtonP->s32), szHARDSOFTBUTTONDEFAULTAPP, NULL,
-                   fTrue);
-    else
-      CbEmitStruct(&(hardSoftButtonP->s16), szHARDSOFTBUTTONDEFAULTAPP, NULL,
-                   fTrue);
-    hardSoftButtonP++;
-  }
-  CloseOutput();
-  if (dataHardSoftButtonP)
-    free(dataHardSoftButtonP);
+  if (pFileName != NULL)
+    free(pFileName);
 }
 
 /*-----------------------------------------------------------------------------
 |	ParseApplicationPreferences : 'pref'
 -------------------------------------------------------------RMa-------------*/
 void
-ParseApplicationPreferences()
+ParseApplicationPreferences(void)
 {
   RCSYSAPPPREFS sysAppPrefs;
   ITM itm;
   int resID = 0;
 
   ParseItm(&itm, ifId, if2Priority,
-           if3StackSize | if3MinHeapSpace | if3Locale);
+           if3StackSize | if3MinHeapSpace | if3Locale, if4Null);
   /*
    * RMa localisation 
    */
-  if (itm.Locale)
-  {
-    if (szLocaleP)
+	if (ObjectDesiredInOutputLocale (&itm))
     {
-      if (strncmp(itm.Locale, szLocaleP, strlen(szLocaleP)))
-        goto SAMESTUFF;
-    }
-    else
-      goto SAMESTUFF;
-  }
-  else if (vfStripNoLocRes)
-  {
-  SAMESTUFF:
     return;
   }
 
@@ -5813,7 +4803,7 @@ ParseApplicationPreferences()
   SETBAFIELD(sysAppPrefs, minHeapSpace, itm.MinHeapSpace);
 
   // We write the datas to disk
-  OpenOutput(kPalmResType[kAppPrefsType], resID);       /* RMa "hsbd" */
+  OpenOutput(kPalmResType[kAppPrefsType], resID); /* RMa "pref" */
   if (vfLE32)
     CbEmitStruct(&(sysAppPrefs.s32), szRCSYSAPPPREFS, NULL, fTrue);
   else
@@ -5883,11 +4873,24 @@ OpenInputFile(char *szIn)
 |		Supports #define foo const and foo equ const
 /      Added Support for #ifdef/#else/#endif  (nested #includes still needed).
 -------------------------------------------------------------WESC------------*/
+/*
+ * LDu 31-8-2001 : implement nested #includes
+ * - pass the previous global values to the function.
+ * - these values will be restored at the function's end.
+ */
 void
-ParseCInclude(char *szIncludeFile)
+// LDu 31-8-2001 : deleted// ParseCInclude(char *szIncludeFile)
+// LDu 31-8-2001 : start modification//
+ParseCInclude(char *szIncludeFile,
+              char *prv_szInfile,
+              int prv_ifdefSkipping,
+              int prv_ifdefLevel,
+              FILE * prv_vfhIn,
+              int prv_iline)
+// LDu 31-8-2001 : end modification//
 {
-  FILE *fhInSav;
-  int ilineSav;
+  // LDu 31-8-2001 : deleted// FILE *fhInSav;
+  // LDu 31-8-2001 : deleted// int ilineSav;
   char szInFileSav[256];
   char szId[256];
   int wIdVal;
@@ -5899,16 +4902,23 @@ ParseCInclude(char *szIncludeFile)
   /*
    * needed at this scope to not interfer with the globals 
    */
-  int ifdefSkipping = 0;
-  int ifdefLevel = 0;
+  // LDu 31-8-2001 : deleted// int ifdefSkipping = 0;
+  // LDu 31-8-2001 : deleted// int ifdefLevel = 0;
   char *hackP;
 
   /*
    * tok contains filename 
    */
 
-  fhInSav = vfhIn;
-  ilineSav = iline;
+  // LDu 31-8-2001 : start modification//
+  static int depth = 0;
+  depth++;
+  ifdefSkipping = 0;
+  ifdefLevel = 0;
+  // LDu 31-8-2001 : end modification//
+
+  // LDu 31-8-2001 : deleted// fhInSav = vfhIn;
+  // LDu 31-8-2001 : deleted// ilineSav = iline;
   strcpy(szInFileSav, szInFile);
 
   OpenInputFile(szIncludeFile);
@@ -5923,6 +4933,50 @@ ParseCInclude(char *szIncludeFile)
             ErrorLine("preprocessor directive expected");
           switch (tok.rw)
           {
+          /*
+           * LDu 31-8-2001: process nested include files 
+           * limit the depth to 32 files...
+           */
+            case rwInclude:
+              {
+				// if flag vfIFIH set by user we ignore all includes
+				// files within header files.
+                if (!vfIFIH && ifdefSkipping == 0)
+                {
+                  if (depth < 32)
+                  {
+                    char *szFileName;
+                    char *pchExt;
+
+                    GetExpectLt(&tok, ltStr, "include filename");
+                    szFileName = tok.lex.szId;
+
+                    pchExt = strrchr(szFileName, '.');
+                    if (!pchExt)
+                    {
+                      /*
+                       * Assume it's a .h file 
+                       */
+                      ParseCInclude(szFileName, prv_szInfile, ifdefSkipping,
+                                    ifdefLevel, vfhIn, iline);
+                      break;
+                    }
+                    pchExt++;
+                    ParseCInclude(szFileName, prv_szInfile, ifdefSkipping,
+                                  ifdefLevel, vfhIn, iline);
+                  }
+                  else
+                  {
+                    ErrorLine("too many nested files");
+                  }
+                }
+					 else
+                  NextLine();		 // RMa in #include not parsed jump to next line
+                break;
+              }
+          /*
+           * LDu 31-8-2001 : end modification
+           */
             case rwDefine:
               {
                 if (ifdefSkipping)
@@ -6100,8 +5154,16 @@ ParseCInclude(char *szIncludeFile)
   }
   fclose(vfhIn);
   strcpy(szInFile, szInFileSav);
-  iline = ilineSav;
-  vfhIn = fhInSav;
+  // LDu 31-8-2001 : deleted//iline = ilineSav;
+  // LDu 31-8-2001 : deleted//vfhIn = fhInSav;
+
+  // LDu 31-8-2001 : start modification//
+  iline = prv_iline;
+  vfhIn = prv_vfhIn;
+  ifdefSkipping = prv_ifdefSkipping;
+  ifdefLevel = prv_ifdefLevel;
+  depth--;
+  // LDu 31-8-2001 : end modification//
 }
 
 /*-----------------------------------------------------------------------------
@@ -6219,35 +5281,323 @@ InitRcpfile(RCPFILE * prcpfile,
   PlexInit(&prcpfile->plfrm, sizeof(FRM), 10, 10);
   InitFontMem(fontType);
 
-#ifdef CW_PLUGIN
-  // NCR: 15-feb-00 : in codewarrior plugin, globals need to be reinitialized
-
   iidMenuMac = 0;
   iidAlertMac = 0;
   iidStringMac = 0;
   iidStringTableMac = 0;
   iidAISMac = 0;
   idAutoMac = idAutoInit;
-  psymFirst = 0;
-  vfAllowEditIDs = 1;
-  szLanguage = "ENGLISH";                        // so we have some default
+}
+
+/*-----------------------------------------------------------------------------
+/	ParseRcpFile
+/   original code extract from ParseFile
+/   put in separate function to obtain recursive analyzis thru .rcp files
+-------------------------------------------------------------LDu--------------*/
+void
+ParseDirectives(RCPFILE * prcpfile);
+void
+ParseRcpFile(char *szRcpIn,
+             RCPFILE * prcpfile,
+             char *prv_szInfile,
+             int prv_ifdefSkipping,
+             int prv_ifdefLevel,
+             FILE * prv_vfhIn,
+             int prv_iline)
+{
+
+  // LDu 31-8-2001 : start modification
+  //declare a static variable to limit the depth
+  extern char szInFile[];
+  static int depth = 0;
+
+  depth++;
+  //re-initialize some globals
+  ifdefSkipping = 0;
+  ifdefLevel = 0;
+
+  if (depth >= 32)
+{
+    ErrorLine("too many nested files");
+  }
+
+  OpenInputFile(szRcpIn);
+  // LDu 31-8-2001 : end modification
+
+  // Start of original code
+
+  if (!FGetTok(&tok))
+    Error("bogus source file");
+  do
+  {
+    if (ifdefSkipping)
+    {
+      if (tok.lex.lt == ltPound)
+      {
+		// LDu 31-8-2001 : deleted//ParseDirectives();
+		// LDu 31-8-2001 : start modification//
+        ParseDirectives(prcpfile);
+		// LDu 31-8-2001 : end modification//
+      }
+      else
+      {
+        NextLine();
+      }
+      continue;
+    }
+    switch (tok.rw)
+    {
+      case rwForm:
+        if (FParseForm(prcpfile))
+          DumpForm(PlexGetElementAt
+                   (&prcpfile->plfrm, PlexGetCount(&prcpfile->plfrm) - 1));
+        break;
+      case rwMenu:
+        if (FParseMenu())
+        {
+          AssignMenuRects();
+          DumpMenu();
+          FreeMenu();
+        }
+        break;
+      case rwAlert:
+        ParseDumpAlert();
+        break;
+      case rwVersion:
+        ParseDumpVersion();
+        break;
+      case rwStringTable:
+        ParseDumpStringTable();
+        break;
+      case rwString:
+        ParseDumpString();
+        break;
+      case rwCategories:
+        ParseDumpCategories();
+        break;
+      case rwApplicationIconName:
+        ParseDumpApplicationIconName();
+        break;
+      case rwApplication:
+        ParseDumpApplication();
+        break;
+      case rwTranslation:
+        ParseTranslation();
+        break;
+      case rwBitmap:
+      case rwBitmapGrey:
+      case rwBitmapGrey16:
+      case rwBitmapColor16:
+      case rwBitmapColor256:
+      case rwBitmapColor16k:
+      case rwBitmapColor24k:
+      case rwBitmapColor32k:
+      case rwBitmapFamily:
+      case rwBitmapFamily_special:
+      case rwBootScreenFamily:
+        ParseDumpBitmapFile(tok.rw);
+        break;
+      case rwInteger:
+        ParseDumpInteger();
+        break;
+      case rwWordList:
+        ParseDumpWordList();
+        break;
+      case rwLongWordList:
+        ParseDumpLongWordList();
+        break;
+      case rwByteList:
+        ParseDumpByteList();
+        break;
+      case rwIcon:
+			if ( (vfLE32) && (vfAppIcon68K) )		// force app icon in 68K format
+			{
+				vfLE32 = fFalse;
+				ParseDumpIcon(fFalse, rwBitmap);
+				vfLE32 = fTrue;
+			}
+			else
+				ParseDumpIcon(fFalse, rwBitmap);
+        break;
+      case rwIconFamily:
+			if ( (vfLE32) && (vfAppIcon68K) )		// force app icon in 68K format
+			{
+				vfLE32 = fFalse;
+				ParseDumpIcon(fFalse, rwBitmapFamily);
+				vfLE32 = fTrue;
+			}
+			else
+				ParseDumpIcon(fFalse, rwBitmapFamily);
+        break;
+      case rwIconSmall:
+			if ( (vfLE32) && (vfAppIcon68K) )		// force app icon in 68K format
+			{
+				vfLE32 = fFalse;
+				ParseDumpIcon(fTrue, rwBitmap);
+				vfLE32 = fTrue;
+			}
+			else
+				ParseDumpIcon(fTrue, rwBitmap);
+        break;
+      case rwIconSmallFamily:
+			if ( (vfLE32) && (vfAppIcon68K) )		// force app icon in 68K format
+			{
+				vfLE32 = fFalse;
+				ParseDumpIcon(fTrue, rwBitmapFamily);
+				vfLE32 = fTrue;
+			}
+			else
+				ParseDumpIcon(fTrue, rwBitmapFamily);
+        break;
+      case rwTrap:
+        ParseDumpTrap();
+        break;
+      case rwFont:
+        ParseDumpFont();
+        break;
+      case rwPaletteTable:
+        ParseDumpPaletteTable();
+        break;
+      case rwMidi:
+        ParseDumpMidi();
+        break;
+      case rwPalette:
+        ParseDumpPalette();
+        break;
+
+#ifdef PALM_INTERNAL
+      case rwLauncherCategory:                  // RMa add: support for this resource
+        ParseDumpLauncherCategory();
+        break;
+      case rwGraffitiInputArea:
+        ParseDumpGraffitiInputArea();
+        break;
+      case rwCountryLocalisation:
+        ParseDumpCountry();
+        break;
+      case rwLocales:
+        ParseDumpLocales();
+        break;
+      case rwFeature:
+        ParseDumpFeature();
+        break;
+      case rwKeyboard:
+        ParseDumpKeyboard();
+        break;
+      case rwFontIndex:
+        ParseDumpFontIndex();
+        break;
+      case rwFontMap:
+        ParseDumpFontMap();
+        break;
+      case rwHardSoftButtonDefault:
+        ParseDumpHardSoftButtonSoft();
+        break;
+      case rwSysAppPrefs:
+        ParseApplicationPreferences();
+        break;
+		case rwTableList:
+        ParseDumpTableList();
+        break;
+		case rwCharsetList:
+		  ParseDumpCharsetList();
+        break;
+		case rwTextTable:
+		  ParseDumpTextTable();
+		  break;
+		case rwSearchTable:
+		  ParseDumpSearchTable();
+		  break;
 #endif
+
+      case rwHex:
+        ParseDumpHex();
+        break;
+      case rwData:
+        ParseDumpData();
+        break;
+
+        /*
+         * Add a rw here, remember to add to error message below 
+         */
+      default:
+        if (tok.lex.lt == ltPound)
+        {
+		  // LDu 31-8-2001 : deleted//ParseDirectives();
+		  // LDu 31-8-2001 : start modification//
+          ParseDirectives(prcpfile);
+  		  // LDu 31-8-2001 : end modification//
+        }
+        else if (tok.lex.lt == ltDoubleSlash)
+          NextLine();
+        else
+        {                                        /* RMa add error string more explicit */
+          char errorString[128];
+
+          sprintf(errorString, "Unknown token : '%s'\n", tok.lex.szId);
+          ErrorLine2(errorString,
+                     "FORM, MENU, ALERT, VERSION, STRINGTABLE, STRING, CATEGORIES, "
+							"APPLICATIONICONNAME, APPLICATION, BITMAP, PALETTE, "
+							"BITMAPGREY, BITMAPGREY16, BITMAPCOLOR16, BITMAPCOLOR256, "
+							"BITMAPCOLOR16K, BITMAPCOLOR24K, BITMAPCOLOR32K, BITMAPFAMILY, "
+							"BOOTSCREENFAMILY, ICON, ICONFAMILY, SMALLICON, SMALLICONFAMILY, "
+							"LAUNCHERCATEGORY, BYTELIST, WORDLIST, LONGWORDLIST, MIDI, "
+							"SYSAPPLICATIONPREFERENCES, PALETTETABLE, TRAP, FONT, HEX, DATA, INTEGER"
+#ifdef PALM_INTERNAL
+							", FONTINDEX, FONTMAP, GRAFFITIINPUTAREA, COUNTRYLOCALISATION, "
+							"LOCALES, FEATURE, KEYBOARD, HARDSOFTBUTTONDEFAULT, "
+							"SEARCHTABLE, TEXTTABLE, TABLELIST, CHARSETLIST"
+#endif
+							"or TRANSLATION expected");
+        }
+    }
+  }
+  while (FGetTok(&tok));
+  fclose(vfhIn);
+
+  // END of original code
+
+  // LDu 31-8-2001 : start modification
+  // restore the previous global values 
+  if (prv_szInfile)
+    strcpy(szInFile, prv_szInfile);
+  iline = prv_iline;
+  if (prv_vfhIn)
+    vfhIn = prv_vfhIn;
+  ifdefSkipping = prv_ifdefSkipping;
+  ifdefLevel = prv_ifdefLevel;
+  depth--;
+  // Ldu 31-8-2001 : end modification
+
 }
 
 /*-----------------------------------------------------------------------------
 |	ParseDirectives
 -------------------------------------------------------------DAVE------------*/
 void
-ParseDirectives()
+// LDu 31-8-2001 : deleted //ParseDirectives()
+// LDu 31-8-2001 : start modification //
+ParseDirectives(RCPFILE * prcpfile)
+// LDu 31-8-2001 : end modification //
 {
   TOK tok;
   char szId[256];
+
+  // LDu 31-8-2001 : start modification //
+  extern char szInFile[];
+  // LDu 31-8-2001 : end modification //
 
   FGetTok(&tok);
   switch (tok.rw)
   {
     case rwInclude:
       {
+      // LDu 31-8-2001 : start modification //
+      // ignore include files when skipping
+      if (ifdefSkipping == 0)
+        {
+      // LDu 31-8-2001 : end modification //
+
         char *szFileName;
         char *pchExt;
 
@@ -6260,7 +5610,20 @@ ParseDirectives()
           /*
            * Assume it's a .h file 
            */
-          ParseCInclude(szFileName);
+          // LDu 31-8-2001 : deleted// ParseCInclude(szFileName);
+          // LDu 31-8-2001 : start modification //
+          /*
+		   * * pass current global values to the ParseCInclude function
+           * * because we need to preserve them
+           * *          szInfile,
+           * *          ifdefSkipping,
+           * *          ifdefLevel,
+           * *          vfhIn,
+           * *          iline,
+           */
+            ParseCInclude(szFileName, szInFile, ifdefSkipping, ifdefLevel,
+                          vfhIn, iline);
+          // LDu 31-8-2001 : end modification //
           break;
         }
 
@@ -6269,10 +5632,42 @@ ParseDirectives()
         {
           ParseJavaInclude(szFileName);
         }
+		// LDu 31-8-2001: start modification //
+        // CInclude files only with .h .hpp .hxx extensions
+        else if (FSzEqI(pchExt, "h") || FSzEqI(pchExt, "hxx") ||
+                 FSzEqI(pchExt, "hpp"))
+        {
+           ParseCInclude(szFileName, szInFile, ifdefSkipping, ifdefLevel,
+                          vfhIn, iline);
+        }
+        // RCP files only with .rcp extension
+        else if (FSzEqI(pchExt, "rcp") )
+        {
+            ParseRcpFile(szFileName, prcpfile, szInFile, ifdefSkipping,
+                         ifdefLevel, vfhIn, iline);
+        }
+		// LDu 31-8-2001: end modification //
         else
         {
-          ParseCInclude(szFileName);
+          // LDu 31-8-2001 : deleted// ParseCInclude(szFileName);
+          // LDu 31-8-2001 : start modification //
+          /*
+		   * * pass current global values to the ParseCInclude function
+           * * because we need to preserve them
+           * *          szInfile,
+           * *          ifdefSkipping,
+           * *          ifdefLevel,
+           * *          vfhIn,
+           * *          iline,
+           */
+            ParseCInclude(szFileName, szInFile, ifdefSkipping, ifdefLevel,
+                          vfhIn, iline);
+          // LDu 31-8-2001 : end modification //
         }
+      // LDu 31-8-2001 : start modification //
+      // ignore include files when skipping
+	  }
+      // LDu 31-8-2001 : end modification //
         break;
       }
     case rwDefine:
@@ -6419,7 +5814,7 @@ ParseFile(char *szIn,
        */
       strcpy(szFile, szIn);
       if (FSzEqI(szFile + strlen(szFile) - 4, ".rcp"))
-        szFile[strlen(szFile) - 4] = '\0';
+       szFile[strlen(szFile) - 4] = '\0';
       strcat(szFile, ".ro");
     }
     else
@@ -6432,183 +5827,33 @@ ParseFile(char *szIn,
       strcpy(szFile, szOutDir);
       dot = strrchr(szFile, '.');
       if (dot && (strchr(dot, '/') != NULL || strchr(dot, '\\') != NULL))
-        dot = NULL;                              /* The dot was in a directory name, not the basename.  */
+       dot = NULL;  /* The dot was in a directory name, not the basename.  */
 
       if (dot == NULL)
-        strcat(szFile, ".ro");
+       strcat(szFile, ".ro");
     }
 
     OpenResDBFile(szFile);
   }
   else
     SetOutFileDir(szOutDir);
-  OpenInputFile(szIn);
+
+  // LDu 31-8-2001 deleted// OpenInputFile(szIn);
   OpenResFile(szResFile);
   FInitLexer(NULL, fTrue);
 
-  if (!FGetTok(&tok))
-    Error("bogus source file");
-  do
-  {
-    if (ifdefSkipping)
-    {
-      if (tok.lex.lt == ltPound)
-      {
-        ParseDirectives();
-      }
-      else
-      {
-        NextLine();
-      }
-      continue;
-    }
-    switch (tok.rw)
-    {
-      case rwForm:
-        if (FParseForm(prcpfile))
-          DumpForm(PlexGetElementAt
-                   (&prcpfile->plfrm, PlexGetCount(&prcpfile->plfrm) - 1));
-        break;
-      case rwMenu:
-        if (FParseMenu())
-        {
-          AssignMenuRects();
-          DumpMenu();
-          FreeMenu();
-        }
-        break;
-      case rwAlert:
-        ParseDumpAlert();
-        break;
-      case rwVersion:
-        ParseDumpVersion();
-        break;
-      case rwStringTable:
-        ParseDumpStringTable();
-        break;
-      case rwString:
-        ParseDumpString();
-        break;
-      case rwCategories:
-        ParseDumpCategories();
-        break;
-      case rwApplicationIconName:
-        ParseDumpApplicationIconName();
-        break;
-      case rwApplication:
-        ParseDumpApplication();
-        break;
-      case rwLauncherCategory:                  // RMa add: support for this resource
-        ParseDumpLauncherCategory();
-        break;
-      case rwTranslation:
-        ParseTranslation();
-        break;
-      case rwBitmap:
-      case rwBitmapGrey:
-      case rwBitmapGrey16:
-      case rwBitmapColor16:
-      case rwBitmapColor256:
-      case rwBitmapColor16k:
-      case rwBitmapColor24k:
-      case rwBitmapColor32k:
-      case rwBitmapFamily:
-      case rwBitmapFamily_special:
-      case rwBootScreenFamily:
-        ParseDumpBitmapFile(tok.rw);
-        break;
-      case rwInteger:
-        ParseDumpInteger();
-        break;
-      case rwWordList:
-        ParseDumpWordList();
-        break;
-      case rwLongWordList:
-        ParseDumpLongWordList();
-        break;
-      case rwByteList:
-        ParseDumpByteList();
-        break;
-      case rwPaletteTable:
-        ParseDumpPaletteTable();
-        break;
-      case rwGraffitiInputArea:
-        ParseDumpGraffitiInputArea();
-        break;
-      case rwCountryLocalisation:
-        ParseDumpCountry();
-        break;
-      case rwLocales:
-        ParseDumpLocales();
-        break;
-      case rwFeature:
-        ParseDumpFeature();
-        break;
-      case rwKeyboard:
-        ParseDumpKeyboard();
-        break;
-      case rwMidi:
-        ParseDumpMidi();
-        break;
-      case rwIcon:
-        ParseDumpIcon(fFalse, rwBitmap);
-        break;
-      case rwIconFamily:
-        ParseDumpIcon(fFalse, rwBitmapFamily);
-        break;
-      case rwIconSmall:
-        ParseDumpIcon(fTrue, rwBitmap);
-        break;
-      case rwIconSmallFamily:
-        ParseDumpIcon(fTrue, rwBitmapFamily);
-        break;
-      case rwTrap:
-        ParseDumpTrap();
-        break;
-      case rwFont:
-        ParseDumpFont();
-        break;
-      case rwFontIndex:
-        ParseDumpFontIndex();
-        break;
-      case rwHardSoftButtonDefault:
-        ParseDumpHardSoftButtonSoft();
-        break;
-      case rwSysAppPrefs:
-        ParseApplicationPreferences();
-        break;
-      case rwHex:
-        ParseDumpHex();
-        break;
-      case rwData:
-        ParseDumpData();
-        break;
+  // LDu 31-8-2001 start modification //
+  ParseRcpFile(szIn, prcpfile, szIn, 0, 0, NULL, 0);
 
-        /*
-         * Add a rw here, remember to add to error message below 
-         */
-      default:
-        if (tok.lex.lt == ltPound)
-        {
-          ParseDirectives();
-        }
-        else if (tok.lex.lt == ltDoubleSlash)
-          NextLine();
-        else
-        {                                        /* RMa add error string more explicit */
-          char errorString[128];
+  // previous code 
+  // is now in ParseRcpFile function
+  // to have a recursive implementation
 
-          sprintf(errorString, "Unknown token : '%s'\n", tok.lex.szId);
-          ErrorLine2(errorString,
-                     "FORM, MENU, ALERT, VERSION, STRINGTABLE, STRING, CATEGORIES, APPLICATIONICONNAME, APPLICATION, LAUNCHERCATEGORY, BITMAP, BITMAPGREY, BITMAPGREY16, BITMAPCOLOR16, BITMAPCOLOR256, BITMAPCOLOR16K, BITMAPCOLOR24K, BITMAPCOLOR32K, BITMAPFAMILY, BOOTSCREENFAMILY, ICON, ICONFAMILY, SMALLICON, SMALLICONFAMILY, TRAP, FONT, FONTINDEX, HEX, DATA, INTEGER, BYTELIST, WORDLIST, LONGWORDLIST, PALETTETABLE, GRAFFITIINPUTAREA, COUNTRYLOCALISATION, LOCALES, FEATURE, KEYBOARD, MIDI, HARDSOFTBUTTONDEFAULT, SYSAPPLICATIONPREFERENCES or TRANSLATION expected");
-        }
-    }
-  }
-  while (FGetTok(&tok));
-  fclose(vfhIn);
+  // LDu 31-8-2001 end modification //
+
   if (szIncFile != NULL)
   {
-    WriteIncFile(szIncFile);
+    //WriteIncFile(szIncFile);
   }
 
   FreeSymTable();

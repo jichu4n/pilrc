@@ -39,6 +39,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+#include <time.h>
 #include "pilrc.h"
 #include "util.h"
 #include "font.h"
@@ -526,7 +527,7 @@ OpenOutput(char *szBase,
   {
     sprintf(szPrettyName, "%s%s%04x.bin", szOutFileDir, szBase, id);
     szFileName = szPrettyName;
-    szMode = "wb";
+    szMode = "w+b";
   }
 
   vfhOut = fopen(szFileName, szMode);
@@ -649,7 +650,7 @@ FindAndOpenFile(char *szIn,
       }
     }
 
-    if (i == totalIncludePaths)
+    if (i == totalIncludePaths) 
     {
       ErrorLine2("Unable to find ", szIn);
     }
@@ -786,7 +787,12 @@ WriteOutResourceDB()
   intstrncpy(head.name, (vfPrcName) ? vfPrcName : szOutResDBFile, 32);
   head.attr = 1;                                 /* dmHdrAttrResDB */
   head.version = 1;
+#ifdef JOHN_MARSHALL
   head.created = head.modified = 0xadc0bea0;
+#else
+  head.created = head.modified = 
+    time (0) + (unsigned long) (66L * (365.25252 * 24 * 60 * 60));
+#endif
   intstrncpy(head.type, (vfPrcType) ? vfPrcType : "RESO", 4);
   intstrncpy(head.creator, (vfPrcCreator) ? vfPrcCreator : "pRES", 4);
   head.nrecords = PlexGetCount(&resdir);
