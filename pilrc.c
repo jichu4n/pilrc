@@ -3951,33 +3951,36 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
   inpreamble = fTrue;
 
   while (inpreamble && FGetTok(&tok))
-    switch (tok.rw)
+    if (tok.rw == rwId || tok.lex.lt == ltConst || tok.lex.lt == ltLParen
+	|| (tok.lex.lt == ltId && tok.rw == rwNil))
     {
-      case rwId:
-	resid = WGetId("Bitmap/Icon resource ID");
-	break;
-
-      case rwLocale:
-	locale = PchGetSz("locale");
-	break;
-
-      case rwNoCompress:
-      case rwAutoCompress:
-      case rwForceCompress:
-        defattr.compress = tok.rw;
-        break;
-
-      case rwCompressScanLine:
-      case rwCompressRLE:
-      case rwCompressPackBits:
-      case rwCompressBest:
-        defattr.compressMethod = tok.rw;
-        break;
-
-      default:
-	inpreamble = fFalse;
-	break;
+      UngetTok();
+      resid = WGetId("Bitmap/Icon resource ID");
     }
+    else
+      switch (tok.rw)
+      {
+	case rwLocale:
+	  locale = PchGetSz("locale");
+	  break;
+
+	case rwNoCompress:
+	case rwAutoCompress:
+	case rwForceCompress:
+	  defattr.compress = tok.rw;
+	  break;
+
+	case rwCompressScanLine:
+	case rwCompressRLE:
+	case rwCompressPackBits:
+	case rwCompressBest:
+	  defattr.compressMethod = tok.rw;
+	  break;
+
+	default:
+	  inpreamble = fFalse;
+	  break;
+      }
 
   if (resid == -1)
     ErrorLine ("Bitmap resource ID required");
