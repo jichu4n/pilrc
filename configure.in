@@ -1,0 +1,22 @@
+AC_INIT(pilrc.c)
+AM_INIT_AUTOMAKE(pilrc, 2.5b4)
+
+AC_PROG_CC
+AC_PROG_RANLIB
+
+AM_PATH_GTK(1.2.0,
+[
+AM_CONDITIONAL(PILRCUI, true)
+],
+[
+AM_CONDITIONAL(PILRCUI, false)
+])
+
+# Check for warnings flag if gcc was detected.
+if test "x$ac_cv_prog_gcc" = "xyes"; then
+  CFLAGS="$CFLAGS -Wall"
+fi
+
+AC_DEFINE(UNIX)
+
+AC_OUTPUT(Makefile)

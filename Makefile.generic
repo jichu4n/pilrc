@@ -1,0 +1,37 @@
+#
+# @(#)Makefile.generic
+#
+# Copyright 2000, Aaron Ardiri (mailto:aaron@ardiri.com)
+# All rights reserved.
+#
+# This file was generated as part of the "PilRC" program developed for 
+# the Palm Computing Platform designed by Palm: http://www.palm.com/ 
+#
+
+# compiler commands 
+PREFIX   = 
+CC       = gcc
+
+# source / outputs
+OBJS 	= pilrc.o lex.o util.o bitmap.o main.o font.o plex.o
+EXEC    = pilrc
+
+# compiler flags 
+CCFLAGS = -O2 -Wall -g -DUNIX
+
+# compile requirements
+$(EXEC): $(OBJS)
+	$(CC) $(OBJS) $(CCFLAGS) -o $(EXEC)
+
+# compile rules
+.SUFFIXES: .c .o
+
+.c.o:
+	$(CC) -c $(CCFLAGS) $<
+
+# clean-up funtions
+clean:
+	rm -f *.[oa]
+
+distclean: 
+	rm -f *.[oa] $(EXEC)

@@ -32,15 +32,14 @@
 #define g_width 22       /* width token */
 #define g_bitmap 99      /* bitmap data */
 
+/* some foreign font handing function */
+int (*pfnChkCode)(unsigned char *cp, int *pdx);
 
 /* Some globals to keep track of things for error reporting */
 
 static char *filename;
 static unsigned int lineno;
 int vfontType;
-
-static int (*pfnChkCode)(unsigned char *cp, int *pdx);
-
 
 /* Global to hold the font widths and offsets */
 

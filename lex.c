@@ -439,7 +439,13 @@ BOOL FGetLex(LEX *plex, BOOL fInComment)
 				pchStore = lex.szId;
 				while (*pchLex != '"')
 					{
-					if (*pchLex == '\\')
+					int n, tmp; 
+					n = (*pfnChkCode)(pchLex, &tmp);
+					if (n >= 1) {
+					  while (n-- > 0) 
+						*pchStore++ = *pchLex++;
+					} 
+					else if (*pchLex == '\\')
 						{
 						int ch;
 

@@ -122,7 +122,7 @@ void WarningLine(char *sz)
 	{
 	char szErr[256];
 
-	sprintf(szErr, "%s:%d): warning : %s", szInFile, iline, sz);
+	sprintf(szErr, "%s:%d: warning : %s", szInFile, iline, sz);
 	fprintf(stderr, "\n");
 	fprintf(stderr, szErr);
 	fprintf(stderr, "\n");
