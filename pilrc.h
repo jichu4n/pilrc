@@ -51,9 +51,9 @@ typedef int p_short;
 #endif
 
 #ifdef WIN32                                     // little endian
-#define HOST_LITTLE_ENDIAN
+#define HOST_LITTLE_ENDIAN			1
 #else                                            // big endian
-#define HOST_BIG_ENDIAN
+#define HOST_BIG_ENDIAN				1
 #endif
 
 #ifndef strdup
@@ -957,12 +957,12 @@ typedef struct _rcscrollbar
   /*
    * Short penPosInCar;
  *//*
- * * * * * * * * * * zw 
+ * * * * * * * * * * * * * * * zw 
  */
   /*
    * Short savePos;
  *//*
- * * * * * * * * * * zw 
+ * * * * * * * * * * * * * * * zw 
  */
 }
 RCSCROLLBAR;
@@ -1321,7 +1321,7 @@ typedef struct _rcBITMAP
   /*
    * ushort and_reserved_and_colorTable[3] 
  *//*
- * * * * * * * * * * z1w 
+ * * * * * * * * * * * * * * * z1w 
  */
   unsigned char *pbBits;
 
@@ -1365,431 +1365,11 @@ typedef struct _rcFONT
 }
 RCFONTTYPE;
 
-#define szRCFONT "w,w,w,w,w,w,w,w,w,w,w,w"
-
-/*-----------------------------------------------------------------------------
-|	Graffiti Input Area
--------------------------------------------------------------RMa------------*/
-
-typedef struct _rcSilkAreaBA16Type
-{
-  RCRECT bounds;                                 /* w4 */
-  p_int areaType;                                /* l */
-  p_int areaIndex;                               /* w */
-}
-RCSilkAreaBA16Type;
-
-#define szRCSilkAreaBA16EmitStr "w4,l,w"
-typedef struct _rcSilkAreaBA32Type
-{
-  RCRECT bounds;                                 /* w4 */
-  p_int areaType;                                /* l */
-  p_int areaIndex;                               /* w */
-}
-RCSilkAreaBA32Type;
-
-#define szRCSilkAreaBA32EmitStr "w4,l,w,zw"
-
-#define szRCSILKAREA (vfLE32?szRCSilkAreaBA32EmitStr:szRCSilkAreaBA16EmitStr)
-typedef union _RCSILKAREA
-{
-  RCSilkAreaBA16Type s16;
-  RCSilkAreaBA32Type s32;
-}
-RCSILKAREA;
-
-typedef struct _rcSilkButtonBA16Type
-{
-  //      p_int             buttonCount;            /* w */
-  RCRECT bounds;                                 /* w4 */
-  p_int keyDownChr;                              /* w */
-  p_int keyDownKeyCode;                          /* w */
-  p_int keyDownModifiers;                        /* w */
-}
-RCSilkButtonBA16Type;
-
-#define szRCSilkButtonBA16EmitStr "w4,w,w,w"
-typedef struct _rcSilkButtonBA32Type
-{
-  //      p_int             buttonCount;            /* w */
-  RCRECT bounds;                                 /* w4 */
-  p_int keyDownChr;                              /* w */
-  p_int keyDownKeyCode;                          /* w */
-  p_int keyDownModifiers;                        /* w */
-}
-RCSilkButtonBA32Type;
-
-#define szRCSilkButtonBA32EmitStr "w4,w,w,w,zw"
-
-#define szRCSILKBUTTON (vfLE32?szRCSilkButtonBA32EmitStr:szRCSilkButtonBA16EmitStr)
-typedef union _RCSILKBUTTON
-{
-  RCSilkButtonBA16Type s16;
-  RCSilkButtonBA32Type s32;
-}
-RCSILKBUTTON;
-
-typedef struct _rcSilkBA16Type
-{
-  p_int version;                                 /* w */
-  p_int vendorCreator;                           /* l */
-  p_int localeLanguage;                          /* w */
-  p_int localeCountry;                           /* w */
-  p_int areaCount;                               /* w */
-}
-RCSilkBA16Type;
-
-#define szRCSilkBA16EmitStr "w,l,w,w,w"
-typedef struct _rcSilkBA32Type
-{
-  p_int version;                                 /* w */
-  p_int areaCount;                               /* w */
-  p_int vendorCreator;                           /* l */
-  p_int localeLanguage;                          /* w */
-  p_int localeCountry;                           /* w */
-}
-RCSilkBA32Type;
-
-#define szRCSilkBA32EmitStr "w,w,l,w,w"
-
-#define szRCSILK (vfLE32?szRCSilkBA32EmitStr:szRCSilkBA16EmitStr)
-typedef union _RCSILK
-{
-  RCSilkBA16Type s16;
-  RCSilkBA32Type s32;
-}
-RCSILK;
-
-/*-----------------------------------------------------------------------------
-|	cnty Contry
-|	An array of these structures (one per country) is kept in the system
-|	resource.
-|	Preferences.h, DateTime.h, Localize.h, 
--------------------------------------------------------------RMa------------*/
-#define countryNameLength		20
-#define currencyNameLength		20
-#define currencySymbolLength	6
-
-typedef struct CountryPreferencesBA16Type
-{
-  p_int country;                                 // Country the structure represents
-  //      p_int             filler1;                                                                                                        // (Word alignment)
-  p_int countryName[countryNameLength];
-  p_int dateFormat;                              // Format to display date in
-  p_int longDateFormat;                          // Format to display date in
-  p_int weekStartDay;                            // Sunday or Monday
-  p_int timeFormat;                              // Format to display time in
-  p_int numberFormat;                            // Format to display numbers in
-  //      p_int             filler2;                                                                                                        // (Word alignment)
-  p_int currencyName[currencyNameLength];        // Dollars
-  p_int currencySymbol[currencySymbolLength];    // $
-  p_int uniqueCurrencySymbol[currencySymbolLength];     // US$
-  p_int currencyDecimalPlaces;                   // 2 for 1.00
-  p_int daylightSavings;                         // Type of daylight savings correction
-  p_int minutesWestOfGMT;                        // minutes west of Greenwich
-  p_int measurementSystem;                       // metric, english, etc.
-  //      p_int             filler3;                                                                                                        // (Word alignment)
-}
-CountryPreferencesBA16Type;
-
-#define szRCCountryBA16EmitStr "b,zb,b20,b,b,b,b,b,zb,b20,b6,b6,b,b,l,b,zb"
-
-typedef struct CountryPreferencesBA32Type
-{
-  p_int country;                                 // Country the structure represents - 1 byte, 0
-  p_int dateFormat;                              // Format to display date in - 1 byte, 1
-  p_int longDateFormat;                          // Format to display date in - 1 byte, 2
-  p_int weekStartDay;                            // Sunday or Monday - 1 byte, 3
-  p_int countryName[countryNameLength];          // 20 bytes, 4
-  p_int timeFormat;                              // Format to display time in - 1 byte, 24
-  p_int numberFormat;                            // Format to display numbers in - 1 byte, 25
-  p_int daylightSavings;                         // Type of daylight savings correction - 1 byte, 26
-  p_int measurementSystem;                       // metric, english, etc. - 1 byte, 27
-  p_int currencyName[currencyNameLength];        // Dollars - 20 bytes, 28
-  p_int currencySymbol[currencySymbolLength];    // $ - 6 bytes, 48
-  p_int uniqueCurrencySymbol[currencySymbolLength];     // US$ - 6 bytes, 54
-  p_int minutesWestOfGMT;                        // minutes west of Greenwich - 4 bytes, 60
-  p_int currencyDecimalPlaces;                   // 2 for 1.00 - 1 byte, 61
-  //      p_int             reserved1;                                                                                              // padding
-  //      p_int             reserved2;                                                                                              // padding
-}
-CountryPreferencesBA32Type;
-
-#define szRCCountryBA32EmitStr "b,b,b,b,b20,b,b,b,b,b20,b6,b6,l,b,zb,zw"
-
-#define szRCCOUNTRY (vfLE32?szRCCountryBA32EmitStr:szRCCountryBA16EmitStr)
-typedef union _RCCOUNTRY
-{
-  CountryPreferencesBA16Type s16;
-  CountryPreferencesBA32Type s32;
-}
-RCCOUNTRY;
-
-/*----------------------------------------------------------------------------
-|	locs Locales
--------------------------------------------------------------RMa------------*/
-#define kMaxCountryNameLen			19
-#define kMaxCurrencyNameLen		19
-#define kMaxCurrencySymbolLen		5
-
-typedef struct
-{
-  p_int language;                                // Language of locale
-  p_int country;                                 // Country of locale
-  p_int countryName[kMaxCountryNameLen + 1];     // Country name (localized)
-  p_int dateFormat;                              // Short format to display date in
-  p_int longDateFormat;                          // Long format to display date in
-  p_int timeFormat;                              // Format to display time in
-  p_int weekStartDay;                            // Weekday for first calendar column (sunday=0)
-  p_int timeZone;                                // Default GMT offset minutes, + for east of GMT, - for west
-  p_int numberFormat;                            // Format to display numbers in
-  //_int                          reserved;
-  p_int currencyName[kMaxCurrencyNameLen + 1];   // (e.g., "US Dollar")
-  p_int currencySymbol[kMaxCurrencySymbolLen + 1];      // (e.g., "$")
-  p_int uniqueCurrencySymbol[kMaxCurrencySymbolLen + 1];        // (e.g, "US$")
-  p_int currencyDecimalPlaces;                   // (e.g., 2 for $10.12)
-  p_int measurementSystem;                       // (e.g, Metric, English)
-}
-LmLocaleSettingsBA16Type;
-
-#define szRCLocaleSettingsBA16EmitStr "b,b,b20,b,b,b,b,w,b,zb,b20,b6,b6,b,b"
-
-typedef struct
-{
-  p_int version;                                 // Version of this structure
-  p_int numLocales;                              // Number of LmLocaleSettingsTypes that follow:
-  //      LmLocaleSettingsBA16Type        locales[0];     //      Settings for each locale
-  //or
-  // LmLocaleSettingsBA32Type     locales[0];     //      Settings for each locale
-}
-LmSettingsType;
-
-#define szRCSettingsEmitStr "w,w"
-
-typedef struct
-{
-  p_int language;                                // Language of locale
-  p_int country;                                 // Country of locale
-  p_int dateFormat;                              // Short format to display date in
-  p_int longDateFormat;                          // Long format to display date in
-  p_int timeFormat;                              // Format to display time in
-  p_int weekStartDay;                            // Weekday for first calendar column (sunday=0)
-  p_int timeZone;                                // Default GMT offset minutes, + for east of GMT, - for west
-  p_int numberFormat;                            // Format to display numbers in
-  //_int                          reserved;
-  p_int currencyDecimalPlaces;                   // (e.g., 2 for $10.12)
-  p_int measurementSystem;                       // (e.g, Metric, English)
-  p_int countryName[kMaxCountryNameLen + 1];     // Country name (localized)
-  p_int currencyName[kMaxCurrencyNameLen + 1];   // (e.g., "US Dollar")
-  p_int currencySymbol[kMaxCurrencySymbolLen + 1];      // (e.g., "$")
-  p_int uniqueCurrencySymbol[kMaxCurrencySymbolLen + 1];        // (e.g, "US$")
-}
-LmLocaleSettingsBA32Type;
-
-#define szRCLocaleSettingsBA32EmitStr "b,b,b,b,b,b,w,b,zb,b,b,b20,b20,b6,b6"
-
-#define szRCLOCALES (vfLE32?szRCSettingsBA32EmitStr:szRCSettingsBA16EmitStr)
-typedef union _RCLOCALES
-{
-  LmLocaleSettingsBA16Type s16;
-  LmLocaleSettingsBA32Type s32;
-}
-RCLOCALES;
-
-/*----------------------------------------------------------------------------
-|	hard/soft button default
--------------------------------------------------------------RMa------------*/
-
-typedef struct ButtonDefaultAppBA16Type
-{
-  p_int keyCode;                                 // virtual key code of the hard/soft button
-  p_int creator;                                 // app creator code
-}
-ButtonDefaultAppBA16Type;
-
-#define ButtonDefaultAppBA16EmitStr "w,l"
-
-typedef struct ButtonDefaultListBA16Type
-{
-  p_int numButtons;                              // number of default button assignments
-  //      ButtonDefaultAppBA16Type button[1];     // array of button assignments
-}
-ButtonDefaultListBA16Type;
-
-#define ButtonDefaultListBA16EmitStr "w"
-
-typedef struct ButtonDefaultAppBA32Type
-{
-  p_int keyCode;                                 // virtual key code of the hard/soft button
-  //      p_int padding;                                          // explicit alignment padding
-  p_int creator;                                 // app creator code
-}
-ButtonDefaultAppBA32Type;
-
-#define ButtonDefaultAppBA32EmitStr "w,zw,l"
-
-typedef struct ButtonDefaultListBA32Type
-{
-  p_int numButtons;                              // number of default button assignments
-  //      p_int padding;                                          // explicit alignment padding
-  //      ButtonDefaultAppBA32Type button[1];     // array of button assignments
-}
-ButtonDefaultListBA32Type;
-
-#define ButtonDefaultListBA32EmitStr "w,zw"
-
-#define szHARDSOFTBUTTONLIST (vfLE32?ButtonDefaultListBA32EmitStr:ButtonDefaultListBA16EmitStr )
-
-typedef union _RCHARDSOFTBUTTONLIST
-{
-  ButtonDefaultListBA16Type s16;
-  ButtonDefaultListBA32Type s32;
-}
-RCHARDSOFTBUTTONLIST;
-
-#define szHARDSOFTBUTTONDEFAULTAPP (vfLE32?ButtonDefaultAppBA32EmitStr:ButtonDefaultAppBA16EmitStr )
-
-typedef union _RCHARDSOFTBUTTONDEFAULT
-{
-  ButtonDefaultAppBA16Type s16;
-  ButtonDefaultAppBA32Type s32;
-}
-RCHARDSOFTBUTTONDEFAULT;
-
-/*----------------------------------------------------------------------------
-|	feat feature
--------------------------------------------------------------RMa------------*/
-typedef struct ROMFtrFeatureBA16Type
-{
-  p_int num;                                     // feature number
-  p_int value;                                   // feature value
-}
-ROMFtrFeatureBA16Type;
-
-#define szRCFeatureBA16EmitStr "w,l"
-
-typedef struct ROMFtrFeatureBA32Type
-{
-  p_int num;                                     // feature number
-  //      p_int             reserved;
-  p_int value;                                   // feature value
-}
-ROMFtrFeatureBA32Type;
-
-#define szRCFeatureBA32EmitStr "w,zw,l"
-
-#define szRCFEATUREFEATURE (vfLE32?szRCFeatureBA32EmitStr:szRCFeatureBA16EmitStr)
-typedef union _RCFEATUREFEATURE
-{
-  ROMFtrFeatureBA16Type s16;
-  ROMFtrFeatureBA32Type s32;
-}
-RCFEATUREFEATURE;
-
-typedef struct ROMFtrCreatorBA16Type
-{
-  p_int creator;                                 // feature creator
-  p_int numEntries;                              // # of entries
-  //      ROMFtrFeatureBA16Type   feature[1];                     // variable size array of Features
-}
-ROMFtrCreatorBA16Type;
-
-#define szRCFeatureCreatorBA16EmitStr "l,w"
-
-typedef struct ROMFtrCreatorBA32Type
-{
-  p_int creator;                                 // feature creator
-  p_int numEntries;                              // # of entries
-  //      p_int                                             reserved;
-  //      ROMFtrFeatureBA32Type   feature[1];                     // variable size array of Features
-}
-ROMFtrCreatorBA32Type;
-
-#define szRCFeatureCreatorBA32EmitStr "l,w,zw"
-
-#define szRCFEATURECREATOR (vfLE32?szRCFeatureCreatorBA32EmitStr:szRCFeatureCreatorBA16EmitStr)
-typedef union _RCFEATURECREATOR
-{
-  ROMFtrCreatorBA16Type s16;
-  ROMFtrCreatorBA32Type s32;
-}
-RCFEATURECREATOR;
-
-typedef struct ROMFtrTableBA16Type
-{
-  p_int numEntries;                              // # of entries
-  //      ROMFtrCreatorBA16Type   creator[1];                     // var. size array of Creators
-}
-ROMFtrTableBA16Type;
-
-#define szRCFeatureTableBA16EmitStr "w"
-
-typedef struct ROMFtrTableBA32Type
-{
-  p_int numEntries;                              // # of entries
-  //      p_int                                             reserved;
-  //      ROMFtrCreatorBA32Type   creator[1];                     // var. size array of Creators
-}
-ROMFtrTableBA32Type;
-
-#define szRCFeatureTableBA32EmitStr "w,zw"
-
-#define szRCFEATURE (vfLE32?szRCFeatureTableBA32EmitStr:szRCFeatureTableBA16EmitStr)
-typedef union _RCFEATURE
-{
-  ROMFtrTableBA16Type s16;
-  ROMFtrTableBA32Type s32;
-}
-RCFEATURE;
-
-/*----------------------------------------------------------------------------
-|	KEYBOARD
--------------------------------------------------------------RMa------------*/
-#define keyboardRows		4
-#define numKeyboards		3                // alpha, punc/number, and p_int'l
-
-typedef struct _KeyboardKeyBA16Type
-{
-  p_int shiftedKey;                              // key to use if shift is on
-  p_int capsKey;                                 // key to use if caps lock is on
-  p_int unshiftedKey;
-  p_int width;                                   // the width of the key.  The text is drawn centered.
-  p_int labelOffset;                             // if there is a label display it instead
-  // of a key (all modes)
-}
-KeyboardKeyType;
-
-#define szRCKeyboardKeyBA16EmitStr "b,b,b,b,w"
-#define szRCKeyboardKeyBA32EmitStr "b,b,b,b,l"
-
-#define szRCKEYBOARDKEY (vfLE32?szRCKeyboardKeyBA32EmitStr:szRCKeyboardKeyBA16EmitStr)
-
-typedef struct _keyboardlayoutBA16Type
-{
-  RCRECT bounds;
-  p_int rowHeight;
-  p_int font;
-  p_int keys;
-  p_int keysPerRow[keyboardRows];
-  p_int shiftKey;
-  p_int capsKey;
-  p_int lastLayoutInKeyboard;
-
-  /*
-   * p_int                          reserved 
-   */
-}
-KeyboardLayoutType;
-
-#define szRCKeyboardLayoutBA16EmitStr "w4,b,b,w,b4,b,b,b,zb"
-#define szRCKeyboardLayoutBA32EmitStr "w4,b,b,w,b4,b,b,b,zb"
-
-#define szRCKEYBOARDLAYOUT (vfLE32?szRCKeyboardLayoutBA32EmitStr:szRCKeyboardLayoutBA16EmitStr)
+#define szRCFONT "w,w,w,w,w,w,w,w,w,w,w,w,w"
 
 /*----------------------------------------------------------------------------
 |	SYSAPPPREFS
 -------------------------------------------------------------RMa------------*/
-
 typedef struct _SysAppPrefsBA16Type
 {
   p_int priority;                                // task priority
@@ -1910,6 +1490,7 @@ RCPFILE;
        rwForm, rwBegin, rwEnd, rwModal, rwSaveBehind, rwNoSaveBehind,
        rwHelpId, rwDefaultBtnId, rwMenuId,
        rwEnabled, rwDisabled, rwUsable, rwNonUsable, rwLeftAnchor,
+       rwExtended, rwNonExtended,                /* MBr add: gadget */
        rwRightAnchor, rwGroup, rwFont,
        rwFrame, rwNoFrame, rwBoldFrame, rwVertical, rwGraphical,
 
@@ -1929,54 +1510,11 @@ RCPFILE;
        rwBitmapColor32k,
        rwBitmapFamily,
        rwBitmapFamily_special,
-       rwBitmapPalette,
-       rwInteger,
-       rwWordList,
-       rwFontIndex,
-       rwPaletteTable,
-       rwPalette,
-       rwGraffitiInputArea,
-       rwCreator,
-       rwLanguage,
-       rwCountry,
-       rwArea,
-       rwScreen,
-       rwGraffiti,
-       rwAreaIndex,
-       rwKeyDownChr,
-       rwKeyDownKeyCode,
-       rwKeyDownModifiers,
-
-       rwCountryLocalisation,
-       rwNumber,
-       rwName,
-       rwDateFormat,
-       rwLongDateFormat,
-       rwWeekStartDay,
-       rwTimeFormat,
-       rwNumberFormat,
-       rwCurrencyName,
-       rwCurrencySymbol,
-       rwCurrencyUniqueSymbol,
-       rwCurrencyDecimalPlaces,
-       rwDaylightSavings,
-       rwMinutesWestOfGmt,
-       rwMeasurementSystem,
-
-       rwLocales,                                /* 'locs' */
-       rwLanguages,                              /* 'locs' */
-       rwCountrys,                               /* 'locs' */
-       rwCountryName,                            /* 'locs' */
-       rwTimeZone,                               /* 'locs' */
-
-       rwFeature,
-       rwEntry,
-       rwKeyboard,
-       rwLongWordList,
-       rwByteList,
-       rwDefaultItem,
-       rwMidi,
        rwBootScreenFamily,
+       rwBitmapPalette,
+       rwPalette,
+
+       rwInteger,
        rwPrevLeft, rwPrevRight, rwPrevWidth, rwPrevTop, rwPrevBottom,
        rwPrevHeight,
        rwMenu,
@@ -2008,12 +1546,119 @@ RCPFILE;
        rwString,
        rwStringTable,
        rwFile,
+       rwLauncherCategory,                       /* RMa add: application default launcher category */
        rwApplicationIconName,
        rwApplication,
-       rwLauncherCategory,                       /* RMa add: application default launcher category */
        rwCategories,
 
+       rwWordList,
+       rwLongWordList,
+       rwByteList,
+       rwPaletteTable,
+       rwMidi,
+       rwSysAppPrefs,                            /* RMa system Application preferences */
+       rwPriority,
+       rwStackSize,
+       rwMinHeapSpace,
+
        rwTranslation,
+
+#ifdef PALM_INTERNAL
+       rwCountryLocalisation,                    /* 'cnty' */
+       rwNumber,
+       rwName,
+       rwDateFormat,
+       rwLongDateFormat,
+       rwWeekStartDay,
+       rwTimeFormat,
+       rwNumberFormat,
+       rwCurrencyName,
+       rwCurrencySymbol,
+       rwCurrencyUniqueSymbol,
+       rwCurrencyDecimalPlaces,
+       rwDaylightSavings,
+       rwMinutesWestOfGmt,
+       rwMeasurementSystem,
+
+       rwLocales,                                /* 'locs' */
+       rwLanguages,                              /* 'locs' */
+       rwCountrys,                               /* 'locs' */
+       rwCountryName,                            /* 'locs' */
+       rwTimeZone,                               /* 'locs' */
+
+       rwFontIndex,
+       rwFontMap,
+
+       rwFontType,                               /* 'NFNT' & 'fntm' */
+       rwFirstChar,
+       rwLastChar,
+       rwmaxWidth,
+       rwkernMax,
+       rwnDescent,
+       rwfRectWidth,
+       rwfRectHeight,
+       rwOwTLoc,
+       rwAscent,
+       rwDescent,
+       rwLeading,
+       rwRowWords,
+       rwFlag,
+       rwState,
+
+       rwGraffitiInputArea,
+       rwCreator,
+       rwLanguage,
+       rwCountry,
+       rwArea,
+       rwScreen,
+       rwGraffiti,
+       rwAreaIndex,
+       rwKeyDownChr,
+       rwKeyDownKeyCode,
+       rwKeyDownModifiers,
+
+       rwFeature,
+       rwEntry,
+       rwKeyboard,
+       rwDefaultItem,
+
+       rwLocale,                                 /* RMa Locatisation management */
+       rwHardSoftButtonDefault,                  /* RMa add Hard/Soft button default */
+
+       rwTableList,                              /* ttli */
+       rwType,
+       rwIndex,
+       rwCharsetList,                            /* csli */
+
+       rwTextTable,                              /* ttbl */
+       rwTableType,
+       rwDefaultOutput,
+       rwNumElementBits,
+       rwNumIndexedDataLenBits,
+       rwNumResultBits,
+       rwIndexDataOffset,
+       rwClasses,
+       rwCases,
+       rwCasesPerState,
+       rwAction,
+       rwNextState,
+       rwIn,
+       rwOut,
+       rwOffset,
+       rwNumUniqueResults,
+       rwNumUniqueResultTableBits,
+
+       rwSearchTable,                            /* tSCH */
+       rwOffset_s0,
+       rwOffset_sD,
+       rwOffset_sK,
+       rwOffset_sM,
+       rwOffset_sU,
+       rwOffset_sP,
+       rwOffset_sA,
+       rwOffset_sG,
+       rwOffset_sR,
+#endif
 
        rwCenter,
        rwRight,
@@ -2026,15 +1671,6 @@ RCPFILE;
        rwNumColumns,
        rwNumRows,
        rwColumnWidths,
-
-       rwHardSoftButtonDefault,                  /* RMa add Hard/Soft button default */
-
-       rwSysAppPrefs,                            /* RMa system Application preferences */
-       rwPriority,
-       rwStackSize,
-       rwMinHeapSpace,
-
-       rwLocale,                                 /* RMa Locatisation management */
 
        rwInclude,
        rwDefine,
@@ -2108,7 +1744,6 @@ RWT;
        {"tPUL", "popuplist", rwPUL},
        {"tGSI", "graffitistateindicator", rwGSI},       /* Graffiti State */
        {"tGDT", "gadget", rwGDT},                /* Gadget */
-       {"tSCL", "scrollbar", rwSCL},             /* Scrollbar */
 
        {"tBTN", "button", rwBTN},
        {"tPBN", "pushbutton", rwPBN},
@@ -2117,6 +1752,8 @@ RWT;
        {"tSLT", "selectortrigger", rwSLT},
        {"tREP", "repeatbutton", rwREP},
        {"tSLD", "slider", rwSLD},                /* RMa add */
+       {"tSCL", "scrollbar", rwSCL},             /* Scrollbar */
+
        {"form", "tFRM", rwForm},
        {"begin", NULL, rwBegin},
        {"end", NULL, rwEnd},
@@ -2142,6 +1779,8 @@ RWT;
 
        {"vertical", NULL, rwVertical},
        {"graphical", NULL, rwGraphical},
+       {"extended", NULL, rwExtended},           /* MBr add: gadget */
+       {"nonextended", NULL, rwNonExtended},     /* MBr add: gadget */
        {"editable", NULL, rwEditable},
        {"noneditable", NULL, rwNonEditable},
        {"underlined", NULL, rwUnderlined},
@@ -2152,10 +1791,38 @@ RWT;
        {"hasscrollbar", NULL, rwHasScrollBar},
        {"rightalign", NULL, rwRightAlign},
        {"maxchars", NULL, rwMaxChars},
+       {"visibleitems", NULL, rwVisibleItems},
        {"autoshift", NULL, rwAutoShift},
        {"numeric", NULL, rwNumeric},
+       {"checked", "on", rwChecked},
 
-       {"visibleitems", NULL, rwVisibleItems},
+       {"bitmap", NULL, rwBitmap},
+       {"bitmapgrey", "bitmapgray", rwBitmapGrey},
+       {"bitmapgrey16", "bitmapgray16", rwBitmapGrey16},
+       {"bitmapcolor16", "bitmapcolour16", rwBitmapColor16},
+       {"bitmapcolor", "bitmapcolour", rwBitmapColor256},
+
+       {"bitmapcolor16k", "bitmapcolour16k", rwBitmapColor16k},
+       {"bitmapcolor24k", "bitmapcolour24k", rwBitmapColor24k},
+       {"bitmapcolor32k", "bitmapcolour32k", rwBitmapColor32k},
+       {"bitmapfamily", NULL, rwBitmapFamily},
+       {"bitmapfamilyspecial", NULL, rwBitmapFamily_special},
+       {"bootscreenfamily", NULL, rwBootScreenFamily},  /* 'tbsb' it look like as a bitmapfamily with an header (size & crc) */
+       {"bitmappalette", NULL, rwBitmapPalette},
+       {"palette", NULL, rwPalette},
+
+       {"integer", NULL, rwInteger},
+       {"prevleft", NULL, rwPrevLeft},
+       {"prevright", NULL, rwPrevRight},
+       {"prevwidth", NULL, rwPrevWidth},
+       {"prevtop", NULL, rwPrevTop},
+       {"prevbottom", NULL, rwPrevBottom},
+       {"prevheight", NULL, rwPrevHeight},
+
+       {"menu", "MBAR", rwMenu},
+       {"pulldown", NULL, rwPullDown},
+       {"menuitem", NULL, rwMenuItem},
+       {"separator", NULL, rwSeparator},
 
        {"value", NULL, rwValue},
        {"min", "minvalue", rwMinValue},
@@ -2168,24 +1835,50 @@ RWT;
        {"bitmapid", NULL, rwBitmapID},
        {"selectedbitmapid", NULL, rwSelectedBitmapID},
 
-       {"checked", "on", rwChecked},
-       {"bitmap", NULL, rwBitmap},
-       {"bitmapgrey", "bitmapgray", rwBitmapGrey},
-       {"bitmapgrey16", "bitmapgray16", rwBitmapGrey16},
-       {"bitmapcolor16", "bitmapcolour16", rwBitmapColor16},
-       {"bitmapcolor", "bitmapcolour", rwBitmapColor256},
+       {"alert", "tALT", rwAlert},
+       {"message", NULL, rwMessage},
+       {"buttons", NULL, rwButtons},
+       {"information", NULL, rwInformation},
+       {"confirmation", NULL, rwConfirmation},
+       {"warning", NULL, rwWarning},
+       {"error", NULL, rwError},
 
-       {"bitmapcolor16k", "bitmapcolour16k", rwBitmapColor16k},
-       {"bitmapcolor24k", "bitmapcolour24k", rwBitmapColor24k},
-       {"bitmapcolor32k", "bitmapcolour32k", rwBitmapColor32k},
-       {"bitmapfamily", NULL, rwBitmapFamily},
-       {"bitmapfamilyspecial", NULL, rwBitmapFamily_special},
-       {"bitmappalette", NULL, rwBitmapPalette},
-       {"integer", NULL, rwInteger},
+       {"version", "tVER", rwVersion},
+       {"stringtable", "tSTL", rwStringTable},
+       {"string", "tSTR", rwString},
+       {"file", "tSTR", rwFile},
+       {"applicationiconname", NULL, rwApplicationIconName},
+       {"application", "APPL", rwApplication},
+       {"categories", "tAIS", rwCategories},
        {"wordlist", NULL, rwWordList},
-       {"fontindex", NULL, rwFontIndex},
+       {"longwordlist", NULL, rwLongWordList},   /* 'DLST' */
+       {"bytelist", NULL, rwByteList},           /* 'BLST' */
        {"palettetable", NULL, rwPaletteTable},
-       {"palette", NULL, rwPalette},
+       {"midi", NULL, rwMidi},                   /* 'MIDI' */
+
+       {"translation", NULL, rwTranslation},
+
+#ifdef PALM_INTERNAL
+       {"launchercategory", "taic", rwLauncherCategory},
+       {"fontindex", NULL, rwFontIndex},
+
+       {"fontmap", NULL, rwFontMap},             /* 'NFNT' & 'fntm' */
+       {"fonttype", NULL, rwFontType},
+       {"firstchar", NULL, rwFirstChar},
+       {"lastChar", NULL, rwLastChar},
+       {"maxwidth", NULL, rwmaxWidth},
+       {"kernmax", NULL, rwkernMax},
+       {"ndescent", NULL, rwnDescent},
+       {"frectwidth", NULL, rwfRectWidth},
+       {"frectheight", NULL, rwfRectHeight},
+       {"owtloc", NULL, rwOwTLoc},
+       {"ascent", NULL, rwAscent},
+       {"descent", NULL, rwDescent},
+       {"leading", NULL, rwLeading},
+       {"rowwords", NULL, rwRowWords},
+       {"flag", NULL, rwFlag},
+       {"state", NULL, rwState},
+
        {"graffitiinputarea", NULL, rwGraffitiInputArea},        /* 'silk' */
        {"creator", NULL, rwCreator},
        {"language", NULL, rwLanguage},
@@ -2221,57 +1914,56 @@ RWT;
        {"feature", NULL, rwFeature},             /* 'feat' */
        {"entry", NULL, rwEntry},
        {"keyboard", NULL, rwKeyboard},           /* 'tkbd' */
-       {"longwordlist", NULL, rwLongWordList},   /* 'DLST' */
-       {"bytelist", NULL, rwByteList},           /* 'BLST' */
        {"defaultitem", NULL, rwDefaultItem},     /* 'DLST' & 'BLST' */
-       {"midi", NULL, rwMidi},                   /* 'MIDI' */
-       {"bootscreenfamily", NULL, rwBootScreenFamily},  /* 'tbsb' it look like as a bitmapfamily with an header (size & crc) */
 
        {"SysApplicationPreferences", NULL, rwSysAppPrefs},      /* 'pref' */
        {"priority", NULL, rwPriority},           /* 'pref' */
        {"stacksize", NULL, rwStackSize},         /* 'pref' */
        {"minheapspace", NULL, rwMinHeapSpace},   /* 'pref' */
 
-       {"prevleft", NULL, rwPrevLeft},
-       {"prevright", NULL, rwPrevRight},
-       {"prevwidth", NULL, rwPrevWidth},
-
-       {"prevtop", NULL, rwPrevTop},
-       {"prevbottom", NULL, rwPrevBottom},
-       {"prevheight", NULL, rwPrevHeight},
-
-       {"menu", "MBAR", rwMenu},
-       {"pulldown", NULL, rwPullDown},
-       {"menuitem", NULL, rwMenuItem},
-       {"separator", NULL, rwSeparator},
-
-       {"alert", "tALT", rwAlert},
-       {"message", NULL, rwMessage},
-       {"buttons", NULL, rwButtons},
-       {"information", NULL, rwInformation},
-       {"confirmation", NULL, rwConfirmation},
-       {"warning", NULL, rwWarning},
-       {"error", NULL, rwError},
-
-       {"version", "tVER", rwVersion},
-
-       {"stringtable", "tSTL", rwStringTable},
-       {"string", "tSTR", rwString},
-       {"file", "tSTR", rwFile},
-       {"applicationiconname", NULL, rwApplicationIconName},
-       {"application", "APPL", rwApplication},
-       {"launchercategory", "taic", rwLauncherCategory},
-       {"categories", "tAIS", rwCategories},
-
-       {"translation", NULL, rwTranslation},
-
        {"hardsoftbuttondefault", NULL, rwHardSoftButtonDefault},
+
+       {"locale", NULL, rwLocale},               /* RMa Locatisation management */
+
+       {"tablelist", NULL, rwTableList},         /* ttli */
+       {"type", NULL, rwType},
+
+       {"charsetlist", NULL, rwCharsetList},     /* csli */
+
+       {"texttable", NULL, rwTextTable},         /* ttbl */
+       {"tabletype", NULL, rwTableType},
+       {"defaultoutput", NULL, rwDefaultOutput},
+       {"numelementbits", NULL, rwNumElementBits},
+       {"numindexeddatalenbits", NULL, rwNumIndexedDataLenBits},
+       {"numresultbits", NULL, rwNumResultBits},
+       {"indexdataoffset", NULL, rwIndexDataOffset},
+       {"classes", NULL, rwClasses},
+       {"cases", NULL, rwCases},
+       {"casesperstate", NULL, rwCasesPerState},
+       {"action", NULL, rwAction},
+       {"nextstate", NULL, rwNextState},
+       {"in", "input", rwIn},
+       {"out", "output", rwOut},
+       {"offset", NULL, rwOffset},
+       {"rwnumuniqueresults", NULL, rwNumUniqueResults},
+       {"rwnumuniqueresulttablebits", NULL, rwNumUniqueResultTableBits},
+
+       {"searchtable", NULL, rwSearchTable},     /* tSCH */
+       {"offset_s0", NULL, rwOffset_s0},         /* tSCH */
+       {"offset_sd", NULL, rwOffset_sD},         /* tSCH */
+       {"offset_sk", NULL, rwOffset_sK},         /* tSCH */
+       {"offset_sm", NULL, rwOffset_sM},         /* tSCH */
+       {"offset_su", NULL, rwOffset_sU},         /* tSCH */
+       {"offset_sp", NULL, rwOffset_sP},         /* tSCH */
+       {"offset_sa", NULL, rwOffset_sA},         /* tSCH */
+       {"offset_sg", NULL, rwOffset_sG},         /* tSCH */
+       {"offset_sr", NULL, rwOffset_sR},         /* tSCH */
+#endif
 
        {"center", NULL, rwCenter},
        {"right", NULL, rwRight},
        {"bottom", NULL, rwBottom},
        {"auto", NULL, rwAuto},
-
        {"at", NULL, rwAt},
        {"id", NULL, rwId},
        {"autoid", NULL, rwAutoId},
@@ -2279,8 +1971,6 @@ RWT;
        {"columns", "numcolumns", rwNumColumns},
        {"rows", "numrows", rwNumRows},
        {"columnwidths", "widths", rwColumnWidths},
-
-       {"locale", NULL, rwLocale},               /* RMa Locatisation management */
 
        {"define", NULL, rwDefine},
        {"equ", NULL, rwEqu},
@@ -2346,6 +2036,333 @@ typedef struct _tok
 }
 TOK;
 
+/*-----------------------------------------------------------------------------
+|	Various Konstant types -- basically deferred evaluation of constants
+|	mainly for AUTO and CENTER because we can't evaluate them until we know
+|	the font for the particular item.
+-------------------------------------------------------------WESC------------*/
+
+/*
+ * Konstant Type 
+ */
+typedef enum _kt
+{
+  ktConst,
+  ktCenter,
+  ktAuto,
+  ktCenterAt,
+  ktRightAt,
+  ktBottomAt
+}
+KT;
+
+/*
+ * Konstant 
+ */
+typedef struct _k
+{
+  KT kt;
+  int wVal;
+}
+K;
+
+/*
+ * Konstant Point 
+ */
+typedef struct _kpt
+{
+  K kX;
+  K kY;
+}
+KPT;
+
+/*
+ * Konstant Rect 
+ */
+typedef struct _krc
+{
+  KPT kptUpperLeft;
+  KPT kptExtent;
+}
+KRC;
+
+/*-----------------------------------------------------------------------------
+|	ITM
+|		an item in a form -- grif and grif2 define the syntax of the item
+|	and what to expect.
+-------------------------------------------------------------WESC------------*/
+typedef struct _itm
+{
+  int grif;
+  int grifOut;
+  int grif2;
+  int grif2Out;
+  int grif3;
+  int grif3Out;
+  int grif4;
+  int grif4Out;
+  char *text;
+  int cbText;                                    /* length of text including nul terminator */
+  int id;
+  int listid;
+  KRC krc;
+  /*
+   * RectangleType rc; 
+   */
+  RCRECT rc;
+  KPT kpt;
+  /*
+   * PointType pt; 
+   */
+  RCPOINT pt;
+  BOOL usable;
+  BOOL leftAnchor;
+  int frame;
+  BOOL extended;                                 /* MBr add: gadget */
+  BOOL enabled;
+  BOOL on;                                       /* checked */
+  BOOL editable;
+  BOOL underlined;
+  BOOL singleLine;
+  BOOL dynamicSize;
+  BOOL vertical;                                 /* RMa add: slider */
+  BOOL graphical;                                /* RMa add: slider */
+  int justification;
+  int maxChars;
+  int autoShift;
+  BOOL hasScrollBar;
+  BOOL numeric;
+  int numItems;
+  int cvis;
+  int group;
+  int font;
+  int rscID;
+  BOOL modal;
+  BOOL saveBehind;
+  int helpId;
+  int defaultBtnId;
+  int menuId;
+  int numRows;
+  int numColumns;
+  int rgdxcol[64];
+  int value;                                     /* scrollbar */
+  int minValue;                                  /* scrollbar */
+  int maxValue;                                  /* scrollbar */
+  int pageSize;                                  /* scrollbar */
+  int thumbid;                                   /* RMa add: slider */
+  int backgroundid;                              /* RMa add: slider */
+  BOOL feedback;                                 /* RMa add: slider */
+  int bitmapid;                                  /* RMa add: graphical button */
+  int selectedbitmapid;                          /* RMa add: graphical button */
+  int version;                                   /* RMa add: GraffitiInputArea 'silk', 'locs' */
+  char *creator;                                 /* RMa add: GraffitiInputArea 'silk' */
+  char *language;                                /* RMa add: GraffitiInputArea 'silk' */
+  char *country;                                 /* RMa add: GraffitiInputArea 'silk' */
+  int areaType;                                  /* RMa add: GraffitiInputArea 'silk' */
+  int areaIndex;                                 /* RMa add: GraffitiInputArea 'silk' */
+  int keyDownChr;                                /* RMa add: GraffitiInputArea 'silk' */
+  int keyDownKeyCode;                            /* RMa add: GraffitiInputArea 'silk' */
+  int keyDownModifiers;                          /* RMa add: GraffitiInputArea 'silk' */
+  int Number;                                    /* RMa add: country 'cnty' */
+  char *Name;                                    /* RMa add: country 'cnty', 'locs' */
+  int DateFormat;                                /* RMa add: country 'cnty', 'locs' */
+  int LongDateFormat;                            /* RMa add: country 'cnty', 'locs' */
+  int WeekStartDay;                              /* RMa add: country 'cnty', 'locs' */
+  int TimeFormat;                                /* RMa add: country 'cnty', 'locs' */
+  int NumberFormat;                              /* RMa add: country 'cnty', 'locs' */
+  char *CurrencyName;                            /* RMa add: country 'cnty', 'locs' */
+  char *CurrencySymbol;                          /* RMa add: country 'cnty', 'locs' */
+  char *CurrencyUniqueSymbol;                    /* RMa add: country 'cnty', 'locs' */
+  int CurrencyDecimalPlaces;                     /* RMa add: country 'cnty', 'locs' */
+  int DaylightSavings;                           /* RMa add: country 'cnty', 'locs' */
+  int MinutesWestOfGmt;                          /* RMa add: country 'cnty' */
+  int MeasurementSystem;                         /* RMa add: country 'cnty', 'locs' */
+  int TimeZone;                                  /* RMa add: locales         'locs' */
+  char *CountryName;                             /* RMa add: locales         'locs' */
+  int Languages;                                 /* RMa add: locales         'locs' */
+  int Countrys;                                  /* RMa add: locales         'locs' */
+  int DefaultItem;                               /* RMa add: 'pref' */
+  int Priority;                                  /* RMa add: 'pref' */
+  int StackSize;                                 /* RMa add: 'pref' */
+  int MinHeapSpace;                              /* RMa add: 'pref' */
+  char *Locale;                                  /* RMa localisation management */
+  int AlertType;                                 /* RMA alert */
+  int FontType;                                  /* RMa add: font 'NFNT' & 'fntm' */
+  int FirstChar;                                 /* RMa add: font 'NFNT' & 'fntm' */
+  int LastChar;                                  /* RMa add: font 'NFNT' & 'fntm' */
+  int maxWidth;                                  /* RMa add: font 'NFNT' & 'fntm' */
+  int kernMax;                                   /* RMa add: font 'NFNT' & 'fntm' */
+  int nDescent;                                  /* RMa add: font 'NFNT' & 'fntm' */
+  int fRectWidth;                                /* RMa add: font 'NFNT' & 'fntm' */
+  int fRectHeight;                               /* RMa add: font 'NFNT' & 'fntm' */
+  int owTLoc;                                    /* RMa add: font 'NFNT' & 'fntm' */
+  int Ascent;                                    /* RMa add: font 'NFNT' & 'fntm' */
+  int Descent;                                   /* RMa add: font 'NFNT' & 'fntm' */
+  int Leading;                                   /* RMa add: font 'NFNT' & 'fntm' */
+  int rowWords;                                  /* RMa add: font 'NFNT' & 'fntm' */
+  int flag;                                      /* RMa add: font 'NFNT' & 'fntm' */
+  int state;                                     /* RMa add: font 'NFNT' & 'fntm' */
+  BOOL compress;                                 /* RMa add: font 'ttbl' */
+  int tableType;                                 /* RMa add: font 'ttbl' */
+  int defaultOutput;                             /* RMa add: font 'ttbl' */
+  int numElementBits;                            /* RMa add: font 'ttbl' */
+  int numIndexedDataLenBits;                     /* RMa add: font 'ttbl' */
+  int numResultBits;                             /* RMa add: font 'ttbl' */
+  int indexDataOffset;                           /* RMa add: font 'ttbl' */
+}
+ITM;
+
+/*
+ * Item Flags 
+ */
+#define ifNull			  0x00000000
+#define ifText         0x00000001
+#define ifMultText     0x00000002
+#define ifId           0x00000004
+#define ifRc           0x00000008
+#define ifPt           0x00000010
+#define ifUsable       0x00000020
+#define ifAnchor       0x00000040
+#define ifFrame        0x00000080
+#define ifEnabled      0x00000100
+#define ifOn           0x00000200
+#define ifEditable     0x00000400
+#define ifSingleLine   0x00000800
+#define ifDynamicSize  0x00001000
+#define ifMaxChars     0x00002000
+#define ifCvis         0x00004000
+#define ifGroup        0x00008000
+#define ifFont         0x00010000
+#define ifAlign        0x00020000
+#define ifUnderlined   0x00040000
+#define ifListId       0x00080000
+#define ifBitmap       0x00100000
+#define ifExtended     0x00200000                /* MBr add: gadget */
+
+/*
+ * Form ifs 
+ */
+#define ifModal        0x00200000
+#define ifSaveBehind   0x00400000
+#define ifHelpId       0x00800000
+#define ifDefaultBtnId 0x01000000
+#define ifMenuId       0x02000000
+
+/*
+ * Ifs defining margins -- extra width to add to an item in addition to it's string width 
+ */
+#define ifSmallMargin  0x80000000
+#define ifBigMargin    0x40000000
+
+/*
+ * if2s -- ran out of bits in if! 
+ */
+#define if2Null					0x00000000
+#define if2NumColumns			0x00000001
+#define if2NumRows				0x00000002
+#define if2ColumnWidths			0x00000004
+#define if2Value					0x00000008
+#define if2MinValue				0x00000010
+#define if2MaxValue				0x00000020
+#define if2PageSize				0x00000040
+#define if2AutoShift				0x00000080
+#define if2Scrollbar				0x00000100
+#define if2Numeric				0x00000200
+
+#define if2Type 					0x00000800      /* RMa add */
+#define if2File 					0x00001000      /* RMa add */
+#define if2CreatorID				0x00002000      /* RMa add */
+#define if2AppType				0x00004000      /* RMa add */
+#define if2CreateTime			0x00008000      /* RMa add */
+#define if2ModTime				0x00010000      /* RMa add */
+#define if2BackupTime			0x00020000      /* RMa add */
+#define if2AppInfo				0x00040000      /* RMa add */
+#define if2SortInfo				0x00080000      /* RMa add */
+#define if2ReadOnly				0x00100000      /* RMa add */
+#define if2Backup					0x00200000      /* RMa add */
+#define if2CopyProtect			0x00400000      /* RMa add */
+#define if2Priority				0x00800000      /* RMa add */
+#define if2ThumbID				0x01000000      /* RMa add */
+#define if2BackgroundID			0x02000000      /* RMa add */
+#define if2Vertical				0x04000000      /* RMa add */
+#define if2Graphical				0x08000000      /* RMa add */
+#define if2BitmapID				0x10000000      /* RMa add */
+#define if2SelectedBitmapID	0x20000000       /* RMa add */
+#define if2Feedback				0x40000000      /* RMa add */
+
+/*
+ * if3s -- ran out of bits in if and if2!       RMa add 
+ */
+#define if3Null					0x00000000
+#define if3Vers					0x00000001
+#define if3Creator				0x00000002
+#define if3Language				0x00000004
+#define if3Country				0x00000008
+#define if3areaType				0x00000010
+#define if3areaIndex				0x00000020
+#define if3keyDownChr			0x00000040
+#define if3keyDownKeyCode		0x00000080
+#define if3keyDownModifiers	0x00000100
+#define if3Number							0x00000200
+#define if3Name							0x00000400
+#define if3DateFormat					0x00000800
+#define if3LongDateFormat				0x00001000
+#define if3WeekStartDay					0x00002000
+#define if3TimeFormat					0x00004000
+#define if3NumberFormat					0x00008000
+#define if3CurrencyName					0x00010000
+#define if3CurrencySymbol				0x00020000
+#define if3CurrencyUniqueSymbol		0x00040000
+#define if3CurrencyDecimalPlaces		0x00080000
+#define if3DayLightSaving				0x00100000
+#define if3MinutesWestOfGmt			0x00200000
+#define if3MeasurementSystem			0x00400000
+#define if3DefaultItm					0x00800000
+#define if3TimeZone  					0x01000000
+#define if3Languages			   		0x02000000
+#define if3Countrys						0x04000000
+#define if3CountryName					0x08000000
+#define if3StackSize						0x10000000
+#define if3MinHeapSpace					0x20000000
+#define if3Locale							0x40000000      /* RMa Localisation Management */
+#define if3AlertType						0x80000000      /* RMa alert */
+
+/*
+ * if4s -- ran out of bits in if, if2 and if3!       RMa add 
+ */
+#define if4Null					0x00000000      /* RMa 'NFNT' & 'fntm' */
+#define if4FontType				0x00000001
+#define if4firstChar				0x00000002
+#define if4lastChar				0x00000004
+#define if4maxWidth				0x00000008
+#define if4kernMax				0x00000010
+#define if4nDescent				0x00000020
+#define if4fRectWidth			0x00000040
+#define if4fRectHeight			0x00000080
+#define if4owTLoc					0x00000100
+#define if4Ascent					0x00000200
+#define if4Descent				0x00000400
+#define if4Leading				0x00000800
+#define if4rowWords				0x00001000
+#define if4flag					0x00002000
+#define if4state					0x00004000
+#define if4tableType						0x00008000
+#define if4defaultOutput				0x00010000
+#define if4numElementBits				0x00020000
+#define if4numIndexedDataLenBits		0x00040000
+#define if4numResultBits				0x00080000
+#define if4indexDataOffset				0x00100000
+#define if4compressed					0x00200000
+
+/*
+ * Parse globals 
+ */
+extern BOOL fTokUngotten;
+extern TOK tokPrev;
+extern TOK tok;
+extern int iline;
+extern char szLine[4096];
+
 extern BOOL vfWinGUI;
 extern BOOL vfAutoId;
 extern BOOL vfQuiet;
@@ -2357,6 +2374,10 @@ extern BOOL vfCheckDupes;
 extern BOOL vfAppend;
 extern BOOL vfRTL;
 extern BOOL vfLE32;
+extern BOOL vfAppIcon68K;
+extern BOOL vfAutoAmdc;
+
+extern char *szDllNameP;
 
 //LDu : Output a Prc file
 extern BOOL vfPrc;
@@ -2364,6 +2385,11 @@ extern const char *vfPrcName;
 extern const char *vfPrcCreator;
 extern const char *vfPrcType;
 extern BOOL vfPrcTimeStamp;
+
+/*
+ * LDu Ignore Include File In Header Files
+ */
+extern BOOL vfIFIH;
 
 #define DEFAULT_PRCNAME "PilRC resources"
 #define DEFAULT_PRCCR8R 0x70524553               // 'pRES'
@@ -2380,6 +2406,22 @@ extern BOOL vfStripNoLocRes;
 #define dyScreen 160
 #define maxCategories  16
 #define categoryLength 16
+
+void ParseToFinalEnd(void);
+BOOL ObjectDesiredInOutputLocale(const ITM * itm);
+void ParseItm(ITM * pitm,
+              int grif,
+              int grif2,
+              int grif3,
+              int grif4);
+BOOL FGetTok(TOK * ptok);
+VOID UngetTok(void);
+int WGetConst(char *szErr);
+char *PchGetSz(char *szErr);
+VOID GetExpectRw(RW rw);
+int WGetId(char *szErr,
+           BOOL fAutoIDOk);
+int WGetConstEx(char *szErr);
 
 void CbInit(void);
 int CbEmitStruct(void *pv,

@@ -120,7 +120,7 @@ Error(char *sz)
 #endif
   {
     fprintf(stderr, "\n");
-    fprintf(stderr, "%s", sz);  // added "%s", AA
+    fprintf(stderr, "%s", sz);                   // added "%s", AA
     fprintf(stderr, "\n");
     exit(1);
   }
@@ -213,7 +213,7 @@ WarningLine(char *sz)
            ? "%s(%d): warning : %s"
            : "%s:%d: warning : %s"), szInFile, iline, sz);
   fprintf(stderr, "\n");
-  fprintf(stderr, "%s", szErr);  // added "%s", AA
+  fprintf(stderr, "%s", szErr);                  // added "%s", AA
   fprintf(stderr, "\n");
 #endif
 }
@@ -527,7 +527,7 @@ OpenOutput(char *szBase,
   {
     sprintf(szPrettyName, "%s%s%04x.bin", szOutFileDir, szBase, id);
     szFileName = szPrettyName;
-    szMode = "wb";
+    szMode = "w+b";
   }
 
   vfhOut = fopen(szFileName, szMode);
@@ -650,7 +650,7 @@ FindAndOpenFile(char *szIn,
       }
     }
 
-    if (i == totalIncludePaths) 
+    if (i == totalIncludePaths)
     {
       ErrorLine2("Unable to find ", szIn);
     }
@@ -792,8 +792,8 @@ WriteOutResourceDB()
   if (!vfPrcTimeStamp)
     head.created = head.modified = 0xadc0bea0;
   else
-    head.created = head.modified = 
-      time (0) + (unsigned long) (66L * (365.25252 * 24 * 60 * 60));
+    head.created = head.modified =
+      time(0) + (unsigned long)(66L * (365.25252 * 24 * 60 * 60));
 
   intstrncpy(head.type, (vfPrcType) ? vfPrcType : "RESO", 4);
   intstrncpy(head.creator, (vfPrcCreator) ? vfPrcCreator : "pRES", 4);

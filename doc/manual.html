@@ -1,7 +1,10 @@
 <html>
-<head><title>
-PilRC
-</title></head>
+<head>
+<title>PilRC</title>
+<style>
+.palmInternal { display:none; }	<-- none or block -->
+</style>
+</head>
 <body bgcolor="#00000" text="#ffffff" link="#7f3fff" vlink="#7f3fff">
 
 <center>
@@ -21,14 +24,14 @@ PilRC
 <tr>
 <td>
 <font face="Arial,Helvetica">
-<h2>PilRC v2.9<br>
-    User Manual</h2>
+<h2>PilRC v2.90 p3<br>
+    User Manual <div class="palmInternal">PALM internal</div></h2>
 </font>
 </td>
 <td valign=top align=right>
 <font face="Arial,Helvetica">
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
-  22 February 2002
+  25 February 2002
 </font>
 </td>
 </tr>
@@ -107,11 +110,22 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
 </font>
 <ul>
 <pre>
-pilrc   [-L LANGUAGE] [-I INCLUDE PATH] [-D MACRO(=VAL)] 
-	[-R RESFILE] [-H INCLUDE PATH] [-ro] [-q] [-V] 
-	[-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] [-allowEditID] 
-	[-noEllipsis] [-LE32] [-o OUTPUTPATH] file.rcp [output path]
-pilrcui [-L LANGUAGE] file.rcp</pre>
+<table border=0>
+<tr>
+<td valign=top><font face="Arial,Helvetica">pilrc</font></td>
+<td>
+   [-L LANGUAGE] [-I INCLUDE PATH] [-D MACRO(=VAL)] 
+	[-R RESFILE] [-H INCLUDE PATH]<BR>[-ro] [-ts] [-q] [-V] [-Loc CODE] [-StripLoc]
+	[-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] [-allowEditID]<BR>[-LE32] [-noIFIH]
+	<span class="palmInternal">[-AppIcon68K] [-amdc NAME]</span>[-noEllipsis] [-o OUTPUTPATH] file.rcp [output path]
+</td>
+</tr>
+<tr>
+<td valign=top><font face="Arial,Helvetica">pilrcui</font></td>
+<td>[-L LANGUAGE] file.rcp</td>
+</tr>
+</table>
+</pre>
 <font face="Arial,Helvetica">
 
 <table border=0>
@@ -193,6 +207,18 @@ pilrcui [-L LANGUAGE] file.rcp</pre>
   <font face="Arial,Helvetica">
   Output a single .ro file in PRC format containing all the generated
   resources, instead of a collection of .bin files.
+  </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -ts
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Put POSIX timestamp on .ro file generated.
   </font>
   </td>
 </tr>
@@ -319,12 +345,48 @@ pilrcui [-L LANGUAGE] file.rcp</pre>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
+  -noIFIH
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Ignore includes files in header files.
+  </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
   -LE32
   </font>
   </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Generate Little Endian 32 bits compatible resources (ARM, NT)
+  </font>
+  </td>
+</tr>
+<tr class="palmInternal">
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -AppIcon68K
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Force AppIcon resources generation in 68K format.
+  </font>
+  </td>
+</tr>
+<tr class="palmInternal">
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -amdc NAME
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Generate resource 'amdc' id=1 with NAME.dll as content.
   </font>
   </td>
 </tr>
@@ -910,7 +972,7 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     </font>
     </td>
   </tr>
-  <tr>
+  <tr class="palmInternal">
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_fontindex">FONTINDEX</a>
@@ -919,6 +981,18 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     <td valign=center>
     <font face="Arial,Helvetica">
     Font Index table for Font Resource
+    </font>
+    </td>
+  </tr>
+  <tr class="palmInternal">
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_fontmap">FONTMAP</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    Font Map extention for Font Resource (i.e. japan)
     </font>
     </td>
   </tr>
@@ -1006,7 +1080,7 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     </font>
     </td>
   </tr>
-  <tr>
+  <tr class="palmInternal">
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_feature">FEATURE</a>
@@ -1018,7 +1092,7 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     </font>
     </td>
   </tr>
-  <tr>
+  <tr class="palmInternal">
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_graffitiinputarea">GRAFFITIINPUTAREA</a>
@@ -1030,7 +1104,7 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     </font>
     </td>
   </tr>
-  <tr>
+  <tr class="palmInternal">
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_countrylocalisation">COUNTRYLOCALISATION</a>
@@ -1042,7 +1116,7 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     </font>
     </td>
   </tr>
-  <tr>
+  <tr class="palmInternal">
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_locales">LOCALES</a>
@@ -1053,7 +1127,8 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     System reserved
     </font>
     </td>
-  </tr>  <tr>
+  </tr>
+  <tr class="palmInternal">
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_keyboard">KEYBOARD</a>
@@ -1073,11 +1148,11 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     </td>
     <td valign=center>
     <font face="Arial,Helvetica">
-    Copy .mid to a Palm midi Resource
+    Copy .aif or .mid to a Palm midi Resource
     </font>
     </td>
   </tr>
-  <tr>
+  <tr  class="palmInternal">
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_Hardsoftbutton">HARDSOFTBUTTONDEFAULT</a>
@@ -1093,6 +1168,54 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_SysAppPrefs">SYSAPPLICATIONPREFERENCES</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    System reserved
+    </font>
+    </td>
+  </tr>
+  <tr class="palmInternal">
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_SearchTable">SEARCHTABLE</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    System reserved
+    </font>
+    </td>
+  </tr>
+  <tr class="palmInternal">
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_TextTable">TEXTTABLE</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    System reserved
+    </font>
+    </td>
+  </tr>
+  <tr class="palmInternal">
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_TableList">TABLELIST</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    System reserved
+    </font>
+    </td>
+  </tr>
+  <tr class="palmInternal">
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_CharSetList">CHARSETLIST</a>
     </font>
     </td>
     <td valign=center>
@@ -1344,6 +1467,7 @@ is one or more of: <p>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE]
+    [<font color="#0000ff">NONEXTENDED</font>] [EXTENDED]
     </tt>
     </td>
   </tr>
@@ -1614,6 +1738,13 @@ STRING ID <font color="#00ff00">&lt;StringResourceId.n&gt;</font>&nbsp
 </ul>
 
 <font face="Arial,Helvetica">
+<u>Notes:</u> <p>
+<ul>
+<li> 
+If string terminated by 3 '.' PilRC replace it by the char '...'.
+<li> 
+Character '\r' = 0x0D is replaced by '\n' = 0x0A.
+</ul>
 <u>Example:</u>
 <ul>
 </font>
@@ -2029,7 +2160,7 @@ BITMAPFAMILY  ID 9 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENTINDEX 2
 
 <ul>
 <pre>
-TRAP ID <font color="#00ff00">&lt;TrapId.n&gt;</font> VALUE <font color="#00ff00">&lt;TrapNumber.n&gt;</font></pre>
+TRAP ID <font color="#00ff00">&lt;TrapId.n&gt;</font> [VALUE] <font color="#00ff00">&lt;TrapNumber.n&gt;</font></pre>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -2237,7 +2368,7 @@ FntDefineFont(128, font128);</pre>
 <li>
 FONT support in PilRC is not complete, and has been reverse engineered.
 </ul>
-
+<div class="palmInternal">
 <a name="lang_fontindex"></a>
 <b>FONTINDEX (fnti)</b><p>
 </font>
@@ -2248,6 +2379,10 @@ FONTINDEX ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp
 BEGIN
 	<font color="#00ff00">&lt;FontType.s&gt; &lt;ResId.n&gt;</font>
 	...
+	[BEGIN
+		<font color="#00ff00">&lt;FontId.n&gt;</font>
+		...
+	END]
 END
 </pre></ul>
 
@@ -2265,9 +2400,45 @@ BEGIN
 	"NFNT" 9001
 	"NFNT" 9002
 	"NFNT" 9003
+	"fntm" 9004
+	BEGIN
+		10000
+		10001
+		10002
+	END
 END
 </pre></ul>
 
+<a name="lang_fontmap"></a>
+<b>FONTMAP (fntm)</b><p>
+</font>
+
+<ul><pre>
+FONTMAP ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+BEGIN
+	<font color="#00ff00">&lt;Flag.n&gt;&lt;State.n&gt;&lt;Value.n&gt;</font>
+	...
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Notes:</u><p>
+<ul>
+<li>This resource is system reserved.
+</ul>
+
+<u>Example:</u>
+</font>
+<ul><pre>
+FONTMAP ID 1000 LOCALE "enUS"
+BEGIN
+	FLAG 0 STATE 1 VALUE 0
+	FLAG 0 STATE 1 VALUE 0
+	FLAG 0 STATE 1 VALUE 0
+	FLAG 0 STATE 1 VALUE 0
+END
+</pre></ul>
+</div>
 <a name="lang_hex"></a>
 <b>HEX</b><p>
 </font>
@@ -2324,7 +2495,7 @@ DATA "junk" ID 1000 "binary.bin"</pre>
 <ul>
 <pre>
 INTEGER ID <font color="#00ff00">&lt;ResId.n&gt;</font>&nbsp
-[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;VALUE <font color="#00ff00">&lt;Value.n&gt;</font></pre>
+[LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]&nbsp;[VALUE] <font color="#00ff00">&lt;Value.n&gt;</font></pre>
 </ul>
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
@@ -2443,7 +2614,7 @@ BEGIN
 	0x01 0x00 0x00 0x00
 END </pre>
 
-
+<div class="palmInternal">
 <font face="Arial,Helvetica">
 <a name="lang_feature"></a>
 <b>FEATURE (feat)</b><p>
@@ -2731,7 +2902,7 @@ END</pre>
 
 <ul>
 <pre>
-KEYBOARD ID <font color="#00ff00">&lt;ResId.n&gt;</font> 
+KEYBOARD ID <font color="#00ff00">&lt;ResId.n&gt;</font>
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>] VALUE <font color="#00ff00">&lt;Value.n&gt;</font></pre>
 </ul>
 <font face="Arial,Helvetica">
@@ -2740,7 +2911,11 @@ KEYBOARD ID <font color="#00ff00">&lt;ResId.n&gt;</font>
 Supported Value are:<br>
 	if keyboard is for United State then value = 0<br>
 	if keyboard is for French then value = 1<br>
-	if keyboard is for Germany then value = 2
+	if keyboard is for Germany then value = 2<br>
+	if keyboard is for Spain then value = 3<br>
+	if keyboard is for Italy then value = 4<br>
+	if keyboard is for Japanese then value = 5
+
 <li>This resource is system reserved.
 </ul>
 
@@ -2749,7 +2924,7 @@ Supported Value are:<br>
 <ul><pre>
 KEYBOARD ID 1000 VALUE 0
 </pre></ul>
-
+</div>
 <font face="Arial,Helvetica">
 <a name="lang_midi"></a>
 <b>MIDI (MIDI)</b><p>
@@ -2762,8 +2937,8 @@ MIDI ID <font color="#00ff00">&lt;ResId.n&gt; &lt;string.s&gt;</font></pre>
 <font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul><li>
-This does not convert the file to midi resource. The .mid file must be 
-Palm Midi compliant (see palm documentation for more information)
+This does not convert the file to midi resource. The .aif or .mid file must be 
+Palm Midi compliant (see palm documentation for more information).
 </ul>
 
 <u>Example:</u>
@@ -2772,14 +2947,14 @@ Palm Midi compliant (see palm documentation for more information)
 MIDI ID 1000 "trompette.mid"
 </pre></ul>
 
-
+<div class="palmInternal">
 <font face="Arial,Helvetica">
 <a name="lang_Hardsoftbutton"></a>
 <b>HARDSOFTBUTTONDEFAULT (hsbd)</b><p>
 </font>
 
 <ul><pre>
-HARDSOFTBUTTONDEFAULT ID <font color="#00ff00">&lt;ResId.n&gt;</font> 
+HARDSOFTBUTTONDEFAULT ID <font color="#00ff00">&lt;ResId.n&gt;</font>
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
 BEGIN
 	BEGIN
@@ -2832,14 +3007,14 @@ BEGIN
 	END
 
 END</pre>
-
+</div>
 <font face="Arial,Helvetica">
 <a name="lang_SysAppPrefs"></a>
 <b>SYSAPPLICATIONPREFERENCES (pref)</b><p>
 </font>
 
 <ul><pre>
-SYSAPPLICATIONPREFERENCES ID <font color="#00ff00">&lt;ResId.n&gt;</font> 
+SYSAPPLICATIONPREFERENCES ID <font color="#00ff00">&lt;ResId.n&gt;</font>
 [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
 		PRIORITY <font color="#00ff00">&lt;Priority.n&gt;</font>
 		STACKSIZE <font color="#00ff00">&lt;StackSize.n&gt;</font>
@@ -2857,7 +3032,217 @@ SYSAPPLICATIONPREFERENCES ID <font color="#00ff00">&lt;ResId.n&gt;</font>
 </font><pre>
 SYSAPPLICATIONPREFERENCES ID 1000 PRIORITY 30 STACKSIZE 0x1000 MINHEAPSPACE 0x1000
 </pre>
+<div class="palmInternal">
+<font face="Arial,Helvetica">
+<a name="lang_SearchTable"></a>
+<b>SEARCHTABLE (tSCH)</b><p>
+</font>
 
+<ul><pre>
+SEARCHTABLE ID <font color="#00ff00">&lt;ResId.n&gt;</font> [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+BEGIN
+	OFFSET_s0 <font color="#00ff00">&lt;Offset_s0.n&gt;</font>
+	OFFSET_sD <font color="#00ff00">&lt;Offset_sD.n&gt;</font>
+	OFFSET_sK <font color="#00ff00">&lt;Offset_sK.n&gt;</font>
+	OFFSET_sM <font color="#00ff00">&lt;Offset_sM.n&gt;</font>
+	OFFSET_sU <font color="#00ff00">&lt;Offset_sU.n&gt;</font>
+	OFFSET_sP <font color="#00ff00">&lt;Offset_sP.n&gt;</font>
+	OFFSET_sA <font color="#00ff00">&lt;Offset_sA.n&gt;</font>
+	OFFSET_sG <font color="#00ff00">&lt;Offset_sG.n&gt;</font>
+	OFFSET_sR <font color="#00ff00">&lt;Offset_sR.n&gt;</font>
+	BEGIN
+		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		...
+	END
+	BEGIN
+		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		...
+	END
+	BEGIN
+		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		...
+	END
+	BEGIN
+		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		...
+	END
+	BEGIN
+		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		...
+	END
+	BEGIN
+		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		...
+	END
+	BEGIN
+		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		...
+	END
+	BEGIN
+		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		...
+	END
+	BEGIN
+		ACTION <font color="#00ff00">&lt;Action.n&gt;</font> NEXTSTATE <font color="#00ff00">&lt;NextState.n&gt;</font> DATA <font color="#00ff00">&lt;data.n&gt;</font>
+		...
+	END
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Notes:</u><p>
+<ul>
+<li>This resource is system reserved.
+</ul>
+
+<font face="Arial,Helvetica">
+<u>Example:</u>
+</font><pre>
+SEARCHTABLE ID 32001 LOCALE "jpJP" 
+BEGIN
+	OFFSET_s0 18
+	OFFSET_sD 1042
+	OFFSET_sK 2066
+	OFFSET_sM 3090
+	OFFSET_sU 4114
+	OFFSET_sP 5138
+	OFFSET_sA 6162
+	OFFSET_sG 7186
+	OFFSET_sR 8210
+	BEGIN
+		ACTION 17 NEXTSTATE 0 DATA 256
+		ACTION 17 NEXTSTATE 0 DATA 257
+		ACTION 17 NEXTSTATE 0 DATA 258
+		...
+	END
+	...
+END
+</pre>
+
+<font face="Arial,Helvetica">
+<a name="lang_TextTable"></a>
+<b>TEXTTABLE (ttbl)</b><p>
+</font>
+
+<ul><pre>
+TEXTTABLE ID <font color="#00ff00">&lt;ResId.n&gt;</font> [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>] [COMPRESS]
+VERSION <font color="#00ff00">&lt;Version.n&gt;</font>	9 or 10
+TABLETYPE <font color="#00ff00">&lt;TableType.n&gt;</font> 1 .. 17
+FLAG <font color="#00ff00">&lt;Flag.n&gt;</font>
+MIN <font color="#00ff00">&lt;Min.n&gt;</font>
+MAX <font color="#00ff00">&lt;Max.n&gt;</font>
+DEFAULTOUTPUT <font color="#00ff00">&lt;DefaultOutput.n&gt;</font>
+NUMELEMENTBITS <font color="#00ff00">&lt;NumElementBits.n&gt;</font>
+NUMINDEXEDDATALENBITS <font color="#00ff00">&lt;NumIndexedDataLenBits.n&gt;</font>
+NUMRESULTBITS <font color="#00ff00">&lt;NumResultBits.n&gt;</font>
+INDEXDATAOFFSET <font color="#00ff00">&lt;IndexDataOffset.n&gt;</font>
+BEGIN
+	...
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Notes:</u><p>
+<ul>
+<li>This resource is system reserved.
+</ul>
+
+<font face="Arial,Helvetica">
+<u>Example:</u>
+</font><pre>
+TEXTTABLE ID 1000 LOCALE "jpJP" COMPRESS
+VERSION 9
+TABLETYPE 2
+FLAG 3758096384
+MIN 64
+MAX 252
+DEFAULTOUTPUT 1
+NUMELEMENTBITS 8
+NUMINDEXEDDATALENBITS 0
+NUMRESULTBITS 8
+INDEXDATAOFFSET 215
+BEGIN
+	...
+END
+</pre>
+
+<font face="Arial,Helvetica">
+<a name="lang_TableList"></a>
+<b>TABLELIST (ttli)</b><p>
+</font>
+
+<ul><pre>
+TABLELIST ID <font color="#00ff00">&lt;ResId.n&gt;</font> [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+BEGIN
+	TYPE <font color="#00ff00">&lt;ResType.s&gt;</font> ID <font color="#00ff00">&lt;ID.n&gt;</font> INDEX <font color="#00ff00">&lt;Index.n&gt;</font>
+	...
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Notes:</u><p>
+<ul>
+<li>This resource is system reserved.
+</ul>
+
+<font face="Arial,Helvetica">
+<u>Example:</u>
+</font><pre>
+TABLELIST ID 1000
+BEGIN
+	TYPE "ttbl" ID 32034 INDEX 40
+	TYPE "ttbl" ID 32030 INDEX 46
+	TYPE "ttbl" ID 32008 INDEX 47
+	TYPE "ttbl" ID 32027 INDEX 10
+	TYPE "ttbl" ID 32028 INDEX 11
+	TYPE "ttbl" ID 32027 INDEX 12
+	TYPE "ttbl" ID 32029 INDEX 13
+	TYPE "ttbl" ID 32031 INDEX 45
+	TYPE "ttbl" ID 32032 INDEX 43
+	TYPE "ttbl" ID 32033 INDEX 44
+	TYPE "ttbl" ID 32035 INDEX 50
+	TYPE "tSTL" ID 32001 INDEX 16
+	TYPE "csli" ID 32001 INDEX 49
+END
+</pre>
+
+<font face="Arial,Helvetica">
+<a name="lang_CharSetList"></a>
+<b>CHARSETLIST (csli)</b><p>
+</font>
+
+<ul><pre>
+CHARSETLIST ID <font color="#00ff00">&lt;ResId.n&gt;</font> [LOCALE <font color="#00ff00">&lt;LocaleName.s&gt;</font>]
+BAGIN
+	NAME <font color="#00ff00">&lt;Name.s&gt;</font> ID <font color="#00ff00">&lt;ID.n&gt;</font>
+	...
+END
+</pre></ul>
+
+<font face="Arial,Helvetica">
+<u>Notes:</u><p>
+<ul>
+<li>This resource is system reserved.
+</ul>
+
+<font face="Arial,Helvetica">
+<u>Example:</u>
+</font><pre>
+CHARSETLIST ID 1000
+BEGIN
+	NAME "us-ascii" ID 1
+	NAME "ASCII" ID 1
+	NAME "ISO646-US" ID 1
+	NAME "us" ID 1
+	NAME "IBM367" ID 1
+	NAME "cp367" ID 1
+	NAME "csASCII" ID 1
+	NAME "shift_jis" ID 4
+	NAME "shift-jis" ID 4
+	NAME "sjis" ID 4
+END
+</pre>
+</div>
 <BR>
 <font face="Arial,Helvetica">
 <a name="international"></a>

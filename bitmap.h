@@ -53,9 +53,11 @@ extern void DumpBitmap(char *fileName,
                        BOOL multibit,
                        BOOL bootscreen);
 
-extern void SetUserPalette4bpp(int p[][3], int nColors);
+extern void SetUserPalette4bpp(int p[][3],
+                               int nColors);
 extern void SetUserPalette4bppToDefault4bpp();
-extern void SetUserPalette8bpp(int p[][3], int nColors);
+extern void SetUserPalette8bpp(int p[][3],
+                               int nColors);
 extern void SetUserPalette8bppToDefault8bpp();
 
 #endif

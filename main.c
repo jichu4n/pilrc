@@ -40,8 +40,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef PALM_INTERNAL
+#include <io.h>
+#include <direct.h>
+#endif
 #include "pilrc.h"
 #include "restype.h"
+
+#ifndef __GNUC__
+#ifdef HOST_LITTLE_ENDIAN
+#pragma message( "- little endian" )
+#else
+#pragma message( "- big endian" )
+#endif
+#ifdef PALM_INTERNAL
+#pragma message( "- Palm internal version" )
+#else
+#pragma message( "- Standard version" )
+#endif
+#endif
 
 /**
  * Display the usage information for PilRC.
@@ -58,6 +75,11 @@ Usage(void)
      "        -I <path>    Search for bitmap and include files in <path>\n"
      "                     More than one -I <path> options may be given\n"
      "                     The current directory is always searched\n"
+#ifdef PALM_INTERNAL
+     "        -noIFIH      Parse includes files in header files\n"
+#else
+     "        -noIFIH      Ignore includes files in header files\n"
+#endif
      "        -R <resfile> Generate JUMP/PilA .res file\n"
      "        -ro          Generate resource database file instead of .bins\n"
      "        -ts          put POSIX timestamp on .ro file generated\n"
@@ -77,6 +99,10 @@ Usage(void)
      "        -noEllipsis  Disable special handling of \"...\" and ellipsis char\n"
      "        -PalmRez     Generate res with PalmRez option\n"
      "        -LE32        Generate 32 bit little endian (ARM, NT) resources\n"
+#ifdef PALM_INTERNAL
+     "        -AppIcon68K  Force AppIcon resources generation in 68K format\n"
+     "        -amdc <name> Generate resource 'amdc' id=1 with <name>.dll as content\n"
+#endif
      "        -Loc <code>  Compile only res with the attribute LOCALE \"code\"\n"
      "                     code samples: deDE, esES, enUS, frFR, itIT, jpJP\n"
      "        -StripLoc    Don't compile 'non localisable resources'\n"
@@ -108,9 +134,13 @@ main(int cArg,
   int macroValue;
 
   // display the (c) string
-  printf("PilRC v2.9 patch release 2\n");
+#ifdef PALM_INTERNAL
+  printf("PilRC v2.9 patch release 3 - (C)2002 A. Ardiri\n");
+#else
+  printf("PilRC v2.9 patch release 3\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
-  printf("  Copyright 2000-2001 Aaron Ardiri (aaron@ardiri.com)\n");
+  printf("  Copyright 2000-2002 Aaron Ardiri (aaron@ardiri.com)\n");
+#endif
 
   // initialize
   if (cArg < 2)
@@ -127,6 +157,16 @@ main(int cArg,
   vfPrcType = NULL;
   vfStripNoLocRes = fFalse;
   szLocaleP = NULL;
+  szDllNameP = NULL;
+  //  vfIFIH = fFalse;
+#ifdef PALM_INTERNAL
+  vfIFIH = fTrue;                                // RMa Default no Parse include in header file
+#else
+  vfIFIH = fFalse;
+#endif
+  vfLE32 = fFalse;
+  vfAppIcon68K = fFalse;
+  vfAutoAmdc = fFalse;
 
   // process as many command line arguments as possible
   for (i = 1; i < cArg; i++)
@@ -310,6 +350,24 @@ main(int cArg,
       continue;
     }
 
+#ifdef PALM_INTERNAL
+    // AppIcon68K
+    if (FSzEqI(rgszArg[i], "-AppIcon68K"))
+    {
+      vfAppIcon68K = fTrue;
+      continue;
+    }
+
+    if (FSzEqI(rgszArg[i], "-amdc"))
+    {
+      if (i++ == cArg)
+        Usage();
+      szDllNameP = rgszArg[i];
+      vfAutoAmdc = fTrue;
+      continue;
+    }
+#endif
+
     // Output a 'ro' File
     if (FSzEqI(rgszArg[i], "-ro"))
     {
@@ -321,6 +379,18 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-ts"))
     {
       vfPrcTimeStamp = fTrue;
+      continue;
+    }
+    /*
+     * LDu 31-8-2001 : Ignore Include File In Header Files
+     */
+    if (FSzEqI(rgszArg[i], "-noIFIH"))
+    {
+#ifdef PALM_INTERNAL
+      vfIFIH = fFalse;
+#else
+      vfIFIH = fTrue;
+#endif
       continue;
     }
 
@@ -387,6 +457,14 @@ main(int cArg,
     szOutputPath = rgszArg[i++];
   //  else
   //    szOutputPath = ".";
+
+#ifdef PALM_INTERNAL
+  // if output folder not exist create it
+  if ((_access(szOutputPath, 0)) == -1)
+  {
+    _mkdir(szOutputPath);
+  }
+#endif
 
   // last minute check? (extra stuff?)
   if (cArg != i)

@@ -33,7 +33,7 @@ PREFIX   =
 CC       = gcc
 
 # source / outputs
-OBJS 	= pilrc.o lex.o util.o restype.o bitmap.o main.o font.o plex.o makeKbd.o
+OBJS 	= pilrc.o lex.o util.o restype.o bitmap.o main.o font.o plex.o
 EXEC    = pilrc
 
 # compiler flags 

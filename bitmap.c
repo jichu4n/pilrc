@@ -282,14 +282,15 @@ static void BMP_InvalidExtension(char *);
  * @param nColors the number of colors
  */
 void
-SetUserPalette4bpp(int p[][3], int nColors)
+SetUserPalette4bpp(int p[][3],
+                   int nColors)
 {
   int c;
 
   nColors = (nColors > 16) ? 16 : nColors;
 
   // copy colors
-  for (c=0; c<nColors; c++) 
+  for (c = 0; c < nColors; c++)
   {
     UserPalette4bpp[c][0] = p[c][0];
     UserPalette4bpp[c][1] = p[c][1];
@@ -297,7 +298,7 @@ SetUserPalette4bpp(int p[][3], int nColors)
   }
 
   // fill remainder with blacks
-  for (c=nColors; c<16; c++) 
+  for (c = nColors; c < 16; c++)
   {
     UserPalette4bpp[c][0] = 0;
     UserPalette4bpp[c][1] = 0;
@@ -321,14 +322,15 @@ SetUserPalette4bppToDefault4bpp()
  * @param nColors the number of colors
  */
 void
-SetUserPalette8bpp(int p[][3], int nColors)
+SetUserPalette8bpp(int p[][3],
+                   int nColors)
 {
   int c;
 
   nColors = (nColors > 256) ? 256 : nColors;
 
   // copy colors
-  for (c=0; c<nColors; c++) 
+  for (c = 0; c < nColors; c++)
   {
     UserPalette8bpp[c][0] = p[c][0];
     UserPalette8bpp[c][1] = p[c][1];
@@ -336,7 +338,7 @@ SetUserPalette8bpp(int p[][3], int nColors)
   }
 
   // fill remainder with blacks
-  for (c=nColors; c<256; c++) 
+  for (c = nColors; c < 256; c++)
   {
     UserPalette8bpp[c][0] = 0;
     UserPalette8bpp[c][1] = 0;
@@ -2088,8 +2090,8 @@ BMP_CompressBitmap(RCBITMAP * rcbmp,
   memset(bits, 0, msize * sizeof(unsigned char));
 
   // prevent transparency data from being compressed in 16bpp
-  if (directColor) 
-    rcbmp->pbBits += 8;  
+  if (directColor)
+    rcbmp->pbBits += 8;
 
   // do the compression (at least, attempt it)
   for (i = 0; i < rcbmp->cy; i++)
@@ -2117,8 +2119,8 @@ BMP_CompressBitmap(RCBITMAP * rcbmp,
   }
 
   // fix pointer back for 16bpp (we offset it previously)
-  if (directColor) 
-    rcbmp->pbBits -= 8;  
+  if (directColor)
+    rcbmp->pbBits -= 8;
 
   // if we must compress, or if it was worth it, save!
   if (compress == rwForceCompress || size < rcbmp->cbDst)
@@ -2329,8 +2331,13 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
     int dataSize;
     int bootScreenHeaderSize = (vfLE32) ? 8 : 6;
     unsigned short crc;
+    int test;
 
-    fseek(outputFile, currentPosInFile + bootScreenHeaderSize, SEEK_SET);       /* jump after the header */
+    EmitL(0);
+    EmitW(0);
+    if (vfLE32)
+      EmitW(0);
+
     structureSize = CbEmitStruct(rcbmp, szRCBITMAP, NULL, fTrue);       /* write structure tbmp */
     DumpBytes(rcbmp->pbBits, rcbmp->cbDst);      /* write data tbmp */
     PadBoundary();
@@ -2339,7 +2346,11 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
     dataSize = newPosInFile - (currentPosInFile + bootScreenHeaderSize);
     pData = malloc(dataSize);
     fseek(outputFile, currentPosInFile + bootScreenHeaderSize, SEEK_SET);       /* jump after the header */
-    fread(pData, 1, dataSize, outputFile);
+    if ((test = fread(pData, 1, dataSize, outputFile)) != dataSize)
+    {
+      fprintf(stderr, "Read: %lu\n", (unsigned long)test);
+      abort();
+    }
     crc = Crc16CalcBlock(pData, (unsigned short)dataSize, 0);
 
     fseek(outputFile, currentPosInFile, SEEK_SET);      /* jump before the header */
