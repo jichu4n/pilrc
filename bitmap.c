@@ -20,6 +20,7 @@
  * 05-Mar-97  David Dawson     file created
  * 08-Mar-97  Wes Cherry       removed windows dependancies
  * 07-Feb-00  Aaron Ardiri     color bitmap resources integrated
+ * 13-Feb-00  Aaron Ardiri     fixed RGB -> Index for MASK images
  *
  * PilRC is open-source,  that means that as a  developer can take 
  * part in the development of the software. Any modifications (bug
@@ -222,26 +223,33 @@ BMP_RGBToColorIndex(int r,
 {
   int index, lowValue, i, *diffArray;
 
-  // generate the color "differences" for all colors in the palette
-  diffArray = (int *)malloc(256 * sizeof(int));
-  for (i=0; i < 256; i++) {
-    diffArray[i] = ((PalmPalette256[i][0] - r)*(PalmPalette256[i][0] - r)) +
-                   ((PalmPalette256[i][1] - g)*(PalmPalette256[i][1] - g)) +
-                   ((PalmPalette256[i][2] - b)*(PalmPalette256[i][2] - b));
-  }
+  // masking value (black) should be (0,0,0) and index 255
+  if ((r | g | b) == 0) index = 0xff;
 
-  // find the palette index that has the smallest color "difference"
-  index    = 0;
-  lowValue = diffArray[0];
-  for (i=1; i<256; i++) {
-    if (diffArray[i] < lowValue) {
-      lowValue = diffArray[i];
-      index    = i;
+  // a typical "closest" match will do fine
+  else {
+
+    // generate the color "differences" for all colors in the palette
+    diffArray = (int *)malloc(256 * sizeof(int));
+    for (i=0; i < 256; i++) {
+      diffArray[i] = ((PalmPalette256[i][0]-r)*(PalmPalette256[i][0]-r)) +
+                     ((PalmPalette256[i][1]-g)*(PalmPalette256[i][1]-g)) +
+                     ((PalmPalette256[i][2]-b)*(PalmPalette256[i][2]-b));
     }
-  }
 
-  // clean up
-  free(diffArray);
+    // find the palette index that has the smallest color "difference"
+    index    = 0;
+    lowValue = diffArray[0];
+    for (i=1; i<256; i++) {
+      if (diffArray[i] < lowValue) {
+        lowValue = diffArray[i];
+        index    = i;
+      }
+    }
+
+    // clean up
+    free(diffArray);
+  }
 
   return index;
 }
@@ -920,12 +928,15 @@ BMP_CompressBitmap(RCBITMAP *rcbmp,
                    BOOL     colortable)
 {
   unsigned char *bits;
-  int size, i, j, k, flag;
+  int           size, msize, i, j, k, flag;
 
-  // allocate some new memory to perform compression in
-  size = 2 + (colortable? COLOR_TABLE_SIZE : 0);
-  bits = (unsigned char *)
-         malloc(size + ((rcbmp->cbRow + ((rcbmp->cbRow + 7) / 8)) * rcbmp->cy));
+  // determine how much memory is required for compression (hopefully less)
+  size  = 2 + (colortable? COLOR_TABLE_SIZE : 0);
+  msize = size + ((rcbmp->cbRow + ((rcbmp->cbRow + 7) / 8)) * rcbmp->cy);
+
+  // allocat memory and clear
+  bits = (unsigned char *)malloc(msize * sizeof(unsigned char));
+  memset(bits, 0, msize * sizeof(unsigned char));
 
   // do the compression (at least, attempt it)
   for (i=0; i<rcbmp->cy; i++) {
@@ -963,8 +974,8 @@ BMP_CompressBitmap(RCBITMAP *rcbmp,
       bits[COLOR_TABLE_SIZE+1] = (unsigned char)size;
     }
     else {
-      bits[0] = (unsigned char)(size >> 8);
-      bits[1] = (unsigned char)size;
+      bits[0] = (unsigned char)((size & 0xff00) >> 8);
+      bits[1] = (unsigned char) (size & 0x00ff);
     }
 
     // change the data chunk to the newly compressed data
@@ -998,8 +1009,9 @@ BMP_CompressDumpBitmap(RCBITMAP *rcbmp,
   {
     case 1:
          if (((rcbmp->cx != 32) || (rcbmp->cy != 32)) && 
+             ((rcbmp->cx != 32) || (rcbmp->cy != 22)) &&
              ((rcbmp->cx != 22) || (rcbmp->cy != 22))) {
-           ErrorLine("Icon resource not 32x32 or 22x22 (preferred)");
+           ErrorLine("Icon resource not 32x32, 32x22 or 22x22 (preferred)");
          }
          break;
 
@@ -1024,9 +1036,18 @@ BMP_CompressDumpBitmap(RCBITMAP *rcbmp,
     // determine the next depth offset (# dwords)
     rcbmp->nextDepthOffset = 4 + (rcbmp->cbDst >> 2);  // 16 bytes - header
 
-    // round up to the nearest dword and reallocate memory for buffer
-    rcbmp->cbDst  = (rcbmp->nextDepthOffset - 4) << 2;
-    rcbmp->pbBits = (PILRC_BYTE *)realloc(rcbmp->pbBits, rcbmp->cbDst); 
+    // if we need to, round up to the nearest dword and get more memory
+    if ((rcbmp->cbDst % 4) != 0) {
+
+      int i, oldSize = rcbmp->cbDst;
+
+      rcbmp->nextDepthOffset++;
+      rcbmp->cbDst  = (rcbmp->nextDepthOffset - 4) << 2;
+      rcbmp->pbBits = (PILRC_BYTE *)realloc(rcbmp->pbBits, rcbmp->cbDst); 
+
+      // need to clear extra memory that was allocated?
+      for (i=oldSize; i<rcbmp->cbDst; i++) rcbmp->pbBits[i] = 0x00; // clear it
+    }
   }
 
   // dump the bitmap header and data

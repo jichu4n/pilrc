@@ -1,30 +1,50 @@
-/*-----------------------------------------------------------------------------
-| pilrc.c -- a resource compiler for the US Robotics Pilot
-|
-|	Wes Cherry - wesc@ricochet.net
-|	29 Oct 1996
-|
-|	Known bugs:
-|	[fixed] Prevbottom doesn't work if previous item is a LIST
-|	LIST DISABLED doesn't work.  Seems to be a Palm bug.
-|	FIELD: MAXCHARS required for edit to work
-|	
-|
-| See pilrc.htm for documentation
--------------------------------------------------------------WESC------------*/
+/*
+ * @(#)pilrc.c
+ *
+ * Copyright 1997-1999, Wes Cherry   (wesc@technosis.com)
+ * Copyright      2000, Aaron Ardiri (ardiri@palmgear.com)
+ *
+ * This source file was generated as part of the PilRC application
+ * that is  used by developers  of the Palm Computing Platform  to
+ * translate  a resource script (.rcp)  into binary resource files 
+ * required to generate Palm Computing Platform applications. 
+ * 
+ * The source code and  binaries are available free  of charge and 
+ * are to be used on an "as-is" basis. The developers of PilRC are
+ * to provide no warranty, either expressed or  implied due to the 
+ * use of the software. 
+ *
+ * Revisions:
+ * ----------
+ *
+ * 29-Oct-96  Wes Cherry       file created
+ * 12-Feb-00  Darren Chi       tAIS resource support fix
+ *
+ * PilRC is open-source,  that means that as a  developer can take 
+ * part in the development of the software. Any modifications (bug
+ * fixes or improvements) should be sent to the current maintainer
+ * of PilRC.  This will ensure the entire Palm Computing  Platform
+ * development  community can obtain the  latest and greatest from 
+ * PilRC.
+ *
+ * Credits:
+ * --------
+ * 
+ * xxxxxxxxxxxxxx  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <errno.h>
+
 #define EMITRWT	
 #include "pilrc.h"
 #include "bitmap.h"
 #include "font.h"
 
 #define idAutoInit 9999
-
-
 #define idPalmOSReservedMin 10000
 
 /*-----------------------------------------------------------------------------
@@ -73,6 +93,9 @@ int rgidString[iidStringMax];
 #define iidAlertMax 512
 int iidAlertMac;
 int rgidAlert[iidAlertMax];
+#define iidAISMax 128
+int iidAISMac;
+int rgidAIS[iidAISMax];
 
 
 
@@ -1648,10 +1671,13 @@ void FreeRcpfile(RCPFILE *prcpf)
 			FreeFrm((FRM *)PlexGetElementAt(&prcpf->plfrm, ifrm));
 		PlexFree(&prcpf->plfrm);
 		}
-	iidMenuMac = 0;
-	iidAlertMac = 0;
+
+	iidMenuMac   = 0;
+	iidAlertMac  = 0;
 	iidStringMac = 0;
-	idAutoMac = idAutoInit;
+	iidAISMac    = 0;
+	idAutoMac    = idAutoInit;
+
 	FreeFontMem();
 	}
 
@@ -2335,7 +2361,7 @@ void ParseDumpString()
 		{
 		int iid;
 
-		for (iid = 0; iid < iidMenuMac; iid++)
+		for (iid = 0; iid < iidStringMac; iid++)
 			{
 			if (rgidString[iid] == id)
 				{
@@ -2391,16 +2417,16 @@ void ParseDumpCategories()
 		{
 		int iid;
 
-		for (iid = 0; iid < iidMenuMac; iid++)
+		for (iid = 0; iid < iidAISMac; iid++)
 			{
-			if (rgidString[iid] == id)
+			if (rgidAIS[iid] == id)
 				{
 				ErrorLine("Duplicate Categories Resource ID");
 				}
 			}
 		}
-	if (iidStringMac < iidStringMax)
-		rgidString[iidStringMac++] = id;
+	if (iidAISMac < iidAISMax)
+		rgidString[iidAISMac++] = id;
 
 	OpenOutput("tAIS", id);
 
@@ -2500,7 +2526,7 @@ void ParseDumpBitmapFile(int bitmapType)
 
             if ((flag & 0x01) == 0x01)
               DumpBitmap(pchFileName[i], 0, compress, 
-                         rwBitmap+i, colortable, (flag != 0x00));
+                         rwBitmap+i, colortable, ((flag & 0xfe) != 0x00));
             flag = flag >> 1;
             i++;
           }
@@ -2547,7 +2573,7 @@ void ParseDumpIcon(BOOL fSmall, int bitmapType)
 
             if ((flag & 0x01) == 0x01)
               DumpBitmap(pchFileName[i], fSmall ? 2 : 1, rwNoCompress, 
-                         rwBitmap+i, fFalse, (flag != 0x00));
+                         rwBitmap+i, fFalse, ((flag & 0xfe) != 0x00));
             flag = flag >> 1;
             i++;
           }
