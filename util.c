@@ -848,7 +848,8 @@ WriteOutResourceDB(void)
    * to encounter.  
    */
 
-  intstrncpy(head.name, (vfPrcName) ? vfPrcName : szOutResDBFile, 32);
+  intstrncpy(head.name, (vfPrcName) ? vfPrcName : szOutResDBFile, 31);
+  head.name[31] = 0;
   head.attr = 1;                                 /* dmHdrAttrResDB */
   head.version = 1;
 
