@@ -5906,51 +5906,44 @@ OverwriteIncFile( const char *inc_fn, const char *tmp_fn )
 static void
 WriteIncFile(char *szFile)
 {
-	FILE *temp_file;
-	SYM *psym;
-	char *temp_name = MakeFilename("%s.tmp", szFile);
+  FILE *temp_file;
+  SYM *psym;
+  char *temp_name = MakeFilename("%s.tmp", szFile);
 
-	temp_file = fopen(temp_name, "w");
-	if (temp_file == NULL)
-	{
-		Error("Unable to open include file %s for writing: %s", szFile, strerror(errno));
-		return;
-	}
+  temp_file = fopen(temp_name, "w");
+  if (temp_file == NULL)
+    Error("Unable to open include file %s for writing: %s", szFile, strerror(errno));
 
-	fprintf(temp_file, "/* pilrc generated file.  Do not edit!*/\n");
+  fprintf(temp_file, "/* pilrc generated file.  Do not edit!*/\n");
 
-	for (psym = psymFirst; psym != NULL; psym = psym->psymNext)
-	{
-		if (psym->fAutoId)
-		{
-			fprintf(temp_file, "#define %s %d\n", psym->sz, psym->wVal);
-		}
-	}
-	fclose( temp_file );
+  for (psym = psymFirst; psym != NULL; psym = psym->psymNext)
+    if (psym->fAutoId)
+      fprintf(temp_file, "#define %s %d\n", psym->sz, psym->wVal);
 
-	if ( OverwriteIncFile( szFile, temp_name ) )
-	{
-		/* note: CodeWarrior PilRC command line adapter depends on 
-		 * the next phrase's exact wording to detect that an include 
-		 * file was written, so don't remove this message or change 
-		 * it without informing Metrowerks - BLC */
+  fclose(temp_file);
 
-		if ( ! vfQuiet )
-		    printf("writing include file: %s\n", szFile);
-		(void) remove( szFile );
-		if ( rename( temp_name, szFile ) != 0 )
-			Error( "Cannot rename temporary include file %s: %s", szFile, strerror(errno) );
-	}
-	else
-	{
-		if ( ! vfQuiet )
-		{
-			printf( "No changes made to include file: %s\n", szFile );
-		}
-		(void) remove( temp_name );
-	}
+  if (OverwriteIncFile(szFile, temp_name))
+  {
+    /* CodeWarrior PilRC command line adapter depends on the next phrase's
+       exact wording to detect that an include file was written, so don't
+       remove this message or change it without informing Metrowerks - BLC */
 
-	free(temp_name);
+    if (! vfQuiet)
+      printf("writing include file: %s\n", szFile);
+
+    remove(szFile);
+    if (rename(temp_name, szFile) != 0)
+      Error("Cannot rename temporary include file %s: %s", szFile, strerror(errno));
+  }
+  else
+  {
+    if (! vfQuiet)
+      printf("No changes made to include file: %s\n", szFile);
+
+    remove(temp_name);
+  }
+
+  free(temp_name);
 }
 
 
