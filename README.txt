@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
- PilRC version 2.5b8                                          June 23, 2000
+ PilRC version 2.5b9                                          June 28, 2000
 ----------------------------------------------------------------------------
 
   INSTALLATION:
@@ -54,6 +54,11 @@
   can be compiled by typing the following at your command prompt:
 
      make -f Makefile.generic
+
+  PilRCUI can be compiled  by typing the following at your  command prompt
+  when using a system with "gtk" support:
+
+     make -f Makefile.gui
 
   > autoconf + automake installed:
 

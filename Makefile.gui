@@ -1,5 +1,5 @@
 #
-# @(#)configure.in
+# @(#)Makefile.gui
 #
 # Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
 #                2000, Aaron Ardiri (mailto:aaron@ardiri.com)
@@ -26,27 +26,34 @@
 #                 creation
 #     18-Jun-2000 Aaron Ardiri
 #                 GNU GPL documentation additions
+#     26-Jun-2000 Rall Zimmermann
+#                 Modified for building pilrcui
 #
 
-AC_INIT(pilrc.c)
-AM_INIT_AUTOMAKE(pilrc, 2.5b9)
+# compiler commands 
+PREFIX   = 
+CC       = gcc
 
-AC_PROG_CC
-AC_PROG_RANLIB
+# source / outputs
+OBJS 	= pilrc.o lex.o util.o bitmap.o font.o plex.o xwin.o
+EXEC    = pilrcui
 
-AM_PATH_GTK(1.2.0,
-[
-AM_CONDITIONAL(PILRCUI, true)
-],
-[
-AM_CONDITIONAL(PILRCUI, false)
-])
+# compiler flags 
+CCFLAGS = -O2 -Wall `gtk-config --cflags` -DUNIX
 
-# Check for warnings flag if gcc was detected.
-if test "x$ac_cv_prog_gcc" = "xyes"; then
-  CFLAGS="$CFLAGS -Wall"
-fi
+# compile requirements
+$(EXEC): $(OBJS)
+	$(CC) $(OBJS) $(CCFLAGS) `gtk-config --libs` -o $(EXEC)
 
-AC_DEFINE(UNIX)
+# compile rules
+.SUFFIXES: .c .o
 
-AC_OUTPUT(Makefile)
+.c.o:
+	$(CC) -c $(CCFLAGS) $<
+
+# clean-up funtions
+clean:
+	rm -f *.[oa]
+
+distclean: 
+	rm -f *.[oa] $(EXEC)

@@ -26,13 +26,24 @@
  *                 creation
  *     18-Jun-2000 Aaron Ardiri
  *                 GNU GPL documentation additions
+ *     28-Jun-2000 Tom Dyas <tdyas@vger.rutgers.edu>
+ *                 Use GtkItemFactory and not the deprecated GtkMenuFactory.
+ *                 Add some standard headers so malloc()/free() defined.
+ *                 pilrc_reload() return type changed to void since no caller
+ *                   actually checks its return value.
+ *                 VERSION -> PILRCUI_VERSION to avoid automake's VERSION
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 #include <gtk/gtk.h>
-#include <strings.h>
+
 #include "pilrc.h"
 
-#define VERSION "PilrcUI/X 0.12"
+#define PILRCUI_VERSION "PilrcUI/X 0.12"
 
 #define PEN_0 0		/* NULL, width = 0 */
 #define PEN_1 1		/* SOLID, width = 1 */
@@ -47,8 +58,9 @@ void pilrcui_exit (GtkWidget*, gpointer);
 void create_file_selection ();
 void file_selection_ok (GtkWidget *w, GtkFileSelection *fs);
 void destroy_window (GtkWidget *widget, GtkWidget **window);
+void pilrc_reload(char *);
 
-static GtkWidget* pilrcui_menus_init();
+static GtkWidget* pilrcui_menus_init(GtkWidget *);
 static void pilrcui_toggle_autoid (GtkWidget *w, gpointer client_data);
 static void pilrcui_toggle_quiet (GtkWidget *w, gpointer client_data);
 static void pilrcui_about_create (GtkWidget *w, gpointer client_data);
@@ -63,20 +75,20 @@ static GtkWidget *FormArea = NULL;
 static GtkWidget *FormMenu = NULL;
 
 /* Second entry is for an accelerator, don't have them yet */
-
-static GtkMenuEntry MainMenu[] =
+static GtkItemFactoryEntry menu_items[] =
 {
-  { "<PilrcUI>/File/Open", NULL, pilrcui_open, NULL },
-  { "<PilrcUI>/File/Reload", NULL, pilrcui_reload, NULL },
-  { "<PilrcUI>/File/<separator>", NULL, NULL, NULL },
-  { "<PilrcUI>/File/Exit", NULL, pilrcui_exit, NULL },
-  { "<PilrcUI>/Options/Resize", NULL, NULL, NULL },
-  { "<PilrcUI>/Options/<check>No AutoID", NULL, pilrcui_toggle_autoid, NULL },
-  { "<PilrcUI>/Options/<check>Verbose", NULL, pilrcui_toggle_quiet, NULL },
-  { "<PilrcUI>/Help/About", NULL, pilrcui_about_create, NULL }
+  { "/_File",              NULL, NULL,                      0, "<Branch>" },
+  { "/File/_Open",         "<control>O", pilrcui_open,      0, NULL },
+  { "/File/_Reload",       "<control>R", pilrcui_reload,    0, NULL },
+  { "/File/sep1",          NULL,     NULL,                  0, "<Separator>" },
+  { "/File/E_xit",         NULL,     pilrcui_exit,          0, NULL },
+  { "/_Options",           NULL,     NULL,                  0, "<Branch>" },
+  { "/Options/_Resize",    NULL,     NULL,                  0, NULL },
+  { "/Options/No _AutoID", NULL,     pilrcui_toggle_autoid, 0, "<CheckItem>" },
+  { "/Options/_Verbose",   NULL,     pilrcui_toggle_quiet,  0, "<CheckItem>" },
+  { "/_Help",              NULL,     NULL,                  0, "<LastBranch>" },
+  { "/Help/_About",        NULL,     pilrcui_about_create,  0, NULL }
 };
-
-static int NumMainMenu = sizeof (MainMenu) / sizeof (MainMenu[0]);
 
 static int CurrentForm = -1;
 
@@ -639,7 +651,7 @@ void pilrcui_form_select (GtkWidget *w, gpointer ifrm)
   pilrcui_drawform (GTK_DRAWING_AREA (FormArea));
 }
 
-int pilrc_reload (char *fn)
+void pilrc_reload (char *fn)
 {
   char directory[_POSIX_PATH_MAX];
   char cwd[_POSIX_PATH_MAX];
@@ -711,19 +723,22 @@ void pilrcui_exit (GtkWidget *widget, gpointer client_data)
   gtk_exit (0);
 }
 
-static GtkWidget* pilrcui_menus_init()
+static GtkWidget* pilrcui_menus_init(GtkWidget * window)
 {
-  GtkMenuFactory *factory;
-  GtkMenuFactory *subfactory;
+  GtkItemFactory * item_factory;
+  GtkAccelGroup * accel_group;
+  GtkWidget * menubar;
+  int num_menu_items = sizeof(menu_items) / sizeof(menu_items[0]);
 
-  factory = gtk_menu_factory_new (GTK_MENU_FACTORY_MENU_BAR);
+  accel_group = gtk_accel_group_new();
+  item_factory = gtk_item_factory_new(GTK_TYPE_MENU_BAR,
+				      "<main>", accel_group);
 
-  subfactory = gtk_menu_factory_new (GTK_MENU_FACTORY_MENU_BAR);
-  gtk_menu_factory_add_subfactory (factory, subfactory, "<PilrcUI>");
+  gtk_item_factory_create_items(item_factory, num_menu_items, menu_items, 0);
+  gtk_window_add_accel_group(GTK_WINDOW(window), accel_group);
 
-  gtk_menu_factory_add_entries (factory, MainMenu, NumMainMenu);
-
-  return subfactory->widget;
+  menubar = gtk_item_factory_get_widget (item_factory, "<main>");
+  return menubar;
 }
 
 int create_main_window ()
@@ -748,7 +763,7 @@ int create_main_window ()
   gtk_container_add (GTK_CONTAINER (MainWindow), vbox);
   gtk_widget_show (vbox);
 
-  menubar = pilrcui_menus_init();
+  menubar = pilrcui_menus_init(MainWindow);
   gtk_box_pack_start (GTK_BOX (vbox), menubar, TRUE, TRUE, 0);
   gtk_widget_show (menubar);
 
@@ -871,7 +886,7 @@ static void pilrcui_about_create (GtkWidget *w, gpointer client_data)
     style->font = gdk_font_load ("-Adobe-Helvetica-Medium-R-Normal--*-140-*-*-*-*-*-*");
     gtk_widget_push_style (style);
 
-    label = gtk_label_new (VERSION);
+    label = gtk_label_new (PILRCUI_VERSION);
     gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, TRUE, 0);
     gtk_widget_show (label);
 
@@ -926,7 +941,7 @@ static int pilrcui_about_hide (GtkWidget *w, gpointer client_data)
 
 void usage (char *argv0)
 {
-  printf ("%s  by  Brandon Long (blong@fiction.net)\n", VERSION);
+  printf ("%s  by  Brandon Long (blong@fiction.net)\n", PILRCUI_VERSION);
   printf ("\nUsage:\n");
   printf ("%s [-v] <filename>\n", argv0);
   printf ("\t -v        Version/Usage Information\n");

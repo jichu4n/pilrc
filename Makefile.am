@@ -18,22 +18,24 @@ noinst_HEADERS=bitmap.h macres.h plex.h std.h \
 pilrcui_SOURCES=$(COMMON_SOURCES) xwin.c
 pilrcui_LDADD=$(GTK_LIBS)
 
-DOC_FILES=doc/index.htm doc/palmlogo.gif doc/pilrc.gif doc/pilrc.htm \
-	doc/readme.dos doc/readme.os2 doc/readme.x
+DOC_FILES=doc/archive.html doc/contrib.html doc/download.gif \
+	doc/download.html doc/history.html doc/index.html doc/manual.html
 
-EXAMPLE_FILES=example/font.txt example/mkasm.cmd example/pilrcbin.pbm \
-	example/pilrctst.asm example/pilrctst.inc example/runme.bat \
-	example/foo.bat example/pilrc.bmp example/pilrcic.bmp \
-	example/pilrctst.c example/pilrctst.rcp example/runme.cmd \
-	example/mkasm.bat example/pilrcasc.pbm example/pilrcics.bmp \
-	example/pilrctst.h example/readme.txt example/string.txt
+EXAMPLE_FILES=example/images/icon1bpp.bmp example/images/icon2bpp.bmp \
+	example/images/icon8bpp.bmp example/images/info1bpp.bmp \
+	example/images/palm1bpp.bmp example/images/palm2bpp.bmp \
+	example/images/palm8bpp.bmp example/images/smic1bpp.bmp \
+	example/images/smic2bpp.bmp example/images/smic8bpp.bmp \
+	example/5x11.txt example/Makefile example/README.txt example/device.c \
+	example/device.h example/gccfix.c example/gccfix.h example/palm.c \
+	example/palm.h example/pilrctst.def example/pilrctst.prc \
+	example/pilrctst.rcp example/resource.h
 
 PPMQUANT_FILES=ppmquant/palette-02.pbm ppmquant/palette-04.pgm \
 	ppmquant/palette-16.pgm ppmquant/palette-256.ppm
 
 FONTS_FILES=fonts/pilfont.zip
-VSLICK_FILES=vslick/rcp.vlx
-ROOT_FILES=makefile.os2 pilrc.dsp pilrc.mak readme.txt resource.rc
+ROOT_FILES=makefile.os2 pilrc.dsp pilrc.mak README.txt LICENSE.txt resource.rc
 
-EXTRA_DIST=$(DOC_FILES) $(EXAMPLE_FILES) $(FONTS_FILES) $(VSLICK_FILES) \
-	$(ROOT_FILES) $(PPMQUANT_FILES)
+EXTRA_DIST=$(DOC_FILES) $(EXAMPLE_FILES) $(FONTS_FILES) $(ROOT_FILES) \
+	$(PPMQUANT_FILES)

@@ -27,6 +27,13 @@
 #define deviForm                2100
 #define deviFormOkButton        2100
 
+#define tSTLForm                2200
+#define tSTLFormTypeField       2201
+#define tSTLFormList            2202
+#define tSTLFormMetricButton    2203
+#define tSTLFormImperialButton  2204
+#define tSTLFormOkButton        2205
+
 // forms
 
 #define mainForm                3000
@@ -35,7 +42,13 @@
 // menus
 
 #define mainMenu                3100
+#define menuItemtSTL            3101
 #define menuItemAbout           3102
 
 // fonts
 #define font128                 1000
+
+// string tables
+#define stringTableMetric       1000
+#define stringTableImperial     1001
+#define stringTableType         1002

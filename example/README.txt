@@ -1,12 +1,12 @@
 ----------------------------------------------------------------------------
- PilRC demo version 0.1beta                                    June 7, 2000
+ PilRC demo version 0.2                                       June 28, 2000
 ----------------------------------------------------------------------------
 
   BUILDING
   ========
 
-  PilRC demo (version 0.1beta) outlines the basic usage of PilRC with the
-  prc-tools 2.0 and later compiling environment, which is available here:
+  PilRC demo outlines the basic usage of PilRC with the prc-tools 2.0 and 
+  later compiling environment, which is available here:
 
     http://www.palmos.com/dev/tech/tools/gcc/index.html
 
@@ -16,6 +16,12 @@
   author is prohibited.
 
   Thankyou for downloading and using PilRC! 
+
+  CHANGES:
+  ========
+
+  07-Jun-00 Aaron Ardiri         Creation
+  28-Jun-00 Aaron Ardiri         tSTL demonstration added
 
   // az
   aaron@ardiri.com

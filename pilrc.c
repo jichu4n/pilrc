@@ -29,6 +29,8 @@
  *     23-Jun-2000 Mark Garlanger
  *                 Additions to support #ifdef/#ifndef/#else/#endif in 
  *                 both *.rcp files and *.h files. 
+ *     24-Jun-2000 Kurt Spaugh
+ *                 Additions for tSTL resource support
  */
 
 #include <stdio.h>
@@ -2360,6 +2362,66 @@ void ParseDumpVersion()
 	}
 
 /*-----------------------------------------------------------------------------
+|	ParseDumpStringTable
+-------------------------------------------------------------KAS-------------*/
+void ParseDumpStringTable()
+	{
+	int id;
+	int tot = 0;
+	int numStrings = 0;
+	char *buf;
+	char *prefixString;
+
+	buf = malloc(32768);
+	id = WGetId("StringTable ResourceId", fFalse);
+	if (vfCheckDupes)
+		{
+		int iid;
+		for (iid = 0; iid < iidStringMac; iid++)
+			if (rgidString[iid] == id)
+				ErrorLine("Duplicate StringTable Resource ID");
+		}
+	if (iidStringMac < iidStringMax)
+		rgidString[iidStringMac++] = id;
+
+	GetExpectLt(&tok, ltStr, "String Text");
+	prefixString = strdup(tok.lex.szId);
+
+	GetExpectLt(&tok, ltStr, "String Text");
+	strcpy(buf, tok.lex.szId);
+	tot = strlen(tok.lex.szId)+1;
+	numStrings++;
+
+	while (FGetTok(&tok)) 
+		{
+		int l;
+		if (tok.lex.lt != ltStr)
+			{
+			UngetTok();
+			break;
+			}
+
+		l = strlen(tok.lex.szId) + 1;
+		if (tot+l > 32768)
+			ErrorLine("Sum of string lengths must be less than 32768");
+
+		strcpy(buf+tot, tok.lex.szId);
+		tot += l;
+		numStrings++;
+		if (numStrings >= 384)
+			ErrorLine("Number of strings in table must be less than 384");
+		}
+	OpenOutput("tSTL", id);
+	DumpBytes(prefixString, strlen(prefixString)+1);
+	EmitW((unsigned short)numStrings);
+	DumpBytes(buf, tot);
+	CloseOutput();
+
+	free(prefixString);
+	free(buf);
+	}
+
+/*-----------------------------------------------------------------------------
 |	ParseDumpString
 -------------------------------------------------------------WESC------------*/
 void ParseDumpString()
@@ -3367,6 +3429,9 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 		case rwVersion:
 			ParseDumpVersion();
 			break;
+		case rwStringTable:
+			ParseDumpStringTable();
+			break;
 		case rwString:
 			ParseDumpString();
 			break;
@@ -3425,7 +3490,7 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 			else if (tok.lex.lt == ltDoubleSlash)
 				NextLine();
 			else
-				ErrorLine("FORM, MENU, ALERT, VERSION, STRING, CATEGORIES, APPLICATIONICONNAME, APPLICATION, BITMAP, BITMAPGREY, BITMAPGREY16, BITMAPCOLOR, BITMAPFAMILY, ICON, ICONFAMILY, SMALLICON, SMALLICONFAMILY, TRAP, FONT, HEX, DATA or TRANSLATION expected");
+				ErrorLine("FORM, MENU, ALERT, VERSION, STRINGTABLE, STRING, CATEGORIES, APPLICATIONICONNAME, APPLICATION, BITMAP, BITMAPGREY, BITMAPGREY16, BITMAPCOLOR, BITMAPFAMILY, ICON, ICONFAMILY, SMALLICON, SMALLICONFAMILY, TRAP, FONT, HEX, DATA or TRANSLATION expected");
 			}
 		}
 	while (FGetTok(&tok));

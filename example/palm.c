@@ -20,6 +20,7 @@ static Int32 evtTimeOut;
 // interface
 static Boolean mainFormEventHandler(EventType *);
 static Boolean infoFormEventHandler(EventType *);
+static Boolean tSTLFormEventHandler(EventType *);
 
 /**
  * The Form:mainForm event handling routine.
@@ -71,10 +72,14 @@ infoFormEventHandler(EventType *event)
            case infoFormOkButton:
 
                 // send a close event
-                MemSet(event, sizeof(EventType), 0);
-                event->eType = frmCloseEvent;
-                event->data.frmClose.formID = FrmGetActiveFormID();
-                EvtAddEventToQueue(event);
+	        {
+             	  EventType event;
+
+                  MemSet(&event, sizeof(EventType), 0);
+                  event.eType = frmCloseEvent;
+                  event.data.frmClose.formID = FrmGetActiveFormID();
+                  EvtAddEventToQueue(&event);
+                }
 
                 processed = true;
                 break;
@@ -83,6 +88,154 @@ infoFormEventHandler(EventType *event)
                 break;
          }
          break;
+
+    default:
+         break;
+  }
+
+  return processed;
+}
+
+/**
+ * The Form:tSTLForm event handling routine.
+ *
+ * @param event the event to process.
+ * @return true if the event was handled, false otherwise.
+ */
+static Boolean 
+tSTLFormEventHandler(EventType *event)
+{
+  Boolean processed = false;
+
+  switch (event->eType) 
+  {
+    case frmOpenEvent:
+         FrmDrawForm(FrmGetActiveForm());
+         {
+	   FormType  *frm;
+	   FieldType *fldType;
+	   MemHandle memHandle;
+
+	   frm = FrmGetActiveForm();
+
+           fldType = 
+	     (FieldType *)FrmGetObjectPtr(frm,
+	         FrmGetObjectIndex(frm, tSTLFormTypeField));
+           memHandle = MemHandleNew(32);
+	   StrCopy(MemHandleLock(memHandle), ""); MemHandleUnlock(memHandle);
+	   FldSetTextHandle(fldType, memHandle);
+         }
+
+         // simulate the tap of the "imperial button"
+	 {
+	   EventType event;
+
+           MemSet(&event, sizeof(EventType), 0);
+	   event.eType = ctlSelectEvent;
+	   event.data.ctlSelect.controlID = tSTLFormMetricButton;
+	   EvtAddEventToQueue(&event);
+	 }
+         processed = true;
+         break;
+   
+    case ctlSelectEvent:
+
+         switch (event->data.ctlSelect.controlID)
+         {
+           case tSTLFormMetricButton:
+           case tSTLFormImperialButton:
+                {
+                  FormType  *frm;
+		  ListType  *lstTable;
+	          FieldType *fldType;
+                  MemHandle memHandle, memTableHandle, memLists;
+		  MemPtr    ptrStringTable;
+		  UInt16    count, index, tblIndex;
+
+		  frm = FrmGetActiveForm();
+
+                  index    = 
+		    event->data.ctlSelect.controlID - tSTLFormMetricButton;
+                  tblIndex = stringTableMetric + index;
+
+		  memTableHandle = DmGetResource('tSTL', tblIndex);
+                  ptrStringTable = (MemPtr)MemHandleLock(memTableHandle);
+		  count    =  
+  (*((UInt8 *)(ptrStringTable + StrLen((Char *)ptrStringTable) + 1)) << 8) |
+   *((UInt8 *)(ptrStringTable + StrLen((Char *)ptrStringTable) + 2));
+		  memLists = SysFormPointerArrayToStrings(
+                    ptrStringTable + StrLen((Char *)ptrStringTable) + 3, count);
+		  MemHandleUnlock(memTableHandle);
+		  DmReleaseResource(memTableHandle);
+
+		  lstTable = 
+		    (ListType *)FrmGetObjectPtr(frm,
+		      FrmGetObjectIndex(frm, tSTLFormList));
+                  LstSetListChoices(lstTable, MemHandleLock(memLists), count); 
+                  LstDrawList(lstTable);
+
+                  fldType = 
+                    (FieldType *)FrmGetObjectPtr(frm,
+                       FrmGetObjectIndex(frm, tSTLFormTypeField));
+                  memHandle = FldGetTextHandle(fldType);
+                  SysStringByIndex(stringTableType, index, 
+                                   MemHandleLock(memHandle), 32);
+                  FldSetTextHandle(fldType, memHandle);
+		  MemHandleUnlock(memHandle);
+		  FldDrawField(fldType);
+		}
+
+                processed = true;
+                break;
+
+           case tSTLFormOkButton:
+
+                // send a close event
+	        {
+	          EventType event;
+
+                  MemSet(&event, sizeof(EventType), 0);
+                  event.eType = frmCloseEvent;
+                  event.data.frmClose.formID = FrmGetActiveFormID();
+	          EvtAddEventToQueue(&event);
+	        }
+
+                processed = true;
+                break;
+
+           default:
+                break;
+         }
+         break;
+
+    case frmCloseEvent:
+
+         // clean up memory allocations
+	 {
+	   FormType  *frm;
+	   FieldType *fldType;
+           ListType  *lstTable;
+	   MemHandle memHandle;
+
+	   frm = FrmGetActiveForm();
+
+           fldType = 
+	     (FieldType *)FrmGetObjectPtr(frm,
+	         FrmGetObjectIndex(frm, tSTLFormTypeField));
+           memHandle = FldGetTextHandle(fldType);
+	   FldSetTextHandle(fldType, NULL);
+	   MemHandleFree(memHandle);
+
+	   lstTable = 
+             (ListType *)FrmGetObjectPtr(frm,
+		FrmGetObjectIndex(frm, tSTLFormList));
+           if (lstTable->itemsText) {
+	     MemPtrUnlock(lstTable->itemsText);
+	     MemPtrFree(lstTable->itemsText);
+	   }
+	 }
+
+	 break;
 
     default:
          break;
@@ -198,6 +351,13 @@ ApplicationHandleEvent(EventType *event)
                   processed = true;
                   break;
 
+             case tSTLForm:
+                  FrmSetEventHandler(frm, 
+                    (FormEventHandlerPtr)tSTLFormEventHandler);
+
+                  processed = true;
+                  break;
+
              default:
                   break;
            }
@@ -208,6 +368,11 @@ ApplicationHandleEvent(EventType *event)
 
          switch (event->data.menu.itemID) 
          {
+           case menuItemtSTL:
+                ApplicationDisplayDialog(tSTLForm);
+                processed = true;
+                break;
+
            case menuItemAbout:
                 ApplicationDisplayDialog(infoForm);
                 processed = true;
@@ -225,10 +390,14 @@ ApplicationHandleEvent(EventType *event)
            case globalFormAboutButton:
 
                 // regenerate menu event
-                MemSet(event, sizeof(EventType), 0);
-                event->eType            = menuEvent;
-                event->data.menu.itemID = menuItemAbout;
-                EvtAddEventToQueue(event);
+	        {
+	          EventType event;
+
+                  MemSet(&event, sizeof(EventType), 0);
+                  event.eType = menuEvent;
+                  event.data.menu.itemID = menuItemAbout;
+	          EvtAddEventToQueue(&event);
+	        }
 
                 processed = true;
                 break;

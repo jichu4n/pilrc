@@ -35,7 +35,7 @@ BEGIN
   LABEL "PilRC demo" AUTOID AT (8 PrevTop+20) FONT 1
   LABEL "version 0.1beta" AUTOID AT (8 PrevTop+12) FONT 1
 
-  BUTTON "Ok" ID infoFormOkButton AT (CENTER 136 40 AUTO)
+  BUTTON "Ok" ID infoFormOkButton AT (CENTER 138 40 AUTO)
 END
 
 FORM ID deviForm AT (2 2 156 156) MODAL
@@ -55,7 +55,7 @@ BEGIN
   LABEL "PilRC demo" AUTOID AT (8 PrevTop+20) FONT 1
   LABEL "version 0.1beta" AUTOID AT (8 PrevTop+12) FONT 1
 
-  BUTTON "Ok" ID deviFormOkButton AT (CENTER 136 40 AUTO)
+  BUTTON "Ok" ID deviFormOkButton AT (CENTER 138 40 AUTO)
 END
 
 FORM ID mainForm AT (0 0 160 160) NOSAVEBEHIND
@@ -66,17 +66,35 @@ BEGIN
   BUTTON "" ID globalFormAboutButton AT (147 1 12 12) NOFRAME
   FORMBITMAP AT (PrevLeft PrevTop) BITMAP bitmapAbout
 
-  LABEL "PilRC v2.5b5" AUTOID AT (0 PrevBottom+4) FONT 1
+  LABEL "PilRC v2.5b9" AUTOID AT (0 PrevBottom+4) FONT 1
   LABEL "Copyright 1997-1999 Wes Cherry" AUTOID AT (0 PrevBottom) FONT 128
   LABEL "Copyright 2000      Aaron Ardiri" AUTOID AT (0 PrevBottom) FONT 128
 END
 
 MENU ID mainMenu
 BEGIN
+  PULLDOWN "Demo"
+  BEGIN
+    MENUITEM "tSTL resource" menuItemtSTL
+  END
   PULLDOWN "Help"
   BEGIN
     MENUITEM "About" menuItemAbout
   END
+END
+
+FORM ID tSTLForm AT (2 2 156 156) MODAL
+BEGIN
+  TITLE "tSTL demo"
+
+  FIELD ID tSTLFormTypeField AT (16 PrevTop+16 140 AUTO) NONEDITABLE
+  LIST "" ID tSTLFormList AT (CENTER PrevBottom+4 140 AUTO) VISIBLEITEMS 5 USABLE
+  BUTTON "Metric" ID tSTLFormMetricButton AT (CENTER@50 PrevBottom+8 40 AUTO)
+  BUTTON "Imperial" ID tSTLFormImperialButton AT (CENTER@110 PrevTop 40 AUTO)
+
+  LABEL "StringTable Demonstration" AUTOID AT (CENTER PrevBottom+8) FONT 1
+
+  BUTTON "Ok" ID tSTLFormOkButton AT (CENTER 138 40 AUTO)
 END
 
 VERSION "0.1 beta"
@@ -95,6 +113,13 @@ TRANSPARENCY 255 0 0
 
 BITMAPFAMILY bitmapPalm
   "images/palm1bpp.bmp" "images/palm2bpp.bmp" "" "images/palm8bpp.bmp" COMPRESS
+
+STRINGTABLE stringTableMetric   
+  "" "Litres" "Meters" "Celsius"    "Newtons"     "Kilograms"
+STRINGTABLE stringTableImperial 
+  "" "Quarts" "Feet"   "Fahrenheit" "Foot Pounds" "Pounds"
+STRINGTABLE stringTableType 
+  "Units are: " "Metric" "Imperial"
 
 HEX "junk" ID 1000 0x20 32 "Hello World" 0x10 0x50
 

@@ -32,13 +32,13 @@
 <tr>
 <td>
 <font face="Arial,Helvetica">
-<h2>PilRC v2.5b8 / PilRCUI<br>
+<h2>PilRC v2.5b9 / PilRCUI<br>
     User Manual</h2>
 </font>
 <td valign=top align=right>
 <font face="Arial,Helvetica">
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
-  23 June 2000
+  28 June 2000
 </font>
 </tr>
 </table>
@@ -606,6 +606,16 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
+    <a href="#lang_stringtable">STRINGTABLE</a>
+    </font>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    String List Resource
+    </font>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
     <a href="#lang_categories">CATEGORIES</a>
     </font>
     <td valign=center>
@@ -1150,6 +1160,82 @@ STRING ID <font color="#00ff00">&lt;StringResourceId.n&gt;</font> FILE <font col
 STRING ID 100 "This is a very long string that shows escape characters \n" \
               "as well as continued .ss syntax strings"
 STRING ID 101 FILE "string.txt"</pre>
+</ul>
+
+<font face="Arial,Helvetica">
+<a name="lang_stringtable"></a>
+<b>STRINGTABLE (tSTL)</b><p>
+</font>
+
+<ul>
+<pre>
+STRINGTABLE ID <font color="#00ff00">&lt;StringTableResourceId.n&gt;</font> <font color="#00ff00">&lt;PrefixString.ss&gt; &lt;String.ss&gt;</font> ... <font color="#00ff00">&lt;String.ss&gt;</font></pre>
+</ul>
+
+<font face="Arial,Helvetica">
+<u>Notes:</u>
+<ul>
+<li>
+Using the <tt>tSTL</tt> resource: <p>
+
+<b>.. in a LIST</b> <br>
+</font>
+<ul>
+<pre>
+[source.rcp]
+STRINGTABLE stringTableMetric
+  "" "Litres" "Meters" "Celsius"    "Newtons"     "Kilograms"
+
+[source.c]
+MemHandle memHandle, memStringList;
+MemPtr    ptrTable;
+UInt16    count;
+
+memHandle = DmGetResource('tSTL', stringTableMetric);
+ptrTable  = (MemPtr)MemHandleLock(memHandle);
+
+// get the string count &lt;-- "messy"
+count         = 
+  (*((UInt8 *)(ptrTable + StrLen((Char *)ptrTable) + 1)) &lt;&lt; 8) |
+   *((UInt8 *)(ptrTable + StrLen((Char *)ptrTable) + 2));
+
+// get the handle to an array of strings
+memStringList = 
+  SysFormPointerArrayToStrings(ptrTable + StrLen((Char *)ptrTable) + 3, count);
+
+// <b>NOTE:</b> the "prefix" is ignored here
+...
+
+MemHandleUnlock(memHandle);
+DmReleaseResource(memHandle); </pre>
+
+</ul>
+<font face="Arial,Helvetica">
+<b>.. to get a single STRING</b> <br>
+</font>
+<ul>
+
+<pre>
+[source.rcp]
+STRINGTABLE stringTableTypes
+  "Units are:" "Metric" "Imperial"
+
+[source.c]
+Char string[32];
+SysStringByIndex(stringTableTypes, 0, string, 32);</pre>
+</ul>
+<font face="Arial,Helvetica">
+</ul>
+<li>
+a limitation of 384 strings apply<p>
+</ul>
+
+<u>Example:</u>
+<ul>
+</font>
+<pre>
+STRINGTABLE ID 100 "" "One" "Two" "Three" "Four" 
+STRINGTABLE ID 100 "-" "One" "Two" "Three" "Four"</pre>
 </ul>
 
 <font face="Arial,Helvetica">

@@ -618,6 +618,9 @@ typedef enum
 
 	rwVersion,
 	rwString,
+// 2.5b9 additions
+	rwStringTable,
+// end
 	rwFile,
 	rwApplicationIconName,
 	rwApplication,
@@ -792,6 +795,10 @@ RWT rgrwt[] =
 	{"error",        NULL,           rwError},
 
 	{"version",      "tVER",         rwVersion},
+
+// 2.5b9 additions
+	{"stringtable",  "tSTL",         rwStringTable},
+// end
 	{"string",       "tSTR",         rwString},
 	{"file",         "tSTR",         rwFile},
 	{"applicationiconname", NULL,    rwApplicationIconName},
