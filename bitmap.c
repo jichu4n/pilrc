@@ -295,6 +295,16 @@ SetUserPalette4bpp(int p[][3],
 {
   int c;
 
+#ifdef BITMAP_CALL_LOG
+  if (!vfQuiet)
+  {
+    printf("SetUserPalette4bpp(");
+    for (c = 0; c < nColors; c++)
+      printf("%d:%d:%d, ", p[c][0], p[c][1], p[c][2]);
+    printf("%d)\n", nColors);
+  }
+#endif
+
   nColors = (nColors > 16) ? 16 : nColors;
 
   // copy colors
@@ -320,6 +330,11 @@ SetUserPalette4bpp(int p[][3],
 void
 SetUserPalette4bppToDefault4bpp()
 {
+#ifdef BITMAP_CALL_LOG
+  if (!vfQuiet)
+    printf("SetUserPalette4bppToDefault4bpp(): ");
+#endif
+
   SetUserPalette4bpp(PalmPalette4bppColor, 16);
 }
 
@@ -334,6 +349,16 @@ SetUserPalette8bpp(int p[][3],
                    int nColors)
 {
   int c;
+
+#ifdef BITMAP_CALL_LOG
+  if (!vfQuiet)
+  {
+    printf("SetUserPalette8bpp(");
+    for (c = 0; c < nColors; c++)
+      printf("%d:%d:%d, ", p[c][0], p[c][1], p[c][2]);
+    printf("%d)\n", nColors);
+  }
+#endif
 
   nColors = (nColors > 256) ? 256 : nColors;
 
@@ -360,6 +385,11 @@ SetUserPalette8bpp(int p[][3],
 void
 SetUserPalette8bppToDefault8bpp()
 {
+#ifdef BITMAP_CALL_LOG
+  if (!vfQuiet)
+    printf("SetUserPalette8bppToDefault8bpp(): ");
+#endif
+
   SetUserPalette8bpp(PalmPalette8bpp, 256);
 }
 
@@ -1989,7 +2019,6 @@ ReadPNMInt(struct foreign_reader *r)
  * but they probably will return random colors.  But running out of input
  * indicates that the input is corrupted, so this doesn't really matter.  
  */
-int UserPalette8bpp[256][3];
 
 static void
 ReadP1(struct foreign_reader *r,
@@ -2709,6 +2738,60 @@ DumpBitmap(char *fileName,
   long size;
   RCBITMAP rcbmp;
   BOOL directColor;
+
+#if BITMAP_CALL_LOG
+  if (!vfQuiet)
+  {
+    printf("DumpBitmap(\"%s\", ", fileName);
+    if (isIcon)
+      printf ("icon #?, "); //printf("icon #%d, ", isIcon);
+    else
+      printf("not-icon, ");
+    switch (compress)
+    {
+      case 0:			printf("no(0)-compress, ");	break;
+      case rwNoCompress:	printf("no-compress, ");	break;
+      case rwAutoCompress:	printf("compress, ");		break;
+      case rwForceCompress:	printf("force-compress, ");	break;
+      default:
+	printf("compress %d?, ", compress);
+	break;
+    }
+    switch (bitmaptype)
+    {
+      case rwBitmap:		printf("bmp,");		break;
+      case rwBitmapGrey:	printf("bmpGrey,");	break;
+      case rwBitmapGrey16:	printf("bmpGrey16,");	break;
+      case rwBitmapColor16:	printf("bmpColor16,");	break;
+      case rwBitmapColor256:	printf("bmpColor256,");	break;
+      case rwBitmapColor16k:	printf("bmpColor16k,");	break;
+      case rwBitmapColor24k:	printf("bmpColor24k,");	break;
+      case rwBitmapColor32k:	printf("bmpColor32k,");	break;
+      default:
+	printf("bmp %d?,", bitmaptype);
+	break;
+    }
+    printf("\n           %sctbl, ", colortable? "" : "no-");
+    switch (transparencyData[0])
+    {
+      case 0:
+	printf("no-transp, ");
+	break;
+      case rwTransparency:
+	printf("transp %d:%d:%d, ",
+	       transparencyData[1], transparencyData[2], transparencyData[3]);
+	break;
+      case rwTransparencyIndex:
+	printf("transp #%d, ", transparencyData[1]);
+	break;
+      default:
+	printf("transp %d?, ", transparencyData[0]);
+	break;
+    }
+    printf("%smultibit, %sbs, %d)\n",
+	   multibit? "" : "not-", bootScreen? "" : "not-", density);
+  }
+#endif
 
   // is it a direct color bitmap? 
   directColor = ((bitmaptype == rwBitmapColor16k) ||

@@ -1534,9 +1534,7 @@ RCPFILE;
        rwBitmapBpp,
        rwBitmapDensity,
 
-#ifdef PALM_INTERNAL
        rwBootScreenFamily,
-#endif
        rwBitmapPalette,
        rwPalette,
 

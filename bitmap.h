@@ -54,6 +54,10 @@ extern void DumpBitmap(char *fileName,
                        BOOL bootscreen,
                        int density);
 
+/* Note that the palettes set by the following functions are only used
+   when DumpBitmap() is called with a bitmaptype of rwBitmapColor16 or
+   rwBitmapColor256.  */
+
 extern void SetUserPalette4bpp(int p[][3],
                                int nColors);
 extern void SetUserPalette4bppToDefault4bpp();
