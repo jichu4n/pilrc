@@ -86,6 +86,9 @@
  *                 horizonal scroll bars at recommended height.
  *      5-Nov-2002 Ben Combee
  *                 Altered MENU SEPARATOR to allow specifying ID or AUTOID
+ *     22-Mar-2003 Bob Withers
+ *                 Added support for preprocessor directives within MENU,
+ *                 FORM, and ALERT defintions.
  */
 
 #include <stdio.h>
@@ -114,6 +117,9 @@ char *strdup(const char *s);
 #define idDefaultDirection -1
 #define idPalmOSReservedMin 10000
 #define idPalmOSReservedMinWithEditIDs 10008
+
+static void ParseDirectives(RCPFILE * prcpfile);
+
 
 /*-----------------------------------------------------------------------------
 |	 Globals
@@ -2383,7 +2389,7 @@ FreeRcpfile(RCPFILE * prcpf)
 |		Parse the objects (items) in a form
 -------------------------------------------------------------WESC------------*/
 static BOOL
-FParseObjects()
+FParseObjects(RCPFILE * prcpfile)
 {
   RCFORMOBJECT obj;
   RW rwSav;
@@ -2397,6 +2403,10 @@ FParseObjects()
   while (FGetTok(&tok))
   {
     fok = (FormObjectKind) - 1;
+
+    if (ifdefSkipping && tok.lex.lt != ltPound)
+      continue;
+
     // memset(&itm, 0, sizeof(ITM));                // Already done in ParseItm
     switch (rwSav = tok.rw)
     {
@@ -2720,7 +2730,10 @@ FParseObjects()
         break;
 
       default:
-        ErrorLine2("Unknown token:", tok.lex.szId);
+	if (tok.lex.lt == ltPound)
+	  ParseDirectives(prcpfile);
+	else
+	  ErrorLine2("Unknown token:", tok.lex.szId);
         break;
     }
     if (fok != (FormObjectKind) - 1)
@@ -2793,7 +2806,7 @@ FParseForm(RCPFILE * prcpf)
   SETPBAFIELD(vpfrm, form.defaultButton, itm.defaultBtnId);
   SETPBAFIELD(vpfrm, form.menuRscId, itm.menuId);
 
-  f = FParseObjects();
+  f = FParseObjects(prcpf);
   //      if (ifrmMac > ifrmMax)
   //              Error("Too many forms!");
   if (vfCheckDupes)
@@ -2990,7 +3003,7 @@ AssignMenuRects()
 |	FParsePullDown
 -------------------------------------------------------------WESC------------*/
 static BOOL
-FParsePullDown()
+FParsePullDown(RCPFILE * prcpfile)
 {
   RCMENUPULLDOWN mpd;
   RCMENUITEM mi;
@@ -3001,10 +3014,16 @@ FParsePullDown()
   GetExpectRw(rwBegin);
   while (FGetTok(&tok))
   {
+    if (ifdefSkipping && tok.lex.lt != ltPound)
+      continue;
+
     switch (tok.rw)
     {
       default:
-        ErrorLine("END or MENUITEM expected");
+	if (tok.lex.lt == ltPound)
+	  ParseDirectives(prcpfile);
+	else
+	  ErrorLine("END or MENUITEM expected");
         break;
       case rwMenuItem:
         memset(&mi, 0, sizeof(RCMENUITEM));
@@ -3119,7 +3138,7 @@ FParsePullDown()
 |	FParseMenu
 -------------------------------------------------------------WESC------------*/
 static BOOL
-FParseMenu()
+FParseMenu(RCPFILE * prcpfile)
 {
   ITM itm;
 
@@ -3166,7 +3185,7 @@ FParseMenu()
         ErrorLine2("Unknown identifier:", tok.lex.szId);
         break;
       case rwPullDown:
-        FParsePullDown();
+        FParsePullDown(prcpfile);
         break;
       case rwEnd:
         return fTrue;
@@ -3204,7 +3223,7 @@ FreeMenu()
 |	ParseDumpAlert
 -------------------------------------------------------------WESC------------*/
 static void
-ParseDumpAlert()
+ParseDumpAlert(RCPFILE * prcpfile)
 {
   ITM itm;
   RCALERTTEMPLATE at;
@@ -3252,10 +3271,17 @@ ParseDumpAlert()
 
   while (FGetTok(&tok))
   {
+    if (ifdefSkipping && tok.lex.lt != ltPound)
+      continue;
+
     switch (tok.rw)
     {
       default:
-        ErrorLine("END expected");
+	if (tok.lex.lt == ltPound)
+	  ParseDirectives(prcpfile);
+	else
+	  ErrorLine("END expected");
+	break;
       case rwEnd:
         goto WriteAlert;
       case rwTTL:
@@ -5365,7 +5391,6 @@ InitRcpfile(RCPFILE * prcpfile,
 /   original code extract from ParseFile
 /   put in separate function to obtain recursive analyzis thru .rcp files
 -------------------------------------------------------------LDu--------------*/
-static void ParseDirectives(RCPFILE * prcpfile);
 static void
 ParseRcpFile(char *szRcpIn,
              RCPFILE * prcpfile,
@@ -5423,7 +5448,7 @@ ParseRcpFile(char *szRcpIn,
                    (&prcpfile->plfrm, PlexGetCount(&prcpfile->plfrm) - 1));
         break;
       case rwMenu:
-        if (FParseMenu())
+        if (FParseMenu(prcpfile))
         {
           AssignMenuRects();
           DumpMenu();
@@ -5431,7 +5456,7 @@ ParseRcpFile(char *szRcpIn,
         }
         break;
       case rwAlert:
-        ParseDumpAlert();
+        ParseDumpAlert(prcpfile);
         break;
       case rwVersion:
         ParseDumpVersion();
