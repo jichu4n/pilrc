@@ -616,7 +616,14 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
   unsigned short bit[8] = { 128, 64, 32, 16, 8, 4, 2, 1 };
   unsigned int counter = 0;
   FNTFAMDEF * tmpFontFamilyEntries = fontFamilyEntries;
+  const FNTFAMDEF *firstEntry = fontFamilyEntries;
   unsigned int aGlyphBitsOffset = 0;
+
+  FontCharInfoType *singleOW = NULL;
+  unsigned int singleH;
+
+  int badGlyphs[kArraySize];
+  int *badGlyph = &badGlyphs[0];
 
   if (densityCount < 2)
     Error("FontFamily must have 2 fonts with density 72 and 144.");
@@ -727,6 +734,8 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
           if (curChar < 0)
             ErrorX("Unexpected WIDTH token");
           fntOW[fntNo][curChar].width = value;
+          if (singleOW && value * firstEntry->density != singleOW[curChar].width * fontFamilyEntries->density)
+            *badGlyph++ = curChar;
           continue;
         }
 
@@ -736,7 +745,11 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
           {
             width = strlen(s1);
             if (fntOW[fntNo][curChar].width == -1)
+            {
               fntOW[fntNo][curChar].width = width;
+              if (singleOW && width * firstEntry->density != singleOW[curChar].width * fontFamilyEntries->density)
+                *badGlyph++ = curChar;
+            }
           }
           else if (width != (int)strlen(s1))
             ErrorX("Invalid width");
@@ -790,6 +803,9 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
     coltable[curChar + 1] = coltable[curChar] + fntOW[fntNo][curChar].width;
     CloseGlyph(header, &width, &row, &col, autoWidth, autoRectWidth);
     fntH[fntNo] = header[h_fRectHeight];
+    if (singleOW &&
+        fntH[fntNo]*firstEntry->density != singleH*fontFamilyEntries->density)
+      WarningLine("Font heights not in proportion across different densities");
 
     header[h_rowWords] = (col + 15) / 16;
 /*
@@ -872,6 +888,11 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
       DumpBytes(&fntOW[fntNo][header[h_firstChar]],
           (header[h_lastChar] - header[h_firstChar] + 1 + missingChar) * 2);
       EmitW(0xFFFF);
+
+      // detach the single density metrics so they won't be overwritten
+      singleOW = fntOW[fntNo];
+      fntOW[fntNo] = NULL;
+      singleH = fntH[fntNo];
     }
  
     // dump Glyph
@@ -894,6 +915,21 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
     EmitL( 0);
     EmitL(0xF2000000);
   }
+
+  if (badGlyph > badGlyphs)
+  {
+    char msg[2048];
+    int *ip;
+    strcpy(msg, "Glyph widths not in proportion across different densities:");
+    for (ip = badGlyphs; ip < badGlyph; ip++)
+      sprintf(strchr(msg, '\0'), (isprint(*ip))? " '%c'" : " %d", *ip);
+    WarningLine(msg);
+  }
+
+  // Record the single density metrics for future reference
+  free(fntOW[fntNo]);
+  fntOW[fntNo] = singleOW;
+  fntH[fntNo] = singleH;
 }
 
 
@@ -1441,7 +1477,7 @@ DxChar(int ch,
   int dx;
 
   if (ifnt < 0 || ifnt >= 255)
-    ErrorLine("Invalid F	ontID");
+    ErrorLine("Invalid FontID");
   if (!fntOW[ifnt])
     ErrorLine("Font not defined");
   dx = fntOW[ifnt][ch].width;
