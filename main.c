@@ -93,9 +93,9 @@ main(int  cArg,
 	
   // display the (c) string
 #ifdef ARM
-  printf("PilRC ARM v2.7\n");
+  printf("PilRC ARM v2.7a\n");
 #else
-  printf("PilRC 68k v2.7\n");
+  printf("PilRC 68k v2.7a\n");
 #endif
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000-2001 Aaron Ardiri (ardiri@palmgear.com)\n");

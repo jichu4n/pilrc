@@ -169,8 +169,6 @@ void pilrcui_pilot_text (GtkDrawingArea *w, char *s, RCPOINT org, RCRECT *prc,
   int sx;
   int cch;
   int rgdx[256];
-  int eto;
-  GtkWidget *style;
   GdkFont *font;
   GdkGC *gc;
 
@@ -246,10 +244,8 @@ void pilrcui_pilot_text (GtkDrawingArea *w, char *s, RCPOINT org, RCRECT *prc,
 void pilrcui_drawform (GtkDrawingArea *w)
 {
   GtkStateType state;
-  GtkStyle *style;
   PLEXFORMOBJLIST *pplt;
   RCFORM *pform;
-  RCFORMOBJLIST *rglt;
   FRM *pfrm;
   int ilt;
   static GdkGC *pens[5] = {NULL, NULL, NULL, NULL, NULL};
@@ -387,8 +383,11 @@ void pilrcui_drawform (GtkDrawingArea *w)
 	  ctl = *pobj->control;
 	  if (!ctl.attr.usable)
 	    break;
-	  /* ctl.text = (CharPtr) IbOut() + cbLt; */
-	  pchText = pobj->control->text;
+
+// 2.7a additions/modifications
+//	  pchText = pobj->control->text;
+	  pchText = pobj->control->u.text;
+// end
 	  switch (ctl.style)
 	  {
 	    case buttonCtl:
@@ -747,7 +746,6 @@ int create_main_window ()
   GtkWidget *vbox;
   GtkWidget *hbox;
   GtkWidget *other;
-  GtkWidget *menu;
   GtkWidget *menuitem;
   GtkWidget *vbox2;
 
@@ -831,7 +829,6 @@ static void pilrcui_about_create (GtkWidget *w, gpointer client_data)
   GtkWidget *label;
   GtkWidget *alignment;
   gint max_width;
-  gint i;
 
   if (!about_dialog)
   {
