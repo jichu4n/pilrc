@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
- PilRC version 2.9p10                                         August 4, 2002
+ PilRC version 3.0alpha                                         May 12, 2003
 ----------------------------------------------------------------------------
 
   INSTALLATION:
@@ -11,7 +11,7 @@
   resource file. 
 
   Copyright (C) 1997-1999 Wes Cherry
-  Copyright (C) 2000-2002 Aaron Ardiri
+  Copyright (C) 2000-2003 Aaron Ardiri
 
   This program is free software;  you can redistribute it and/or modify it 
   under the terms of the GNU  General  Public  License as published by the 
@@ -42,7 +42,7 @@
   ========
 
   The  source code and  binaries are  available  free of  charge  and  are 
-  Copyrighted 1997-2000 by Wes Cherry and Aaron Ardiri. We'd encourage you
+  Copyrighted 1997-2003 by Wes Cherry and Aaron Ardiri. We'd encourage you
   to send modifications (bug-fixes and/or improvements) of PilRC to  Aaron 
   Ardiri so that they can be integrated into the next release(s). 
 

@@ -3,7 +3,7 @@
  * @(#)main.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2002, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2003, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -147,7 +147,7 @@ main(int cArg,
   int macroValue;
 
   // display the (c) string
-  printf("PilRC v3.0\n");
+  printf("PilRC v3.0alpha\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000-2003 Aaron Ardiri (aaron@ardiri.com)\n");
 
