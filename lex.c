@@ -39,7 +39,6 @@
 
 static int wBaseCur = 10;
 
-static const char *pchLexBuf;
 static const char *pchLex;
 
 static int commentDepth;
@@ -48,15 +47,8 @@ BOOL
 FInitLexer(const char *pch,
            BOOL fMarkErrors)
 {
-  pchLexBuf = pch;
   pchLex = pch;
   return fTrue;
-}
-
-const char *
-PchLexerBuffer(void)
-{
-  return pchLexBuf;
 }
 
 static BOOL
@@ -68,6 +60,13 @@ FSkipWhite(void)
          || *pchLex == '\r')
     pchLex++;
   return (*pchLex != '\000');
+}
+
+const char *
+PchLexerBuffer(void)
+{
+  FSkipWhite();
+  return pchLex;
 }
 
 /***    Allow 12345678LU, for instance (should be only in .h or .hpp?!?) ***/
