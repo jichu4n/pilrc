@@ -86,7 +86,7 @@ CAPTION "About"
 FONT 8, "MS Sans Serif"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,71,66,50,14
-    LTEXT           "PilRCUI v2.5b5",-1,71,16,50,8
+    LTEXT           "PilRCUI v2.5b6",-1,71,16,50,8
     LTEXT           "Copyright 1997-1999 Wes Cherry (wesc@ricochet.net)",-1,
                     10,27,172,8
     LTEXT           "Copyright 2000 Aaron Ardiri (ardiri@palmgear.com)",-1,

@@ -20,6 +20,7 @@
   <a href="index.html"   >About</a>
 - <a href="download.html">Download</a>
 - <a href="history.html" >History</a>
+- <a href="archive.html" >Archive</a>
 - <font color="#ffff00">  Manual </font>
 - <a href="contrib.html" >Contributors</a>
 </tt>
@@ -31,13 +32,13 @@
 <tr>
 <td>
 <font face="Arial,Helvetica">
-<h2>PilRC v2.5b5 / PilRCUI<br>
+<h2>PilRC v2.5b6 / PilRCUI<br>
     User Manual</h2>
 </font>
 <td valign=top align=right>
 <font face="Arial,Helvetica">
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
-  7 June 2000
+  10 June 2000
 </font>
 </tr>
 </table>
@@ -730,7 +731,7 @@ is one or more of: <p>
 <ul>
 <table>
   <tr>
-    <td valign=top width=175>
+    <td valign=top width=180>
     <tt>TITLE</tt>
     <td valign=top>
     <tt>
@@ -738,15 +739,13 @@ is one or more of: <p>
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>BUTTON</tt>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font> 
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">
-      &lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;
-    </font>) <br>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR] 
     [RIGHTANCHOR] <br>
     [<font color="#0000ff">FRAME</font>] [NOFRAME] [BOLDFRAME] 
@@ -754,15 +753,13 @@ is one or more of: <p>
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>PUSHBUTTON</tt>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font> 
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">
-      &lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;
-    </font>)<br>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>)<br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR] 
     [RIGHTANCHOR] <br>
     [FONT <font color="#00ff00">&lt;FontId&gt;</font>] 
@@ -770,15 +767,13 @@ is one or more of: <p>
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>CHECKBOX</tt>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">
-      &lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;
-    </font>) <br>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
     [RIGHTANCHOR] <br>
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] 
@@ -786,45 +781,39 @@ is one or more of: <p>
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>POPUPTRIGGER</tt>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">
-      &lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;
-    </font>) <br>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
     [RIGHTANCHOR] <br>
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>SELECTORTRIGGER</tt>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">
-      &lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;
-    </font>) <br>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
     [RIGHTANCHOR] <br>
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>REPEATBUTTON</tt>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">
-      &lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;
-    </font>) <br>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
     [RIGHTANCHOR] <br>
     [<font color="#0000ff">FRAME</font>] [NOFRAME] [BOLDFRAME]
@@ -832,7 +821,7 @@ is one or more of: <p>
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>LABEL</tt>
     <td valign=top>
     <tt>
@@ -844,15 +833,13 @@ is one or more of: <p>
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>FIELD</tt>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">
-      &lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;
-    </font>) <br>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] 
     [<font color="#0000ff">LEFTALIGN</font>] [RIGHTALIGN] <br>
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
@@ -863,41 +850,36 @@ is one or more of: <p>
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>POPUPLIST</tt>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">
-      &lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;
-    </font>) <br>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] 
     [VISIBLEITEMS <font color="#00ff00">&lt;NumVisItems.n&gt;</font>] <br>
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>LIST</tt>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font>
+    <font color="#00ff00">&lt;Item.s&gt;</font> ...
+    <font color="#00ff00">&lt;Item.s&gt;</font> <br>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">
-      &lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;
-    </font>) <br>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] 
     [VISIBLEITEMS <font color="#00ff00">&lt;NumVisItems.n&gt;</font>] <br>
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>FORMBITMAP</tt>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt;</font>) <br>
     [BITMAP <font color="#00ff00">&lt;BitmapId.n&gt;</font>] 
@@ -905,28 +887,22 @@ is one or more of: <p>
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>GADGET</tt>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">
-      &lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;
-    </font>) <br>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE]
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>TABLE</tt>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">
-      &lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;
-    </font>) <br>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [ROWS <font color="#00ff00">&lt;NumRows.n&gt;</font>] 
     [COLUMNS <font color="#00ff00">&lt;NumCols.n&gt;</font>] <br>
     [COLUMNWIDTHS <font color="#00ff00">&lt;Col1Width.n&gt;</font> ...
@@ -934,15 +910,12 @@ is one or more of: <p>
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
+    <td valign=top>
     <tt>SCROLLBAR</tt>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">
-      &lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;
-    </font>) <br>
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE]
     [VALUE <font color="#00ff00">&lt;Value.n&gt;</font>] 
     [MIN <font color="#00ff00">&lt;MinValue.n&gt;</font>]  <br>
@@ -951,11 +924,10 @@ is one or more of: <p>
     </tt>
   </tr>
   <tr>
-    <td valign=top width=150>
-    <tt>GRAFITISTATEINDICATOR</tt>
+    <td valign=top>
+    <tt>GRAFFITISTATEINDICATOR</tt>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font>
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt;</font>)
     </tt>
   </tr>
@@ -1664,13 +1636,12 @@ For Palm Computing Platform reference information, be sure to also visit the
 following websites: <p>
 
 <ul>
-<li> <a href="http://www.palmos.com/">http://www.palmos.com/</a> <br>
-     <a href="http://www.palm.com/devzone">http://www.palm.com/devzone</a> <br>
+<li> <a href="http://www.palmos.com/" target="_">http://www.palmos.com/</a> <br>
      Provided by Palm Computing. <p>
-<li> <a href="http://www.massena.com/">http://www.massena.com</a> <br>
+<li> <a href="http://www.massena.com/" target="_">http://www.massena.com</a> <br>
      A great source of low level Palm Computing Platform information. <br>
      Provided by David Massena. <p>
-<li> <a href="http://www.roadcoaders.com/">http://www.roadcoaders.com</a> <br>
+<li> <a href="http://www.roadcoaders.com/" target="_">http://www.roadcoaders.com</a> <br>
      Need some examples? This is a great resource to find plenty of source 
      code for applications written on the Palm Computing Platform. <p>
 </ul>

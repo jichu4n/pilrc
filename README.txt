@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
- PilRC version 2.5b5                                           June 7, 2000
+ PilRC version 2.5b6                                          June 10, 2000
 ----------------------------------------------------------------------------
 
   INSTALLATION:
@@ -9,6 +9,23 @@
   one or more binary resource files  that are to be  used when  developing 
   for  the  Palm Computing Platform.  PilRCUI gives you a  preview of your
   resource file. 
+
+  Copyright (C) 1997-1999 Wes Cherry
+  Copyright (C)      2000 Aaron Ardiri
+
+  This program is free software;  you can redistribute it and/or modify it 
+  under the terms of the GNU  General  Public  License as published by the 
+  Free Software Foundation;  either version  2 of the License, or (at your 
+  option) any later version.
+
+  This  program  is  distributed in  the hope that it will be useful,  but 
+  WITHOUT   ANY   WARRANTY;   without   even   the  implied   warranty  of 
+  MERCHANTABILITY  or  FITNESS  FOR A  PARTICULAR  PURPOSE.  See  the  GNU 
+  General Public License for more details.
+
+  You should  have received a copy of the GNU General Public License along 
+  with this program;  if not, write to the Free Software Foundation, Inc., 
+  59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
   You should obtain the latest version of PilRC before compiling it. It is
   available from the following location:
@@ -22,9 +39,9 @@
   ========
 
   The  source code and  binaries are  available  free of  charge  and  are 
-  Copyrighted 1997-2000 by Wes Cherry and Aaron Ardiri.  Any modifications 
-  (bug-fixes and/or improvements) to  PilRC should be sent to Aaron Ardiri
-  so that they can be integrated into the next release(s). 
+  Copyrighted 1997-2000 by Wes Cherry and Aaron Ardiri. We'd encourage you
+  to send modifications (bug-fixes and/or improvements) of PilRC to  Aaron 
+  Ardiri so that they can be integrated into the next release(s). 
 
   > generic "compile"
 

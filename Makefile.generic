@@ -17,7 +17,7 @@ OBJS 	= pilrc.o lex.o util.o bitmap.o main.o font.o plex.o
 EXEC    = pilrc
 
 # compiler flags 
-CCFLAGS = -O2 -Wall -g -DUNIX
+CCFLAGS = -O2 -Wall -DUNIX
 
 # compile requirements
 $(EXEC): $(OBJS)

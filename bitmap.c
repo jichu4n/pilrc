@@ -1019,7 +1019,7 @@ WriteIndexedColorTbmp (RCBITMAP *rcbmp,
 		       struct foreign_reader *reader,
 		       struct rgb *colortable)
 {
-  const int N = 937;
+#define N 937
   struct hash_entry
   {
     struct rgb key;

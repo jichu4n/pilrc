@@ -92,12 +92,12 @@ void ErrorLine2(char *sz, char *sz2)
 	
 	if (sz2 == NULL)
 		sprintf(szErr, 
-                  ((vfVSErrors) ? "%s:(%d): error : %s" : 
+                  ((vfVSErrors) ? "%s(%d): error : %s" : 
                                   "%s:%d: error : %s"),
 		  szInFile, iline, sz);
 	else
 		sprintf(szErr, 
-                  ((vfVSErrors) ? "%s:(%d): error : %s %s" : 
+                  ((vfVSErrors) ? "%s(%d): error : %s %s" : 
                                   "%s:%d: error : %s %s"),
 		  szInFile, iline, sz, sz2);
 	Error(szErr);
