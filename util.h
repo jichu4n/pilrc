@@ -84,6 +84,17 @@ VOID intstrncpy(p_int * dst,
                 const char *src,
                 int n);
 
+/* Returns a pointer (which should be freed by the caller) to memory allocated
+   for a string constructed according to the somewhat printf-style formatted
+   arguments.  The following sequences in szFormat are expanded:
+	%s  inserts the corresponding char* argument;
+	%e  considers the corresponding char* argument to be an extension
+	    to be removed if the output string so far ends thus;
+	/   inserts / or \ as appropriate if the output string so far
+	    doesn't already end in a directory separator.  */
+
+char *MakeFilename(const char *szFormat, ...);
+
 VOID OpenOutput(char *szBase,
                 int id);
 VOID CloseOutput(void);

@@ -181,6 +181,80 @@ WarningLine(const char *szFormat, ...)
 
 
 /*-----------------------------------------------------------------------------
+|	MakeFilename
+|
+|		Construct a filename and return it in newly malloc()ed memory
+-------------------------------------------------------------JOHN------------*/
+char *
+MakeFilename(const char *szFormat, ...)
+{
+  const char *s;
+  char *fname, *fn;
+  va_list args;
+  size_t len = 0;
+
+  va_start(args, szFormat);
+
+  for (s = szFormat; *s; s++)
+    if (*s == '%')
+    {
+      char *arg = va_arg(args, char *);
+      if (*++s == 's')
+        len += strlen(arg);
+    }
+    else
+      len++;
+
+  va_end(args);
+
+  fname = malloc(len + 1);
+  if (fname == NULL)
+    Error("Out of memory");
+
+  va_start(args, szFormat);
+
+  fn = fname;
+  for (s = szFormat; *s; s++)
+    switch (*s)
+    {
+      case '%':
+        switch (*++s)
+        {
+          case 's':
+            strcpy(fn, va_arg(args, char *));
+            fn = strrchr(fn, '\0');
+            break;
+
+          case 'e':
+            {
+              char *ext = va_arg(args, char *);
+              size_t extlen = strlen(ext);
+              *fn = '\0';
+              if (strlen(fname) >= extlen && FSzEqI(fn - extlen, ext))
+                fn -= extlen;
+            }
+            break;
+        }
+        break;
+
+      case '/':
+        if (fn == fname || (fn[-1] != '/' && fn[1] != '\\'))
+          *fn++ = DIRSEPARATOR;
+        break;
+
+      default:
+        *fn++ = *s;
+        break;
+    }
+
+  *fn = '\0';
+
+  va_end(args);
+  return fname;
+}
+
+
+/*-----------------------------------------------------------------------------
 |	EmitB
 |	
 |		Emit a byte to the output
