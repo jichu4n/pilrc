@@ -27,10 +27,7 @@
 #     18-Jun-2000 Aaron Ardiri
 #                 GNU GPL documentation additions
 
-AC_INIT(PilRC,
-  [translit(esyscmd([grep '^Version:' pilrc.spec | sed 's/.*: //']),
-	    esyscmd(echo))])  dnl this translit() strips \n characters
-
+AC_INIT(PilRC, RPM_SPEC_VERSION(pilrc.spec))
 AM_INIT_AUTOMAKE([foreign no-define])
 AC_CONFIG_SRCDIR(../pilrc.c)
 AC_PREREQ(2.50)
