@@ -170,6 +170,8 @@ main(int cArg,
   int fontType;
   int macroValue;
 
+  BOOL vfShowVersion = fFalse;
+
   // initialize
   if (cArg < 2)
     Usage();
@@ -510,9 +512,8 @@ main(int cArg,
 
     if (FSzEqI(rgszArg[i], "--version"))
     {
-        // Don't parse any more options after this one,
-	// and, in particular, don't try to do any work
-        return 0;
+        vfShowVersion = fTrue;
+        continue;
     }
 
     // unknown argument?
@@ -524,6 +525,9 @@ main(int cArg,
   {
     header();
   }
+
+  if (vfShowVersion)
+    return 0;  // Stop prematurely, after showing the header
 
   if ((cArg - i) < 1)
     Usage();
