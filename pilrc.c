@@ -2486,10 +2486,24 @@ void ParseDumpBitmapFile(int bitmapType)
 
 	OpenOutput("Tbmp", id);
         if (bitmapType == rwBitmapFamily) {
-	  DumpBitmap(pchFileName[0], fFalse, compress, rwBitmap, colortable, fTrue);
-	  DumpBitmap(pchFileName[1], fFalse, compress, rwBitmapGrey, colortable, fTrue);
-	  DumpBitmap(pchFileName[2], fFalse, compress, rwBitmapGrey16, colortable, fTrue);
-	  DumpBitmap(pchFileName[3], fFalse, compress, rwBitmapColor, colortable, fFalse);
+
+          int i, flag = 0x00;
+        
+          if (strcmp(pchFileName[0], "") != 0) flag |= 0x01;
+          if (strcmp(pchFileName[1], "") != 0) flag |= 0x02;
+          if (strcmp(pchFileName[2], "") != 0) flag |= 0x04;
+          if (strcmp(pchFileName[3], "") != 0) flag |= 0x08;
+
+          // only process the bitmaps that have been supplied!
+          i=0;
+          while (flag != 0x00) {
+
+            if ((flag & 0x01) == 0x01)
+              DumpBitmap(pchFileName[i], 0, compress, 
+                         rwBitmap+i, colortable, (flag != 0x00));
+            flag = flag >> 1;
+            i++;
+          }
         }
         else {
 	  DumpBitmap(pchFileName[0], fFalse, compress, bitmapType, colortable, fFalse);
@@ -2514,15 +2528,29 @@ void ParseDumpIcon(BOOL fSmall, int bitmapType)
 	OpenOutput("tAIB", fSmall ? 1001 : 1000);
 
 	if (bitmapType == rwBitmapFamily) {
+
+          int i, flag = 0x00;
+
 	  pchFileName[0] = PchGetSz("Icon Filename");
 	  pchFileName[1] = PchGetSz("Icon Filename");
 	  pchFileName[2] = PchGetSz("Icon Filename");
 	  pchFileName[3] = PchGetSz("Icon Filename");
 
-	  DumpBitmap(pchFileName[0], fSmall ? 2 : 1, rwNoCompress, rwBitmap, fFalse, fTrue);
-	  DumpBitmap(pchFileName[1], fSmall ? 2 : 1, rwNoCompress, rwBitmapGrey, fFalse, fTrue);
-	  DumpBitmap(pchFileName[2], fSmall ? 2 : 1, rwNoCompress, rwBitmapGrey16, fFalse, fTrue);
-	  DumpBitmap(pchFileName[3], fSmall ? 2 : 1, rwNoCompress, rwBitmapColor, fFalse, fFalse);
+          if (strcmp(pchFileName[0], "") != 0) flag |= 0x01;
+          if (strcmp(pchFileName[1], "") != 0) flag |= 0x02;
+          if (strcmp(pchFileName[2], "") != 0) flag |= 0x04;
+          if (strcmp(pchFileName[3], "") != 0) flag |= 0x08;
+
+          // only process the bitmaps that have been supplied!
+          i=0;
+          while (flag != 0x00) {
+
+            if ((flag & 0x01) == 0x01)
+              DumpBitmap(pchFileName[i], fSmall ? 2 : 1, rwNoCompress, 
+                         rwBitmap+i, fFalse, (flag != 0x00));
+            flag = flag >> 1;
+            i++;
+          }
 
 	  free(pchFileName[0]);
 	  free(pchFileName[1]);

@@ -2,7 +2,7 @@ OBJS 	= pilrc.o lex.o util.o bitmap.o main.o font.o plex.o
 XOBJS	= pilrc.o lex.o util.o bitmap.o xwin.o font.o plex.o
 
 CC 	= gcc
-CFLAGS 	= -Wall -W -O2 -g -DUNIX
+CFLAGS 	= -Wall -O2 -g -DUNIX
 XINC	= -I/local/include
 XLIBS 	= -L/local/lib -lgtk -lgdk -lglib -lX11 -lm
 
