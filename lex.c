@@ -39,34 +39,20 @@
 
 static int wBaseCur = 10;
 
-static char *pchLexBuf;
-static char *pchLexPrev;
-static char *pchLex;
+static const char *pchLexBuf;
+static const char *pchLexPrev;
+static const char *pchLex;
 
 static int commentDepth;
 
 BOOL
-FInitLexer(char *pch,
+FInitLexer(const char *pch,
            BOOL fMarkErrors)
 {
   pchLexBuf = pch;
   pchLex = pch;
   pchLexPrev = pch;
   return fTrue;
-}
-
-#if 0
-static char *
-PchLexer(void)
-{
-  return pchLex;
-}
-#endif
-
-char *
-PchLexerPrev(void)
-{
-  return pchLexPrev;
 }
 
 static BOOL
@@ -486,7 +472,7 @@ FGetLex(LEX * plex,
         {
           int n, tmp;
 
-          n = (*pfnChkCode) ((unsigned char *)pchLex, &tmp);
+          n = (*pfnChkCode) ((const unsigned char *)pchLex, &tmp);
           if (n >= 1)
           {
             while (n-- > 0)

@@ -100,10 +100,8 @@ LEX;
 /*
  * Lex function prototypes 
  */
-BOOL FInitLexer(char *pch,
+BOOL FInitLexer(const char *pch,
                 BOOL fReportErrors);
-char *PchLexer(void);
-char *PchLexerPrev(void);
 BOOL FGetLex(LEX * plex,
              BOOL fInComment);
 VOID PrintLex(LEX * plex);
