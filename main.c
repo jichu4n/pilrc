@@ -51,6 +51,8 @@ Usage(void)
         "        -R <resfile> Generate JUMP/PilA .res file\n"
         "        -H <incfile> Autoassign IDs and write .h file with #defines\n"
         "        -F5          Use Big5 Chinese font widths\n"
+        "        -Fkt         Use Korean font widths (hantip font)\n"
+        "        -Fkm         Use Korean font widths (hanme font)\n"
         "        -Fg          Use GB Chinese font widths\n"
         "        -Fj          Use Japense font widths\n"
         "        -Fh          Use Hebrew font widths\n"
@@ -80,7 +82,7 @@ main(int  cArg,
   int  fontType;
 	
   // display the (c) string
-  printf("PilRC v2.5b1\n");
+  printf("PilRC v2.5b3\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000      Aaron Ardiri (ardiri@palmgear.com)\n");
 
@@ -161,6 +163,18 @@ main(int  cArg,
     // font chinese GB
     if (FSzEqI(rgszArg[i], "-Fg")) {
       fontType = fontChineseGB;
+      continue;
+    }
+
+    // font korean (jmjeong@oopsla.snu.ac.kr)
+    if (FSzEqI(rgszArg[i], "-Fkm")) {
+      fontType = fontKoreanHanme;
+      continue;
+    }
+
+    // font korean (jmjeong@oopsla.snu.ac.kr)
+    if (FSzEqI(rgszArg[i], "-Fkt")) {
+      fontType = fontKoreanHantip;
       continue;
     }
 			

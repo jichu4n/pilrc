@@ -1,0 +1,125 @@
+What's new in 2.5b3 (Wed, 13 Apr 2000)
+-------------------
+o TRANSPARENTINDEX added to ICON and BITMAP configuration
+o RGB -> System Palette(s) implemented 
+  - no more inverted 1bpp bitmaps (outputed from xv etc)
+o COLORTABLE support added for ICONS
+o Warning messages now in GNU format (for parsing by IDE's)
+o ICONGREY, ICONGREY16, ICONCOLOR items removed
+o ICONFAMILY requires that 1bpp bitmap exists
+  - application launcher must have AT LEAST 1bpp bitmaps
+
+What's new in 2.5b2 (Mon, 11 Apr 2000)
+-------------------
+o PBM, PPM, PGM image support (1bpp, 2bpp, 4bpp and color)
+  - "ppmquant" palette files added to match PalmOS palettes
+o NOSAVEBEHIND (forms) option now working correctly :P
+o ICONFAMILY, BITMAPFAMILY bug fix
+o BITMAP transparency support added
+o .BMP color table entries can be VARIABLE (not 1, 16 or 256)
+o Japanese Language "shift jis" handling bugfix
+o Korean Language support
+o Error messages now in GNU format (for parsing by IDE's)
+o Bugfixes
+
+What's new in 2.5b1 (Tue, 8 Feb 2000)
+-------------------
+o ICONFAMILY, BITMAPFAMILY fixes (optional bitmap depths)
+
+What's new in 2.5a
+------------------
+o ParseDumpString bug fix
+
+What's new in 2.5
+-----------------
+* MAINTENANCE of PilRC passed onto Aaron Ardiri (ardiri@palmgear.com)
+* http://www.hig.se/~ardiri/development/palmIII/pilrc/index.html
+o COLOR support!
+o *GREY, *GREY16 and *FAMILY resources added for Bitmap/Icon resources
+
+
+What's new in 2.4
+-----------------
+o Category support
+o default button in alerts
+o Longer lists allowed.
+
+What's new in 2.3a
+------------------
+o Compilation fix for *nix users
+
+What's new in 2.3
+-----------------
+o Parens supported in expressions
+o Font resources
+o No limit on the number of forms.
+o Comments anywhere in the .rcp file
+o C style /* */ comments.
+o Support for Hebrew, Japense and Chinese fonts. (-Fh, -Fj and -F5 and -Fg)
+o Support for 'XXXX' hex constants
+o Support for -rtl flag and | operator (for BiDi Hebrew)
+o Support for Bold12 fonts
+o FILE keyword for STRING 
+o Menu width calculation fixes
+
+What's new in 2.2
+-----------------
+o Support for Small Icons (finally!)
+o Changed system ID conflict error to warning.
+
+What's new in 2.0a
+------------------
+o SCROLLBAR removed for FIELDS -- it broke normal SCROLLBAR controls
+
+What's new in 2.0
+-----------------
+o Support for greyscale bitmaps (BITMAPGREY). 
+  For a 2bpp Win* drawing routines, check out ScumbySoft's Win2 2bpp library.
+o AUTOSHIFT, NUMERIC, SCROLLBAR now supported for FIELDs 
+o CENTER@ allows you to specify x or y coordinate to center contr
+o RIGHT@ and BOTTOM@ specifies left/top coordinate.
+o Bug fixes with AUTO, FONT 6.
+
+What's new in 1.9
+-----------------
+o ID id.n for controls may be replaced by AUTOID. 
+  PilRC will autoassign ids when AUTOID is specified. 
+o PilRCUI now works with XWindows (xwin.c). main() moved to main.c 
+o OS/2 makefile included (makefile.os2). 
+o Support for TRAP resources for writing HackMaster system extensions.
+
+What's new in 1.8
+-----------------
+o Fixed some bad bugs in scrollbar generation
+o Fixed bug in duplicate control detection code.
+
+What's new in 1.7
+-----------------
+o Incorporated code to read PBM, PBITM, and XBM bitmaps.
+o Bitmap compression may be specified (COMPRESS, AUTOCOMPRESS, NOCOMPRESS).
+o Automatic ID assignment (-H command line option)
+o Support for new PalmOS 2.0 scrollbar control
+
+What's new in 1.6
+-----------------
+o Fixed bug that prevented it from working on non Intel platforms 
+
+What's new in 1.5
+-----------------
+o Now checks for duplicate form, menu, string, alert and form object ids
+o Also checks for invalid ids (not in 0..9999)
+
+What's new in 1.4
+-----------------
+o New -R command line argument: emits .res files 
+o New -q command line argument: Quiet mode -- less noisy output
+o Sample .c file now builds and loads correctly on Pilots
+
+What's new in 1.3
+-----------------
+o Support for .java include files
+o New BITMAP and ICON commands convert Windows .BMP files to pilot bitmaps
+o Sample .rcp file, .c and .asm files with examples for each control type
+o New -I command line argument to specify include search paths
+o Updated user manual
+o Bug fixes 

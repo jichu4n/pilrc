@@ -18,5 +18,7 @@ int GetFontType();
 #define fontJapanese 2	
 #define fontChineseBig5 3
 #define fontChineseGB 4
+#define fontKoreanHanme 5
+#define fontKoreanHantip 6
 
 #endif /*__FONT_H__ */

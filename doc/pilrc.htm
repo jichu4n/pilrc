@@ -9,13 +9,13 @@
 &nbsp;
 <table BORDER=0 WIDTH="100%" >
 <tr>
-<td><b><font face="Verdana"><font size=+2>PilRC / PilRCUI v2.5b1</font></font></b>
+<td><b><font face="Verdana"><font size=+2>PilRC / PilRCUI v2.5b3</font></font></b>
 <br><b><font face="Verdana"><font size=+2>User Manual</font></font></b></td>
 
 <td>
 <div align=right><a href="mailto:ardiri@palmgear.com">Aaron Ardiri</a>
 (ardiri@palmgear.com)&nbsp;
-<br>7 Feb 2000&nbsp;</div>
+<br>13 Apr 2000&nbsp;</div>
 </td>
 </tr>
 </table>
@@ -28,15 +28,16 @@ Home Page</a> for the latest version.</font></font>
 <tr>
 <td VALIGN=TOP><font face="Verdana">PilRC</font></td>
 
-<td>A resource compiler for the US Robotics Pilot</td>
+<td>A resource compiler for the Palm Computing Platform</td>
 </tr>
 
 <tr>
 <td VALIGN=TOP><font face="Verdana">PilRCUI</font></td>
 
 <td>A form previewer. It launches a window which previews a close approximation
-of forms as they would appear on the Pilot. Clicking in the content window
-of PilRCUI will cause it to reload the current script.&nbsp;</td>
+of forms as they would appear on the Palm. Clicking in the content window
+of PilRCUI will cause it to reload the current script.&nbsp;<br>
+<i><b>NOT UPDATED:</b> - any GUI programmers want to help?</i></td>
 </tr>
 </table>
 </blockquote>
@@ -135,6 +136,20 @@ considered errors.</td>
 
 <td VALIGN=TOP>Use Chinese (GB) font widhts for AUTO width calcuations.
 (NOT IMPLEMENTED!)</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP NOWRAP WIDTH="30%"><font face="Verdana">-Fkm</font></td>
+
+<td VALIGN=TOP>Use Korean font widhts for AUTO width calcuations.
+(Hanme font)</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP NOWRAP WIDTH="30%"><font face="Verdana">-Fkt</font></td>
+
+<td VALIGN=TOP>Use Korean font widhts for AUTO width calcuations.
+(Hantip font)</td>
 </tr>
 
 <tr>
@@ -403,9 +418,6 @@ Reference</font></font></b></h3>
 
 <tr>
 <td><font face="Verdana"><a href="#Icon">ICON,</a></font>
-<br><font face="Verdana"><a href="#Icon">ICONGREY,</a></font>
-<br><font face="Verdana"><a href="#Icon">ICONGREY16,</a></font>
-<br><font face="Verdana"><a href="#Icon">ICONCOLOR,</a></font>
 <br><font face="Verdana"><a href="#Icon">ICONFAMILY</a></font></td>
 
 <td>Icon bitmap</td>
@@ -413,9 +425,6 @@ Reference</font></font></b></h3>
 
 <tr>
 <td><font face="Verdana"><a href="#SmallIcon">SMALLICON,</a></font>
-<br><font face="Verdana"><a href="#SmallIcon">SMALLICONGREY,&nbsp;</a></font>
-<br><font face="Verdana"><a href="#SmallIcon">SMALLICONGREY16,&nbsp;</a></font>
-<br><font face="Verdana"><a href="#SmallIcon">SMALLICONCOLOR,</a></font>
 <br><font face="Verdana"><a href="#SmallIcon">SMALLICONFAMILY</a></font></td>
 
 <td>Small Icon bitmap</td>
@@ -803,68 +812,62 @@ Example
 <pre>APPLICATION ID 1 "ALHK"</pre>
 </blockquote>
 <a NAME="Icon"></a><font face="Verdana"><font size=+1>ICON (tAIB)</font></font>
-<blockquote>Converts a Microsoft Windows style 32x32 (recommended) or 22x22
-(may not be centered in app launcher) monochrome bitmap to tAIB Pilot icon
-resources with ID 1000.</blockquote>
+<blockquote>Converts a Microsoft Windows style 32x32, 32x22 or 22x22
+(may not be centered in app launcher depending on size) monochrome, greyscale 
+or color bitmap to tAIB Pilot icon resources with ID 1000.</blockquote>
 
 <blockquote>
 <pre>ICON <font color="#008000">&lt;IconFileName.s></font></pre>
 Support for black and white, 4 and 16 color greyscale and 256 color (all
 Palm Computing Platform OS 3.5 compliant) has been added in version 2.5
-of PilRC. Multibit icons also available using the FAMILY tags. Compression
-is not available for icons. Icon colortables may be generated for color
-icons however it is not recommended (as it slows down system performance)
-- there is a simple algorithm implemented that will attempt to match your
-bitmap to the default system palette.
-<pre>ICONGREY&nbsp;&nbsp; <font color="#008000">&lt;BitmapFileName.s>
-</font>ICONGREY16 <font color="#008000">&lt;BitmapFileName.s>
-</font>ICONCOLOR&nbsp; <font color="#008000">&lt;BitmapFileName.s> </font>[<font color="#0000FF">NOCOLORTABLE</font>] [COLORTABLE]
-ICONFAMILY <font color="#008000">&lt;BitmapFileName.s> * 4 </font>[<font color="#0000FF">NOCOLORTABLE</font>] [COLORTABLE]</pre>
+of PilRC, but can only be used with multibit icons (as of 2.5b3). Multibit 
+icons are available using the FAMILY tags. Compression is not available for 
+icons. Icon colortables may be generated for color icons however it is not 
+recommended (as it slows down system performance) - there is a simple 
+algorithm implemented that will attempt to match your bitmap to the 
+default system palette. Transparency support added with 2.5b2 - 
+supply the RGB tuple of the color that represents the transparent color. 
+<pre>ICONFAMILY <font color="#008000">&lt;BitmapFileName.s&gt; * 4 </font>[<font color="#0000FF">NOCOLORTABLE</font>] [COLORTABLE] [TRANSPARENT r g b] [TRANSPARENTINDEX index]</pre>
 </blockquote>
 Example
 <blockquote>
 <pre>ICON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "myicon.bmp"
-ICONGREY&nbsp;&nbsp; "myicon2bppgrey.bmp"
-ICONGREY16 "myicon4bppgrey.bmp"
-ICONCOLOR&nbsp; "myicon256color.bmp" COLORTABLE
-ICONFAMILY "myicon.bmp" "myicon2bppgrey.bmp" "myicon4bppgrey.bmp" "myicon256color.bmp"</pre>
+ICONFAMILY "myicon.bmp" "myicon2bppgrey.bmp" "myicon4bppgrey.bmp" "myicon256color.bmp"
+ICONFAMILY "myicon.bmp" "" "" "myicon256color.bmp" TRANSPARENTINDEX 255</pre>
 </blockquote>
 <a NAME="SmallIcon"></a><font face="Verdana"><font size=+1>SMALLICON (tAIB)</font></font>
-<blockquote>Converts a Microsoft Windows style 15x9 monochrome bitmap to
-tAIB Pilot icon resources with ID 1001.</blockquote>
+<blockquote>Converts a Microsoft Windows style 15x9 monochrome, greyscale 
+or color bitmap to tAIB Pilot icon resources with ID 1001.</blockquote>
 
 <blockquote>
 <pre>SMALLICON <font color="#008000">&lt;IconFileName.s></font></pre>
 Support for black and white, 4 and 16 color greyscale and 256 color (all
 Palm Computing Platform OS 3.5 compliant) has been added in version 2.5
-of PilRC. Multibit icons also available using the FAMILY tags. Compression
-is not available for icons. Icon colortables may be generated for color
-icons however it is not recommended (as it slows down system performance)
-- there is a simple algorithm implemented that will attempt to match your
-bitmap to the default system palette.
-<pre>SMALLICONGREY&nbsp;&nbsp; <font color="#008000">&lt;BitmapFileName.s>
-</font>SMALLICONGREY16 <font color="#008000">&lt;BitmapFileName.s>
-</font>SMALLICONCOLOR&nbsp; <font color="#008000">&lt;BitmapFileName.s> </font>[<font color="#0000FF">NOCOLORTABLE</font>] [COLORTABLE]
-SMALLICONFAMILY <font color="#008000">&lt;BitmapFileName.s> * 4 </font>[<font color="#0000FF">NOCOLORTABLE</font>] [COLORTABLE]</pre>
+of PilRC but can only be used in multibit icons (as of 2.5b3). Multibit 
+icons are available using the FAMILY tags. Compression is not available 
+for icons. Icon colortables may be generated for color icons however it 
+is not recommended (as it slows down system performance) - there is a simple 
+algorithm implemented that will attempt to match your bitmap to the 
+default system palette. Transparency support added with 2.5b2 - supply the 
+RGB tuple of the color that represents the transparent color. 
+<pre>SMALLICONFAMILY <font color="#008000">&lt;BitmapFileName.s&gt; * 4 </font>[<font color="#0000FF">NOCOLORTABLE</font>] [COLORTABLE] [TRANSPARENT r g b] [TRANSPARENTINDEX index]</pre>
 </blockquote>
 Example
 <blockquote>
 <pre>SMALLICON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; "myicon.bmp"
-SMALLICONGREY&nbsp;&nbsp; "myicon2bppgrey.bmp"
-SMALLICONGREY16 "myicon4bppgrey.bmp"
-SMALLICONCOLOR&nbsp; "myicon256color.bmp" COLORTABLE
-SMALLICONFAMILY "myicon.bmp" "myicon2bppgrey.bmp" "myicon4bppgrey.bmp" "myicon256color.bmp"</pre>
+SMALLICONFAMILY "myicon.bmp" "myicon2bppgrey.bmp" "myicon4bppgrey.bmp" "myicon256color.bmp"
+SMALLICONFAMILY "myicon.bmp" "" "" "myicon256color.bmp" TRANSPARENTINDEX 255</pre>
 </blockquote>
 <a NAME="Bitmap"></a><font face="Verdana"><font size=+1>BITMAP (Tbmp)</font></font>
 <blockquote>Converts The following monochrome bitmap formats to TBmp Pilot
 bitmap resources.
-<p>BMP, PBITM, XBM, PBM
+<pre>BMP, PBITM, XBM, PBM</pre>
 <p>Compression may be specified via COMPRESS or FORCECOMPRESS. COMPRESS
 will compress only if it results in a resource that is smaller than an
 uncompressed bitmap. FORCECOMPRESS compresses unconditionally.</blockquote>
 
 <blockquote>
-<pre>BITMAP ID &lt;BitmapResourceId.n> <font color="#008000">&lt;BitmapFileName.s></font> [<font color="#0000FF">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]</pre>
+<pre>BITMAP ID &lt;BitmapResourceId.n> <font color="#008000">&lt;BitmapFileName.s></font> [<font color="#0000FF">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS] [TRANSPARENT r g b] [TRANSPARENTINDEX index]</pre>
 Support for black and white, 4 and 16 color greyscale and 256 color (all
 Palm Computing Platform OS 3.5 compliant) has been added in version 2.5
 of PilRC. Multibit bitmaps also available using the FAMILY tags. Compression
@@ -872,11 +875,12 @@ may give unpredictable results with non black and white bitmaps - however,
 testing shows no problem. Bitmap colortables may be generated for color
 bitmaps however it is not recommended (as it slows down system performance)
 - there is a simple algorithm implemented that will attempt to match your
-bitmap to the default system palette.
-<pre>BITMAPGREY&nbsp;&nbsp; ID &lt;BitmapResourceId.n> <font color="#008000">&lt;BitmapFileName.s>
-</font>BITMAPGREY16 ID &lt;BitmapResourceId.n> <font color="#008000">&lt;BitmapFileName.s>
-</font>BITMAPCOLOR&nbsp; ID &lt;BitmapResourceId.n> <font color="#008000">&lt;BitmapFileName.s> </font>[<font color="#0000FF">NOCOLORTABLE</font>] [COLORTABLE]
-BITMAPFAMILY ID &lt;BitmapResourceId.n> <font color="#008000">&lt;BitmapFileName.s> * 4 </font>[<font color="#0000FF">NOCOLORTABLE</font>] [COLORTABLE]</pre>
+bitmap to the default system palette. Transparency support added with 2.5b2 - 
+supply the RGB tuple of the color that represents the transparent color. 
+<pre>BITMAPGREY&nbsp;&nbsp; ID &lt;BitmapResourceId.n&gt; <font color="#008000">&lt;BitmapFileName.s&gt;
+</font>BITMAPGREY16 ID &lt;BitmapResourceId.n&gt; <font color="#008000">&lt;BitmapFileName.s&gt;
+</font>BITMAPCOLOR&nbsp; ID &lt;BitmapResourceId.n&gt; <font color="#008000">&lt;BitmapFileName.s&gt; </font>[<font color="#0000FF">NOCOLORTABLE</font>] [COLORTABLE] [TRANSPARENT r g b] 
+BITMAPFAMILY ID &lt;BitmapResourceId.n&gt; <font color="#008000">&lt;BitmapFileName.s&gt; * 4 </font>[<font color="#0000FF">NOCOLORTABLE</font>] [COLORTABLE] [TRANSPARENT r g b] [TRANSPARENTINDEX index]</pre>
 </blockquote>
 Examples:
 <blockquote>
@@ -884,13 +888,16 @@ Examples:
 BITMAPGREY&nbsp;&nbsp; ID 101 "mybitmap2bppgrey.bmp" COMPRESS
 BITMAPGREY16 ID 102 "mybitmap4bppgrey.bmp" COMPRESS
 BITMAPCOLOR&nbsp; ID 103 "mybitmap256color.bmp" COMPRESS COLORTABLE
-BITMAPFAMILY ID 104 "mybitmap.bmp" "mybitmap2bppgrey.bmp" "mybitmap4bppgrey.bmp" "mybitmap256color.bmp" COMPRESS</pre>
+BITMAPFAMILY ID 104 "mybitmap.bmp" "mybitmap2bppgrey.bmp" "mybitmap4bppgrey.bmp" "mybitmap256color.bmp" COMPRESS
+BITMAPFAMILY ID 105 "mybitmap.bmp" "" "" "mybitmap256color.bmp" COMPRESS
+BITMAPFAMILY ID 106 "mybitmap.bmp" "" "" "mybitmap256color.bmp" COMPRESS TRANSPARENT 255 255 255
+BITMAPFAMILY ID 106 "mybitmap.bmp" "" "" "mybitmap256color.bmp" COMPRESS TRANSPARENTINDEX 255</pre>
 </blockquote>
 <a NAME="Trap"></a><font face="Verdana"><font size=+1>TRAP (TRAP)</font></font>
 <blockquote>Emits a HackMaster TRAP resource. For more info on Hackmaster
 system extensions check out <a href="http://www.daggerware.com/hackmstr.htm">DaggerWare's
 HackMaster</a>. TrapIds must be greater than 1000.
-<pre>TRAP ID &lt;TrapId.n> &lt;TrapNumber.n></pre>
+<pre>TRAP ID &lt;TrapId.n&gt; &lt;TrapNumber.n&gt</pre>
 </blockquote>
 Example:
 <blockquote>
@@ -1140,19 +1147,23 @@ FIELD: NUMERIC doesn't work in PalmOS 2.0 (or 1.0)</li>
 <li>
 FIELD: AUTOSHIFT is flaky in PalmOS 2.0</li>
 
-<p><br>SAVEBEHIND is the default for forms. Turning this off with NOSAVEBEHIND
+<p>SAVEBEHIND is the default for forms. Turning this off with NOSAVEBEHIND
 may cause your program to crash (or it may not)</ul>
 <a NAME="Further"></a><b><font face="Verdana"><font size=+1>Further Reading</font></font></b>
-<blockquote>For an excellent expose on how to create dynamic resources
-on the fly, check out: Gary Desrosiers' "PalmPilot Dynamic UI Construction"
-at <a href="http://www.pcnet.com/~desrosi/DynamUI.html">http://www.pcnet.com/~desrosi/DynamUI.html</a>.
-This is a great primer on how resources are constructed on the pilot.</blockquote>
+<blockquote>For Palm Computing Platform reference information, be sure to check
+out the following sites: <p>
 
-<blockquote>Check out RoadCoders for lots of samples and other pilot programming
-information.<a href="http://www.roadcoders.com/pilot/"> http://www.roadcoders.com/pilot/</a></blockquote>
-
-<blockquote>Darrin Massena's site, though not updated frequently is another
-good starting point.<a href="http://www.massena.com"> http://www.massena.com</a></blockquote>
+<ul>
+<li> <a href="http://www.palmos.com/">http://www.palmos.com/</a> <br>
+     <a href="http://www.palm.com/devzone">http://www.palm.com/devzone</a> <br>
+     Provided by Palm Computing. <p>
+<li> <a href="http://www.massena.com/">http://www.massena.com</a> <br>
+     A great source of low level Palm Computing Platform information. <br>
+     Provided by David Massena. <p>
+<li> <a href="http://www.roadcoaders.com/">http://www.roadcoaders.com</a> <br>
+     Need some examples? This is a great resource to find plenty of source 
+     code for applications written on the Palm Computing Platform. <p>
+</ul>
 
 </body>
 </html>

@@ -125,6 +125,45 @@ int IsJapanese(unsigned char *cp, int *pdxChar)
 
 	}
 
+/*-----------------------------------------------------------------------------
+| IsKoreanHanme
+|	
+|	Check the double byte char is Korean coded(Large Font, for HanMe)
+-----------------------------------------------------------------------------*/
+int IsKoreanHanme(unsigned char *cp, int *pdxChar)
+{
+
+/* Korean code rule (by JaeMok Jeong)
+	first  byte range 0xb0..0xc8             (high byte)
+	second byte range 0xa1..0xfe             (low  byte)
+*/
+	if ((*cp>= 0xb0 && *cp<=0xc8) && (*(cp+1)>=0xa1 && *(cp+1)<=0xfe)) {
+		*pdxChar = 11;	/* not sure about this, hanme font width */
+		return 2;
+	}
+
+	return 0;
+}
+
+/*-----------------------------------------------------------------------------
+| IsKoreanHantip
+|	
+|	Check the double byte char is Korean coded(Small Font, for Hantiip)
+-----------------------------------------------------------------------------*/
+int IsKoreanHantip(unsigned char *cp, int *pdxChar)
+	{
+
+/* Korean code rule (by JaeMok Jeong)
+	first  byte range 0xb0..0xc8             (high byte)
+	second byte range 0xa1..0xfe             (low  byte)
+*/
+	if ((*cp>= 0xb0 && *cp<=0xc8) && (*(cp+1)>=0xa1 && *(cp+1)<=0xfe))
+		{
+		*pdxChar = 8;		/* hantip font width = 8 */
+		return 2;
+	}
+	return 0;
+}
 
 /* Report an error with line number and filename */
 
@@ -742,6 +781,12 @@ void InitFontMem(int fontType)
 			break;
 		case fontJapanese:
 			pfnChkCode = IsJapanese;
+			break;
+		case fontKoreanHanme:
+			pfnChkCode = IsKoreanHanme;
+			break;
+		case fontKoreanHantip:
+			pfnChkCode = IsKoreanHantip;
 			break;
 		case fontHebrew:
 			SetBuiltinFont(0, font0Hebrew, 0xe0, sizeof(font0Hebrew));

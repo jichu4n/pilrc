@@ -35,6 +35,7 @@
  * Andrew Bulhak   PBM conversion
  * Hoshi Takanori  XBM, PBITM and compression
  * Aaron Ardiri    color bitmap resource integration
+ * John Marshall   PGM/PPM conversion
  */
 
 #ifndef __GNUC__
@@ -61,7 +62,7 @@ typedef int            bool;	      /* f  */
 static PILRC_ULONG  LLoadX86(PILRC_ULONG w);
 static PILRC_USHORT WLoadX86(PILRC_USHORT w);
 
-static int  BMP_RGBToColorIndex(int, int, int);
+static int  BMP_RGBToColorIndex(int, int, int, int[][3], int);
 static int  BMP_GetBits1bpp(int, PILRC_BYTE *, int, int, int);
 static void BMP_SetBits1bpp(int, PILRC_BYTE *, int, int, int);
 static void BMP_SetBits2bpp(int, PILRC_BYTE *, int, int, int, int);
@@ -69,10 +70,10 @@ static int  BMP_GetBits4bpp(int, PILRC_BYTE *, int, int, int);
 static void BMP_SetBits4bpp(int, PILRC_BYTE *, int, int, int, int);
 static int  BMP_GetBits8bpp(int, PILRC_BYTE *, int, int, int);
 static void BMP_SetBits8bpp(int, PILRC_BYTE *, int, int, int, int);
-static void BMP_ConvertWindowsBitmap(RCBITMAP *, PILRC_BYTE *, int, BOOL);
+static void BMP_ConvertWindowsBitmap(RCBITMAP *, PILRC_BYTE *, int, BOOL, int*);
 static void BMP_ConvertTextBitmap(RCBITMAP *, PILRC_BYTE *, int);
 static void BMP_ConvertX11Bitmap(RCBITMAP *, PILRC_BYTE *, int);
-static void BMP_ConvertPBMBitmap(RCBITMAP *, PILRC_BYTE *, int);
+static void BMP_ConvertPNMBitmap(RCBITMAP *, PILRC_BYTE *, int, int, BOOL);
 static void BMP_CompressBitmap(RCBITMAP *, int, BOOL);
 static void BMP_CompressDumpBitmap(RCBITMAP *, int, int, BOOL, BOOL);
 static void BMP_InvalidExtension(char *);
@@ -133,9 +134,36 @@ typedef struct tagBITMAPINFO
 } BITMAPINFO; 
 
 /*
+ * The 1bit-2 color system palette for Palm Computing Devices.
+ */
+int PalmPalette1bpp[2][3] = 
+{
+  {   0,   0,   0}, { 255, 255, 255 }
+};
+
+/*
+ * The 2bit-4 color system palette for Palm Computing Devices.
+ */
+int PalmPalette2bpp[4][3] = 
+{
+  { 255, 255, 255}, { 192, 192, 192}, { 128, 128, 128 }, { 0, 0, 0 }
+};
+
+/*
+ * The 4bit-16 color system palette for Palm Computing Devices.
+ */
+int PalmPalette4bpp[16][3] = 
+{
+  {   0,   0,   0}, {  17,  17,  17 }, {  34,  34,  34 }, {  51,  51,  51 },
+  {  68,  68,  68}, {  85,  85,  85 }, { 102, 102, 102 }, { 119, 119, 119 },
+  { 136, 136, 136}, { 153, 153, 153 }, { 170, 170, 170 }, { 187, 187, 187 },
+  { 204, 204, 204}, { 221, 221, 221 }, { 238, 238, 238 }, { 255, 255, 255 }
+};
+
+/*
  * The 8bit-256 color system palette for Palm Computing Devices.
  */
-static int PalmPalette256[256][3] = 
+int PalmPalette8bpp[256][3] = 
 {
   { 255, 255, 255 }, { 255, 204, 255 }, { 255, 153, 255 }, { 255, 102, 255 }, 
   { 255,  51, 255 }, { 255,   0, 255 }, { 255, 255, 204 }, { 255, 204, 204 }, 
@@ -214,42 +242,39 @@ static int PalmPalette256[256][3] =
  * @param r the red RGB value
  * @param g the green RGB value
  * @param b the blue RGB value
- * @return the index of the RGB triplet in the PalmPalette256 table.
+ * @param palette a pointer to a color pallete array
+ * @param paletteSize the number of items in the palette array (triples)
+ * @return the index of the RGB triplet in the palette table.
  */
 static int 
 BMP_RGBToColorIndex(int r, 
                     int g, 
-                    int b)
+                    int b,
+                    int palette[][3],
+                    int paletteSize)
 {
   int index, lowValue, i, *diffArray;
 
-  // masking value (black) should be (0,0,0) and index 255
-  if ((r | g | b) == 0) index = 0xff;
-
-  // a typical "closest" match will do fine
-  else {
-
-    // generate the color "differences" for all colors in the palette
-    diffArray = (int *)malloc(256 * sizeof(int));
-    for (i=0; i < 256; i++) {
-      diffArray[i] = ((PalmPalette256[i][0]-r)*(PalmPalette256[i][0]-r)) +
-                     ((PalmPalette256[i][1]-g)*(PalmPalette256[i][1]-g)) +
-                     ((PalmPalette256[i][2]-b)*(PalmPalette256[i][2]-b));
-    }
-
-    // find the palette index that has the smallest color "difference"
-    index    = 0;
-    lowValue = diffArray[0];
-    for (i=1; i<256; i++) {
-      if (diffArray[i] < lowValue) {
-        lowValue = diffArray[i];
-        index    = i;
-      }
-    }
-
-    // clean up
-    free(diffArray);
+  // generate the color "differences" for all colors in the palette
+  diffArray = (int *)malloc(paletteSize * sizeof(int));
+  for (i=0; i < paletteSize; i++) {
+    diffArray[i] = ((palette[i][0]-r)*(palette[i][0]-r)) +
+                   ((palette[i][1]-g)*(palette[i][1]-g)) +
+                   ((palette[i][2]-b)*(palette[i][2]-b));
   }
+
+  // find the palette index that has the smallest color "difference"
+  index    = 0;
+  lowValue = diffArray[0];
+  for (i=1; i<paletteSize; i++) {
+    if (diffArray[i] < lowValue) {
+      lowValue = diffArray[i];
+      index    = i;
+    }
+  }
+
+  // clean up
+  free(diffArray);
 
   return index;
 }
@@ -486,19 +511,20 @@ BMP_SetBits8bpp(int        cx,
  * @param pbResData  a reference to the bitmap resource. 
  * @param bitmaptype the type of bitmap (B+W, Grey, Grey16 or Color)?
  * @param colortable does a color table need to be generated?
+ * @param transparencyData anything we need to know about transparency
  */
 static void 
 BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp, 
                          PILRC_BYTE *pbResData, 
                          int        bitmaptype, 
-                         BOOL       colortable)
+                         BOOL       colortable,
+                         int        *transparencyData)
 {
   PILRC_BYTE       *pbSrc;
-  int              x, y, dx, dy, colorDat;
-  int              cbRow, cbHeader, cbits, cbitsPel;
+  int              i, x, y, dx, dy, colorDat;
+  int              cbRow, cbHeader, cbits, cbitsPel, numClrs;
   BITMAPINFO       *pbmi;
   BITMAPINFOHEADER bmi;
-  BOOL             fNonGreyWarning;
 
   pbmi = (BITMAPINFO *)(pbResData + sizeof(BITMAPFILEHEADER)); 
   memcpy (&bmi, pbmi,sizeof(BITMAPINFOHEADER));
@@ -507,7 +533,9 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
   dx       = LLoadX86(bmi.biWidth);
   dy       = LLoadX86(bmi.biHeight);
   cbits    = WLoadX86(bmi.biBitCount);
-  pbSrc    = ((PILRC_BYTE *)pbmi) + cbHeader + (sizeof(RGBQUAD) * (1 << cbits));
+  numClrs  = LLoadX86(bmi.biClrUsed);
+  if (numClrs == 0) numClrs = 1 << cbits;  // MSPaint DONT set this
+  pbSrc    = ((PILRC_BYTE *)pbmi) + cbHeader + (sizeof(RGBQUAD) * numClrs);
   cbitsPel = -1;
   colorDat = 0;
 
@@ -550,6 +578,22 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
   switch (bitmaptype) 
   {
     case rwBitmap:
+         rcbmp->pixelsize = cbitsPel;
+         rcbmp->version   = 1;
+
+         // lets make sure that color 0 = white :P
+         if (BMP_RGBToColorIndex(pbmi->bmiColors[0].rgbRed,
+                                 pbmi->bmiColors[0].rgbGreen,
+                                 pbmi->bmiColors[0].rgbBlue,
+                                 PalmPalette1bpp, 2) != 0) {
+ 
+           // 0 and 1 are wrong way around, invert them
+           for (i=0; i<LLoadX86(bmi.biSizeImage); i++) {
+             pbSrc[i] = ~pbSrc[i];
+           }
+         }
+         break;
+
     case rwBitmapGrey:
     case rwBitmapGrey16:
          rcbmp->pixelsize = cbitsPel;
@@ -568,15 +612,23 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
 
            rcbmp->ff |= 0x4000;
            tmpPtr     = rcbmp->pbBits;
-           *tmpPtr++  = 0x10;
+           *tmpPtr++  = 0x01;
            *tmpPtr++  = 0x00;
 
-           // extract the color table
-           for (i=0; i<256; i++) {
+           // extract the color table (the number we have)
+           for (i=0; i<numClrs; i++) {
              *tmpPtr++ = i;
              *tmpPtr++ = pbmi->bmiColors[i].rgbRed;
              *tmpPtr++ = pbmi->bmiColors[i].rgbGreen;
              *tmpPtr++ = pbmi->bmiColors[i].rgbBlue;
+           }
+
+           // fill in remaining colors with Palm system defaults
+           for (; i<256; i++) {
+             *tmpPtr++ = i;
+             *tmpPtr++ = PalmPalette8bpp[i][0];
+             *tmpPtr++ = PalmPalette8bpp[i][1];
+             *tmpPtr++ = PalmPalette8bpp[i][2];
            }
          }
 
@@ -588,11 +640,17 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
 
            // generate the cross reference table
            paletteXref = (int *)malloc(256 * sizeof(int));
-           for (i=0; i<256; i++) {
+           for (i=0; i<numClrs; i++) {
              paletteXref[i] = 
                BMP_RGBToColorIndex(pbmi->bmiColors[i].rgbRed,
                                    pbmi->bmiColors[i].rgbGreen,
-                                   pbmi->bmiColors[i].rgbBlue);
+                                   pbmi->bmiColors[i].rgbBlue,
+                                   PalmPalette8bpp, 256);
+           }
+
+           // fill in extra colors with black index
+           for (; i<256; i++) {
+             paletteXref[i] = 255;
            }
 
            // adjust the bitmap to reflect the closest matching
@@ -610,6 +668,27 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
            // clean up
            free(paletteXref);
          }
+
+         // do we need to consider transparency?
+         switch (transparencyData[0]) 
+         {
+           case rwTransparency:
+                rcbmp->ff |= 0x2000;
+                rcbmp->transparentIndex = 
+                  BMP_RGBToColorIndex(transparencyData[1],
+                                      transparencyData[2],
+                                      transparencyData[3],
+                                      PalmPalette8bpp, 256);
+                break;
+
+           case rwTransparencyIndex:
+                rcbmp->ff |= 0x2000;
+                rcbmp->transparentIndex = transparencyData[1];
+                break;
+
+           default:
+                break;
+         }
          break;
 
     default:
@@ -617,7 +696,6 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
   }
 
   // convert from .bmp to binary format
-  fNonGreyWarning = fFalse;
   for (y = 0; y < dy; y++) {
     for (x = 0; x < dx; x++) {
 
@@ -634,32 +712,27 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
 
         case rwBitmapGrey:
              {
-               int w;
-               int grey2bpp[] = { 3,1,1,1,1,1,1,1,2,1,1,1,1,1,1,0 };
+               int v, w;
 				
                w = BMP_GetBits4bpp(dx, pbSrc, x, yT, 32);
-               switch (w)
-               {
-                 case 0x00: case 0x07: case 0x08: case 0x0f:
-                      break;
-
-                 default:
-                      if (!fNonGreyWarning) {
-                        WarningLine("BitmapGrey uses 'non grey' colors");
-                        fNonGreyWarning = fTrue;
-                      }                            // color = light grey
-                      break;
-               }
-               BMP_SetBits2bpp(dx, rcbmp->pbBits, x, y, grey2bpp[w], 16);
+               v = BMP_RGBToColorIndex(pbmi->bmiColors[w].rgbRed,
+                                       pbmi->bmiColors[w].rgbGreen,
+                                       pbmi->bmiColors[w].rgbBlue,
+                                       PalmPalette2bpp, 4);
+               BMP_SetBits2bpp(dx, rcbmp->pbBits, x, y, v, 16);
              }
              break;
 
         case rwBitmapGrey16:
              {
-               int w;
+               int v, w;
 
-               w = 15 - BMP_GetBits4bpp(dx, pbSrc, x, yT, 32);
-               BMP_SetBits4bpp(dx, rcbmp->pbBits, x, y, w, 16);
+               w = BMP_GetBits4bpp(dx, pbSrc, x, yT, 32);
+               v = BMP_RGBToColorIndex(pbmi->bmiColors[w].rgbRed,
+                                       pbmi->bmiColors[w].rgbGreen,
+                                       pbmi->bmiColors[w].rgbBlue,
+                                       PalmPalette4bpp, 16);
+               BMP_SetBits4bpp(dx, rcbmp->pbBits, x, y, v, 16);
              }
              break;
 
@@ -686,7 +759,6 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
 
 /* Skip a newline */
 static int 
-// skip_newline(PILRC_BYTE *data, int size, int i)
 BMP_SkipNewLine(PILRC_BYTE *data, int size, int i)
 {
 	while (i < size && (data[i] != '\n' && data[i] != '\r'))
@@ -801,7 +873,7 @@ BMP_ConvertX11Bitmap(RCBITMAP   *rcbmp,
         rcbmp->cbDst = rcbmp->cbRow * rcbmp->cy;
         rcbmp->pbBits = malloc(rcbmp->cbDst);
 
-        i = size; // get out of the loop
+        break;    // get out of the loop
       }
     }
   }
@@ -816,7 +888,7 @@ BMP_ConvertX11Bitmap(RCBITMAP   *rcbmp,
 
      PILRC_BYTE c = tolower(data[i]);
 
-     // termination of a line?
+     // termination of a byte?
      if ((c == ',') || (c == '}')) {
        if (pos < rcbmp->cbDst) {
          rcbmp->pbBits[pos++] = (unsigned char) value;
@@ -836,87 +908,478 @@ BMP_ConvertX11Bitmap(RCBITMAP   *rcbmp,
   }
 }
 
+
+struct rgb
+{
+  int r, g, b;
+};
+
+struct foreign_reader
+{
+  void (*start_row) (struct foreign_reader *self, int y);
+  void (*read_pixel) (struct foreign_reader *self, struct rgb *color);
+  int maxval;
+  PILRC_BYTE *pb, *pblim;
+  void *userdata;
+};
+
+static void
+default_start_row (struct foreign_reader *self, int y)
+{
+}
+
+static void
+WriteGreyTbmp (RCBITMAP *rcbmp,
+	       struct foreign_reader *reader)
+{
+  BOOL warnColorLost = fFalse;
+  int depth = rcbmp->pixelsize;
+  unsigned long outmaxval = (1UL << depth) - 1;
+  unsigned char *outp = rcbmp->pbBits;
+  int *index = malloc ((reader->maxval + 1) * sizeof (int));
+  int i, x, y, ningreys;
+
+  for (i = 0; i <= reader->maxval; i++)  index[i] = -1;
+
+  for (y = 0; y < rcbmp->cy; y++)
+  {
+    unsigned int outword = 0;
+    int outlen = 0;
+
+    reader->start_row (reader, y);
+
+    for (x = 0; x < rcbmp->cx; x++)
+    {
+      struct rgb c;
+      unsigned long grey;
+
+      reader->read_pixel (reader, &c);
+      if (c.r == c.g && c.g == c.b)
+	grey = c.r;
+      else
+      {
+	warnColorLost = fTrue;
+	/* From the colorspace-FAQ.  There's _some_ chance I'm applying the
+	   right formula.  It's been a long time since graphics class...  */
+	grey = (299L * c.r + 587L * c.g + 114L * c.b) / 1000L;
+      }
+
+      if (grey > reader->maxval)  grey = reader->maxval;
+
+      if (index[grey] == -1)
+      {
+	unsigned long outgrey;
+	outgrey = (grey * outmaxval + reader->maxval/2) / reader->maxval;
+	index[grey] = (outgrey <= outmaxval)? outmaxval - outgrey : 0;
+      }
+
+      outword <<= depth;
+      outword |= index[grey];
+      outlen += depth;
+      if (outlen >= 16)
+      {
+	*outp++ = outword >> 8;
+	*outp++ = outword & 0xff;
+	outword = 0;
+	outlen = 0;
+      }
+    }
+
+    if (outlen > 0)
+    {
+      outword <<= 16 - outlen;
+      *outp++ = outword >> 8;
+      *outp++ = outword & 0xff;
+    }
+  }
+
+  if (warnColorLost)
+    WarningLine ("Some colors saturated in index converted to grey");
+
+  ningreys = 0;
+  for (i = 0; i <= reader->maxval; i++)
+    if (index[i] != -1)
+      ningreys++;
+
+  free (index);
+
+  if (ningreys > outmaxval+1)
+  {
+    char buffer[120];
+    sprintf (buffer, "%d input grey levels converted to only %ld",
+	     ningreys, outmaxval+1);
+    WarningLine (buffer);
+  }
+}
+
+
+static int
+WriteIndexedColorTbmp (RCBITMAP *rcbmp,
+		       struct foreign_reader *reader,
+		       struct rgb *colortable)
+{
+  const int N = 937;
+  struct hash_entry
+  {
+    struct rgb key;
+    unsigned char index;
+  } table[N];
+
+  unsigned char *outp = rcbmp->pbBits;
+  int x, y, h, nentries, ninputcolors, noutputcolors;
+
+  nentries = 0;
+  for (h = 0; h < N; h++)
+    table[h].key.r = -1;
+
+  ninputcolors = 0;
+
+  for (y = 0; y < rcbmp->cy; y++)
+  {
+    reader->start_row (reader, y);
+
+    for (x = 0; x < rcbmp->cx; x++)
+    {
+      struct rgb c;
+      unsigned char index;
+
+      reader->read_pixel (reader, &c);
+
+      /* This hash function has no basis in theory...  */
+      for (h = (((c.r + 37) ^ (c.g << 2)) + c.b) % N; ; h = (h + 1) % N)
+	if (table[h].key.r == -1)
+	{
+	  struct rgb cs;
+	  cs.r = (c.r * 255UL) / reader->maxval;
+	  cs.g = (c.g * 255UL) / reader->maxval;
+	  cs.b = (c.b * 255UL) / reader->maxval;
+
+	  if (colortable)
+	  {
+	    if (ninputcolors < 256)
+	    {
+	      colortable[ninputcolors] = cs;
+	      index = ninputcolors;
+	    }
+	    else
+	      index = 0;  /* FIXME!!!! */
+	  }
+	  else
+	    index = BMP_RGBToColorIndex(cs.r, cs.g, cs.b,
+                                        PalmPalette8bpp, 256);
+
+	  ninputcolors++;
+
+	  /* Only add the new color if the table isn't already over full.
+	     This'll slow down for input images with lots of distinct colors,
+	     but it won't be infinitely slow as it would be if we let the
+	     table get completely full.  */
+	  if (nentries < N/2)
+	  {
+	    nentries++;
+	    table[h].key.r = c.r;
+	    table[h].key.g = c.g;
+	    table[h].key.b = c.b;
+	    table[h].index = index;
+	  }
+	  break;
+	}
+	else if (table[h].key.r == c.r && table[h].key.g == c.g
+		 && table[h].key.b == c.b)
+	{
+	  index = table[h].index;
+	  break;
+	}
+
+      *outp++ = index;
+    }
+
+    if (rcbmp->cbRow > rcbmp->cx)
+      *outp++ = 0;
+  }
+
+  noutputcolors = (colortable)? ninputcolors : 0;
+
+  if (ninputcolors > 256)
+  {
+    char buffer[120];
+    sprintf (buffer, "%d input colors converted to only 256", ninputcolors);
+    WarningLine (buffer);
+    ninputcolors = 256;
+  }
+
+  return ninputcolors;
+}
+
+
 /**
- * Convert a .pbm file to Palm Computing resource data.
+ * Write the body of a Palm Computing bitmap resource data (family member).
  *
  * @param rcbmp      a reference to the Palm Computing resource data.
- * @param data       a reference to the bitmap resource. 
- * @param cb         the size the bitmap resource.
+ * @param width      width of the bitmap
+ * @param height     height of the bitmap
+ * @param bitmaptype the type of bitmap (B+W, Grey, Grey16 or Color)?
+ * @param colortable does a color table need to be generated?
+ * @param reader     callbacks and state variables to read the input file
  */
-static void 
-BMP_ConvertPBMBitmap(RCBITMAP   *rcbmp, 
-                     PILRC_BYTE *pbData, 
-                     int        cb)
+static void
+WriteTbmp (RCBITMAP *rcbmp,
+	   int width,
+	   int height,
+	   int bitmaptype,
+	   BOOL colortable,
+	   struct foreign_reader *reader)
 {
-  PILRC_BYTE *pb;
-  PILRC_BYTE *pbMac;
-  char       c, type;
-  int        x, y, r;
-  int        width, height;
+  int depth = 0;
 
-  // check the bitmap
-  pb    = pbData;
-  pbMac = pb+cb;
-  if (*pb++ !='P') ErrorLine("Not a PBM file.");
-
-  type=*pb++;
-  if ((type != '1') && (type != '4')) ErrorLine("Not a monochrome bitmap.");
-
-  // ignore any junk 
-  do { c = *pb++; } while (isspace(c)); pb--;
-  while (c=='#') { do {c=*pb++;} while (c!='\n'); c=*pb++; pb--; }
-
-  // try and get the width and height of the bitmap
-  sscanf((const char *)pb, "%d %d", &width, &height);
-
-  // ignore any junk 
-  do {c=*pb++;} while (c != '\n'); pb--;
-  do {c=*pb++;} while (isspace(c)); pb--;
-  while (c=='#') { do {c=*pb++;} while (c!='\n');  c=*pb++; pb--; }
-
-  memset(rcbmp, 0, sizeof(RCBITMAP));
-  rcbmp->cbRow  = ((width + 15) & ~15) / 8;
-  rcbmp->cbDst  = rcbmp->cbRow * height;
-  rcbmp->pbBits = malloc(rcbmp->cbDst);
-  memset(rcbmp->pbBits, 0, rcbmp->cbDst);
-
-  // read the bits
-  switch (type) 
+  switch (bitmaptype)
   {
-    case '1':  // ASCII
-         for (y=0; y<height; y++) {
-           for (x=0; x<width; x++) {
-             do { c=*pb++; } while ((c != '0') && (c != '1'));
-             if (c == '1')
-               BMP_SetBits1bpp(width, rcbmp->pbBits, x, y, 16);
-           }
-         }
-         break;
+    case rwBitmap:
+	 depth = 1;
+	 break;
 
-    case '4':  // BINARY
-         for (y=0; y<height; y++) {
-           for (r=0; r<width; r+=8) {
-             c = *pb++;
-             for (x=0; ((x+r) < width) && (x < 8); x++) {
-               if ((c & 0x80) != 0)
-                 BMP_SetBits1bpp(width, rcbmp->pbBits, x+r, y, 16);
-               c<<=1;
-             }
-           }
-         }
-         break;
+    case rwBitmapGrey:
+	 depth = 2;
+	 break;
+
+    case rwBitmapGrey16:
+	 depth = 4;
+	 break;
+
+    case rwBitmapColor:
+	 depth = 8;
+	 break;
 
     default:
-         Assert(fFalse);
-         break;
+	 Assert(fFalse);
+	 break;
   }
 
   rcbmp->cx = width;
   rcbmp->cy = height;
+  rcbmp->pixelsize = depth;
+  rcbmp->cbRow = ((width * depth + 15) & ~15) >> 3;
+  rcbmp->cbDst = rcbmp->cbRow * height;
+  rcbmp->pbBits = malloc (rcbmp->cbDst);
+  rcbmp->version = (depth == 8)? 2 : 1;
+
+  /* The iterate-over-the-pixels code of these two ought to be unified into
+     one function, but because the color conversions inside the loops are so
+     different, it seems easier to duplicate the loops.  */
+
+  if (rcbmp->pixelsize < 8)
+    WriteGreyTbmp (rcbmp, reader);
+  else
+  {
+    if (colortable)
+    {
+      struct rgb table[256];
+      int nentries = WriteIndexedColorTbmp (rcbmp, reader, table);
+
+      /* Now bolt the color table onto the front of the output bits.  */
+
+      unsigned char *newBits = malloc (2 + 4 * nentries + rcbmp->cbDst);
+      if (newBits)
+      {
+	unsigned char * bits = newBits;
+	int i;
+
+	*bits++ = (nentries & 0xff00) >> 8;
+	*bits++ = nentries & 0x00ff;
+
+	for (i = 0; i < nentries; i++)
+	{
+	  *bits++ = i;
+	  *bits++ = table[i].r;
+	  *bits++ = table[i].g;
+	  *bits++ = table[i].b;
+	}
+
+	memcpy (bits, rcbmp->pbBits, rcbmp->cbDst);
+	free (rcbmp->pbBits);
+
+	rcbmp->ff |= 0x4000;
+	rcbmp->pbBits = newBits;
+	rcbmp->cbDst += 2 + 4 * nentries;
+      }
+    }
+    else
+      (void) WriteIndexedColorTbmp (rcbmp, reader, NULL);
+  }
 }
 
+
+static void
+SkipPNMWhitespace (struct foreign_reader *r)
+{
+  while (r->pb < r->pblim)
+    if (isspace (*r->pb))
+      r->pb++;
+    else if (*r->pb == '#')
+      while (r->pb < r->pblim && *r->pb != '\n' && *r->pb != '\r')
+	r->pb++;
+    else
+      break;
+}
+
+static int
+ReadPNMInt (struct foreign_reader *r)
+{
+  int n = 0;
+
+  SkipPNMWhitespace (r);
+  for (; r->pb < r->pblim && isdigit (*r->pb); r->pb++)
+    n = 10 * n + *r->pb - '0';
+
+  return n;
+}
+
+
+/* A lot of these depend on PILRC_BYTE being unsigned.  Further, if we run
+   out of input (i.e., pb >= pblim) these won't infinite loop or anything,
+   but they probably will return random colors.  But running out of input
+   indicates that the input is corrupted, so this doesn't really matter.  */
+
+static void
+ReadP1 (struct foreign_reader *r, struct rgb *c)
+{
+  SkipPNMWhitespace (r);
+  while (r->pb < r->pblim)
+    switch (*r->pb++)
+    {
+      case '0':
+	   /* Yes, PBM color levels really are reversed compared to PGMs!  */
+	   c->r = c->g = c->b = 1;
+	   return;
+
+      case '1':
+	   c->r = c->g = c->b = 0;
+	   return;
+
+      default:
+	 break;
+    }
+}
+
+struct userdata_P4
+{
+  PILRC_BYTE byte, mask;
+};
+
+static void
+StartRowP4 (struct foreign_reader *r, int y)
+{
+  struct userdata_P4 *p4 = r->userdata;
+  p4->mask = 0;
+}
+
+static void
+ReadP4 (struct foreign_reader *r, struct rgb *c)
+{
+  struct userdata_P4 *p4 = r->userdata;
+
+  if (p4->mask == 0)
+  {
+    if (r->pb < r->pblim)  p4->byte = *r->pb++;
+    p4->mask = 0x80;
+  }
+
+  c->r = c->g = c->b = (p4->byte & p4->mask)? 0 : 1;
+  p4->mask >>= 1;
+}
+
+static void
+ReadP2 (struct foreign_reader *r, struct rgb *c)
+{
+  c->r = c->g = c->b = ReadPNMInt (r);
+}
+
+static void
+ReadP5 (struct foreign_reader *r, struct rgb *c)
+{
+  if (r->pb < r->pblim)
+    c->r = c->g = c->b = *r->pb++;
+}
+
+static void
+ReadP3 (struct foreign_reader *r, struct rgb *c)
+{
+  c->r = ReadPNMInt (r);
+  c->g = ReadPNMInt (r);
+  c->b = ReadPNMInt (r);
+}
+
+static void
+ReadP6 (struct foreign_reader *r, struct rgb *c)
+{
+  if (r->pb + 2 < r->pblim)
+  {
+    c->r = *r->pb++;
+    c->g = *r->pb++;
+    c->b = *r->pb++;
+  }
+}
+
+
 /**
- * Compress a Bitmap (tBmp or tAIC) resource.
+ * Convert a PBM/PGM/PPM file to Palm Computing resource data.
+ *
+ * @param rcbmp      a reference to the Palm Computing resource data.
+ * @param pbResData  a reference to the bitmap resource.
+ * @param cb         the size the bitmap resource.
+ * @param bitmaptype the type of bitmap (B+W, Grey, Grey16 or Color)?
+ * @param colortable does a color table need to be generated?
+ */
+static void
+BMP_ConvertPNMBitmap(RCBITMAP   *rcbmp,
+                     PILRC_BYTE *pb,
+                     int        cb,
+                     int        bitmaptype,
+                     BOOL       colortable)
+{
+  static void (*read_func[]) (struct foreign_reader *, struct rgb *) =
+    { NULL, ReadP1, ReadP2, ReadP3, ReadP4, ReadP5, ReadP6 };
+
+  struct foreign_reader pnm;
+  struct userdata_P4 dataP4;
+  int type, width, height;
+
+  type = (cb >= 2 && pb[0] == 'P')? pb[1] - '0' : -1;
+
+  if (type < 1 || type > 6)
+    ErrorLine ("Not a PBM/PGM/PPM file.");
+
+  pnm.pb = pb;
+  pnm.pblim = pb + cb;
+
+  pnm.pb += 2;
+  width = ReadPNMInt (&pnm);
+  height = ReadPNMInt (&pnm);
+
+  pnm.maxval = (type == 1 || type == 4)? 1 : ReadPNMInt (&pnm);
+
+  if (type >= 4)
+  {
+    /* Skip up to one character of whitespace in RAWBITS files.  */
+    if (pnm.pb < pnm.pblim && isspace (*pnm.pb))
+      pnm.pb++;
+  }
+
+  pnm.read_pixel = read_func[type];
+  if (type == 4)
+  {
+    pnm.start_row = StartRowP4;
+    pnm.userdata = &dataP4;
+  }
+  else
+    pnm.start_row = default_start_row;
+
+  WriteTbmp (rcbmp, width, height, bitmaptype, colortable, &pnm);
+}
+
+
+/**
+ * Compress a Bitmap (Tbmp or tAIB) resource.
  * 
  * @param rcbmp      a reference to the Palm Computing resource data.
  * @param compress   compression style?
@@ -989,7 +1452,7 @@ BMP_CompressBitmap(RCBITMAP *rcbmp,
 }
 
 /**
- * Compress and Dump a single Bitmap (tBmp or tAIC) resource.
+ * Compress and Dump a single Bitmap (Tbmp or tAIB) resource.
  * 
  * @param rcbmp      a reference to the Bitmap resource
  * @param isIcon     an icon? 0 = bitmap, 1 = normal, 2 = small
@@ -1011,7 +1474,7 @@ BMP_CompressDumpBitmap(RCBITMAP *rcbmp,
          if (((rcbmp->cx != 32) || (rcbmp->cy != 32)) && 
              ((rcbmp->cx != 32) || (rcbmp->cy != 22)) &&
              ((rcbmp->cx != 22) || (rcbmp->cy != 22))) {
-           ErrorLine("Icon resource not 32x32, 32x22 or 22x22 (preferred)");
+           WarningLine("Icon resource not 32x32, 32x22 or 22x22 (preferred)");
          }
          break;
 
@@ -1075,13 +1538,14 @@ BMP_InvalidExtension(char *fileName)
 }
 
 /**
- * Dump a single Bitmap (tBmp or tAIC) resource.
+ * Dump a single Bitmap (Tbmp or tAIB) resource.
  * 
  * @param fileName   the source file name  
  * @param isIcon     an icon? 0 = bitmap, 1 = normal, 2 = small
  * @param compress   compression style?
  * @param bitmaptype the type of bitmap (B+W, Grey, Grey16 or Color)?
  * @param colortable does a color table need to be generated?
+ * @param transparencyData anything we need to know about transparency
  * @param multibit   should this bitmap be prepared for multibit? 
  */
 extern void DumpBitmap(char *fileName, 
@@ -1089,6 +1553,7 @@ extern void DumpBitmap(char *fileName,
                        int  compress, 
                        int  bitmaptype, 
                        BOOL colortable,
+                       int  *transparencyData,
                        BOOL multibit)
 {
   PILRC_BYTE *pBMPData;
@@ -1099,6 +1564,12 @@ extern void DumpBitmap(char *fileName,
 
   // determine the size of the resource to load
   fileName = FindAndOpenFile(fileName, "rb", &pFile);
+  if (pFile == NULL) {
+    char pchLine[200];
+    sprintf(pchLine, "Could not find Resource %s.", fileName);
+    ErrorLine(pchLine);
+  }
+
   fseek(pFile,0,SEEK_END);
   size = ftell(pFile);
   rewind(pFile);
@@ -1123,7 +1594,7 @@ extern void DumpBitmap(char *fileName,
   // convert the resource into a binary resource
   memset(&rcbmp, 0, sizeof(RCBITMAP));
   if (FSzEqI(pchExt, "bmp")) {
-    BMP_ConvertWindowsBitmap(&rcbmp, pBMPData, bitmaptype, colortable);
+    BMP_ConvertWindowsBitmap(&rcbmp, pBMPData, bitmaptype, colortable, transparencyData);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, colortable, multibit);
   }
   else 
@@ -1137,8 +1608,8 @@ extern void DumpBitmap(char *fileName,
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse, multibit);
   }
   else 
-  if (FSzEqI(pchExt, "pbm")) {
-    BMP_ConvertPBMBitmap(&rcbmp, pBMPData, size);
+  if (FSzEqI(pchExt, "pbm") || FSzEqI(pchExt, "pgm") || FSzEqI(pchExt, "ppm")) {
+    BMP_ConvertPNMBitmap(&rcbmp, pBMPData, size, bitmaptype, colortable);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse, multibit);
   }
   else {

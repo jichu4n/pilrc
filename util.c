@@ -94,10 +94,10 @@ void ErrorLine2(char *sz, char *sz2)
 	{
 	char szErr[256];
 	
-	if (sz2 == NULL)
-		sprintf(szErr, "%s(%d) : error : %s", szInFile, iline, sz);
+	if (sz2 == NULL)  // updated: Christian Falch
+		sprintf(szErr, "%s:%d: error : %s", szInFile, iline, sz);
 	else
-		sprintf(szErr, "%s(%d) : error : %s %s", szInFile, iline, sz, sz2);
+		sprintf(szErr, "%s:%d: error : %s %s", szInFile, iline, sz, sz2);
 	Error(szErr);
 	}
 
@@ -122,7 +122,7 @@ void WarningLine(char *sz)
 	{
 	char szErr[256];
 
-	sprintf(szErr, "%s(%d) : warning : %s", szInFile, iline, sz);
+	sprintf(szErr, "%s:%d): warning : %s", szInFile, iline, sz);
 	fprintf(stderr, "\n");
 	fprintf(stderr, szErr);
 	fprintf(stderr, "\n");

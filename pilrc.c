@@ -1194,7 +1194,7 @@ void ParseItm(ITM *pitm, int grif, int grif2)
 			break;
 		case rwNoSaveBehind:
 			CheckGrif(ifSaveBehind);
-			pitm->saveBehind = 1;
+			pitm->saveBehind = 0;
 			break;
 		case rwHelpId:
 			CheckGrif(ifHelpId);
@@ -2479,7 +2479,7 @@ void ParseDumpBitmapFile(int bitmapType)
 	BOOL colortable;
 	int id;
 	char *pchFileName[4];
-
+	int  transparencyData[4];
 
 	id = WGetId("Bitmap ResourceId", fFalse);
 	pchFileName[0] = PchGetSz("Bitmap Filename");
@@ -2491,9 +2491,10 @@ void ParseDumpBitmapFile(int bitmapType)
 	  pchFileName[3] = PchGetSz("Bitmap Filename");
         }
 
-	compress = rwNoCompress;
-	colortable = fFalse;
-	if (FGetTok(&tok)) 
+	compress            = rwNoCompress;
+	colortable          = fFalse;
+	transparencyData[0] = 0;
+	while (FGetTok(&tok)) 
 		{
 		if (tok.rw == rwNoCompress || tok.rw == rwAutoCompress || tok.rw == rwForceCompress) 
 			{
@@ -2505,8 +2506,23 @@ void ParseDumpBitmapFile(int bitmapType)
 			colortable = (tok.rw == rwColorTable);
 			}
 		else 
+		if (tok.rw == rwTransparency) 
+			{
+			transparencyData[0] = rwTransparency;
+			transparencyData[1] = WGetConst("red value");
+			transparencyData[2] = WGetConst("green value");
+			transparencyData[3] = WGetConst("blue value");
+			}
+		else 
+		if (tok.rw == rwTransparencyIndex) 
+			{
+			transparencyData[0] = rwTransparencyIndex;
+			transparencyData[1] = WGetConst("transparency index");
+			}
+		else 
 			{
 			UngetTok();
+			break;
 			}
 		}
 
@@ -2526,13 +2542,13 @@ void ParseDumpBitmapFile(int bitmapType)
 
             if ((flag & 0x01) == 0x01)
               DumpBitmap(pchFileName[i], 0, compress, 
-                         rwBitmap+i, colortable, ((flag & 0xfe) != 0x00));
+                         rwBitmap+i, colortable, transparencyData, ((flag & 0xfe) != 0x00));
             flag = flag >> 1;
             i++;
           }
         }
         else {
-	  DumpBitmap(pchFileName[0], fFalse, compress, bitmapType, colortable, fFalse);
+	  DumpBitmap(pchFileName[0], fFalse, compress, bitmapType, colortable, transparencyData, fFalse);
         }
 	CloseOutput();
 
@@ -2550,19 +2566,54 @@ void ParseDumpBitmapFile(int bitmapType)
 void ParseDumpIcon(BOOL fSmall, int bitmapType)
 	{
 	char *pchFileName[4];
+	int  transparencyData[4];
+	BOOL colortable;
+
+	pchFileName[0] = PchGetSz("Icon Filename");
+
+	// family? need to get 1bpp, 2bpp, 4bpp and 8bpp!
+        if (bitmapType == rwBitmapFamily) {
+	  pchFileName[1] = PchGetSz("Icon Filename");
+	  pchFileName[2] = PchGetSz("Icon Filename");
+	  pchFileName[3] = PchGetSz("Icon Filename");
+        }
+
+        transparencyData[0] = 0;
+	colortable          = fFalse;
+	while (FGetTok(&tok)) 
+		{
+		if (tok.rw == rwNoColorTable || tok.rw == rwColorTable) 
+			{
+			colortable = (tok.rw == rwColorTable);
+			}
+		else 
+		if (tok.rw == rwTransparency) 
+			{
+			transparencyData[0] = rwTransparency;
+			transparencyData[1] = WGetConst("red value");
+			transparencyData[2] = WGetConst("green value");
+			transparencyData[3] = WGetConst("blue value");
+			}
+		else 
+		if (tok.rw == rwTransparencyIndex) 
+			{
+			transparencyData[0] = rwTransparencyIndex;
+			transparencyData[1] = WGetConst("transparency index");
+			}
+		else 
+			{
+			UngetTok();
+			break;
+			}
+		}
 
 	OpenOutput("tAIB", fSmall ? 1001 : 1000);
-
 	if (bitmapType == rwBitmapFamily) {
 
           int i, flag = 0x00;
 
-	  pchFileName[0] = PchGetSz("Icon Filename");
-	  pchFileName[1] = PchGetSz("Icon Filename");
-	  pchFileName[2] = PchGetSz("Icon Filename");
-	  pchFileName[3] = PchGetSz("Icon Filename");
-
           if (strcmp(pchFileName[0], "") != 0) flag |= 0x01;
+          else ErrorLine("ICONFAMILY/SMALLICONFAMILY must have a 1bpp bitmap");
           if (strcmp(pchFileName[1], "") != 0) flag |= 0x02;
           if (strcmp(pchFileName[2], "") != 0) flag |= 0x04;
           if (strcmp(pchFileName[3], "") != 0) flag |= 0x08;
@@ -2573,7 +2624,7 @@ void ParseDumpIcon(BOOL fSmall, int bitmapType)
 
             if ((flag & 0x01) == 0x01)
               DumpBitmap(pchFileName[i], fSmall ? 2 : 1, rwNoCompress, 
-                         rwBitmap+i, fFalse, ((flag & 0xfe) != 0x00));
+                         rwBitmap+i, colortable, transparencyData, ((flag & 0xfe) != 0x00));
             flag = flag >> 1;
             i++;
           }
@@ -2584,8 +2635,7 @@ void ParseDumpIcon(BOOL fSmall, int bitmapType)
 	  free(pchFileName[3]);
 	}
 	else {
-	  pchFileName[0] = PchGetSz("Icon Filename");
- 	  DumpBitmap(pchFileName[0], fSmall ? 2 : 1, rwNoCompress, bitmapType, fFalse, fFalse);
+ 	  DumpBitmap(pchFileName[0], fSmall ? 2 : 1, rwNoCompress, bitmapType, fFalse, transparencyData, fFalse);
 	  free(pchFileName[0]);
 	}
 	CloseOutput();
@@ -3001,18 +3051,16 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 			ParseDumpBitmapFile(tok.rw);
 			break;
 		case rwIcon:
-		case rwIconGrey:
-		case rwIconGrey16:
-		case rwIconColor:
+			ParseDumpIcon(fFalse, rwBitmap);
+			break;
 		case rwIconFamily:
-			ParseDumpIcon(fFalse, rwBitmap + (tok.rw-rwIcon));
+			ParseDumpIcon(fFalse, rwBitmapFamily);
 			break;
 		case rwIconSmall:
-		case rwIconSmallGrey:
-		case rwIconSmallGrey16:
-		case rwIconSmallColor:
+			ParseDumpIcon(fTrue, rwBitmap);
+			break;
 		case rwIconSmallFamily:
-			ParseDumpIcon(fTrue, rwBitmap + (tok.rw-rwIconSmall));
+			ParseDumpIcon(fTrue, rwBitmapFamily);
 			break;
 		case rwTrap:
 			ParseDumpTrap();

@@ -617,21 +617,29 @@ typedef enum
 	rwEqu,
 
 	rwIcon,
-	rwIconGrey,
-	rwIconGrey16,
-	rwIconColor,
+//	rwIconGrey,
+//	rwIconGrey16,
+//	rwIconColor,     
+                         // Aaron Ardiri 
+                         // - removed these due to be purely backward 
+                         //   compatable in the applications launcher
 	rwIconFamily,
 
 	rwIconSmall,
-	rwIconSmallGrey,
-	rwIconSmallGrey16,
-	rwIconSmallColor,
+//  	rwIconSmallGrey,
+//  	rwIconSmallGrey16,
+//  	rwIconSmallColor,
+                         // Aaron Ardiri 
+                         // - removed these due to be purely backward 
+                         //   compatable in the applications launcher
 	rwIconSmallFamily,
 	
 	rwTrap,
 
 	rwFontId,
 
+	rwTransparency,
+	rwTransparencyIndex,
 	rwNoColorTable,
 	rwColorTable,
 
@@ -778,20 +786,30 @@ RWT rgrwt[] =
 	{"include",      NULL,           rwInclude},
 
 	{"icon",         NULL,           rwIcon},
-	{"icongrey",     "icongray",     rwIconGrey},
-	{"icongrey16",   "icongray16",   rwIconGrey16},
-	{"iconcolor",    "iconcolour",   rwIconColor},
+//	{"icongrey",     "icongray",     rwIconGrey},
+//	{"icongrey16",   "icongray16",   rwIconGrey16},
+//	{"iconcolor",    "iconcolour",   rwIconColor},
+                         // Aaron Ardiri 
+                         // - removed these due to be purely backward 
+                         //   compatable in the applications launcher
+
 	{"iconfamily",   NULL,           rwIconFamily},
 
 	{"smallicon",    NULL,           rwIconSmall},
-	{"smallicongrey",     "smallicongray",     rwIconSmallGrey},
-	{"smallicongrey16",   "smallicongray16",   rwIconSmallGrey16},
-	{"smalliconcolor",    "smalliconcolour",   rwIconSmallColor},
+//	{"smallicongrey",     "smallicongray",     rwIconSmallGrey},
+//	{"smallicongrey16",   "smallicongray16",   rwIconSmallGrey16},
+//	{"smalliconcolor",    "smalliconcolour",   rwIconSmallColor},
+                         // Aaron Ardiri 
+                         // - removed these due to be purely backward 
+                         //   compatable in the applications launcher
+
 	{"smalliconfamily",   NULL,                rwIconSmallFamily},
 	
 	{"trap",         NULL,           rwTrap},
 	{"fontid",       NULL,         rwFontId},
 
+	{"transparency", "transparent",  rwTransparency},
+	{"transparencyIndex", "transparentindex",  rwTransparencyIndex},
 	{"colortable",   "colourtable",  rwColorTable},
 	{"nocolortable", "nocolourtable",  rwNoColorTable},
 	{"nocompress",   NULL,           rwNoCompress},

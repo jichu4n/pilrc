@@ -40,13 +40,14 @@
 #define __BITMAP_H__
 
 /**
- * Dump a single Bitmap (tBmp or tAIC) resource.
+ * Dump a single Bitmap (Tbmp or tAIB) resource.
  * 
  * @param fileName   the source file name  
  * @param isIcon     an icon? 0 = bitmap, 1 = normal, 2 = small
  * @param compress   compression style?
  * @param bitmaptype the type of bitmap (B+W, Grey, Grey16 or Color)?
  * @param colortable does a color table need to be generated?
+ * @param transparencyData anything we need to know about transparency
  * @param multibit   should this bitmap be prepared for multibit? 
  */
 extern void DumpBitmap(char *fileName, 
@@ -54,6 +55,7 @@ extern void DumpBitmap(char *fileName,
                        int  compress, 
                        int  bitmaptype, 
                        BOOL colortable,
+                       int  *transparencyData,
                        BOOL multibit);
 
 #endif
