@@ -112,6 +112,7 @@ AddAccessPath(const char *path)
     if (includePaths == NULL)
     {
       /* error: out of memory */
+      Error("Out of memory allocating include path");
     }
   }
   includePaths[totalIncludePaths++] = path;
