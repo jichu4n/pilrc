@@ -1620,6 +1620,7 @@ TE;
      {
        char *sz;
        int wVal;
+       char* sVal;
        BOOL fAutoId;
        struct SYM *psymNext;
      }
@@ -2647,5 +2648,7 @@ RCPFILE *ParseFile(char *szIn,
 SYM *PsymLookupId(int id);
 VOID AddSym(char *sz,
             int wVal);
+VOID AddSymString(char* sz, char* val);
+VOID AddDefineSymbol(void);
 
 #endif                                           // _pilrc_h

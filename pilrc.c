@@ -89,6 +89,8 @@
  *      5-Nov-2002 Ben Combee
  *                 Altered MENU SEPARATOR to allow specifying ID or AUTOID
  *     22-Mar-2003 Bob Withers
+ *                 Added support for #define strings which can be used in
+ *                 place of string constants.
  *                 Added support for preprocessor directives within MENU,
  *                 FORM, and ALERT defintions.
  */
@@ -315,8 +317,21 @@ AddSym(char *sz,
   psym = calloc(1, sizeof(SYM));
   psym->sz = strdup(sz);
   psym->wVal = wVal;
+  psym->sVal = NULL;
   psym->psymNext = psymFirst;
   psymFirst = psym;
+}
+
+VOID AddSymString(char* sz, char* val)
+{
+    auto     SYM*       psym;
+    
+    psym = calloc(1, sizeof(SYM));
+    psym->sz = strdup(sz);
+    psym->wVal = 0;
+    psym->sVal = strdup(val);
+    psym->psymNext = psymFirst;
+    psymFirst = psym;
 }
 
 /*-----------------------------------------------------------------------------
@@ -333,6 +348,19 @@ PsymLookup(char *sz)
     if (strcmp(psym->sz, sz) == 0)
       return psym;
   return NULL;
+}
+
+static VOID
+CheckNumericSymbol(SYM* psym)
+{
+	char msg[80];
+
+    if (NULL != psym->sVal)
+    {
+        sprintf(msg, "Symbol %s should be numeric ID but is defined as string %s",
+                psym->sz, psym->sVal);
+        ErrorLine(msg);
+    }
 }
 
 static int
@@ -361,16 +389,20 @@ PsymAddSymAutoId(char *sz)
 static VOID
 FreeSymTable()
 {
-  SYM *psym;
-  SYM *psymNext;
-
-  for (psym = psymFirst; psym != NULL; psym = psymNext)
-  {
-    psymNext = psym->psymNext;
-    free(psym->sz);
-    free(psym);
-  }
-  psymFirst = NULL;
+    SYM* psym;
+    SYM* psymNext;
+ 
+    for (psym = psymFirst; psym != NULL; psym = psymNext)
+    {
+        psymNext = psym->psymNext;
+        free(psym->sz);
+        if (NULL != psym->sVal)
+            free(psym->sVal);
+    
+        free(psym);
+    }
+     
+    psymFirst = NULL;
 }
 
 /*-----------------------------------------------------------------------------
@@ -639,16 +671,54 @@ GetExpectRw(RW rw)
   }
 }
 
+static char* 
+PchCheckSymbol()
+{
+    char msg[80];
+    
+    if (!FGetTok(&tok))
+        ErrorLine("Unexpected end of file");
+    
+    if (rwNil == tok.rw && ltId == tok.lex.lt)
+    {
+        SYM* psym = PsymLookup(tok.lex.szId);
+        if (NULL == psym)
+        {
+            sprintf(msg, "Symbol %s is not defined", tok.lex.szId);
+            ErrorLine(msg);
+        }
+        
+        if (NULL == psym->sVal)
+        {
+            sprintf(msg, "Symbol %s is numeric, a string value is required", psym->sz);
+            ErrorLine(msg);
+        }
+        
+        return(strdup(psym->sVal));
+    }
+    
+    UngetTok();
+    return(NULL);
+}
+
+
 /*-----------------------------------------------------------------------------
 |	PchGetSz
 |	
 |		Get a quoted string.  return dup'ed string.  (remember to free!)
+|
+|   bwithers 3/22/03 - Mod to allow defined symbol to be used in addtion
+|                      to string literal.
 -------------------------------------------------------------WESC------------*/
 char *
 PchGetSz(char *szErr)
 {
-  GetExpectLt(&tok, ltStr, szErr);
-  return strdup(tok.lex.szId);
+    char* p = PchCheckSymbol();
+    if (NULL != p)
+        return(p);
+     
+    GetExpectLt(&tok, ltStr, szErr);
+    return(strdup(tok.lex.szId));
 }
 
 #ifdef DOESNTWORK
@@ -666,6 +736,9 @@ static char *
 PchGetSzMultiLine(char *szErr)
 {
   char sz[16384];
+  char* p = PchCheckSymbol();
+  if (NULL != p)
+      return(p);
 
   GetExpectLt(&tok, ltStr, szErr);
   strcpy(sz, tok.lex.szId);
@@ -699,7 +772,10 @@ static char *
 PchGetSzMultiLine(char *szErr)
 {
   char sz[8192];
-
+  char* p = PchCheckSymbol();
+  if (NULL != p)
+      return(p);
+  
   GetExpectLt(&tok, ltStr, szErr);
   strcpy(sz, tok.lex.szId);
   while (FGetTok(&tok))
@@ -868,6 +944,37 @@ WGetConstEx(char *szErr)
   }
   return wVal;
 }
+
+VOID
+AddDefineSymbol(void)
+{
+    auto     int        wIdVal;
+    auto     char       szId[256];
+    
+    GetExpectLt(&tok, ltId, "identifier");
+    strcpy(szId, tok.lex.szId);
+    if (NULL != PsymLookup(szId))
+    {
+        char msg[80];
+        sprintf(msg, "Symbol %s is defined multiple times", szId);
+        ErrorLine(msg);
+    }
+    
+    if (!FGetTok(&tok))
+        ErrorLine("unexpected end of file");
+    
+    if (ltStr == tok.lex.lt)
+    {
+        AddSymString(szId, tok.lex.szId);
+    }
+    else
+    {
+        UngetTok();
+        wIdVal = WGetConstEx("Constant");
+        AddSym(szId, wIdVal);
+    }
+}
+
 
 /*-----------------------------------------------------------------------------
 |	KtGetK
@@ -1754,7 +1861,7 @@ ParseToFinalEnd(void)
   }
 }
 
-BOOL
+static BOOL
 DesirableLocale(const char *objlocale)
 {
   if (objlocale)
@@ -2435,23 +2542,27 @@ FParseObjects(RCPFILE * prcpfile)
       case rwPBN:                               /* pushbutton */
         ParseItm(&itm,
                  ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont |
-                 ifAnchor | ifGroup | ifSmallMargin | ifFrame,
+                 ifAnchor | ifGroup | ifSmallMargin,
                  if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null,
                  if4Null);
         goto Control;
       case rwCBX:                               /* check box */
-        ParseItm(&itm, ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont | ifAnchor | ifGroup | ifOn | ifBigMargin | ifSmallMargin, if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null, if4Null);     /* BUG! need to add checkbox extra! */
+        ParseItm(&itm, ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont | 
+            ifAnchor | ifGroup | ifOn | ifBigMargin | ifSmallMargin, 
+            if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null, if4Null);     /* BUG! need to add checkbox extra! */
         itm.frame = 0;
         if (itm.graphical)                       /* RMa add some compilation test */
           ErrorLine("PalmOS 3.5 Graphic control can be a check box control");
         goto Control;
       case rwPUT:                               /* popuptrigger */
-        ParseItm(&itm, ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont | ifAnchor | ifBigMargin | ifSmallMargin | ifFrame, if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null, if4Null);    /* SAME! */
+        ParseItm(&itm, ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont | 
+            ifAnchor | ifBigMargin | ifSmallMargin | ifFrame, 
+            if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null, if4Null);    /* SAME! */
         goto Control;
       case rwSLT:                               /* selectortrigger */
         ParseItm(&itm,
                  ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont |
-                 ifAnchor | ifSmallMargin | ifFrame,
+                 ifAnchor | ifSmallMargin,
                  if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null,
                  if4Null);
         goto Control;
@@ -5778,10 +5889,7 @@ ParseDirectives(RCPFILE * prcpfile)
       }
     case rwDefine:
       {
-
-        GetExpectLt(&tok, ltId, "identifier");
-        strcpy(szId, tok.lex.szId);
-        if (PsymLookup(szId) == NULL)
+          AddDefineSymbol();
           break;
       }
 
