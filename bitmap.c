@@ -2650,7 +2650,8 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
     {
       if ((test = fread(pData, 1, dataSize, outputFile)) != dataSize)
       {
-        fprintf(stderr, "Read: %lu\n", (unsigned long)test);
+        fprintf(stderr, "ERROR: Read %lu bytes, expected %lu\n",
+          (unsigned long)test, (unsigned long)dataSize);
         abort();
       }
       crc = Crc16CalcBlock(pData, (unsigned short)dataSize, 0);
