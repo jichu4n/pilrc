@@ -68,7 +68,7 @@
 /*
  * some foreign font handing function 
  */
-int (*pfnChkCode) (unsigned char *cp,
+int (*pfnChkCode) (const unsigned char *cp,
                    int *pdx);
 
 /*
@@ -93,7 +93,7 @@ FontCharInfoType *fntOW[256];
 unsigned int fntH[256];
 
 static int
-IsDBCSNone(unsigned char *cp,
+IsDBCSNone(const unsigned char *cp,
            int *pdxChar)
 {
   return 0;
@@ -105,7 +105,7 @@ IsDBCSNone(unsigned char *cp,
 |		Check the double byte char is BIG5 coded
 -------------------------------------------------------------DLIN------------*/
 static int
-IsBIG5(unsigned char *cp,
+IsBIG5(const unsigned char *cp,
        int *pdxChar)
 {
 
@@ -145,7 +145,7 @@ IsBIG5(unsigned char *cp,
 |		Check the double byte char is Japanese coded
 -------------------------------------------------------------DLIN------------*/
 static int
-IsJapanese(unsigned char *cp,
+IsJapanese(const unsigned char *cp,
            int *pdxChar)
 {
 
@@ -172,7 +172,7 @@ IsJapanese(unsigned char *cp,
 |	Check the double byte char is Korean coded(Large Font, for HanMe)
 -----------------------------------------------------------------------------*/
 static int
-IsKoreanHanme(unsigned char *cp,
+IsKoreanHanme(const unsigned char *cp,
               int *pdxChar)
 {
 
@@ -197,7 +197,7 @@ IsKoreanHanme(unsigned char *cp,
 |	Check the double byte char is Korean coded(Small Font, for Hantiip)
 -----------------------------------------------------------------------------*/
 static int
-IsKoreanHantip(unsigned char *cp,
+IsKoreanHantip(const unsigned char *cp,
                int *pdxChar)
 {
 
