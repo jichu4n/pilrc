@@ -523,6 +523,9 @@ CloseResDBFile()
 |	where TTTT is the base 4 character mac/pilot res type and
 |	XXXX is the resource id as a 4 digit hex number
 -------------------------------------------------------------WESC------------*/
+static char outputResStr[5];
+static int outputResID;
+
 VOID
 OpenOutput(char *szBase,
            int id)
@@ -534,6 +537,11 @@ OpenOutput(char *szBase,
   char szPrettyName[FILENAME_MAX];
   char *szFileName;
   char *szMode;
+
+  // save for possible errors
+  memset(outputResStr, 0, 5);
+  strncpy(outputResStr, szBase, 4);
+  outputResID = id;
 
   /*
    * #ifdef BINOUT 
@@ -568,7 +576,7 @@ OpenOutput(char *szBase,
     Error3("Unable to open binary file:", szFileName, strerror(errno));
 
   if (!vfQuiet)
-    printf("Writing %s\n", szPrettyName);
+    printf("Writing %s (", szPrettyName);
   ibOut = 0;
 
   /*
@@ -595,6 +603,7 @@ CloseOutput()
   DumpBytes(NULL, 0);
 #endif
 
+
   /*
    * #ifdef BINOUT 
    */
@@ -602,7 +611,18 @@ CloseOutput()
     return;
 
   if (!vfQuiet)
-    printf("%d bytes\n", ibOut);
+    printf("%d bytes)\n", ibOut);
+  
+  if (!vfAllowLargeResources && ibOut > maxSafeResourceSize)
+  {
+    char buffer[120];
+  	sprintf(buffer,
+  		"Resource '%s' %d, %d bytes, exceeds safe "
+  		"HotSync size limit of %d bytes",
+  		outputResStr, outputResID, ibOut, maxSafeResourceSize);
+  	WarningLine(buffer);
+  }
+
   ibTotalOut += ibOut;
   if (vfhOut != NULL)
   {

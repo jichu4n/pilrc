@@ -40,6 +40,7 @@
  *      3-Oct-2002 Ben Combee
  *                 Changed include path mechanism to allow unlimited
  *                 numbers of include paths (constrained by memory)
+ *     23-Oct-2003 Don't print copyright string when -q used
  */
 
 #include <stdio.h>
@@ -63,63 +64,84 @@
 #define Str(x)  #x
 #define XStr(x) Str(x)
 
+
+/**
+ *  Display the PilRC Copyright (c) strings, but only once
+ */
+static void header(void)
+{
+	static int outputHeader = 0;
+	
+	if (outputHeader == 0)
+	{
+		outputHeader = 1;
+	    printf("PilRC v3.0 beta 4\n");
+	    printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
+	    printf("  Copyright 2000-2003 Aaron Ardiri (aaron@ardiri.com)\n");
+	    printf("\n");
+	}
+}
+
 /**
  * Display the usage information for PilRC.
  */
 static void
 Usage(void)
 {
+  header();
   Error
     ("\nThis program is free software; you may redistribute it under the\n"
      "terms of the GNU General Public License. This program has absolutely\n"
      "no warranty, you use it AS IS at your own risk.\n\n"
      "usage: pilrc {<options>} infile [outfiledir]\n\n" "Options:\n"
-     "        -L LANGUAGE  Use the TRANSLATION section for the given language\n"
-     "                     Up to " XStr(MAXLANG) " -L options may be given\n"
-     "        -I <path>    Search for bitmap and include files in <path>\n"
-     "                     More than one -I <path> options may be given\n"
-     "                     The current directory is always searched\n"
+     "        -L LANGUAGE    Use the TRANSLATION section for the given language\n"
+     "                       Up to " XStr(MAXLANG) " -L options may be given\n"
+     "        -I <path>      Search for bitmap and include files in <path>\n"
+     "                       More than one -I <path> options may be given\n"
+     "                       The current directory is always searched\n"
 #ifdef PALM_INTERNAL
-     "        -noIFIH      Parse includes files in header files\n"
+     "        -noIFIH        Parse includes files in header files\n"
 #else
-     "        -noIFIH      Ignore includes files in header files\n"
+     "        -noIFIH        Ignore includes files in header files\n"
 #endif
-     "        -R <resfile> Generate JUMP/PilA .res file\n"
-     "        -ro          Generate resource database file instead of .bins\n"
-     "        -ts          put POSIX timestamp on .ro file generated\n"
-     "        -o <filedir> Equivalent to [outfiledir]\n"
-     "        -H <incfile> Autoassign IDs and write .h file with #defines\n"
-     "        -idStart <n> Start autoID assignment at number <n>, counting up\n"
-     "        -D <macro>   Define a pre-processor macro symbol\n"
-     "        -F5          Use Big5 Chinese font widths\n"
-     "        -Fkt         Use Korean font widths (hantip font)\n"
-     "        -Fkm         Use Korean font widths (hanme font)\n"
-     "        -Fg          Use GB Chinese font widths\n"
-     "        -Fj          Use Japense font widths\n"
-     "        -Fh          Use Hebrew font widths\n"
-     "        -Fc          Use Cyrillic font widths\n"
-     "        -rtl         Right to left support\n"
-     "        -q           Less noisy output\n"
-     "        -V           Generate M$ (VS-type) error/warning output\n"
-     "        -allowEditID Allow edit menu IDs (10000-10007)\n"
-     "        -noEllipsis  Disable special handling of \"...\" and ellipsis char\n"
-     "        -PalmRez     Generate res with PalmRez option\n"
-     "        -LE32        Generate 32 bit little endian (ARM, NT) resources\n"
+     "        -R <resfile>   Generate JUMP/PilA .res file\n"
+     "        -ro            Generate resource database file instead of .bins\n"
+     "        -ts            put POSIX timestamp on .ro file generated\n"
+     "        -o <filedir>   Equivalent to [outfiledir]\n"
+     "        -H <incfile>   Autoassign IDs and write .h file with #defines\n"
+     "        -idStart <n>   Start autoID assignment at number <n>, counting up\n"
+     "        -D <macro>     Define a pre-processor macro symbol\n"
+     "        -F5            Use Big5 Chinese font widths\n"
+     "        -Fkt           Use Korean font widths (hantip font)\n"
+     "        -Fkm           Use Korean font widths (hanme font)\n"
+     "        -Fg            Use GB Chinese font widths\n"
+     "        -Fj            Use Japense font widths\n"
+     "        -Fh            Use Hebrew font widths\n"
+     "        -Fc            Use Cyrillic font widths\n"
+     "        -rtl           Right to left support\n"
+     "        -q             Less noisy output\n"
+     "        -V             Generate M$ (VS-type) error/warning output\n"
+     "        -allowEditID   Disable warnings about menu IDs in the Edit (10000-10007) range\n"
+     "        -allowBadSize  Disable warnings about icon sizes being incorrect\n"
+     "        -allowLargeRes Disable warnings about resources that exceed max HotSync resource size\n"
+     "        -noEllipsis    Disable special handling of \"...\" and ellipsis char\n"
+     "        -PalmRez       Generate res with PalmRez option\n"
+     "        -LE32          Generate 32 bit little endian (ARM, NT) resources\n"
 #ifdef PALM_INTERNAL
-     "        -AppIcon68K  Force AppIcon resources generation in 68K format\n"
-     "        -amdc <name> Generate resource 'amdc' id=1 with <name>.dll as content\n"
+     "        -AppIcon68K    Force AppIcon resources generation in 68K format\n"
+     "        -amdc <name>   Generate resource 'amdc' id=1 with <name>.dll as content\n"
 #endif
-     "        -Loc <code>  Compile only res with the attribute LOCALE \"code\"\n"
-     "                     code samples: deDE, esES, enUS, frFR, itIT, jpJP\n"
-     "        -StripLoc    Don't compile 'non localisable resources'\n"
-     "        -type        Specify the type to use when generating a prc (-ro)\n"
-     "        -creator     Specify the creator to use when generating a prc (-ro)\n"
-     "        -name        Specify the database name when generating a prc (-ro)\n"
-     "        <outfiledir> Directory where .bin files should be generated,\n"
-     "                     or name of the file to generate containing all\n"
-     "                     the generated resources\n"
-     "        -M           Generate dependency list only; suppress all other output\n"
-     "        -MD          Generate dependency list"
+     "        -Loc <code>    Compile only res with the attribute LOCALE \"code\"\n"
+     "                       code samples: deDE, esES, enUS, frFR, itIT, jpJP\n"
+     "        -StripLoc      Don't compile 'non localisable resources'\n"
+     "        -type          Specify the type to use when generating a prc (-ro)\n"
+     "        -creator       Specify the creator to use when generating a prc (-ro)\n"
+     "        -name          Specify the database name when generating a prc (-ro)\n"
+     "        <outfiledir>   Directory where .bin files should be generated,\n"
+     "                       or name of the file to generate containing all\n"
+     "                       the generated resources\n"
+     "        -M             Generate dependency list only; suppress all other output\n"
+     "        -MD            Generate dependency list"
      );
   exit(1);
 }
@@ -145,11 +167,6 @@ main(int cArg,
   int i;
   int fontType;
   int macroValue;
-
-  // display the (c) string
-  printf("PilRC v3.0beta\n");
-  printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
-  printf("  Copyright 2000-2003 Aaron Ardiri (aaron@ardiri.com)\n");
 
   // initialize
   if (cArg < 2)
@@ -287,6 +304,20 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-allowEditID"))
     {
       vfAllowEditIDs = fTrue;
+      continue;
+    }
+
+    // allow "edit" ID's?
+    if (FSzEqI(rgszArg[i], "-allowBadSize"))
+    {
+      vfAllowBadIconSizes = fTrue;
+      continue;
+    }
+
+    // allow "edit" ID's?
+    if (FSzEqI(rgszArg[i], "-allowLargeRes"))
+    {
+      vfAllowLargeResources = fTrue;
       continue;
     }
 
@@ -485,9 +516,15 @@ main(int cArg,
     // unknown argument?
     Usage();
   }
+
+  // display the (c) string
+  if (!vfQuiet)
+  {
+    header();
+  }
+
   if ((cArg - i) < 1)
     Usage();
-  printf("\n");
 
   if ((!szLocaleP) && (vfStripNoLocRes))
   {

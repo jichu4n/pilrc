@@ -2586,6 +2586,8 @@ extern char szLine[4096];
 extern BOOL vfWinGUI;
 extern BOOL vfQuiet;
 extern BOOL vfAllowEditIDs;
+extern BOOL vfAllowBadIconSizes;
+extern BOOL vfAllowLargeResources;
 extern BOOL vfNoEllipsis;
 extern BOOL vfPalmRez;
 extern BOOL vfVSErrors;
@@ -2634,6 +2636,7 @@ extern BOOL vfStripNoLocRes;
 #define dyScreen 160
 #define maxCategories  16
 #define categoryLength 16
+#define maxSafeResourceSize 65000
 
 void ParseToFinalEnd(void);
 BOOL ObjectDesiredInOutputLocale(const ITM * itm);

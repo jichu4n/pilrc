@@ -157,6 +157,16 @@ BOOL vfPalmRez;
 BOOL vfAllowEditIDs;
 
 /*
+ * Allow icons that aren't properly sized
+ */
+BOOL vfAllowBadIconSizes;
+
+/*
+ * Allow resources to exceed 64000 bytes
+ */
+BOOL vfAllowLargeResources;
+
+/*
  * Disables ellipsis processing
  */
 BOOL vfNoEllipsis;
@@ -3830,7 +3840,7 @@ ParseDumpCategories()
 typedef struct BMPDEF
 {
   char *pchFileName;
-  int compress;
+  RW compress;
   int compressMethod;
   int transparencyData[4];
   int density;
@@ -4368,7 +4378,7 @@ ParseDumpLauncherCategory(void)
       id = WGetId("LauncherCategory ResourceId");
       if (id != 1000)
         WarningLine
-          ("Default Launcher Category ID is 1000 (it dont work otherwise)");
+          ("Default Launcher Category ID is 1000 (it doesn't work otherwise)");
     }
     else if (tok.rw == rwLocale)
     {
@@ -4651,7 +4661,7 @@ ParseDumpHex()
     while (FGetTok(&tok))
     {
       // turn IDs into values
-      if (tok.lex.lt == ltId)
+      if (tok.lex.lt == ltId && tok.rw == rwNil)
       {
         SYM *psym;
 
@@ -5320,9 +5330,6 @@ ParseCInclude(char *szIncludeFile,
   /*
    * needed at this scope to not interfer with the globals 
    */
-  // LDu 31-8-2001 : deleted// int ifdefSkipping = 0;
-  // LDu 31-8-2001 : deleted// int ifdefLevel = 0;
-  char *hackP;
 
   /*
    * tok contains filename 
@@ -5404,42 +5411,7 @@ ParseCInclude(char *szIncludeFile,
                 }
                 else
                 {
-                  GetExpectLt(&tok, ltId, "identifier");
-                  strcpy(szId, tok.lex.szId);
-
-                  //
-                  // RMa hack to determine if we have or not a value for this define 
-                  // that determine if it a define for multi include protection or not 
-                  //
-                  hackP = strstr(szLine, tok.lex.szId);
-                  hackP += strlen(tok.lex.szId);
-                  while ((*hackP == ' ') || (*hackP == '\t'))
-                    hackP++;
-                  if (*hackP != 0x0a)
-                  {
-                    /*
-                     * RNi: removed because it was breaking the constant evaluation.
-                     * if ((*hackP < '0') || (*hackP > '9'))
-                     * {
-                     * if (!vfQuiet)
-                     * WarningLine
-                     * ("Found a define using an another define. Can't process it");
-                     * NextLine();
-                     * }
-                     * else
-                     */
-                    {
-                      wIdVal = WGetConstEx("Constant");
-                      AddSym(szId, wIdVal);
-                    }
-                  }
-                  else
-                  {
-                    if (!vfQuiet)
-                      WarningLine
-                        ("Found a define without numeric value. Check it");
-                    NextLine();
-                  }
+                  AddDefineSymbol();
                 }
                 break;
               }

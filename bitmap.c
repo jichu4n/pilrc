@@ -2544,7 +2544,8 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
   switch (isIcon)
   {
     case 1000:
-      if (((rcbmp->cx != stdIconSize_x) || (rcbmp->cy != stdIconSize_x)) &&
+      if (!vfAllowBadIconSizes &&
+          ((rcbmp->cx != stdIconSize_x) || (rcbmp->cy != stdIconSize_x)) &&
           ((rcbmp->cx != stdIconSize_x) || (rcbmp->cy != stdIconSize_y)) &&
           ((rcbmp->cx != stdIconSize_y) || (rcbmp->cy != stdIconSize_y)))
       {
@@ -2558,8 +2559,9 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
       break;
 
     case 1001:
-      if ((rcbmp->cx != stdSmallIconSize_x)
-          && (rcbmp->cy != stdSmallIconSize_y))
+      if (!vfAllowBadIconSizes &&
+          (rcbmp->cx != stdSmallIconSize_x) &&
+          (rcbmp->cy != stdSmallIconSize_y))
       {
 		  char buffer[128];
 		  sprintf(buffer, "Small icon resource not %dx%d",
