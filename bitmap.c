@@ -568,7 +568,10 @@ BMP_SetBits1bpp(int cx,
 
   cbRow = BMP_CbRow(cx, 1, cBitsAlign);
   pb += cbRow * y + (x >> 3);
-  *pb |= (0x01 << (7 - (x & 7)));
+  if (vfLE32)
+    *pb |= (0x01 << (x & 7));
+  else
+    *pb |= (0x01 << (7 - (x & 7)));
 }
 
 /**
