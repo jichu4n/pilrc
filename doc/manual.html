@@ -1,11 +1,12 @@
 <html>
 <head>
 <title>PilRC</title>
-<style>
+<style type="text/css">
 BODY { font-family: arial, helvetica, sans-serif }
 PRE.syntax { margin-left: 3em }
-PRE.syntax VAR, TT.syntax VAR { font-style: normal; color: #00ff00 }
-PRE.syntax STRONG, TT.syntax STRONG { font-weight: normal; color: #0000ff }
+.syntax VAR { font-style: normal; color: #00ff00 }
+.syntax STRONG { font-weight: normal; color: #0000ff }
+.usage TT { white-space: nowrap }
 .palmInternal { display: none }
 </style>
 </head>
@@ -32,8 +33,8 @@ User Manual
 <td align=right>
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
   <a href="mailto:combee@techwood.org">Ben Combee</a> (combee@techwood.org)<br>
-  <a href="mailto:johnm@falch.net">John Marshall</a> (johnm@falch.net)<br>
-  <!--date-->2 March 2003
+  <a href="mailto:jmarshall@users.sourceforge.net">John Marshall</a> (jmarshall@users.sf.net)<br>
+  <!--date-->14 December 2003
 </td>
 </tr>
 </table>
@@ -72,20 +73,23 @@ home page</a> for the latest version.
 <table border=0 cellspacing=0 cellpadding=0>
 <tr>
 <td valign=top><tt>pilrc</tt></td>
-<td></td><td><tt>
-[-L&nbsp;LANGUAGE] [-I&nbsp;INCLUDE&nbsp;PATH] [-D&nbsp;MACRO(=VAL)]
-[-R&nbsp;RESFILE] [-H&nbsp;INCLUDE&nbsp;PATH] [-ro] [-ts] [-q] [-V]
-[-Loc&nbsp;CODE] [-StripLoc] [-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] [-Fc]
-[-allowEditID] [-LE32] [-noIFIH]
-<span class="palmInternal">[-AppIcon68K] [-amdc&nbsp;NAME]</span>
-[-noEllipsis] [-o&nbsp;OUTPUTPATH] [-M]&nbsp;[-MD] file.rcp [output&nbsp;path]
+<td></td><td><tt class=usage>
+<tt>[-L LANGUAGE]</tt> <tt>[-I INCLUDE PATH]</tt> <tt>[-D MACRO(=VAL)]</tt>
+<tt>[-R RESFILE]</tt> <tt>[-H INCLUDE PATH]</tt> <tt>[-ro]</tt> <tt>[-ts]</tt>
+<tt>[-q]</tt> <tt>[-V]</tt> <tt>[-Loc CODE]</tt> <tt>[-StripLoc]</tt>
+<tt>[-Fh]</tt> <tt>[-Fj]</tt> <tt>[-F5]</tt> <tt>[-Fg]</tt> <tt>[-Fkm]</tt>
+<tt>[-Fkt]</tt> <tt>[-Fc]</tt> <tt>[-allowEditID]</tt> <tt>[-LE32]</tt>
+<tt>[-noIFIH]</tt>
+<span class=palmInternal><tt>[-AppIcon68K]</tt> <tt>[-amdc NAME]</tt></span>
+<tt>[-noEllipsis]</tt> <tt>[-o OUTPUTPATH]</tt> <tt>[-M]</tt> <tt>[-MD]</tt>
+<tt>file.rcp</tt> <tt>[output path]</tt>
 </tt></td>
 </tr>
 <tr><td></td><td>&nbsp;</td><td></td></tr>
 <tr>
 <td valign=top><tt>pilrcui</tt></td>
-<td></td><td><tt>
-[-L LANGUAGE] file.rcp
+<td></td><td><tt class=usage>
+<tt>[-L LANGUAGE]</tt> <tt>file.rcp</tt>
 </tt></td>
 </tr>
 </table>
