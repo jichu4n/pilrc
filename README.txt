@@ -104,14 +104,11 @@
   Remove the "-O2" option  from the CCFLAGS  variable in the Makefile and
   the execution of PilRC should have no problems :))
 
-  > win32 (Microsoft Dev Studio)
+  > win32 (Microsoft Visual Studio)
 
-  If you have  Microsoft Dev Studio installed, "pilrc.dsp"  is the project 
-  file and you can compile PilRC using the following command:
-
-     nmake /f "pilrc.mak"
-  
-  Note that these files are no longer supported, and have not changed.
+  If you have Microsoft Visual Studio installed, PilRC can be built using
+  the "pilrc.dsp" project and/or the "pilrc.mak" file in the "win32_msvc"
+  directory.
 
   > win32 (CodeWarrior for Windows)
   
