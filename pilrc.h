@@ -1680,12 +1680,12 @@ RCPFILE;
        rwBTN, rwPBN, rwCBX, rwPUT, rwSLT, rwREP, rwSLD, rwSCL,
 
        rwForm, rwBegin, rwEnd, rwModal, rwSaveBehind, rwNoSaveBehind,
-       rwHelpId, rwDefaultBtnId, rwMenuId,
+       rwHelpId, rwDefaultBtnId, rwMenuId, rwNoGSI,
        rwEnabled, rwDisabled, rwUsable, rwNonUsable, rwLeftAnchor,
        rwExtended, rwNonExtended,                /* MBr add: gadget */
        rwRightAnchor, rwGroup, rwFont,
        rwFrame, rwNoFrame, rwBoldFrame, rwRectFrame, rwVertical, rwGraphical,
-
+       
        rwEditable, rwNonEditable, rwUnderlined, rwSingleLine,
        rwMultipleLines, rwDynamicSize, rwLeftAlign, rwHasScrollBar,
        rwRightAlign, rwMaxChars,
@@ -1995,6 +1995,7 @@ RWT;
        {"helpid", NULL, rwHelpId},
        {"defaultbtnid", "defaultbutton", rwDefaultBtnId},       /* RMa form & alert */
        {"menuid", NULL, rwMenuId},
+       {"nograffitistateindicator", NULL, rwNoGSI}, /* No Graffiti State */
 
        {"enabled", NULL, rwEnabled},
        {"disabled", NULL, rwDisabled},

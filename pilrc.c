@@ -2630,7 +2630,7 @@ FParseObjects(RCPFILE * prcpfile)
                  ifAnchor | ifGroup | ifSmallMargin,
                  if2Graphical | if2BitmapID | if2SelectedBitmapID, 
                  if3Null, if4Null);
-        itm.frame = noButtonFrame; 
+        itm.frame = standardButtonFrame; 
         goto Control;
       case rwCBX:                               /* check box */
         ParseItm(&itm, ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont | 
@@ -2651,7 +2651,7 @@ FParseObjects(RCPFILE * prcpfile)
                  ifAnchor | ifSmallMargin,
                  if2Graphical | if2BitmapID | if2SelectedBitmapID, 
                  if3Null, if4Null);
-        itm.frame = noButtonFrame;
+        itm.frame = standardButtonFrame;
         goto Control;
 
       Control:
@@ -2793,6 +2793,10 @@ FParseObjects(RCPFILE * prcpfile)
         obj.grfState = calloc(1, sizeof(RCFORMGRAFFITISTATE));
         obj.grfState->pos = itm.pt;
         fok = frmGraffitiStateObj;
+		bSeenGSI = fTrue;
+        break;
+
+      case rwNoGSI:            /* indicate no graffitistateindicator expliticly */
 		bSeenGSI = fTrue;
         break;
 
