@@ -6585,12 +6585,11 @@ ParseFile(const char *szIn,
 #ifdef PALM_INTERNAL
   if ((vfAutoAmdc) && (szDllNameP))
   {
-    char *pchString;
-	int nameSize = strlen(szDllNameP) + 5;
-    pchString = malloc(nameSize);
+    char *pchString = malloc(strlen(szDllNameP) + 5);
     if (pchString)
     {
-      snprintf(pchString, nameSize, "%s.dll", szDllNameP);
+      strcpy(pchString, szDllNameP);
+      strcat(pchString, ".dll");
       OpenOutput("amdc", 1);
       DumpBytes(pchString, strlen(pchString) + 1);
       CloseOutput();
