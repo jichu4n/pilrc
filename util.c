@@ -65,7 +65,7 @@ static int ibTotalOut;                           /* total output offset (after .
 
 static FILE *vfhRes = NULL;                      /* file receiving resource file ("-R") output */
 
-static char szOutFileDir[FILENAME_MAX];          /* directory for *.bin files */
+static const char *szOutFileDir = NULL;          /* directory for *.bin files */
 
 static char szOutResDBFile[FILENAME_MAX];        /* filename for final .ro file */
 static char szTempFile[FILENAME_MAX];            /* temporary filename */
@@ -455,10 +455,10 @@ PadWordBoundary(void)
 VOID
 SetOutFileDir(const char *sz)
 {
-  if (sz == NULL || strcmp(sz, ".") == 0)
-    strcpy(szOutFileDir, "");
+  if (sz && strcmp(sz, ".") == 0)
+    szOutFileDir = "";
   else
-    snprintf(szOutFileDir, sizeof(szOutFileDir), "%s%c", sz, DIRSEPARATOR);
+    szOutFileDir = sz;
 }
 
 /*-----------------------------------------------------------------------------
@@ -575,6 +575,8 @@ OpenOutput(char *szBase,
   else
   {
     char *szBinPath;
+    if (szOutFileDir == NULL)
+      Error("Can't happen (OutFileDir is not set)");
     szBinPath = MakeFilename("%s/%s", szOutFileDir, szBinFileName);
 
     vfhOut = fopen(szBinPath, "w+b");

@@ -6626,6 +6626,8 @@ ParseFile(const char *szIn,
   CloseResFile();
   if (vfPrc)
     CloseResDBFile();
+  else
+    SetOutFileDir(NULL);
   free(szMainOutput);
   return prcpfile;
 }
