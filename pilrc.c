@@ -5529,52 +5529,25 @@ OpenInputFile(const char *szIn)
 |	ParseCInclude
 |	
 |		Supports #define foo const and foo equ const
-/      Added Support for #ifdef/#else/#endif  (nested #includes still needed).
+/      Added Support for #ifdef/#else/#endif/nested #includes
 -------------------------------------------------------------WESC------------*/
-/*
- * LDu 31-8-2001 : implement nested #includes
- * - pass the previous global values to the function.
- * - these values will be restored at the function's end.
- */
 static void
-// LDu 31-8-2001 : deleted// ParseCInclude(char *szIncludeFile)
-// LDu 31-8-2001 : start modification//
-ParseCInclude(char *szIncludeFile,
-              char *prv_szInfile,
-              int prv_ifdefSkipping,
-              int prv_ifdefLevel,
-              FILE * prv_vfhIn,
-              int prv_iline)
-// LDu 31-8-2001 : end modification//
+ParseCInclude(const char *szIncludeFile)
 {
-  // LDu 31-8-2001 : deleted// FILE *fhInSav;
-  // LDu 31-8-2001 : deleted// int ilineSav;
-  char *szInFileSav;
+  FILE *fhInSav = vfhIn;
+  char *szInFileSav = szInFile;
+  int ilineSav = iline;
+  int ifdefSkippingSav = ifdefSkipping;
+  int ifdefLevelSav = ifdefLevel;
+
   char szId[256];
   int wIdVal;
 
-  /*
-   * Variables to support #ifdef/#else/#endif 
-   */
-  /*
-   * needed at this scope to not interfer with the globals 
-   */
-
-  /*
-   * tok contains filename 
-   */
-
-  // LDu 31-8-2001 : start modification//
   static int depth = 0;
 
   depth++;
   ifdefSkipping = 0;
   ifdefLevel = 0;
-  // LDu 31-8-2001 : end modification//
-
-  // LDu 31-8-2001 : deleted// fhInSav = vfhIn;
-  // LDu 31-8-2001 : deleted// ilineSav = iline;
-  szInFileSav = szInFile;
 
   OpenInputFile(szIncludeFile);
 
@@ -5601,25 +5574,8 @@ ParseCInclude(char *szIncludeFile,
                 {
                   if (depth < 32)
                   {
-                    char *szFileName;
-                    char *pchExt;
-
                     GetExpectLt(&tok, ltStr, "include filename");
-                    szFileName = tok.lex.szId;
-
-                    pchExt = strrchr(szFileName, '.');
-                    if (!pchExt)
-                    {
-                      /*
-                       * Assume it's a .h file 
-                       */
-                      ParseCInclude(szFileName, prv_szInfile, ifdefSkipping,
-                                    ifdefLevel, vfhIn, iline);
-                      break;
-                    }
-                    pchExt++;
-                    ParseCInclude(szFileName, prv_szInfile, ifdefSkipping,
-                                  ifdefLevel, vfhIn, iline);
+                    ParseCInclude(tok.lex.szId);
                   }
                   else
                   {
@@ -5630,9 +5586,7 @@ ParseCInclude(char *szIncludeFile,
                   NextLine();                    // RMa in #include not parsed jump to next line
                 break;
               }
-              /*
-               * LDu 31-8-2001 : end modification
-               */
+
             case rwDefine:
               {
                 if (ifdefSkipping)
@@ -5794,19 +5748,16 @@ ParseCInclude(char *szIncludeFile,
         break;
     }
   }
+
   fclose(vfhIn);
+  vfhIn = fhInSav;
   free(szInFile);
   szInFile = szInFileSav;
-  // LDu 31-8-2001 : deleted//iline = ilineSav;
-  // LDu 31-8-2001 : deleted//vfhIn = fhInSav;
+  iline = ilineSav;
 
-  // LDu 31-8-2001 : start modification//
-  iline = prv_iline;
-  vfhIn = prv_vfhIn;
-  ifdefSkipping = prv_ifdefSkipping;
-  ifdefLevel = prv_ifdefLevel;
+  ifdefSkipping = ifdefSkippingSav;
+  ifdefLevel = ifdefLevelSav;
   depth--;
-  // LDu 31-8-2001 : end modification//
 }
 
 /*-----------------------------------------------------------------------------
@@ -5824,19 +5775,12 @@ ParseCInclude(char *szIncludeFile,
 static void
 ParseJavaInclude(char *szIncludeFile)
 {
-  FILE *fhInSav;
-  int ilineSav;
-  char *szInFileSav;
+  FILE *fhInSav = vfhIn;
+  char *szInFileSav = szInFile;
+  int ilineSav = iline;
+
   char szId[256];
   int wIdVal;
-
-  /*
-   * tok contains filename 
-   */
-
-  fhInSav = vfhIn;
-  ilineSav = iline;
-  szInFileSav = szInFile;
 
   OpenInputFile(szIncludeFile);
 
@@ -5890,12 +5834,11 @@ ParseJavaInclude(char *szIncludeFile)
   }
 
 endOfClass:
-
   fclose(vfhIn);
+  vfhIn = fhInSav;
   free(szInFile);
   szInFile = szInFileSav;
   iline = ilineSav;
-  vfhIn = fhInSav;
 }
 
 static BOOL
@@ -6003,21 +5946,17 @@ InitRcpfile(RCPFILE * prcpfile,
 /   put in separate function to obtain recursive analyzis thru .rcp files
 -------------------------------------------------------------LDu--------------*/
 static void
-ParseRcpFile(const char *szRcpIn,
-             RCPFILE * prcpfile,
-             const char *prv_szInfile,
-             int prv_ifdefSkipping,
-             int prv_ifdefLevel,
-             FILE * prv_vfhIn,
-             int prv_iline)
+ParseRcpFile(const char *szRcpIn, RCPFILE * prcpfile)
 {
+  FILE *fhInSav = vfhIn;
+  char *szInFileSav = szInFile;
+  int ilineSav = iline;
+  int ifdefSkippingSav = ifdefSkipping;
+  int ifdefLevelSav = ifdefLevel;
 
-  // LDu 31-8-2001 : start modification
-  //declare a static variable to limit the depth
   static int depth = 0;
 
   depth++;
-  //re-initialize some globals
   ifdefSkipping = 0;
   ifdefLevel = 0;
 
@@ -6027,9 +5966,6 @@ ParseRcpFile(const char *szRcpIn,
   }
 
   OpenInputFile(szRcpIn);
-  // LDu 31-8-2001 : end modification
-
-  // Start of original code
 
   if (!FGetTok(&tok))
     Error("bogus source file");
@@ -6039,10 +5975,7 @@ ParseRcpFile(const char *szRcpIn,
     {
       if (tok.lex.lt == ltPound)
       {
-        // LDu 31-8-2001 : deleted//ParseDirectives();
-        // LDu 31-8-2001 : start modification//
         ParseDirectives(prcpfile);
-        // LDu 31-8-2001 : end modification//
       }
       else
       {
@@ -6224,10 +6157,7 @@ ParseRcpFile(const char *szRcpIn,
       default:
         if (tok.lex.lt == ltPound)
         {
-          // LDu 31-8-2001 : deleted//ParseDirectives();
-          // LDu 31-8-2001 : start modification//
           ParseDirectives(prcpfile);
-          // LDu 31-8-2001 : end modification//
         }
         else if (tok.lex.lt == ltDoubleSlash)
           NextLine();
@@ -6256,25 +6186,16 @@ ParseRcpFile(const char *szRcpIn,
     }
   }
   while (FGetTok(&tok));
+
   fclose(vfhIn);
+  vfhIn = fhInSav;
+  free(szInFile);
+  szInFile = szInFileSav;
+  iline = ilineSav;
 
-  // END of original code
-
-  // LDu 31-8-2001 : start modification
-  // restore the previous global values 
-  if (prv_szInfile)
-  {
-    free(szInFile);
-    szInFile = prv_szInfile;
-  }
-  iline = prv_iline;
-  if (prv_vfhIn)
-    vfhIn = prv_vfhIn;
-  ifdefSkipping = prv_ifdefSkipping;
-  ifdefLevel = prv_ifdefLevel;
+  ifdefSkipping = ifdefSkippingSav;
+  ifdefLevel = ifdefLevelSav;
   depth--;
-  // Ldu 31-8-2001 : end modification
-
 }
 
 /*-----------------------------------------------------------------------------
@@ -6297,10 +6218,7 @@ ParseLineDirective(BOOL fnameRequired)
 |	ParseDirectives
 -------------------------------------------------------------DAVE------------*/
 static void
-// LDu 31-8-2001 : deleted //ParseDirectives()
-// LDu 31-8-2001 : start modification //
 ParseDirectives(RCPFILE * prcpfile)
-// LDu 31-8-2001 : end modification //
 {
   TOK tok;
   char szId[256];
@@ -6333,11 +6251,9 @@ ParseDirectives(RCPFILE * prcpfile)
 	  if (FSzEqI(pchExt, "java") || FSzEqI(pchExt, "jav"))
 	    ParseJavaInclude(szFileName);
 	  else if (tolower(pchExt[0]) == 'r')
-            ParseRcpFile(szFileName, prcpfile, szInFile, ifdefSkipping,
-                         ifdefLevel, vfhIn, iline);
+	    ParseRcpFile(szFileName, prcpfile);
 	  else
-            ParseCInclude(szFileName, szInFile, ifdefSkipping, ifdefLevel,
-                          vfhIn, iline);
+	    ParseCInclude(szFileName);
         }
         break;
       }
@@ -6555,16 +6471,10 @@ ParseFile(const char *szIn,
     InitDependsList();
   }
 
-  // LDu 31-8-2001 deleted// OpenInputFile(szIn);
   OpenResFile(szResFile);
   FInitLexer(NULL, fTrue);
 
-  // LDu 31-8-2001 start modification //
-  ParseRcpFile(szIn, prcpfile, szIn, 0, 0, NULL, 0);
-
-  // previous code 
-  // is now in ParseRcpFile function
-  // to have a recursive implementation
+  ParseRcpFile(szIn, prcpfile);
 
   if (vfTrackDepends)
   {
@@ -6583,8 +6493,6 @@ ParseFile(const char *szIn,
     }
     free(szDependsFile);
   }
-
-  // LDu 31-8-2001 end modification //
 
   if (!vfInhibitOutput && szOutputHeaderFile)
   {
