@@ -6527,7 +6527,6 @@ ParseFile(const char *szIn,
           int fontType)
 {
   RCPFILE *prcpfile;
-  char szDependsFile[FILENAME_MAX];
 
   if (szIncFile != NULL)
   {
@@ -6581,8 +6580,6 @@ ParseFile(const char *szIn,
 
   if (vfTrackDepends)
   {
-    strcpy(szDependsFile, szIn);
-    ChangeOrAppendFilenameSuffix(szDependsFile, ".rcp", ".d");
     InitDependsList();
   }
 
@@ -6599,16 +6596,24 @@ ParseFile(const char *szIn,
 
   if (vfTrackDepends)
   {
+    char *szDependsFile = MakeFilename("%s%e.d", szIn, ".rcp");
     FILE *dependsFile = fopen(szDependsFile, "w");
     if (dependsFile)
     {
         OutputDependsList(dependsFile);
+
+	if (szOutputHeaderFile[0] != '\0')
+	{
+	    SetDependsTarget(szOutputHeaderFile);
+	    OutputDependsList(dependsFile);
+	}
         fclose(dependsFile);
     }
     else
     {
         // FIXME: error
     }
+    free(szDependsFile);
   }
 
   // LDu 31-8-2001 end modification //
@@ -6616,20 +6621,6 @@ ParseFile(const char *szIn,
   if (!vfInhibitOutput && szOutputHeaderFile[0] != 0)
   {
     WriteIncFile(szOutputHeaderFile);
-    if (vfTrackDepends)
-    {
-      FILE *dependsFile = fopen(szDependsFile, "a");
-      if (dependsFile)
-      {
-          SetDependsTarget(szOutputHeaderFile);
-          OutputDependsList(dependsFile);
-          fclose(dependsFile);
-      }
-      else
-      {
-          // FIXME: error
-      }
-    }
   }
 
 #ifdef PALM_INTERNAL
