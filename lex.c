@@ -1,25 +1,49 @@
 /*-----------------------------------------------------------------------------
 |	lex.c
-|	
+|
 |	Pilrc lexer
 -----------------------------------------------------------------------------*/
+
+/***
+
+    bar:    April 10, 1999
+            Add ability to handle nnnLU, nnnL, and nnnU type constants
+
+    bar:    April 9, 1999
+            Add ability to handle '1234' type constants
+
+	bar:    June 11, 1998
+			Remove GCC warnings
+
+	bar:    April 22, 1998
+
+			Made clean-compile using Borland 4.5(32-bit) C++ and C.
+			Added more complete C string parsing, including all '\' options, hex, etc.
+			Max'ed octal character numbers out to 3 digits.
+			Do C-style comments.
+
+***/
+
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+
 #define NOPILOTINC
 #include "pilrc.h"
 
 
-int wBaseCur = 10;
-              
-char *pchLexBuf;
-char *pchLexPrev;
-char *pchLex;
+static int wBaseCur = 10;
 
-char *_pchParseError;
-BOOL _fReportErrors;
+static char *pchLexBuf;
+static char *pchLexPrev;
+static char *pchLex;
+
+static char *_pchParseError;
+static BOOL _fReportErrors;
+
 
 BOOL FInitLexer(char *pch, BOOL fMarkErrors)
 	{
@@ -31,15 +55,20 @@ BOOL FInitLexer(char *pch, BOOL fMarkErrors)
 	return fTrue;
 	}
 
-char *PchLexer()
+
+#if 0
+static char *PchLexer(void)
 	{
 	return pchLex;
 	}
+#endif
 
-char *PchLexerPrev()
+
+char *PchLexerPrev(void)
 	{
 	return pchLexPrev;
 	}
+
 
 VOID ParseError(char *sz1, char *sz2)
 	{
@@ -48,30 +77,44 @@ VOID ParseError(char *sz1, char *sz2)
 	ErrorLine2(sz1, sz2);
 	}
 
-char *PchParseError()
+
+#if 0
+static char *PchParseError(void)
 	{
 	return _pchParseError;
 	}
-	
-	
-	
+#endif
 
 
-BOOL FSkipWhite()	
+
+
+
+static BOOL FSkipWhite(void)
 	{
 	if (pchLex == NULL)
 		return fFalse;
 	while (*pchLex == ' ' || *pchLex == '\t' || *pchLex == '\n' || *pchLex == '\r')
 		pchLex++;
-	return (*pchLex != '\000');
+	return(*pchLex != '\000');
 	}
+	
+	
+/***    Allow 12345678LU, for instance (should be only in .h or .hpp?!?) ***/
+static void AllowLUAtEndOfConstant(int ch)
+    {
+    if ((ch == 'l') || (ch == 'L'))
+        ch = (BYTE) *pchLex++;
+    if ((ch == 'u') || (ch == 'U'))
+        pchLex++;
+    }
+	
 
-BOOL FParseHex(LEX *plex, int ch)
+static BOOL FParseHex(LEX *plex, int ch)
 	{
 	LEX lex;
 
 	ch = tolower(ch);
-	if (ch == '0' && *(pchLex) == 'x' || *(pchLex) == 'X')
+	if ((ch == '0') && ((*(pchLex) == 'x') || (*(pchLex) == 'X')))
 		{
 		pchLex++;
 		ch = *pchLex++;
@@ -87,114 +130,212 @@ BOOL FParseHex(LEX *plex, int ch)
 			if ((ch >= '0' && ch <= '9'))
 				lex.val += ch-'0';
 			else
-				lex.val += ch-'a'+10;
+				lex.val	+= ch-'a'+10;
 			ch = *pchLex++;
 			ch = tolower(ch);
 			}
+        AllowLUAtEndOfConstant(ch);
 		*plex = lex;
 		return fTrue;
 		}
 	return fFalse;
 	}
-
-BOOL FParseConst(LEX *plex, int ch)
+	
+	
+static BOOL FParseConst(LEX *plex, int ch)
 	{
-	char *pchSav;
-	extern int wBaseCur;
 	char *pchStore;
 
 
 	pchStore = plex->szId;
-//	*pchStore++ = ch;
-	pchSav = pchLex;
-/*	if (wBaseCur == 16) */
-		/*return FParseHex(plex, ch); */
-#ifdef LATER
-	if (wBaseCur == 2)
-		return FParseBin(plex, ch);
-#endif
 	Assert(wBaseCur == 10);
 	if ((ch >= '0' && ch <= '9') || ch == '.')
 		{
 		plex->lt = ltConst;
 		plex->val = 0;
-		if (ch == '0' && *(pchLex) == 'x' || *(pchLex) == 'X')
+		if ((ch == '0') && ((*(pchLex) == 'x') || (*(pchLex) == 'X')))
 			{
 			*pchStore++ = *pchLex++;
-			*pchStore++ = ch;
+			*pchStore = (char) ch;
 			ch = *pchLex++;
 			return FParseHex(plex, ch);
 			}
+
 		while (ch >= '0' && ch <= '9')
 			{
 			plex->val *= 10;
 			plex->val += ch-'0';
-			*pchStore++ = ch;
+			*pchStore++ = (char) ch;
 			ch = *pchLex++;
 			}
-		*pchStore = 0;
-		return fTrue;
 		}
-	*pchStore = 0;
-	return fFalse;
+    else if (ch == '\'')
+        {
+        char    szT[2];
+        int     cc;
+
+        plex->lt = ltConst;
+        plex->val = 0;
+		*pchStore++ = (char) ch;
+        for (cc = 0; cc < 4; ++cc)
+            {
+			ch = (BYTE) *pchLex++;
+            *pchStore++ = (char) ch;
+            /***    printf("char=[%c]\n", ch); ***/
+            if (ch == '\'')
+                break;
+
+            if (ch < ' ')
+                {
+    			szT[0] = (char) ch;
+    			szT[1] = '\000';
+    			ParseError("Unknown character in '' constant: ", szT);
+                }
+
+            plex->val *= 256;
+            plex->val += ch;   /* high-byte first as a guess */
+            }
+
+        /***    Compensate for when we got a full 4 characters ***/
+        if (ch != '\'')
+            ch = (BYTE) *pchLex++;
+
+        ++pchLex;       /* compensate for later -- by caller */
+        if (ch != '\'')
+            {
+            szT[0] = (char) ch;
+            szT[1] = '\000';
+            ParseError("Unknown '' constant terminator: ", szT);
+            }
+        }
+    else
+        {
+    	*pchStore = 0;
+	    return fFalse;
+        }
+
+    /***    Note: 'pchLex' is now one past the character that's in 'ch' - the next character to parse ***/
+    AllowLUAtEndOfConstant(ch);
+
+    *pchStore = 0;
+	return fTrue;
 	}
 
-int ChParseOctal(int ch)
+static int ChParseOctal(int ch)
 	{
-	int chVal;
+	int chVal, cnt;
 
 	chVal = 0;
-	while (ch >= '0' && ch <= '7')
+
+	/***    Functionality change: 2.01b     bar: only three octal chars! ***/
+	for (cnt = 3; cnt-- && ((ch >= '0') && (ch <= '7')); )
 		{
 		chVal *= 8;
 		chVal += ch-'0';
 		ch = *pchLex++;
 		}
-	pchLex--;
+	pchLex--;	/* back off to the non-octal digit */
 	return chVal;
 	}
 
-BOOL FParseId(LEX *plex, int ch)
+
+
+#ifndef _within
+	#define _within(n, l, h)    (((n) >= (l)) && ((n) <= (h)))
+#endif
+
+static int hexize(int c)/***   convert hex digit to binary                                                 ***/
+	{
+	if (_within(c, '0', '9')) return(c - '0');
+	if (_within(c, 'A', 'F')) return(c - ('A' - 10));
+	if (_within(c, 'a', 'f')) return(c - ('a' - 10));
+
+	return(-1);
+	}
+
+
+static int ChParseHex(int ch)
+	{
+	int chVal;
+
+	chVal = 0;
+	for (;;)
+		{
+		int n;
+
+		ch = *pchLex;
+		n = hexize(ch);
+		if (n < 0) break;
+		n += (chVal * 16);
+		if (n >= 256) break;	/* Java's \Uxxxx might take more digits (Unicode alert!!!!) */
+		++pchLex;
+		chVal = n;
+		}
+
+	return chVal;
+	}
+
+
+static BOOL FParseId(LEX *plex, int ch)
 	{
 	LEX lex;
 
 	if ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_')
-	   	{
-	   	/* Identifier */
-	   	int cch;
+		{
+		/* Identifier */
+		int cch;
 
-	   	lex.lt = ltId;
-	   	cch = 0;
-	   	do
-	   		{
+		lex.lt = ltId;
+		cch = 0;
+		do
+			{
 /*			if (ch != '"') */
-				{
-				lex.szId[cch] = ch;
+			{
+				lex.szId[cch] = (char) ch;	/* gratuitous cast - Unicode alert!!!! */
 				cch++;
-				}
-	   		ch = *pchLex++;
-	   		if (cch == cchIdMax-1)
-	   			{    
+			}
+			ch = *pchLex++;
+			if (cch == cchIdMax-1)
+				{
 				ParseError("Identifier too long", NULL);
-	   			break;
-	   			}
-	   		}
-	   	while ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_');
-	   	lex.szId[cch] = '\000';
+				break;
+				}
+			}
+		while ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_');
+		lex.szId[cch] = '\000';
 		*plex = lex;
 		return fTrue;
-	   	}				
+		}
 	return fFalse;
 	}
 
+
+/***    Skip to end of C comment, if there is an end - else eat the input ***/
+static BOOL FSkipToEndOfCComment(void)
+	{
+	while (*pchLex)
+		{
+		if ((pchLex[0] == '*') && (pchLex[1] == '/'))
+			{
+			pchLex += 2;
+			return(fTrue);
+			}
+		++pchLex;
+		}
+
+	return(fFalse);
+	}
+
+
+
+
 #define SLT(ch, ltArg) case ch: lex.lt = ltArg; break;
 
-BOOL FGetLex(LEX *plex)
+BOOL FGetLex(LEX *plex, BOOL fInComment)
 	{
 	int ch;
 	char szT[2];
 	LEX lex;
-	char *pchSav;
 	char *pchStore;
 
 
@@ -202,127 +343,207 @@ BOOL FGetLex(LEX *plex)
 	pchLexPrev = pchLex;
 	if (!FSkipWhite())
 		return fFalse;
-	pchSav = pchLex;
-	pchStore = lex.szId;
-	*pchStore++ = ch = *pchLex++;
-	*pchStore = 0;
-	switch (ch)
-		{
-	/* BUG! could use a lookup table... */
-	/*TODO logical operators */
-	SLT('+', ltPlus)
-	SLT('-', ltMinus)
-	SLT('*',	ltMult)
-	SLT('%', ltMod)
-	SLT('(', ltLParen)
-	SLT(')', ltRParen)
-	SLT('[', ltLBracket)
-	SLT(']', ltRBracket)
-	SLT('{', ltLBrace)
-	SLT('}', ltRBrace)
-	SLT(',', ltComma)
-	SLT('?', ltQuestion)
-	SLT(':', ltColon)
-	SLT('^', ltCaret)
-	SLT('\\', ltBSlash)
-	SLT('#', ltPound)
-	SLT(';', ltSemi)
-	case '/':
-		if (*pchLex == '/')
-			{
-			*pchStore++ = *pchLex++;
-			*pchStore = 0;
-			lex.lt = ltDoubleSlash;
-			}
-		else
-			lex.lt = ltDiv;
-		break;
-	case '<':
-		if (*pchLex == '=')
-			{
-			*pchStore++ = *pchLex++;
-			*pchStore = 0;
-			lex.lt = ltLTE;
-			}
-		else if (*pchLex == '>')
-			{
-			*pchStore++ = *pchLex++;
-			*pchStore = 0;
-			lex.lt = ltNE;
-			}
-		else
-			lex.lt = ltLT;
-		break;
-	case '>':
-		if (*pchLex++ == '=')
-			{
-			*pchStore++ = *pchLex++;
-			*pchStore = 0;
-			lex.lt = ltGTE;
-			}
-		else
-			lex.lt = ltGT;
-		break;
-	case '=':
-		if (*pchLex == '=')
-			{
-			*pchStore++ = *pchLex++;
-			*pchStore = 0;
-			lex.lt = ltEQ;
-			}
-		else
-			lex.lt = ltAssign;
-		break;
-	case '"':
-		lex.lt = ltStr;
-		pchStore = lex.szId;
-		while (*pchLex != '"')
-			{
-			if (*pchLex == '\\')
-				{
-				int ch;
 
-				pchLex++;
-				ch = *pchLex++;
-				if (ch == 'n')
-					ch = 0x0a;
-				else if (ch == 't')
-					ch = '\t';
-				else if (ch >= '0' && ch <= '7')
-					ch = ChParseOctal(ch);
-				*pchStore++ = ch;
-				}
-			else
-				*pchStore++ = *pchLex++;
-	   		if (pchStore-lex.szId == cchIdMax-1)
-	   			{    
-				ParseError("String too long", NULL);
-	   			break;
-	   			}
-			if (*pchLex == 0)
-				{
-				ParseError("Unterminated string", NULL);
-				break;
-				}
-			}
-		pchLex++;
-		*pchStore = 0;
-		break;
-	default:
-		if (FParseConst(&lex, ch) || FParseId(&lex, ch))
-			{
-			/* do nuthin...code is easier to read this way */
-			}
+
+	if (fInComment)
+		{
+		if (!FSkipToEndOfCComment())
+			lex.lt = ltCComment; /* keep going with it */
 		else
-			{
-			szT[0] = ch;
-			szT[1] = '\000';
-			ParseError("Unknown character: ", szT);
-			}
-		pchLex--;
-		break;
+			lex.lt = ltEndCComment;	 /* ok, the comment is over */
 		}
-	
+	else
+		{
+		pchStore = lex.szId;
+		ch = *pchStore++ = *pchLex++;
+
+		*pchStore = 0;
+		switch (ch)
+			{
+			/* BUG! could use a lookup table... */
+			/*TODO logical operators */
+			SLT('+', ltPlus)
+			SLT('-', ltMinus)
+			SLT('*',    ltMult)
+			SLT('%', ltMod)
+			SLT('(', ltLParen)
+			SLT(')', ltRParen)
+			SLT('[', ltLBracket)
+			SLT(']', ltRBracket)
+			SLT('{', ltLBrace)
+			SLT('}', ltRBrace)
+			SLT(',', ltComma)
+			SLT('?', ltQuestion)
+			SLT(':', ltColon)
+			SLT('^', ltCaret)
+			SLT('\\', ltBSlash)
+			SLT('#', ltPound)
+			SLT('@', ltAt)
+			SLT(';', ltSemi)
+			SLT('|', ltPipe)
+			case '/':
+				if (*pchLex == '/')
+					{
+					*pchStore++ = *pchLex++;
+					*pchStore = 0;
+					lex.lt = ltDoubleSlash;
+					}
+				else if (*pchLex == '*')
+					{
+					if (!FSkipToEndOfCComment())
+						lex.lt = ltCComment;
+					else
+						lex.lt = ltEndCComment;	/* return place holder token */
+					}
+				else
+					lex.lt = ltDiv;
+				break;
+			case '<':
+				if (*pchLex == '=')
+					{
+					*pchStore++ = *pchLex++;
+					*pchStore = 0;
+					lex.lt = ltLTE;
+					}
+				else if (*pchLex == '>')
+					{
+					*pchStore++ = *pchLex++;
+					*pchStore = 0;
+					lex.lt = ltNE;
+					}
+				else
+					lex.lt = ltLT;
+				break;
+			case '>':
+				if (*pchLex++ == '=')
+					{
+					*pchStore++ = *pchLex++;
+					*pchStore = 0;
+					lex.lt = ltGTE;
+					}
+				else
+					lex.lt = ltGT;
+				break;
+			case '=':
+				if (*pchLex == '=')
+					{
+					*pchStore++ = *pchLex++;
+					*pchStore = 0;
+					lex.lt = ltEQ;
+					}
+				else
+					lex.lt = ltAssign;
+				break;
+			case '"':
+				lex.lt = ltStr;
+				pchStore = lex.szId;
+				while (*pchLex != '"')
+					{
+					if (*pchLex == '\\')
+						{
+						int ch;
+
+						pchLex++;
+						ch = *pchLex++;
+						switch (ch)
+							{
+							case 'a' :
+								ch = '\a';
+								break;
+
+							case 'b' :
+								ch = '\b';
+								break;
+
+							case 'f' :
+								ch = '\f';
+								break;
+
+							case 'n' :
+								ch = '\n';
+								break;
+
+							case 'r' :
+								ch = '\r';
+								break;
+
+							case 't' :
+								ch = '\t';
+								break;
+
+							case 'v' :
+								ch = '\v';
+								break;
+
+							case '0' :
+							case '1' :
+							case '2' :
+							case '3' :
+							case '4' :
+							case '5' :
+							case '6' :
+							case '7' :
+								ch = ChParseOctal(ch);
+								break;
+
+							case 'x' :
+							case 'X' :
+								ch = ChParseHex(ch);
+								break;
+
+							case '\0' :		/* handle slash at the end of the line  */
+								ch = '\\';
+								break;
+
+							case 'e' :		/* ESC, thank you Richard Brinkerhoff   */
+								ch = '\033';
+								break;
+
+							case 'z' :		/* special control z'er                 */
+								ch = 'z' & 0x1f;
+								break;
+
+							case '_' :		/* special ignore - turns to nothing    */
+								ch = '\0';
+								break;
+							}
+
+						/***    This program does not handle nulls in strings ***/
+						if (ch)
+							*pchStore++ = (char) ch;	/* gratuitous cast - Unicode alert!!!! */
+						}
+					else
+						*pchStore++	= *pchLex++;
+					if (pchStore-lex.szId == cchIdMax-1)
+						{
+						ParseError("String too long", NULL);
+						break;
+						}
+					if (*pchLex == 0)
+						{
+						ParseError("Unterminated string", NULL);
+						break;
+						}
+					}
+				pchLex++;
+				*pchStore = 0;
+				break;
+			default:
+				if (FParseConst(&lex, ch) || FParseId(&lex, ch))
+					{
+					/* do nuthin...code is easier to read this way */
+					}
+				else
+					{
+					szT[0] = (char) ch;
+					szT[1] = '\000';
+					ParseError("Unknown character: ", szT);
+					}
+				pchLex--;
+				break;
+			}
+		}
+
 	*plex = lex;
 	return lex.lt != ltNil;
 	}
@@ -331,38 +552,42 @@ BOOL FGetLex(LEX *plex)
 
 VOID PrintLex(LEX *plex)
 	{
+	plex = plex;
 #ifdef FOO
-	switch(plex->lt)
+	switch (plex->lt)
 		{
-	case ltConst:
- 		printf("%d ", plex->val);
-		break;
-	case ltId:
-		printf("%s ", plex->szId);
-		break;
-	SPLT(ltPlus, "+");
-	SPLT(ltMinus, "-");
-	SPLT(ltMult, "*");
-	SPLT(ltDiv, "/");
-	SPLT(ltMod, "%");
-	SPLT(ltLParen, "(");
-	SPLT(ltRParen, ")");
-	SPLT(ltLBracket, "[");
-	SPLT(ltRBracket, "]");
-	SPLT(ltLBrace, "{");
-	SPLT(ltRBrace, "}");
-	SPLT(ltComma, ",");
-	SPLT(ltLT, "<");
-	SPLT(ltGT, ">");
-	SPLT(ltLTE, "<=");
-	SPLT(ltGTE, ">=");
-	SPLT(ltNE, "<>");
-	SPLT(ltEQ, "==");
-	SPLT(ltAssign, "=");
-	SPLT(ltQuestion, "?");
-	SPLT(ltColon, ":");
-	SPLT(ltCaret, "^");
+		case ltConst:
+			printf("%d ", plex->val);
+			break;
+		case ltId:
+			printf("%s ", plex->szId);
+			break;
+			SPLT(ltPlus, "+");
+			SPLT(ltMinus, "-");
+			SPLT(ltMult, "*");
+			SPLT(ltDiv, "/");
+			SPLT(ltMod, "%");
+			SPLT(ltLParen, "(");
+			SPLT(ltRParen, ")");
+			SPLT(ltLBracket, "[");
+			SPLT(ltRBracket, "]");
+			SPLT(ltLBrace, "{");
+			SPLT(ltRBrace, "}");
+			SPLT(ltComma, ",");
+			SPLT(ltLT, "<");
+			SPLT(ltGT, ">");
+			SPLT(ltLTE, "<=");
+			SPLT(ltGTE, ">=");
+			SPLT(ltNE, "<>");
+			SPLT(ltEQ, "==");
+			SPLT(ltAssign, "=");
+			SPLT(ltQuestion, "?");
+			SPLT(ltColon, ":");
+			SPLT(ltCaret, "^");
 		}
 #endif
 	}
 
+
+
+/* eof */

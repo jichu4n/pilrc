@@ -1,0 +1,39 @@
+PilRC for OS/2 
+--------------
+
+
+Precompiled port
+----------------
+
+An already built OS/2 port of PilRC is available at 
+
+http://www.t-online.de/home/jochen.stenzel/pilot-warpports.html
+
+Since I don't directly build the OS/2 version, this version may lag the current
+release.  See info below on building pilrc yourself (it's easy)
+
+The port is made from the original sources and was done using the EMX
+development package by E. Matthes. It is compiled to run with the EMX
+runtime 0.09b or later, which could be found as emxrt.zip on various
+servers, e.g. look at
+
+    ftp://ftp.leo.org/pub/comp/os/os2/leo/gnu/emx+gcc/emxrt.zip
+    ftp://ftp.uni-stuttgart.de/pub/systems/os2/leo/gnu/emx+gcc/emxrt.zip
+    ftp://ftp-os2.cdrom.com/pub/os2/unix
+
+(this list is derived from the emxrt.doc file included in the package).
+
+This OS/2 version of PilRC was built and tested under OS/2 Warp connect.
+There should be no problem to run it under every OS/2 version where EMX
+is available for. More, because of the inspiring features of EMX, this port
+runs under pure DOS (with installed EMX runtime), too.
+
+
+Porting PilRC yourself
+--------------------
+
+If you prefer to build the port yourself from the sources in this PilRC
+package, a makefile is provided to support you (src\makefile.os2).
+See inline comments therein for details.
+
+

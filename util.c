@@ -8,6 +8,7 @@
 #include <errno.h>
 #include "pilrc.h"
 #include "util.h"
+#include "font.h"
 
 /* Globals */
 FILE *vfhOut;
@@ -28,228 +29,6 @@ extern BOOL vfQuiet;
 char *includePaths[MAXPATHS];
 int   totalIncludePaths = 0;
 
-
-/* font widths for font 0 */
-unsigned char mpchdxFont0[] =
-	{
-	0, 0, 0, 0, 0, 0, 0, 0,   /* 0 */
-	0, 0, 0, 0, 0, 0, 0, 0,   /* 8 */
-	0, 0, 0, 0, 0, 0, 0, 0,   /* 10 */
-	0, 0, 0, 0, 0, 0, 0, 0,   /* 18 */
-	2, 2, 4, 8, 6, 8, 7, 2,   /* 20 */
-	4, 4, 6, 6, 3, 4, 2, 5,   /* 28 */
-	5, 5, 5, 5, 5, 5, 5, 5,   /* 30	 // 0..7 */
-	5, 5, 2, 3, 6, 6, 6, 5,   /* 38   // 8.. */
-	8, 5, 5, 5, 6, 4, 4, 6,   /* 40 */
-	6, 2, 4, 6, 5, 8, 6, 7,   /* 48 */
-	5, 7, 5, 5, 6, 6, 6, 8,   /* 50 */
-	6, 6, 6, 3, 5, 3, 6, 4,   /* 58 */
-	3, 5, 5, 4, 5, 5, 4, 5,   /* 60 */
-	5, 2, 3, 5, 2, 8, 5, 5,   /* 68 */
-	5, 5, 4, 4, 4, 5, 5, 6,   /* 70 */
-	6, 6, 4, 4, 2, 4, 7, 5,   /* 78 */
-	5, 5, 3, 8, 5, 6, 6, 6,   /* 80 */
-	4, 11,5, 4, 8,10,10,10,  /* 88 */
-	10,3, 3, 5, 5, 4, 4, 7,  /* 90 */
-	7, 10,4, 4, 8, 5, 5, 6,  /* 98 */
-	2, 2, 6, 6, 8, 6, 2, 5,   /* a0 */
-	4, 8, 5, 6, 6, 4, 8, 6,   /* a8			// (c).. */
-	5, 6, 4, 4, 3, 5, 6, 2,   /* b0 */
-	4, 2, 5, 6, 8, 8, 8, 5,   /* b8 */
-	5, 5, 5, 5, 5, 5, 7, 5,   /* c0 */
-	4, 4, 4, 4, 3, 2, 3, 3,   /* c8 */
-	7, 6, 7, 7, 7, 7, 7, 5,   /* d0 */
-	8, 6, 6, 6, 6, 6, 6, 6,   /* d8 */
-	5, 5, 5, 5, 5, 5, 8, 4,   /* e0 */
-	5, 5, 5, 5, 2, 2, 3, 3,   /* e8 */
-	5, 5, 5, 5, 5, 5, 5, 6,   /* f0 */
-	7, 5, 5, 5, 5, 6, 5, 6};
-
-unsigned char mpchdxFont1[] =
-	{
-	5,5,5,5,5,5,5,5,
-	5,2,5,5,5,5,5,5,
-	5,5,5,5,5,5,5,5,
-	5,5,5,5,5,5,5,5,
-	2,3,6,10,6,13,9,3,
-	5,5,6,6,3,5,3,6,
-	6,6,6,6,6,6,6,6,
-	6,6,3,3,6,6,6,6,
-	10,7,7,6,7,5,5,8,
-	8,3,5,7,6,10,7,8,
-	7,8,8,6,7,7,8,11,
-	7,7,7,4,6,4,6,5,
-	4,6,6,5,6,6,5,6,
-	6,3,4,6,3,9,6,6,
-	6,6,5,5,6,6,6,9,
-	6,6,5,5,3,5,7,5,
-	6,5,3,9,5,6,5,5, /* 80 */
-	4,17,6,5,10,10,10,10,
-	10,3,3,5,5,4,4,6,
-	7,10,5,5,10,5,5,7,
-	2,3,6,7,8,7,3,6,
-	4,8,6,8,6,5,8,6,
-	5,6,4,4,4,6,7,2,
-	4,2,6,8,9,9,9,6,
-	7,7,7,7,7,7,9,6,
-	5,5,5,5,3,3,3,3,
-	8,7,8,8,8,8,8,6,
-	8,7,7,7,7,7,7,8,
-	6,6,6,6,6,6,9,5,
-	6,6,6,6,3,3,3,3,
-	6,6,6,6,6,6,6,7,
-	8,6,6,6,6,6,6,6
-	};
-
-unsigned char mpchdxFont2[] =
-	{
-	5, 5, 5, 5, 5, 5, 5, 5, 
-	5, 4, 5, 5, 5, 5, 5, 5, 
-	5, 5, 5, 5, 5, 5, 5, 5, 
-	5, 5, 5, 5, 5, 5, 5, 5, 
-	4, 2, 4, 9, 6, 11,8, 2,
-	4, 4, 6, 8, 3, 4, 2, 5, 
-	7, 7, 7, 7, 7, 7, 7, 7, 
-	7, 7, 2, 3, 7, 7, 7, 5, 
-	11,9, 6, 7, 7, 6, 6, 8, 
-	7, 3, 4, 7, 5, 10,7, 8, 	/* 48 */
-	6, 8, 6, 5, 6, 7, 7, 11, 
-	7, 6, 5, 3, 5, 3, 6, 6, 
-	3, 6, 7, 6, 7, 7, 4, 7, 
-	6, 3, 3, 6, 2, 10,7, 7, 
-	7, 7, 4, 5, 4, 7, 6, 10, 
-	6, 7, 6, 4, 2, 4, 7, 5, 	/* 78 */  
-	7, 5, 3, 7, 5, 10,6, 6, 
-	4, 13,5, 4, 9, 10,10,10, 
-	10,3, 3, 5, 5, 5, 6, 12, 
-	7, 11,5, 4, 12,5, 5, 8, 
-	4, 2, 6, 6, 8, 8, 2, 6, 
-	4, 10,5, 7, 7, 4, 10,4, 
-	5, 6, 5, 4, 3, 6, 6, 2, 
-	4, 3, 5, 7, 8, 8, 8, 5, 
-	9, 9, 9, 9, 9, 9, 9, 7, 
-	6, 6, 6, 6, 3, 2, 3, 3, 
-	8, 7, 8, 8, 8, 8, 8, 6, 
-	8, 7, 7, 7, 7, 6, 6, 6, 
-	6, 6, 6, 6, 6, 6, 11,6, 
-	7, 7, 7, 7, 3, 2, 3, 3, 
-	6, 7, 7, 7, 7, 7, 7, 6, 
-	7, 7, 7, 7, 7, 7, 7, 6};
-
-
-unsigned char mpchdxFont3[] =				
-	{
-	5,	/* nil */
-	5,	/* nil */
-	5,	/* nil */
-	11, /* big left arrow */
-	10,	/* big right arrow */
-	10, /* big up arrow */
-	10,	/* big dn arrow */
-	11,	/* small dn arrow */
-	11, /* small up arrow */
-	7,	/* textbox? */
-	4,	/* i */
-	6,	/* white page paper */
-	6,	/* black page paper */
-	19,	/* GSI cap */
-	19,	/* GSI num */
-	19,	/* GSI sift */
-	19,	/* GSI punct */
-	19,	/* GSI intl */
-	19,	/* GSI blank */
-	7,	/* diamond */
-	};
-
-unsigned char mpchdxFont4[] =				
-	{
-	12,	/* Unchecked Checkbox */
-	12,	/* Checked Checkbox */
-	8,	/* Left Triangle */
-	8,	/* Right Triangle */
-	12,	/* Info */
-	};
-
-unsigned char mpchdxFont5[] =
-	{
-	5,	/* Square */
-	11,	/* UpScroll */
-	11,	/* DnScroll */
-	11, /* UpScroll Disabled */
-	11,	/* DnScroll Disabled */
-	};
-
-
-int DxChar(int ch, int ifnt)
-	{
-	switch (ifnt)
-		{
-	case 0:
-		return mpchdxFont0[ch];
-	case 1:
-		return mpchdxFont1[ch];
-	case 2:
-		return mpchdxFont2[ch];
-	case 3:
-		if (ch < sizeof(mpchdxFont3))
-			return mpchdxFont3[ch];
-		break;
-	case 4:
-		if (ch < sizeof(mpchdxFont4))
-			return mpchdxFont4[ch];
-		break;
-	case 5:
-		if (ch < sizeof(mpchdxFont5))
-			return mpchdxFont5[ch];
-		}
-	// default width is 5 for the upper fonts
-	return 5;
-	}
-
-/*-----------------------------------------------------------------------------
-|	DxCalcRgdx
-|	
-|		Get extent of pilot string, placing each char width in rgdx
-|	BUG! only works for font 0
--------------------------------------------------------------WESC------------*/
-int DxCalcRgdx(unsigned char *sz, int ifnt, int *rgdx)
-	{
-	unsigned char *pch;
-	int dx;
-
-	if (sz == NULL)
-		return 0;
-	dx = 0;
-
-	for (pch = sz; *pch != 0; pch++)
-		{
-		if (rgdx != NULL)
-			rgdx[pch-sz] = DxChar(*pch, ifnt);
-		dx += DxChar(*pch, ifnt);
-		}
-	return dx;
-	}	
-	
-/*-----------------------------------------------------------------------------
-|	DxCalcExtent
-|	
-|		Calc extent of string -- BUG! only works for font 0 (and bold)
--------------------------------------------------------------WESC------------*/
-int DxCalcExtent(unsigned char *sz, int ifnt)
-	{
-	unsigned char *pch;
-	int dx;
-
-	if (sz == NULL)
-		return 0;
-	dx = 0;
-
-	for (pch = sz; *pch != 0; pch++)
-		{
-		dx += DxChar(*pch, ifnt);
-		}
-	return dx;
-	}	
 
 
 
@@ -559,7 +338,11 @@ char *FindAndOpenFile(char *szIn, char *mode, FILE **returnFile )
 		int i;
 		for ( i = 0; i < totalIncludePaths; i++ ) {
 
-		    sprintf( szFullName, "%s\\%s", includePaths[i], szIn);
+#ifdef WIN322
+		  sprintf( szFullName, "%s\\%s", includePaths[i], szIn);
+#else
+		  sprintf( szFullName, "%s/%s", includePaths[i], szIn);
+#endif
 		
 		    file = fopen( szFullName, mode);
 		    if ( file != NULL )

@@ -1,0 +1,5 @@
+PilRC for DOS
+
+Pilrc should compile as is using the standard Makefile using DJPP http://www.delorie.com/djgpp.
+
+You may have some problems with pilrcui (xwin.c) compiling, but ignore that...

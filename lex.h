@@ -27,6 +27,8 @@ typedef int LT;
 #define ltPound    16
 #define ltDoubleSlash 17
 #define ltSemi     18
+#define ltAt       19
+#define ltPipe     20
 
 #define ltLParen   42
 #define ltRParen   43
@@ -38,11 +40,13 @@ typedef int LT;
 #define ltQuestion 49
 #define ltColon    50
 #define ltStr      51
+#define ltCComment 52
+#define ltEndCComment 53
 
 
 typedef int VAL;
 
-#define cchIdMax 1024
+#define cchIdMax 4096
 /* LEXeme */
 typedef struct _lex
 	{
@@ -55,9 +59,9 @@ typedef struct _lex
 
 /* Lex function prototypes */
 BOOL FInitLexer(char *pch, BOOL fReportErrors);
-char *PchLexer();
-char *PchLexerPrev();
-BOOL FGetLex(LEX *plex);
+char *PchLexer(void);
+char *PchLexerPrev(void);
+BOOL FGetLex(LEX *plex, BOOL fInComment);
 VOID PrintLex(LEX *plex);
 char *PchParseError();
 VOID ParseError(char *, char *);

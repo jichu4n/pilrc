@@ -20,6 +20,9 @@
 #define EMITRWT	
 #include "pilrc.h"
 #include "bitmap.h"
+#include "font.h"
+
+#define idAutoInit 9999
 
 
 #define idPalmOSReservedMin 10000
@@ -34,19 +37,23 @@ BOOL vfQuiet;
 /* Translations */
 char *szLanguage;
 TE *pteFirst;
+/* RTL For Hebrew*/
+BOOL vfRTL = fFalse;
+
+/* next auto id */
+int idAutoMac = idAutoInit;
+BOOL vfAutoId;
 
 /* Warning about duplicates in forms and menus */
 /* if == 2 then we warn about duplicate labels too */
 BOOL vfCheckDupes;
 
 /* Form globals */
-RCFORM form;	
-#define cobjMax 256
-RCFORMOBJLIST rglt[cobjMax];
+FRM *vpfrm;
+//RCFORM form;	/* current form being parsed */
+//#define cobjMax 256
+//RCFORMOBJLIST rglt[cobjMax];
 
-/* All forms -- used only by PilRCUI */
-FRM rgfrm[ifrmMax];
-int ifrmMac;
 
 /* Menu globals */
 RCMENUBAR menu;
@@ -59,6 +66,7 @@ int idMenu;
 #define iidMenuMax 128
 int iidMenuMac;
 int rgidMenu[iidMenuMax];
+
 #define iidStringMax 512
 int iidStringMac;
 int rgidString[iidStringMax];
@@ -82,8 +90,6 @@ char szLine[4096];
 /* Rect for Prev* keywords */
 RCRECT rcPrev;
 
-
-
 /*-----------------------------------------------------------------------------
 |	AddSym
 |	
@@ -102,6 +108,8 @@ VOID AddSym(char *sz, int wVal)
 	psymFirst = psym;
 	}
 
+
+
 /*-----------------------------------------------------------------------------
 |	PsymLookup
 |	
@@ -115,6 +123,22 @@ SYM *PsymLookup(char *sz)
 		if (strcmp(psym->sz, sz) == 0)
 			return psym;
 	return NULL;
+	}
+
+
+int IdGetAutoId()
+	{
+	return idAutoMac--;
+	}
+
+SYM *PsymAddSymAutoId(char *sz)
+	{
+	SYM *psym;
+	
+	AddSym(sz, IdGetAutoId());
+	psym = PsymLookup(tok.lex.szId);
+	psym->fAutoId = fTrue;
+	return psym;
 	}
 
 /*-----------------------------------------------------------------------------
@@ -220,51 +244,84 @@ VOID FreeTranslations()
 	}
 
 /*-----------------------------------------------------------------------------
+|	NextLine
+|
+|		Skip lexer ahead to the next line
+-------------------------------------------------------------WESC------------*/
+static BOOL NextLine(void)
+	{
+	BOOL    retval;
+
+	retval = fFalse;
+
+	szLine[0] = '\0';		/* just in case there is nothing to be gotten   */
+	if (fgets(szLine, sizeof(szLine), vfhIn) != NULL)
+		{
+		iline++;
+		retval = fTrue;
+		}
+	FInitLexer(szLine, fTrue);	/* so program can shut down gracefully      */
+
+	return(retval);
+	}
+
+/*-----------------------------------------------------------------------------
 |	FGetTok
-|	
+|
 |		Get the next token.  returns fFalse on EOF
 |
 |	Consistency issue -- takes a ptok, but some other other routines don't.
 |	only one global tok...
 -------------------------------------------------------------WESC------------*/
-BOOL FGetTok(TOK *ptok)
+static BOOL FGetTok(TOK *ptok)
 	{
-	BOOL f;
-	
+	BOOL    fInComment;
+
+
 	if (fTokUngotten)
 		{
 		*ptok = tokPrev;
 		fTokUngotten = fFalse;
 		return fTrue;
 		}
-	
+
 	ptok->rw = rwNil;
-	f = fTrue;
-	while (!FGetLex(&ptok->lex))
+	fInComment = fFalse;
+	for (;;)
 		{
-		if (fgets(szLine, sizeof(szLine), vfhIn) == NULL)
-			return fFalse;
-		iline++;
-		FInitLexer(szLine, fTrue);
-		}	
-	if (f)
-		{
-		if (ptok->lex.lt == ltId)
+		while (!FGetLex(&ptok->lex, fInComment))
 			{
-			/* check if it is a reserved word */
-			ptok->rw = RwFromLex(&ptok->lex);
+			if (!NextLine())
+				{
+				if (fInComment)
+					ErrorLine("unexpected end of file during C-style comment");
+				return fFalse;
+				}
 			}
-		else if (ptok->lex.lt == ltStr)
-			{
-			TE *pte;
-			/* attempt translation */
-			pte = PteFromSz(ptok->lex.szId);
-			if (pte != NULL)
-				strcpy(ptok->lex.szId, pte->szTrans);
-			}
+
+		if (ptok->lex.lt == ltCComment)
+			fInComment = fTrue;
+		else if (ptok->lex.lt != ltEndCComment)
+			break;
+		else
+			fInComment	= fFalse;
 		}
 
-	tokPrev = *ptok;		
+	if (ptok->lex.lt == ltId)
+		{
+		/* check if it is a reserved word */
+		ptok->rw = RwFromLex(&ptok->lex);
+		}
+	else if (ptok->lex.lt == ltStr)
+		{
+		TE *pte;
+		/* attempt translation */
+		pte = PteFromSz(ptok->lex.szId);
+		if (pte != NULL)
+			strcpy(ptok->lex.szId, pte->szTrans);
+		}
+
+	tokPrev = *ptok;
 	return fTrue;
 	}
 
@@ -279,20 +336,6 @@ VOID UngetTok()
 	fTokUngotten = fTrue;
 	}	
 
-/*-----------------------------------------------------------------------------
-|	NextLine
-|	
-|		Skip lexer ahead to the next line
--------------------------------------------------------------WESC------------*/
-void NextLine()
-	{
-	if (fgets(szLine, sizeof(szLine), vfhIn) != NULL)
-		{
-		iline++;
-		FInitLexer(szLine, fTrue);
-		}
-	}
-	
 
 	
 	
@@ -357,6 +400,39 @@ char *PchGetSz(char *szErr)
 	return strdup(tok.lex.szId);
 	}
 
+#ifdef DOESNTWORK
+/* attempt at allowing GCC preprocessed string files */
+/*-----------------------------------------------------------------------------
+|	PchGetSzMultiLine
+|	
+|   gets strings on multiple lines w/ \ continuation character.
+-------------------------------------------------------------WESC------------*/
+char *PchGetSzMultiLine(char *szErr)
+	{
+	char sz[16384];
+
+	GetExpectLt(&tok, ltStr, szErr);
+	strcpy(sz, tok.lex.szId);
+	while (FGetTok(&tok))
+		{
+		if (tok.lex.lt == ltStr)
+			{
+			strcat(sz, tok.lex.szId);
+			}
+		else if (tok.lex.lt != ltBSlash)
+			{
+			UngetTok();
+			break;
+			}
+		else
+			{
+			GetExpectLt(&tok, ltStr, szErr);
+			strcat(sz, tok.lex.szId);
+			}
+		}
+	return strdup(sz);
+	}
+#else
 /*-----------------------------------------------------------------------------
 |	PchGetSzMultiLine
 |	
@@ -380,6 +456,7 @@ char *PchGetSzMultiLine(char *szErr)
 		}
 	return strdup(sz);
 	}
+#endif
 
 /*-----------------------------------------------------------------------------
 |	PchGetId
@@ -416,8 +493,15 @@ int WGetConst(char *szErr)
 			psym = PsymLookup(tok.lex.szId);
 			if (psym == NULL)
 				{
-				sprintf(sz, "Expecting %s, got unknown symbol:", szErr);
-				ErrorLine2(sz, tok.lex.szId);
+				if (vfAutoId)
+					{
+					psym = PsymAddSymAutoId(tok.lex.szId);
+					}
+				else
+					{
+					sprintf(sz, "Expecting %s, got unknown symbol:", szErr);
+					ErrorLine2(sz, tok.lex.szId);
+					}
 				}
 			return psym->wVal;
 			}
@@ -443,34 +527,76 @@ int WGetConst(char *szErr)
 	}
 
 
+	
+int WGetConstEx(char *szErr);
+	
+	
 /*-----------------------------------------------------------------------------
-|	WGetConstEx
-|	
-|		Get a constant expression -- no parens, left to right associativity
+| WGetConstExFactor
+| 
+| Get a constant expression -- parens allowed left to right associativity
+-------------------------------------------------------------WESC------------*/
+int WGetConstExFactor(char *szErr) 
+	{
+	int wVal;
+
+	if (FGetTok(&tok)) 
+		{
+		if (tok.lex.lt == ltLParen) 
+			{
+			wVal = WGetConstEx(szErr);
+			if (!FGetTok(&tok) || tok.lex.lt != ltRParen)
+				ErrorLine("Expected but didn't get ')'!");
+			} 
+		else 
+			{
+			UngetTok();
+			wVal = WGetConst(szErr);
+			}
+		}
+	else
+		{
+		wVal = WGetConst(szErr); /* aka hack */
+		}
+
+	return wVal;
+	}
+		
+		
+		
+/*-----------------------------------------------------------------------------
+| WGetConstEx
+| 
+| Get a constant expression -- parens allowed left to right associativity
 -------------------------------------------------------------WESC------------*/
 int WGetConstEx(char *szErr)
 	{
-	int wVal;
 	int wValT;
+	int wVal;
 	LT ltOp;
+	
+	wVal = WGetConstExFactor(szErr);
 
-	wVal = WGetConst(szErr);
-	for(;;)
+
+	for (;;)
 		{
-		if(!FGetTok(&tok))
+		if(!FGetTok(&tok)) 
 			return wVal;
-		switch (tok.lex.lt)
+			
+		switch (tok.lex.lt) 
 			{
 		default:
 			UngetTok();
 			return wVal;
+    
 		case ltPlus:
 		case ltMinus:
 		case ltMult:
 		case ltDiv:
+		case ltPipe:
 			ltOp = tok.lex.lt;
-			wValT = WGetConst(szErr);
-			switch (ltOp)
+			wValT = WGetConstExFactor(szErr);
+			switch (ltOp) 
 				{
 			case ltPlus:
 				wVal += wValT;
@@ -486,10 +612,16 @@ int WGetConstEx(char *szErr)
 					ErrorLine("Divide By Zero!");
 				wVal /= wValT;
 				break;
+			case ltPipe:
+				if (vfRTL)
+					wVal = wValT;
+				break;
 				}
 			}
-		}
 	}
+	return wVal;
+	}
+	
 
 /*-----------------------------------------------------------------------------
 |	Various Konstant types -- basically deferred evaluation of constants
@@ -503,6 +635,9 @@ typedef enum _kt
 	ktConst,
 	ktCenter,
 	ktAuto,
+	ktCenterAt,
+	ktRightAt,
+	ktBottomAt,
 	} KT;
 
 /* Konstant */
@@ -546,10 +681,31 @@ KT KtGetK(K *pk, char *szErr)
 		break;
 	case rwCenter:
 		pk->kt = ktCenter;
+		if (FGetTok(&tok))
+			{
+			if (tok.lex.lt == ltAt)
+				{
+				pk->wVal = WGetConstEx("CENTER@ position")*2;	/* we store extent */
+				pk->kt = ktCenterAt;
+				}
+			else
+				UngetTok();
+			}
+			
 		break;
 	case rwAuto:
 		pk->kt = ktAuto;
-		break;		
+		break;
+	case rwRight:
+		pk->kt = ktRightAt;
+		GetExpectLt(&tok, ltAt, "@");
+		pk->wVal = WGetConstEx("RIGHT@ position");	
+		break;				
+	case rwBottom:
+		pk->kt = ktBottomAt;
+		GetExpectLt(&tok, ltAt, "@");
+		pk->wVal = WGetConstEx("BOTTOM@ position");	
+		break;				
 		}
 	return pk->kt;
 	}
@@ -612,6 +768,9 @@ typedef struct _itm
 	BOOL dynamicSize;
 	int justification;
 	int maxChars;
+	int autoShift;
+	BOOL hasScrollBar;
+	BOOL numeric;
 	int numItems;
 	int cvis;
 	int group;
@@ -625,6 +784,10 @@ typedef struct _itm
 	int numRows;
 	int numColumns;
 	int rgdxcol[64];
+	int value;	/* scrollbar */
+	int minValue; /* scrollbar */
+	int maxValue; /* scrollbar */
+	int pageSize; /* scrollbar */
 	} ITM;
 
 /* Item Flags */
@@ -666,6 +829,13 @@ typedef struct _itm
 #define if2NumColumns  0x00000001
 #define if2NumRows     0x00000002
 #define if2ColumnWidths 0x00000004
+#define if2Value        0x00000008
+#define if2MinValue     0x00000010
+#define if2MaxValue     0x00000020
+#define if2PageSize     0x00000040
+#define if2AutoShift    0x00000080
+#define if2Scrollbar    0x00000100
+#define if2Numeric      0x00000200
 
 
 /* Semi-arbitrary margins */
@@ -678,34 +848,44 @@ typedef struct _itm
 |	
 |		Resolve a Konstant to it's real value, returning it.
 -------------------------------------------------------------WESC------------*/
-int WResolveK(K *pk, ITM *pitm, BOOL fHoriz)
+int WResolveK(K *pk, ITM *pitm, int dxyExtent, BOOL fHoriz)
 	{
 	int wVal;
-	K kT;
+	int dxyCenterAcross;
 
 	switch (pk->kt)
 		{
+	default:
+		Assert(fFalse);
+		return 0;
 	case ktConst:
 		return pk->wVal;
 	case ktAuto:
 		if (fHoriz)
 			{
-			wVal = DxCalcExtent(pitm->text, pitm->font);
+			wVal = DxCalcExtent((unsigned char *)pitm->text, pitm->font);
 			if (pitm->grif & ifSmallMargin)
 				wVal += 2*dxObjSmallMargin; 
 			if (pitm->grif & ifBigMargin)
 				wVal += 2*dxObjBigMargin; 
 			}
 		else
-			wVal = pitm->font == 2 ? 16 : 12;	/* HACK! */
+			wVal = DyFont(pitm->font)+1;	
 		return wVal;
 	case ktCenter:
-		kT.kt = ktAuto;
-		wVal = WResolveK(&kT, pitm, fHoriz);
 		if (fHoriz)
-			wVal = (form.window.windowBounds.extent.x - wVal)/2;
+			dxyCenterAcross = vpfrm->form.window.windowBounds.extent.x;
 		else
-			wVal = (form.window.windowBounds.extent.y - wVal)/2;
+			dxyCenterAcross = vpfrm->form.window.windowBounds.extent.y;
+		wVal = (dxyCenterAcross-dxyExtent)/2;
+		return wVal;
+	case ktCenterAt:
+		dxyCenterAcross = pk->wVal;
+		wVal = (dxyCenterAcross-dxyExtent)/2;
+		return wVal;
+	case ktRightAt:
+	case ktBottomAt:
+		wVal = pk->wVal-dxyExtent;
 		return wVal;
 		}
 	Assert(fFalse);
@@ -720,22 +900,29 @@ VOID ResolveKrcKpt(ITM *pitm)
 	{
 	if (pitm->grif & ifRc)
 		{
-		pitm->rc.topLeft.x = WResolveK(&pitm->krc.kptUpperLeft.kX, pitm, fTrue);
-		pitm->rc.topLeft.y = WResolveK(&pitm->krc.kptUpperLeft.kY, pitm, fFalse);
-		pitm->rc.extent.x = WResolveK(&pitm->krc.kptExtent.kX, pitm, fTrue);
-		pitm->rc.extent.y = WResolveK(&pitm->krc.kptExtent.kY, pitm, fFalse);
+		pitm->rc.extent.x = WResolveK(&pitm->krc.kptExtent.kX, pitm, 0, fTrue);
+		pitm->rc.extent.y = WResolveK(&pitm->krc.kptExtent.kY, pitm, 0, fFalse);
+		
+		pitm->rc.topLeft.x = WResolveK(&pitm->krc.kptUpperLeft.kX, pitm, pitm->rc.extent.x, fTrue);
+		pitm->rc.topLeft.y = WResolveK(&pitm->krc.kptUpperLeft.kY, pitm, pitm->rc.extent.y, fFalse);
 		rcPrev = pitm->rc;
 		}
 
 	if (pitm->grif & ifPt)
 		{
 		K kT;
-		pitm->pt.x = WResolveK(&pitm->kpt.kX, pitm, fTrue);
-		pitm->pt.y = WResolveK(&pitm->kpt.kY, pitm, fFalse);
-		rcPrev.topLeft = pitm->pt;
+		int xT;
+		int yT;
+
 		kT.kt = ktAuto;
-		rcPrev.extent.x = WResolveK(&kT, pitm, fTrue);
-		rcPrev.extent.y = WResolveK(&kT, pitm, fFalse);
+		xT = WResolveK(&kT, pitm, 0, fTrue);
+		yT = WResolveK(&kT, pitm, 0, fFalse);
+
+		pitm->pt.x = WResolveK(&pitm->kpt.kX, pitm, xT, fTrue);
+		pitm->pt.y = WResolveK(&pitm->kpt.kY, pitm, yT, fFalse);
+		rcPrev.topLeft = pitm->pt;
+		rcPrev.extent.x = xT;
+		rcPrev.extent.y = yT;
 		}
 	}
 
@@ -758,17 +945,23 @@ VOID DoCheckGrif(int grif, int ifP)
 |	
 |		Parse ID <const>
 -------------------------------------------------------------WESC------------*/
-int WGetId(char *szErr)
+int WGetId(char *szErr, BOOL fAutoIDOk)
 	{
 	int w;
 
+	fAutoIDOk = fAutoIDOk; /* shut up whiney compilers */
 	if (!FGetTok(&tok))
 		return 0;
-	if (tok.rw != rwId)
-		UngetTok();
-	w = WGetConstEx(szErr);
+	if (tok.rw == rwAutoId)
+		w = IdGetAutoId();
+	else
+		{
+		if (tok.rw != rwId)
+			UngetTok();
+		w = WGetConstEx(szErr);
+		}
 	if (w >= idPalmOSReservedMin)
-		ErrorLine("ID conflicts with PalmOS reserved ID range (valid values: 0-9999)");
+		WarningLine("ID conflicts with PalmOS reserved ID range (valid values: 0-9999, Ok for predefined IDs for Edit menu)");
 	return w;
 	}
 
@@ -800,6 +993,7 @@ void ParseItm(ITM *pitm, int grif, int grif2)
 	pitm->singleLine = 1;
 	pitm->editable = 1;
 	pitm->cvis = -1;
+	pitm->saveBehind = 1;
 	
 	if (grif & ifText)
 		{
@@ -810,7 +1004,7 @@ void ParseItm(ITM *pitm, int grif, int grif2)
 	if (grif & ifMultText)
 		{
 		char *pch;
-		char rgb[1024];
+		char rgb[16384];
 
 		pitm->grifOut |= ifMultText;
 		GetExpectLt(&tok, ltStr, "text");
@@ -834,7 +1028,7 @@ void ParseItm(ITM *pitm, int grif, int grif2)
 	if (grif & ifId)
 		{
 		pitm->grifOut |= ifId;
-		pitm->id = WGetId("ItemId");
+		pitm->id = WGetId("ItemId", fTrue);
 		}
 	if (grif & ifListId)
 		{
@@ -946,6 +1140,23 @@ void ParseItm(ITM *pitm, int grif, int grif2)
 			CheckGrif(ifCvis);
 			pitm->cvis = WGetConstEx("VisibleItems");
 			break;
+		case rwValue:
+			CheckGrif2(if2Value);
+			pitm->value = WGetConstEx("Value");
+			break;
+		case rwMinValue:
+			CheckGrif2(if2MinValue);
+			pitm->minValue = WGetConstEx("MinValue");
+			break;
+		case rwMaxValue:
+			CheckGrif2(if2MaxValue);
+			pitm->maxValue = WGetConstEx("MaxValue");
+			break;
+		case rwPageSize:
+			CheckGrif2(if2PageSize);
+			pitm->pageSize = WGetConstEx("PageSize");
+			break;
+
 		case rwBitmap:
 			CheckGrif(ifBitmap);
 			pitm->rscID = WGetConstEx("BitmapId");
@@ -955,6 +1166,10 @@ void ParseItm(ITM *pitm, int grif, int grif2)
 			pitm->modal = 1;
 			break;
 		case rwSaveBehind:
+			CheckGrif(ifSaveBehind);
+			pitm->saveBehind = 1;
+			break;
+		case rwNoSaveBehind:
 			CheckGrif(ifSaveBehind);
 			pitm->saveBehind = 1;
 			break;
@@ -979,8 +1194,21 @@ void ParseItm(ITM *pitm, int grif, int grif2)
 			pitm->numRows = WGetConstEx("NumRows");
 			break;
 		case rwColumnWidths:
+			CheckGrif2(if2ColumnWidths);
 			for (icol = 0; icol < pitm->numColumns; icol++)
 				pitm->rgdxcol[icol] = WGetConstEx("ColumnWidth"); 
+			break;
+		case rwAutoShift:
+			CheckGrif2(if2AutoShift);
+			pitm->autoShift = 1;
+			break;
+//		case rwSCL:
+			//CheckGrif2(if2Scrollbar);
+			//pitm->hasScrollBar = 1;
+			//break;
+		case rwNumeric:
+			CheckGrif2(if2Numeric);
+			pitm->numeric = 1;
 			break;
 			}
 		}			
@@ -1099,7 +1327,7 @@ int CbEmitStruct(void *pv, char *szPic, char **ppchText, BOOL fEmit)
 			break;
 		case 't':	/* bit */
 			ibit += c;
-			byte = byte << c;
+			byte = (unsigned char)(byte << c);
 			if (!fZero && pi != NULL)
 				byte |= *pi++;
 			if (ibit == 8)
@@ -1132,18 +1360,19 @@ int CbStruct(char *szPic)
 char * mpotszEmit[] =
 	{
 	szRCFIELD,	/* 'tFLD', */
-	szRCCONTROL,	/* 'tCTL',	// need to special case this one! */
+	szRCCONTROL,	/* 'tCTL',	 need to special case this one! */
 	szRCLIST,	/* 'tLST', */
 	szRCTABLE, /*	szRCTBL'tTBL', */
 	szRCFORMBITMAP, /* 'tFBM', */
-	NULL, /* 'tLIN',		// bogus */
-	NULL, /* 'tFRA',		// bugs */
-	NULL, /* 'tREC',     // bogus */
+	NULL, /* 'tLIN',		 bogus */
+	NULL, /* 'tFRA',		 bogus */
+	NULL, /* 'tREC',      bogus */
 	szRCFORMLABEL, /* 'tLBL', */
 	szRCFORMTITLE, /* 'tTTL', */
 	szRCFORMPOPUP, /* 'tPUL', */
 	szRCFORMGRAFFITISTATE, /* 'tGSI', */
 	szRCFORMGADGET, /* 'tGDT' */
+	szRCSCROLLBAR,  /* 'tSCL' */
 	};
 
 
@@ -1192,7 +1421,7 @@ int CbFromLt(RCFORMOBJLIST *plt, int fText)
 /*-----------------------------------------------------------------------------
 |	DumpForm
 -------------------------------------------------------------WESC------------*/
-void DumpForm()
+void DumpForm(FRM *pfrm)
 	{
 	int cbDirectory;
 	int clt;
@@ -1202,10 +1431,11 @@ void DumpForm()
 	int il;
 
 
-	OpenOutput("tFRM", form.formId);
-	clt = form.numObjects;	
+	OpenOutput("tFRM", pfrm->form.formId);
+	clt = pfrm->form.numObjects;	
+	Assert(PlexGetCount(&pfrm->pllt) == clt);
 
-	CbEmitStruct(&form, szRCFORM, NULL, fTrue);
+	CbEmitStruct(&pfrm->form, szRCFORM, NULL, fTrue);
     
 	cbDirectory = CbEmitStruct(&lt, szRCFORMOBJLIST, NULL, fFalse)*clt;
 	ib = IbOut()+cbDirectory;
@@ -1213,7 +1443,7 @@ void DumpForm()
 		{
 		int cb;
 		
-		lt = rglt[ilt];
+		lt = *(RCFORMOBJLIST *)PlexGetElementAt(&pfrm->pllt, ilt);
 		cb = CbFromLt(&lt, 1);
 		lt.u.ibobj = ib;
 		ib += cb;
@@ -1225,13 +1455,16 @@ void DumpForm()
 		int cbLt;
 		char *pchText;						  
 		RCFORMOBJECT *pobj;
+		RCFORMOBJLIST *plt;
 		
 		PadWordBoundary();					
-		pobj = &rglt[ilt].u.object;
-		cbLt = CbFromLt(&rglt[ilt], 0);
+		plt = PlexGetElementAt(&pfrm->pllt, ilt);
+		
+		pobj = &plt->u.object;
+		cbLt = CbFromLt(plt, 0);
 		pchText = NULL;
-		CbEmitStruct(pobj->ptr, mpotszEmit[rglt[ilt].objectType], &pchText, fTrue);
-		switch (rglt[ilt].objectType)
+		CbEmitStruct(pobj->ptr, mpotszEmit[plt->objectType], &pchText, fTrue);
+		switch (plt->objectType)
 			{
 		case frmListObj:
 			pchText = NULL;	/* we dump it ourselves */
@@ -1285,12 +1518,13 @@ BOOL FIdFormObject(FormObjectKind kind, BOOL fIncludeLabels)
 	case frmControlObj:
 	case frmListObj:
 	case frmTableObj:
-	case frmTitleObj:
 	
+	case frmScrollbarObj:
 	case frmGadgetObj:
 		return fTrue;
 	case frmLabelObj:
 		return fIncludeLabels;
+	case frmTitleObj:
 	case frmPopupObj:
 	case frmLineObj:
 	case frmFrameObj:
@@ -1302,6 +1536,42 @@ BOOL FIdFormObject(FormObjectKind kind, BOOL fIncludeLabels)
 	Assert(fFalse);
 	return fFalse;
 	}		
+
+/* Grrr, the PalmOS developers could have been intelligent created a common header
+ for all form objects */
+int IdFromObj(RCFORMOBJECT *pobj, FormObjectKind kind)
+	{
+	switch (kind)
+		{
+	case frmFieldObj:
+		return pobj->field->id;
+		
+	case frmControlObj:
+		return pobj->control->id;
+	case frmListObj:
+		return pobj->list->id;
+	case frmTableObj:
+		return pobj->table->id;
+	case frmScrollbarObj:
+		return pobj->scrollbar->id;
+	case frmGadgetObj:
+		return pobj->gadget->id;
+	case frmLabelObj:
+		return pobj->label->id;
+		
+	case frmTitleObj:
+	case frmPopupObj:
+	case frmLineObj:
+	case frmFrameObj:
+	case frmRectangleObj:
+	case frmGraffitiStateObj:	
+	case frmBitmapObj:
+		Assert(fFalse);
+		return -1;
+		}
+	Assert(fFalse);
+	return fFalse;
+	}
 	
 /*-----------------------------------------------------------------------------
 |	AddObject
@@ -1310,25 +1580,31 @@ BOOL FIdFormObject(FormObjectKind kind, BOOL fIncludeLabels)
 -------------------------------------------------------------WESC------------*/
 VOID AddObject(RCFORMOBJECT *pobj, FormObjectKind kind)
 	{
+	RCFORMOBJLIST lt;
 	int iobj;
 
-	if (form.numObjects > cobjMax)
-		ErrorLine("Too many objects in current form");
+//	if (vpfrm->form.numObjects > cobjMax)
+		//ErrorLine("Too many objects in current form");
 	if (vfCheckDupes && FIdFormObject(kind, fTrue))
 		{
-		for (iobj = 0; iobj < form.numObjects; iobj++)
+		for (iobj = 0; iobj < vpfrm->form.numObjects; iobj++)
 			{
-			if (FIdFormObject(rglt[iobj].objectType, vfCheckDupes == 2) && 
-				pobj->control->id == rglt[iobj].u.object.control->id)
+			RCFORMOBJLIST *plt;
+			plt = PlexGetElementAt(&vpfrm->pllt, iobj);
+			if (FIdFormObject(plt->objectType, fTrue) && 
+				IdFromObj(pobj, kind) == IdFromObj(&plt->u.object, plt->objectType))
 				{
-				WarningLine("Duplicate form object id (error is on the previous line)");
+				/* dupe labels are ok */
+				if (!(kind == frmLabelObj && plt->objectType == frmLabelObj))
+					WarningLine("Duplicate form object id (error is on the previous line)");
 				break;
 				}
 			}
 		}
-	rglt[form.numObjects].objectType = kind;	
-	rglt[form.numObjects].u.object = *pobj;
-	form.numObjects++;
+	lt.objectType = kind;	
+	lt.u.object = *pobj;
+	PlexAddElement(&vpfrm->pllt, &lt);
+	vpfrm->form.numObjects++;
 	}
 
 
@@ -1350,43 +1626,33 @@ VOID FreeLt(RCFORMOBJLIST *plt)
 	}
 
 /*-----------------------------------------------------------------------------
-|	FreeRglt
--------------------------------------------------------------WESC------------*/
-void FreeRglt(RCFORMOBJLIST rglt[], int iltMac)
-	{
-	int ilt;
-
-	for (ilt = 0; ilt < iltMac; ilt++)
-		FreeLt(&rglt[ilt]);
-	}
-
-/*-----------------------------------------------------------------------------
 |	FreeFrm
 -------------------------------------------------------------WESC------------*/
 void FreeFrm(FRM *pfrm)
 	{
-	FreeRglt(pfrm->rglt, pfrm->form.numObjects);
-	free(pfrm->rglt);
+	int ilt;
+
+	for (ilt = 0; ilt < PlexGetCount(&pfrm->pllt); ilt++)
+		FreeLt(PlexGetElementAt(&pfrm->pllt, ilt));
+	PlexFree(&pfrm->pllt);	
 	}
 
-/*-----------------------------------------------------------------------------
-|	FreeRgfrm
--------------------------------------------------------------WESC------------*/
-void FreeRgfrm()
+
+void FreeRcpfile(RCPFILE *prcpf)
 	{
 	int ifrm;
 
-	for (ifrm = 0; ifrm < ifrmMac; ifrm++)
-		FreeFrm(&rgfrm[ifrm]);
-	ifrmMac = 0;
-	}
-
-void FreeAll()
-	{
-	FreeRgfrm();
+	if (prcpf != NULL)
+		{
+		for (ifrm = 0; ifrm < PlexGetCount(&prcpf->plfrm); ifrm++)
+			FreeFrm((FRM *)PlexGetElementAt(&prcpf->plfrm, ifrm));
+		PlexFree(&prcpf->plfrm);
+		}
 	iidMenuMac = 0;
 	iidAlertMac = 0;
 	iidStringMac = 0;
+	idAutoMac = idAutoInit;
+	FreeFontMem();
 	}
 
 /*-----------------------------------------------------------------------------
@@ -1464,7 +1730,7 @@ Control:
 						
 			case rwFLD:
 				ParseItm(&itm, ifId|ifRc|ifUsable|ifAlign|ifFont|ifEnabled|
-					ifUnderlined|ifSingleLine|ifEditable|ifDynamicSize|ifMaxChars, if2Null);
+					ifUnderlined|ifSingleLine|ifEditable|ifDynamicSize|ifMaxChars, if2AutoShift|if2Scrollbar|if2Numeric);
 				obj.field = calloc(1, sizeof(RCFIELD));
 				obj.field->id = itm.id;
 				obj.field->rect = itm.rc;
@@ -1477,6 +1743,9 @@ Control:
 				obj.field->attr.insPtVisible = 1;
 				obj.field->attr.justification = itm.justification;
 				obj.field->attr.dynamicSize = itm.dynamicSize;
+				obj.field->attr.autoShift = itm.autoShift;
+				obj.field->attr.hasScrollBar = itm.hasScrollBar;
+				obj.field->attr.numeric = itm.numeric;
 				obj.field->maxChars = itm.maxChars;
 				fok = frmFieldObj;
 				break;
@@ -1546,6 +1815,20 @@ Control:
 					obj.table->rgdxcol[icol] = itm.rgdxcol[icol];
 				fok = frmTableObj;
 				break;
+			case rwSCL:
+				ParseItm(&itm, ifId|ifRc|ifUsable, if2Value|if2MinValue|if2MaxValue|if2PageSize);
+				obj.scrollbar = calloc(1, sizeof(RCSCROLLBAR));
+				obj.scrollbar->id = itm.id;
+				obj.scrollbar->bounds = itm.rc;
+				if (itm.rc.extent.x != 7)
+					WarningLine("Scrollbar width not the recommended 7");
+				obj.scrollbar->attr.usable = itm.usable;
+				obj.scrollbar->value = itm.value;
+				obj.scrollbar->minValue = itm.minValue;
+				obj.scrollbar->maxValue = itm.maxValue;
+				obj.scrollbar->pageSize = itm.pageSize;
+				fok = frmScrollbarObj;
+				break;
 			default:
 				 ErrorLine2("Unknown token:", tok.lex.szId);
 				 break;
@@ -1557,62 +1840,74 @@ Control:
 	}	
 
 
+void InitFrm(FRM *pfrm)
+	{
+	PlexInit(&pfrm->pllt, sizeof(RCFORMOBJLIST), 10, 10);
+	}
 /*-----------------------------------------------------------------------------
 |	FParseForm
 -------------------------------------------------------------WESC------------*/
-BOOL FParseForm()
+BOOL FParseForm(RCPFILE *prcpf)
 	{
 	ITM itm;
 	BOOL f;
+	FRM frm;
 
-	memset(&form, 0, sizeof(RCFORM));
-	memset(rglt, 0, cobjMax*sizeof(RCFORMOBJLIST));
+	memset(&frm, 0, sizeof(FRM));
+	InitFrm(&frm);
+	vpfrm = &frm;
+//	memset(&form, 0, sizeof(RCFORM));
+//	memset(rglt, 0, cobjMax*sizeof(RCFORMOBJLIST));
 
-	form.window.windowFlags.focusable = 1;
+	vpfrm->form.window.windowFlags.focusable = 1;
 	ParseItm(&itm, ifId|ifRc|ifUsable|ifFrame|ifModal|ifSaveBehind|ifHelpId|ifDefaultBtnId|ifMenuId, if2Null);
-	form.formId = itm.id;
-	form.window.windowBounds = itm.rc;
-	form.window.frameType.width = itm.frame;
+	vpfrm->form.formId = itm.id;
+	vpfrm->form.window.windowBounds = itm.rc;
+	vpfrm->form.window.frameType.width = itm.frame;
 	if (itm.modal)
 		{
-		form.window.windowFlags.modal = fTrue;
-		form.window.windowFlags.dialog = fTrue;
-		/* form.window.frameType.word = dialogFrame;		// Need to parse this!!! */
-		form.window.frameType.cornerDiam = 3;
-		form.window.frameType.width = 2;
+		vpfrm->form.window.windowFlags.modal = fTrue;
+		vpfrm->form.window.windowFlags.dialog = fTrue;
+		/* vpfrm->form.window.frameType.word = dialogFrame;		 Need to parse this!!! */
+		vpfrm->form.window.frameType.cornerDiam = 3;
+		vpfrm->form.window.frameType.width = 2;
 		}
-	/*form.attr.saveBehind = itm.saveBehind; */
-	form.attr.saveBehind = 1;
-	form.attr.usable = itm.usable;
-	form.attr.enabled = itm.enabled;
-	form.helpRscId = itm.helpId;
-	form.defaultButton = itm.defaultBtnId;
-	form.menuRscId = itm.menuId;
+	vpfrm->form.attr.saveBehind = itm.saveBehind;
+	/*vpfrm->form.attr.saveBehind = 1;*/
+	vpfrm->form.attr.usable = itm.usable;
+	vpfrm->form.attr.enabled = itm.enabled;
+	vpfrm->form.helpRscId = itm.helpId;
+	vpfrm->form.defaultButton = itm.defaultBtnId;
+	vpfrm->form.menuRscId = itm.menuId;
 
 	GetExpectRw(rwBegin);
 	f = FParseObjects();
-//#ifdef WINGUI
-	if (ifrmMac > ifrmMax)
-		Error("Too many forms!");
+//	if (ifrmMac > ifrmMax)
+//		Error("Too many forms!");
 	if (vfCheckDupes)
 		{
 		int ifrm;
 
-		for (ifrm = 0; ifrm < ifrmMac; ifrm++)
+		for (ifrm = 0; ifrm < PlexGetCount(&prcpf->plfrm); ifrm++)
 			{
-			if (rgfrm[ifrm].form.formId == form.formId)
+			FRM *pfrm;
+			pfrm = (FRM *)PlexGetElementAt(&prcpf->plfrm, ifrm);
+			if (pfrm->form.formId == vpfrm->form.formId)
 				{
 				ErrorLine("Duplicate Form Resource IDs");
 				break;
 				}
 			}
 		}
-	rgfrm[ifrmMac].form = form;
-	rgfrm[ifrmMac].rglt = calloc(sizeof(RCFORMOBJLIST), form.numObjects);
-	memcpy(rgfrm[ifrmMac].rglt, rglt, sizeof(RCFORMOBJLIST) * form.numObjects);
+//	frm.rglt = calloc(sizeof(RCFORMOBJLIST), vpfrm->form.numObjects);
+	//memcpy(frm.rglt, rglt, sizeof(RCFORMOBJLIST) * vpfrm->form.numObjects);
+	
+	return PlexAddElement(&prcpf->plfrm, &frm);
+//	rgfrm[ifrmMac].form = form;
+//	rgfrm[ifrmMac].rglt = calloc(sizeof(RCFORMOBJLIST), vpfrm->form.numObjects);
+//	memcpy(rgfrm[ifrmMac].rglt, rglt, sizeof(RCFORMOBJLIST) * vpfrm->form.numObjects);
 	/* clone pointers?  yuck */
-	ifrmMac++;
-//#endif
+//	ifrmMac++;
 	return f;
 	}
 										
@@ -1726,7 +2021,7 @@ VOID AssignMenuRects()
 		RCMENUPULLDOWN *pmpd;
 		
 		pmpd = &rgmpd[impd];
-		dx = DxCalcExtent(pmpd->title, fTrue)+9;
+		dx = DxCalcExtent((unsigned char *)pmpd->title, fTrue)+9;
 		pmpd->titleBounds.topLeft.x = xTitle;
 		pmpd->titleBounds.topLeft.y = 0;
 		pmpd->titleBounds.extent.y = 12;
@@ -1739,14 +2034,14 @@ VOID AssignMenuRects()
 			{
 			int dxT;
 
-			dxT = DxCalcExtent(rgmi[imi].itemStr, fTrue)+8;
+			dxT = DxCalcExtent((unsigned char *)rgmi[imi].itemStr, fTrue)+8;
 			if (rgmi[imi].command != 0)
 				{
 				char szT[2];
-				dxT += 6;
-				szT[0] = rgmi[imi].command;
+				dxT += 6 + 12;
+				szT[0] = (char) rgmi[imi].command;
 				szT[1] = 0;
-				dxT += DxCalcExtent(szT, fTrue);
+				dxT += DxCalcExtent((unsigned char *)szT, fTrue);
 				}
 			dxMac = WMax(dxMac, dxT);
 			if (strcmp(rgmi[imi].itemStr, "-") == 0)
@@ -1801,7 +2096,7 @@ BOOL FParsePullDown()
 					mi.itemStr[cch-3] = (char) 0x85;
 					mi.itemStr[cch-2] = 0;
 					}
-				mi.id = WGetId("CommandId");			
+				mi.id = WGetId("CommandId", fFalse);			
 				if (FGetTok(&tok))
 					{
 					if (tok.rw == rwNil && tok.lex.lt == ltStr)
@@ -1813,7 +2108,6 @@ BOOL FParsePullDown()
 					else
 						UngetTok();
 					}
-				}
 				if (vfCheckDupes)
 					{
 					int imi;
@@ -1830,6 +2124,7 @@ BOOL FParsePullDown()
 							}
 						}
 					}
+				}				
 
 			if (imiMac > imiMax)
 				ErrorLine("Too many menu items");
@@ -1843,6 +2138,7 @@ BOOL FParsePullDown()
 			return fTrue; 		
 			}
 		}
+	return fTrue;
 	}
 	
 	
@@ -1855,7 +2151,7 @@ BOOL FParseMenu()
 	memset(&menu, 0, sizeof(RCMENUBAR));
 	imiMac = 0;
 
-	idMenu = WGetId("MenuId");
+	idMenu = WGetId("MenuId", fFalse);
 
 	if (vfCheckDupes)
 		{
@@ -1930,7 +2226,7 @@ void ParseDumpAlert()
 	memset(&itm, 0, sizeof(itm));
 	pchTitle = rgbZero;
 	pchMessage = rgbZero;
-	idAlert = WGetId("AlertId");
+	idAlert = WGetId("AlertId", fFalse);
 
 	if (vfCheckDupes)
 		{
@@ -1964,6 +2260,9 @@ void ParseDumpAlert()
 		case rwHelpId:
 			at.helpRscID = WGetConstEx("HelpId");
 			break;
+ 		case rwDefaultBtn:
+ 			at.defaultButton = WGetConstEx("DefaultButton");
+ 			break;
 		case rwBegin:
 			while (FGetTok(&tok))
 				{
@@ -1990,6 +2289,8 @@ void ParseDumpAlert()
 		}
 WriteAlert:
 	at.numButtons = itm.numItems;
+ 	if (at.numButtons > 0 && at.defaultButton >= at.numButtons)
+ 		ErrorLine("Invalid default button number");
 
 	OpenOutput("Talt", idAlert);
 	CbEmitStruct(&at, szRCALERTTEMPLATE, NULL, fTrue);
@@ -2012,7 +2313,7 @@ void ParseDumpVersion()
 	int id;
 	char *pchVersion;
 
-	id = WGetId("Version ResourceId");
+	id = WGetId("Version ResourceId", fFalse);
 	pchVersion = PchGetSz("Version Text");
 	OpenOutput("tver", id);
 	DumpBytes(pchVersion, strlen(pchVersion)+1);
@@ -2028,7 +2329,7 @@ void ParseDumpString()
 	int id;
 	char *pchString;
 
-	id = WGetId("String ResourceId");
+	id = WGetId("String ResourceId", fFalse);
 
 	if (vfCheckDupes)
 		{
@@ -2045,27 +2346,132 @@ void ParseDumpString()
 	if (iidStringMac < iidStringMax)
 		rgidString[iidStringMac++] = id;
 
-
-	pchString = PchGetSzMultiLine("String Text");
+	if (!FGetTok(&tok))
+		{
+		ErrorLine("String Text or FILE Expected");
+		}
+		
+	if (tok.rw == rwFile)
+		{
+		FILE *fh;
+		int cch;
+		
+		pchString = malloc(16384);
+		GetExpectLt(&tok, ltStr, "String filename");
+		fh = fopen(tok.lex.szId, "rt");
+		if (fh == NULL)
+			ErrorLine2("Unable to open String file ", tok.lex.szId);
+		cch = fread(pchString, 1, 16384, fh);				
+		if (cch == 16384)
+			ErrorLine("String too long!");
+		pchString[cch] = 0;
+		fclose(fh);		
+		}
+	else
+		{
+		UngetTok();
+		pchString = PchGetSzMultiLine("String Text");
+		}
 	OpenOutput("tSTR", id);
 	DumpBytes(pchString, strlen(pchString)+1);
 	CloseOutput();
 	free(pchString);
 	}
+/*-----------------------------------------------------------------------------
+|       ParseDumpCategories
+-------------------------------------------------------------JOHNL-----------*/
+void ParseDumpCategories()
+	{
+	int id, len, count;
+	char *string;
+
+	id = WGetId("Categories ResourceId", fFalse);
+
+	if (vfCheckDupes)
+		{
+		int iid;
+
+		for (iid = 0; iid < iidMenuMac; iid++)
+			{
+			if (rgidString[iid] == id)
+				{
+				ErrorLine("Duplicate Categories Resource ID");
+				}
+			}
+		}
+	if (iidStringMac < iidStringMax)
+		rgidString[iidStringMac++] = id;
+
+	OpenOutput("tAIS", id);
+
+	count = 0;
+	GetExpectLt(&tok, ltStr, "String Text");
+	do
+		{
+		/* Only read up to maxCategories strings */
+		if (count < maxCategories) 
+			{
+			string = tok.lex.szId;
+			len = strlen(tok.lex.szId);
+			/* Check the size of the string and only write 15 character max */
+			if (len >= categoryLength)
+				len = categoryLength - 1;
+			DumpBytes(string, len);
+			EmitB(0);
+			}
+		else
+			{
+			if (count == maxCategories)
+				WarningLine("Too many strings in Categories. Extra strings will be ignored");
+			}
+		count++;
+
+		if (!FGetTok(&tok))
+			break;
+		} 
+	while(tok.lex.lt == ltStr);
+
+	if (tok.lex.lt != ltNil)
+	    UngetTok();
+
+	/* The AppInfo category structure expects exactly maxCategories 
+         * strings, so write a null byte for any unspecified strings */
+	for (; count < maxCategories; count++) 
+		EmitB(0);
+
+	CloseOutput();
+
+	}
+
 
 /*-----------------------------------------------------------------------------
 |	ParseDumpBitmapFile
 -------------------------------------------------------------DAVE------------*/
-void ParseDumpBitmapFile()
+void ParseDumpBitmapFile(BOOL fGrey)
 	{
+	int compress;
 	int id;
 	char *pchFileName;
 
-	id = WGetId("Bitmap ResourceId");
+
+	id = WGetId("Bitmap ResourceId", fFalse);
 	pchFileName = PchGetSz("Bitmap Filename");
 
+	compress = rwNoCompress;
+	if (FGetTok(&tok)) 
+		{
+		if (tok.rw == rwNoCompress || tok.rw == rwAutoCompress || tok.rw == rwForceCompress) 
+			{
+			compress = tok.rw;
+			}
+		else 
+			{
+			UngetTok();
+			}
+		}
+
 	OpenOutput("Tbmp", id);
-	DumpBitmap( pchFileName, fFalse );
+	DumpBitmap( pchFileName, fFalse, compress, fGrey );
 	CloseOutput();
 
 	free(pchFileName);
@@ -2074,14 +2480,14 @@ void ParseDumpBitmapFile()
 /*-----------------------------------------------------------------------------
 |	ParseDumpIcon
 -------------------------------------------------------------DAVE------------*/
-void ParseDumpIcon()
+void ParseDumpIcon(BOOL fSmall)
 	{
 	char *pchFileName;
 
 	pchFileName = PchGetSz("Icon Filename");
 
-	OpenOutput("tAIB", 1000);
-	DumpBitmap( pchFileName, fTrue );
+	OpenOutput("tAIB", fSmall ? 1001 : 1000);
+	DumpBitmap(pchFileName, fSmall ? 2 : 1, rwNoCompress, fFalse);
 	CloseOutput();
 
 	free(pchFileName);
@@ -2096,7 +2502,7 @@ void ParseDumpApplicationIconName()
 	int id;
 	char *pchString;
 
-	id = WGetId("Application IconName ResourceId");
+	id = WGetId("Application IconName ResourceId", fFalse);
 	pchString = PchGetSz("Icon Name Text");
 	OpenOutput("tAIN", id);
 	DumpBytes(pchString, strlen(pchString)+1);
@@ -2113,16 +2519,56 @@ void ParseDumpApplication()
 	int id;
 	char *pchString;
 
-	id = WGetId("APPL ResourceId");
+	id = WGetId("APPL ResourceId", fFalse);
 	pchString = PchGetSz("APPL");
 	if (strlen(pchString) != 4)
-		Error("APPL resource must be 4 chars");
+		ErrorLine("APPL resource must be 4 chars");
 	OpenOutput("APPL", id);
 	DumpBytes(pchString, 4);
 	CloseOutput();
 	free(pchString);
 	}
 
+/*-----------------------------------------------------------------------------
+|	ParseDumpTrap
+-------------------------------------------------------------WESC------------*/
+void ParseDumpTrap()
+	{
+	int id;
+	int wTrap;
+
+	id = WGetId("TRAP ResourceId", fFalse);
+	wTrap = WGetConst("Trap number");
+	if (id < 1000)
+		ErrorLine("TRAP resource id must be >= 1000, see HackMaster documentation");
+	OpenOutput("TRAP", id);
+	EmitW((unsigned short)wTrap);
+	CloseOutput();
+	}
+
+
+/*-----------------------------------------------------------------------------
+|     ParseDumpFont
+-------------------------------------------------------------DPT-------------*/
+void ParseDumpFont()
+	{
+	int id;
+	int fontid;
+	char *pchFileName;
+	
+	id = WGetId("Font ResourceId", fFalse);
+	GetExpectRw(rwFontId);
+	fontid = WGetId("FontId", fFalse);
+	if (fontid < 128 || fontid > 255)
+		ErrorLine("FontID invalid.  valid values: 128<=FontID<=255");
+	pchFileName = PchGetSz("Font Filename");
+	
+	OpenOutput("NFNT", id);
+	DumpFont(pchFileName, fontid);
+	CloseOutput();
+	
+	free(pchFileName);
+	}
 
 /*-----------------------------------------------------------------------------
 |	ParseTranslation
@@ -2318,8 +2764,27 @@ endOfClass:
 	}
 
 
+void WriteIncFile(char *szFile)
+	{
+	FILE *fh;
+	SYM *psym;
+	
+	fh = fopen(szFile, "wt");
+	if (fh == NULL)
+		Error3("Unable to open:", szFile, strerror(errno));
+	if (!vfQuiet)
+		printf("writing include file: %s\n", szFile);
+	fprintf(fh, "/* pilrc generated file.  Do not edit!*/\n");
+	for (psym = psymFirst; psym != NULL; psym = psym->psymNext)
+		{
+		if (psym->fAutoId)
+			fprintf(fh, "#define %s %d\n", psym->sz, psym->wVal);
+		}			
+	fclose(fh);
+	}
+
 /*-----------------------------------------------------------------------------
-|	ParseFile
+|	ParseDirectives
 -------------------------------------------------------------DAVE------------*/
 
 void ParseDirectives()
@@ -2366,12 +2831,23 @@ void ParseDirectives()
 
 	}
 
+VOID InitRcpfile(RCPFILE *prcpfile, int fontType)
+	{
+	PlexInit(&prcpfile->plfrm, sizeof(FRM), 10, 10);
+	InitFontMem(fontType);
+	}
 
 /*-----------------------------------------------------------------------------
 |	ParseFile
 -------------------------------------------------------------WESC------------*/
-void ParseFile(char *szIn, char *szOutDir, char *szResFile)
+RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile, int fontType)
 	{
+	RCPFILE *prcpfile;
+	
+	prcpfile = calloc(1, sizeof(RCPFILE));
+	InitRcpfile(prcpfile, fontType);
+	
+	
 	SetOutFileDir(szOutDir);
 	OpenInputFile(szIn);
 	OpenResFile(szResFile);
@@ -2384,8 +2860,8 @@ void ParseFile(char *szIn, char *szOutDir, char *szResFile)
 		switch(tok.rw)
 			{
 		case rwForm:
-			FParseForm();
-			DumpForm();
+			FParseForm(prcpfile);
+			DumpForm(PlexGetElementAt(&prcpfile->plfrm, PlexGetCount(&prcpfile->plfrm)-1));
 			break;
 		case rwMenu:
 			FParseMenu();
@@ -2402,6 +2878,9 @@ void ParseFile(char *szIn, char *szOutDir, char *szResFile)
 		case rwString:
 			ParseDumpString();
 			break;
+		case rwCategories:
+			ParseDumpCategories();
+			break;
 		case rwApplicationIconName:
 			ParseDumpApplicationIconName();
 			break;
@@ -2412,11 +2891,23 @@ void ParseFile(char *szIn, char *szOutDir, char *szResFile)
 			ParseTranslation();
 			break;
 		case rwBitmap:
-			ParseDumpBitmapFile();
+		case rwBitmapGrey:
+			ParseDumpBitmapFile(tok.rw == rwBitmapGrey);
 			break;
 		case rwIcon:
-			ParseDumpIcon();
+			ParseDumpIcon(fFalse);
 			break;
+		case rwIconSmall:
+			ParseDumpIcon(fTrue);
+			break;
+		case rwTrap:
+			ParseDumpTrap();
+			break;
+		case rwFont:
+			ParseDumpFont();
+			break;
+
+		/* Add a rw here, remember to add to error message below */
 		default:
 			if (tok.lex.lt == ltPound)
 				{
@@ -2425,131 +2916,20 @@ void ParseFile(char *szIn, char *szOutDir, char *szResFile)
 			else if (tok.lex.lt == ltDoubleSlash)
 				NextLine();
 			else
-				ErrorLine("FORM, MENU, ALERT, VERSION, STRING, APPLICATIONICONNAME, APPLICATION, BITMAP, ICON or TRANSLATION expected");
+				ErrorLine("FORM, MENU, ALERT, VERSION, STRING, CATEGORIES, APPLICATIONICONNAME, APPLICATION, BITMAP, SMALLICON, ICON, TRAP, FONT or TRANSLATION expected");
 			}
 		}
 	while (FGetTok(&tok));
 	fclose(vfhIn);
+	if (szIncFile != NULL)
+		{
+		WriteIncFile(szIncFile);
+		}
+
 	FreeSymTable();
 	FreeTranslations();
 	CloseResFile();
+	return prcpfile;
 	}
 
-
-void Usage()
-	{
-    Error("usage: pilrc {<options>} infile [outfiledir]\n\n"
-	  "Options:\n"
-	  "        -L LANGUAGE  Compile resources for specific language\n"
-	  "        -I <path>    Search for bitmap and include files in <path>\n"
-	  "                     More than one -I <path> options may be given\n"
-	  "                     The current directory is always searched\n"
-	  "        -R <resfile> Generate JUMP/PilA .res file\n"
-	  "        -q           Less noisy output\n"
-	  );
-
-    exit( 1 );
-	}
-
-
-/*-----------------------------------------------------------------------------
-|	main
--------------------------------------------------------------WESC------------*/
-main(int cArg, char *rgszArg[])
-	{
-	char *szOutputPath;
-	char *szInputFile;
-	char *szResFile;
-	int i;
-	
-    	
-	printf("pilrc v1.5.  by Wes Cherry (wesc@ricochet.net)\n");
-
-	vfCheckDupes = 1;	
-	if (cArg < 2)
-		{
-	    Usage();
-		}
-
-	szResFile = NULL;
-	for (i = 1; i < cArg; i++)
-		{
-	    if (rgszArg[i][0] != '-')
-			{
-			break;
-			}
-
-	
-	    if (FSzEqI(rgszArg[i], "-L"))
-			{
-			if (i++ == cArg)
-				{
-				Usage();
-				}
-
-			szLanguage = rgszArg[i];
-			continue;
-			}
-
-	    if (FSzEqI(rgszArg[i], "-I"))
-			{
-			if (i++ == cArg)
-				{
-				Usage();
-				}
-
-			if (totalIncludePaths == MAXPATHS)
-				{
-				printf("Too many include paths!\n\n");
-				Usage();
-				}
-
-			includePaths[ totalIncludePaths++ ] = rgszArg[i];
-			continue;
-			}
-
-	    if (FSzEqI(rgszArg[i], "-R"))
-			{
-			if (i++ == cArg)
-				{
-				Usage();
-				}
-			szResFile = rgszArg[i];
-			continue;
-			}
-	    if (FSzEqI(rgszArg[i], "-q"))
-			{
-			vfQuiet = fTrue;
-			continue;
-			}
-		Usage();
-		}
-
-	if (cArg - i < 1)
-		{
-	    Usage();
-		}
-
-	szInputFile  = rgszArg[i++];
-
-	if (cArg != i)
-		{
-	    szOutputPath = rgszArg[i++];
-		}
-	else
-		{
-	    szOutputPath = ".";
-		}
-
-	if (cArg != i)
-		{
-	    Usage();
-		}
-
-	printf("\n");
-
-	ParseFile(szInputFile, szOutputPath, szResFile);
-
-	return 0;
-	}
 

@@ -1,4 +1,4 @@
-Pilrc 1.5 readme.txt
+Pilrc readme.txt
 Wes Cherry
 wesc@ricochet.net
 
@@ -12,29 +12,46 @@ PilrcUI gives you a quick GUI preview of your resource file.  Clicking on
 the client area causes it to reload.
 
 See doc\pilrc.htm for information on PilRC syntax
-Examples for Pila and Gnu CC are in the example subdirectory. There is a 
+Examples for Pila and Gnu CC are in the example\ subdirectory. There is a 
 readme.txt there which explains more.
 
 Let me know if you run into any bugs, have feature suggestions or whatever.
-PilRC is freeware.  Source code is available.
+PilRC is freeware.  
 
-What's new in 1.5
------------------
-o Now checks for duplicate form, menu, string, alert and form object ids
-o Also checks for invalid ids (not in 0..9999)
+Building PilRC
+--------------
+Source code is available.  You are free to make enhancements, but please
+send the changes back to me so I can fold them into the main sources.
 
-What's new in 1.4
------------------
-o New -R command line argument: emits .res files -- a list of resources emitted by pilrc.  Include this in your PilA or JUMP program
-o New -q command line argument: Quiet mode -- less noisy output
-o Sample .c file now builds and loads correctly on Pilots
+PilRC has been ported to a number of platforms.  If you wish to run pilrc on a non-Win32
+platform, first download http://www.scumby.com/scumbysoft/pilot/pilrc/pilrcsrc.zip, then 
+follow the environment specific directions below.
 
-What's new in 1.3
------------------
-o Support for .java include files (Thanks to David Dawson)
-o New BITMAP and ICON commands convert Windows .BMP files to pilot bitmaps (Thanks to David Dawson)
-o Sample .rcp file, .c and .asm files which contain examples for each control type
-o New -I command line argument to specify include search paths
-o Updated user manual (Thanks to David Dawson)
-o Bug fixes
+Win32:
+------
+pilrc.dsp is a MSDev 5.0 project file
+pilrc.mak should compile using nmake /f "pilrc.mak"
+
+
+Unix/Linux/Solaris/XWindows
+---------------------------
+See doc\Readme.X for info on how to build a X Window version of PilRCUI using
+the GIMP GTK+ widget set.  Thanks to Brandon Long for the XWindows work.  You
+might want to check http://www.fiction.net/pilot/tools.html for more info.
+
+OS/2 Warp
+---------
+See doc\Readme.OS2 for info on how to build PilRC for OS/2 Warp platforms.  Though I haven't
+tested this, the OS/2 version should run on DOS machines using the EMX libraries.
+
+DOS
+---
+See doc\Readme.dos.
+
+VSlick Users
+------------
+I have included a rcp.vlx file for color coding of rcp files.  
+Thanks to Chris Pratt (pratt@platinum.com) for the original work.
+I have had problems making the file extensions stick in vslick 3.0.  
+This seems to be a bug in vslick.
 

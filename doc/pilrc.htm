@@ -2,154 +2,159 @@
 <html>
 
 <head>
-<meta http-equiv="Content-Type"
-content="text/html; charset=iso-8859-1">
-<meta name="GENERATOR" content="Microsoft FrontPage 2.0">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="GENERATOR" content="Microsoft FrontPage 3.0">
 <title>PilRC User's Manual</title>
 </head>
 
-<body bgcolor="#FFFFFF" text="#000000" link="#008080"
-vlink="#000080">
+<body bgcolor="#FFFFFF" text="#000000" link="#008080" vlink="#000080">
 
 <table border="0" width="100%">
-    <tr>
-        <td><font size="5" face="Verdana"><b>PilRC / PilRCUI v1.5<br>
-        User Manual</b></font></td>
-        <td><p align="right"><a href="mailto:wesc@ricochet.net">Wes
-        Cherry</a> (wesc@ricochet.net) <br>
-        07 May 97 </p>
-        </td>
-    </tr>
+  <tr>
+    <td><font size="5" face="Verdana"><b>PilRC / PilRCUI v2.3<br>
+    User Manual</b></font></td>
+    <td><p align="right"><a href="mailto:wesc@ricochet.net">Wes Cherry</a> (wesc@ricochet.net)
+    <br>
+    1 Apr 99 </td>
+  </tr>
 </table>
+
+<p align="left"><font size="2" face="Verdana">Check the <a
+href="http://www.scumby.com/scumbysoft/pilot/pilrc/">PilRC Home Page</a> for the latest
+version.</font></p>
 
 <p align="left"><font size="4" face="Verdana"><b>Description</b></font></p>
 
 <blockquote>
-    <table border="0" cellpadding="10">
-        <tr>
-            <td valign="top"><font face="Verdana">PilRC</font></td>
-            <td>A resource compiler for the US Robotics Pilot</td>
-        </tr>
-        <tr>
-            <td valign="top"><font face="Verdana">PilRCUI</font></td>
-            <td>A form previewer. It launches a window which
-            previews a close approximation of forms as they would
-            appear on the Pilot. Clicking in the content window
-            of PilRCUI will cause it to reload the current
-            script. </td>
-        </tr>
-    </table>
-    <p align="left">Ideally, PilRC and PilRCUI would be the same
-    program, but I don't know how to create a program which
-    conditionally runs in a console window or as a Win32 windows
-    window. </p>
-    <p align="left">If anyone knows how to do this, let me know.</p>
+  <table border="0" cellpadding="10">
+    <tr>
+      <td valign="top"><font face="Verdana">PilRC</font></td>
+      <td>A resource compiler for the US Robotics Pilot</td>
+    </tr>
+    <tr>
+      <td valign="top"><font face="Verdana">PilRCUI</font></td>
+      <td>A form previewer. It launches a window which previews a close approximation of forms
+      as they would appear on the Pilot. Clicking in the content window of PilRCUI will cause it
+      to reload the current script. </td>
+    </tr>
+  </table>
 </blockquote>
 
-<p align="left"><font size="4" face="Verdana"><b>Table of
-Contents</b></font></p>
+<p align="left"><font size="4" face="Verdana"><b>Table of Contents</b></font></p>
 
 <blockquote>
-    <table border="1" cellpadding="3">
-        <tr>
-            <td><a href="#Usage"><font size="2" face="Verdana"><strong>Usage</strong></font></a></td>
-        </tr>
-        <tr>
-            <td><a href="#Understanding"><font size="2"
-            face="Verdana"><strong>Understanding the Manual</strong></font></a></td>
-        </tr>
-        <tr>
-            <td><a href="#Language"><font size="2" face="Verdana"><strong>Resource
-            Language Reference</strong></font></a></td>
-        </tr>
-        <tr>
-            <td><a href="#International"><font size="2"
-            face="Verdana"><strong>International Support</strong></font></a></td>
-        </tr>
-        <tr>
-            <td><a href="#KnownBugs"><font size="2"
-            face="Verdana"><strong>Known Bugs</strong></font></a></td>
-        </tr>
-    </table>
+  <table border="1" cellpadding="3">
+    <tr>
+      <td><a href="#Usage"><font size="2" face="Verdana"><strong>Usage</strong></font></a></td>
+    </tr>
+    <tr>
+      <td><a href="#Understanding"><font size="2" face="Verdana"><strong>Understanding the
+      Manual</strong></font></a></td>
+    </tr>
+    <tr>
+      <td><a href="#Language"><font size="2" face="Verdana"><strong>Resource Language Reference</strong></font></a></td>
+    </tr>
+    <tr>
+      <td><a href="#International"><font size="2" face="Verdana"><strong>International Support</strong></font></a></td>
+    </tr>
+    <tr>
+      <td><a href="#KnownBugs"><font size="2" face="Verdana"><strong>Known Bugs</strong></font></a></td>
+    </tr>
+    <tr>
+      <td><a href="#Further"><font size="2" face="Verdana"><strong>Further Reading</strong></font></a></td>
+    </tr>
+  </table>
 </blockquote>
 
 <p align="left"><a name="Usage"></a><font size="4" face="Verdana"><b>Usage</b></font></p>
 
 <blockquote>
-    <pre><strong>pilrc [-L LANGUAGE] [-I INCLUDE PATH] [-R RESFILE] [-q] file.rcp [output path]
+  <pre><strong>pilrc [-L LANGUAGE] [-I INCLUDE PATH] [-R RESFILE] [-q] file.rcp [output path]
 pilrcui [-L LANGUAGE] file.rcp</strong></pre>
-    <table border="0" cellpadding="5" cellspacing="10">
-        <tr>
-            <td valign="top" width="30%"><font face="Verdana">-L
-            LANGUAGE</font></td>
-            <td valign="top">Generate resource files for target
-            language, LANGUAGE.</td>
-        </tr>
-        <tr>
-            <td width="30%"><font face="Verdana">-I INCLUDE PATH</font></td>
-            <td valign="top">Search INCLUDE PATH when looking for
-            include or bitmap files. <br>
-            <em>Note</em>: multiple paths to search may be
-            specified by repeating the -I option.</td>
-        </tr>
-        <tr>
-            <td width="30%"><font face="Verdana">-R RESFILE</font></td>
-            <td valign="top">Output a .res file specifying all the resources
-            emitted by pilrc.  This file may be included in your PilA or JUMP program.</td>
-        </tr>
-        <tr>
-            <td width="30%"><font face="Verdana">-q</font></td>
-            <td valign="top">Less noisy output, for you minimalists.</td>
-        </tr>
-        
-        
-        <tr>
-            <td valign="top" width="30%" nowrap><font
-            face="Verdana">file.rcp</font></td>
-            <td valign="top">Input file describing the resources
-            to be emitted. Each resource is written as a seperate
-            file in the [output path] directory. The output
-            filename is constructed by appending the hexcode
-            resource id to the four character resource type. <br>
-            For example, a FORM (tFRM) with formid of 15 would be
-            written as tfrm000f.bin.</td>
-        </tr>
-        <tr>
-            <td width="30%"><font face="Verdana">output path</font></td>
-            <td valign="top">Directory where .bin files should be
-            generated.</td>
-        </tr>
-    </table>
+  <table border="0" cellpadding="5" cellspacing="10">
+    <tr>
+      <td valign="top" width="30%"><font face="Verdana">-L LANGUAGE</font></td>
+      <td valign="top">Generate resource files for target language, LANGUAGE.</td>
+    </tr>
+    <tr>
+      <td width="30%"><font face="Verdana">-I INCLUDE PATH</font></td>
+      <td valign="top">Search INCLUDE PATH when looking for include or bitmap files. <br>
+      <em>Note</em>: multiple paths to search may be specified by repeating the -I option.</td>
+    </tr>
+    <tr>
+      <td width="30%"><font face="Verdana">-R RESFILE</font></td>
+      <td valign="top">Output a .res file specifying all the resources emitted by pilrc. This
+      file may be included in your PilA or JUMP program.</td>
+    </tr>
+    <tr>
+      <td>-H INCFILE</td>
+      <td>Output a .h file containing auto-generated resource item IDs for IDs not previously
+      defined.. If -H is not specified then undefined IDs are considered errors.</td>
+    </tr>
+    <tr>
+      <td width="30%"><font face="Verdana">-q</font></td>
+      <td valign="top">Less noisy output, for you minimalists.</td>
+    </tr>
+    <tr>
+      <td width="30%"><font face="Verdana">-Fh</font></td>
+      <td valign="top">Use Hebrew font widths for AUTO width calculations.</td>
+    </tr>
+    <tr>
+      <td width="30%"><font face="Verdana">-Fj</font></td>
+      <td valign="top">Use Japanese font widths for AUTO width calculations.</td>
+    </tr>
+    <tr>
+      <td valign="top" width="30%" nowrap><font face="Verdana">-F5</font></td>
+      <td valign="top">Use Chinese (Big5) font widhts for AUTO width calcuations.</td>
+    </tr>
+    <tr>
+      <td valign="top" width="30%" nowrap><font face="Verdana">-Fg</font></td>
+      <td valign="top">Use Chinese (GB) font widhts for AUTO width calcuations. (NOT
+      IMPLEMENTED!)</td>
+    </tr>
+    <tr>
+      <td valign="top" width="30%" nowrap><font face="Verdana">file.rcp</font></td>
+      <td valign="top">Input file describing the resources to be emitted. Each resource is
+      written as a separate file in the [output path] directory. The output filename is
+      constructed by appending the hexcode resource id to the four character resource type. <br>
+      For example, a FORM (tFRM) with formid of 15 would be written as tfrm000f.bin.</td>
+    </tr>
+    <tr>
+      <td width="30%"><font face="Verdana">output path</font></td>
+      <td valign="top">Directory where .bin files should be generated.</td>
+    </tr>
+  </table>
 </blockquote>
 
-<p><font size="4">Example</font></p>
+<p><font size="4">Examples</font></p>
 
 <blockquote>
-    <p>pilrc -I c:\resources -L FRENCH -R myprogram.res myprogram.rcp c:\output</p>
+  <p>pilrc -I c:\resources -L FRENCH -R myprogram.res myprogram.rcp c:\output<br>
+  pilrc -I c:\resources -L BIG5 -F5 -R myprogram.res myprogram.rcp c:\output<br>
+  pilrc -I c:\resources -L JAPAN -Fj -R myprogram.res myprogram.rcp c:\output</p>
 </blockquote>
 
 <p>&nbsp;</p>
 
-<p><a name="Understanding"></a><font size="4" face="Verdana"><b>Understanding
-the Manual</b></font></p>
+<p><a name="Understanding"></a><font size="4" face="Verdana"><b>Understanding the Manual</b></font></p>
 
 <p><font size="4">Syntax</font></p>
 
 <blockquote>
-    <p>Items in all CAPS appear as literals in the file. <br>
-    Items enclosed in <font color="#008000">&lt;</font> and <font
-    color="#008000">&gt;</font> are required fields. <br>
-    Items enclosed in [ and ] are optional fields. </p>
-    <p>Each field's required type is indicated by a suffix after
-    the field name (see below for types). </p>
+  <p>Items in all CAPS appear as literals in the file. <br>
+  Items enclosed in <font color="#008000">&lt;</font> and <font color="#008000">&gt;</font>
+  are required fields. <br>
+  Items enclosed in [ and ] are optional fields. </p>
+  <p>Each field's required type is indicated by a suffix after the field name (see below for
+  types). </p>
 </blockquote>
 
 <p><font size="4">Types</font></p>
 
 <blockquote>
-    <pre>.i  = identifier
+  <pre>.i  = identifier
       example:  kFoo</pre>
-    <pre>.s  = string (may contain the following character escapes: \t (tab) \n (cr) or \nnn where nnn is an octal character code)
+  <pre>.s  = string (may contain the following character escapes: \t (tab) \n (cr) or \nnn where nnn is an octal character code)
       example:  &quot;Click Me&quot;
 
 .ss = multi line string.  PilRC will concatenate strings on seperate lines 
@@ -158,137 +163,197 @@ the Manual</b></font></p>
                 &quot;men to come to the aid of their country&quot;
 
 .n = number, defined constant or simple arithmetic expression.  Valid operators are + - * /.  
-      precedence is left to right. math is integer.
-      examples: 23 12+3+1 12*4 14*3+5/2
+      precedence is left to right. Math is integer.  Precedence can be changed by grouping 
+      subexpressions with parenthesis
+      examples: 23 12+3+1 12*4 14*3+5/2 12+(2*3)
+      constants may also be 'AAAA' 4CC style.
+
 
 .p = position coordinate.  Which may be either a number, expression or one 
-     of the following keywords
-        AUTO       : Automatic width or height.  The width/height of the 
-                     item is computed based on the text in the item.  
-	             valid only for widths or heights of items.
-        CENTER     : Centers the item either horizontally or vertically.  
-                     Only valid for left or top coordinate of an item.
-	PREVLEFT   : Previous items left coordinate
-	PREVRIGHT  : Previous items right coordinate
-	PREVWIDTH  : Previous items width
-	PREVTOP    : Previous items top coordinate
-	PREVBOTTOM : Previous items bottom coordinate
-	PREVHEIGHT : Previous items height
-	
-	example: PREVRIGHT+2 
-	
-	NOTE:  AUTO and CENTER must stand alone and are not valid in 
-        arithmetic expressions</pre>
+     of the following keywords</pre>
+  <table border="0" cellspacing="1">
+    <tr>
+      <td><pre>AUTO</pre>
+      </td>
+      <td>Automatic width or height. The width/height of the item is computed based on the text
+      in the item. Valid only for widths or heights of items.</td>
+    </tr>
+    <tr>
+      <td><pre>CENTER</pre>
+      </td>
+      <td>Centers the item either horizontally or vertically. Only valid for left or top
+      coordinate of an item.</td>
+    </tr>
+    <tr>
+      <td><pre>CENTER@&lt;coord.n&gt;</pre>
+      </td>
+      <td>Centers the item at the coordinate following.</td>
+    </tr>
+    <tr>
+      <td><pre>RIGHT@&lt;coord.n&gt;</pre>
+      </td>
+      <td>Aligns the item at the right coordinate. Only valid for left coordinate of items</td>
+    </tr>
+    <tr>
+      <td><pre>BOTTOM@&lt;coord.n&gt;</pre>
+      </td>
+      <td>Aligns the item at the bottom coordinate. Only valid for top coordinate of items.</td>
+    </tr>
+    <tr>
+      <td><pre>PREVLEFT</pre>
+      </td>
+      <td>Previous items left coordinate</td>
+    </tr>
+    <tr>
+      <td><pre>PREVRIGHT</pre>
+      </td>
+      <td>Previous items right coordinate</td>
+    </tr>
+    <tr>
+      <td><pre>PREVTOP</pre>
+      </td>
+      <td>Previous items top coordinate</td>
+    </tr>
+    <tr>
+      <td><pre>PREVBOTTOM</pre>
+      </td>
+      <td>Previous items bottom coordinate</td>
+    </tr>
+    <tr>
+      <td><pre>PREVWIDTH</pre>
+      </td>
+      <td>Previous items width</td>
+    </tr>
+    <tr>
+      <td><pre>PREVHEIGHT</pre>
+      </td>
+      <td>Previous items height</td>
+    </tr>
+  </table>
 </blockquote>
+
+<pre>	example: PREVRIGHT+2 
+		 <a href="mailto:CENTER@80/2">CENTER@80/2</a>
+	
+	NOTE:  AUTO and CENTER must stand alone and are not valid in arithmetic expressions</pre>
+
+<pre>      	Note that when the -rtl flag is specified the | operator will cause the expression to
+	evaluate the the value to the right of the | operator. example: 3|4 will evaluate to 3 if the -rtl flag
+	isn't specified and 4 if it is.
+        </pre>
 
 <pre><font size="5" face="Times New Roman">Comments</font></pre>
 
 <blockquote>
-    <pre><font size="3">Comments are single line and begin with //</font></pre>
+  <pre><font size="3">Comments are single line and begin with //</font></pre>
 </blockquote>
 
 <blockquote>
-    <pre>Note that they are only allowed at the outer scope.  Comments within a FORM or MENU or other command are treated as errors.</pre>
+  <pre>Note that they are only allowed at the outer scope.  Comments within a FORM or MENU or other command are treated as errors.</pre>
 </blockquote>
 
 <h3><font size="4" face="Verdana"><strong>Include Files</strong></font></h3>
 
 <blockquote>
-    <p>The .rcp file may contain <font size="2"
-    face="Courier New">#include</font> directives. This allows a
-    programmer to have one header file for their project
-    containing resource IDs. Source code can reference the
-    symbols as can PilRC.</p>
-    <p>PilRC understands three include file formats. Following is
-    the fairly limited syntax for each of them:</p>
-    <table border="0" cellpadding="3" cellspacing="10">
-        <tr>
-            <td valign="top" width="20%"><font face="Verdana">.h</font></td>
-            <td valign="top"><font size="2" face="Courier New">#define
-            </font><font color="#008000" size="2"
-            face="Courier New">&lt;Symbol.i&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Value.n&gt;</font></td>
-        </tr>
-        <tr>
-            <td valign="top" width="20%"><font face="Verdana">.inc</font></td>
-            <td valign="top"><font color="#008000" size="2"
-            face="Courier New">&lt;Symbol.i&gt;</font><font
-            size="2" face="Courier New"> equ </font><font
-            color="#008000" size="2" face="Courier New">&lt;Value.n&gt;</font></td>
-        </tr>
-        <tr>
-            <td valign="top" width="20%"><font face="Verdana">.java, .jav</font></p>
-            </td>
-            <td valign="top"><font size="2" face="Courier New">package
-            &lt;Package name&gt;;<br>
-            <br>
-            [public] class &lt;Class name&gt;<br>
-            {<br>
-            public static final short </font><font
-            color="#008000" size="2" face="Courier New">&lt;Symbol.i&gt;</font><font
-            size="2" face="Courier New"> = </font><font
-            color="#008000" size="2" face="Courier New">&lt;Value.n&gt;</font><font
-            size="2" face="Courier New">;<br>
-            }</font></td>
-        </tr>
-    </table>
-    <p>Each symbol may then be used in place of any number.<br>
-    <strong>NOTE</strong>: <font size="2" face="Courier New">#ifdefs</font>
-    are ignored by PilRC.</p>
+  <p>The .rcp file may contain <font size="2" face="Courier New">#include</font> directives.
+  This allows a programmer to have one header file for their project containing resource
+  IDs. Source code can reference the symbols as can PilRC.</p>
+  <p>PilRC understands three include file formats. Following is the fairly limited syntax
+  for each of them:</p>
+  <table border="0" cellpadding="3" cellspacing="10">
+    <tr>
+      <td valign="top" width="20%"><font face="Verdana">.h</font></td>
+      <td valign="top"><font size="2" face="Courier New">#define </font><font color="#008000"
+      size="2" face="Courier New">&lt;Symbol.i&gt;</font><font size="2" face="Courier New"> </font><font
+      color="#008000" size="2" face="Courier New">&lt;Value.n&gt;</font></td>
+    </tr>
+    <tr>
+      <td valign="top" width="20%"><font face="Verdana">.inc</font></td>
+      <td valign="top"><font color="#008000" size="2" face="Courier New">&lt;Symbol.i&gt;</font><font
+      size="2" face="Courier New"> equ </font><font color="#008000" size="2" face="Courier New">&lt;Value.n&gt;</font></td>
+    </tr>
+    <tr>
+      <td valign="top" width="20%"><font face="Verdana">.java, .jav</font> </td>
+      <td valign="top"><font size="2" face="Courier New">package &lt;Package name&gt;;<br>
+      <br>
+      [public] class &lt;Class name&gt;<br>
+      {<br>
+      public static final short </font><font color="#008000" size="2" face="Courier New">&lt;Symbol.i&gt;</font><font
+      size="2" face="Courier New"> = </font><font color="#008000" size="2" face="Courier New">&lt;Value.n&gt;</font><font
+      size="2" face="Courier New">;<br>
+      }</font></td>
+    </tr>
+  </table>
+  <p>Each symbol may then be used in place of any number.<br>
+  <strong>NOTE</strong>: <font size="2" face="Courier New">#ifdefs</font> are ignored by
+  PilRC.</p>
 </blockquote>
 
-<h3><a name="Language"></a><font size="4" face="Verdana"><strong>Resource
-Language Reference</strong></font></h3>
+<h3><a name="Language"></a><font size="4" face="Verdana"><strong>Resource Language
+Reference</strong></font></h3>
 
 <blockquote>
-    <p><font size="3">The .rcp file may contain the following
-    commands:</font></p>
-    <blockquote>
-        <table border="1" cellpadding="3" cellspacing="5">
-            <tr>
-                <td><a href="#Form"><font size="4" face="Verdana">FORM</font></a></td>
-                <td>Pilot Form</td>
-            </tr>
-            <tr>
-                <td><a href="#Menu"><font face="Verdana">MENU</font></a></td>
-                <td>Menu bar</td>
-            </tr>
-            <tr>
-                <td><a href="#Alert"><font face="Verdana">ALERT</font></a></td>
-                <td>Alert dialog box</td>
-            </tr>
-            <tr>
-                <td><a href="#Version"><font face="Verdana">VERSION</font></a></td>
-                <td>Version string</td>
-            </tr>
-            <tr>
-                <td><a href="#String"><font face="Verdana">STRING</font></a></td>
-                <td>String</td>
-            </tr>
-            <tr>
-                <td><a href="#ApplicationIconName"><font
-                face="Verdana">APPLICATIONICONNAME</font></a></td>
-                <td>Application Icon's Name</td>
-            </tr>
-            <tr>
-                <td><a href="#Application"><font face="Verdana">APPLICATION</font></a></td>
-                <td>Application four character type</td>
-            </tr>
-            <tr>
-                <td><a href="#Icon"><font face="Verdana">ICON</font></a></td>
-                <td>Icon bitmap</td>
-            </tr>
-            <tr>
-                <td><a href="#Bitmap"><font face="Verdana">BITMAP</font></a></td>
-                <td>Bitmap</td>
-            </tr>
-            <tr>
-                <td><a href="#Translation"><font face="Verdana">TRANSLATION</font></a></td>
-                <td>Language string translation</td>
-            </tr>
-        </table>
-    </blockquote>
+  <p><font size="3">The .rcp file may contain the following commands:</font></p>
+  <blockquote>
+    <table border="1" cellpadding="3" cellspacing="5">
+      <tr>
+        <td><a href="#Form"><font size="4" face="Verdana">FORM</font></a></td>
+        <td>Pilot Form</td>
+      </tr>
+      <tr>
+        <td><a href="#Menu"><font face="Verdana">MENU</font></a></td>
+        <td>Menu bar</td>
+      </tr>
+      <tr>
+        <td><a href="#Alert"><font face="Verdana">ALERT</font></a></td>
+        <td>Alert dialog box</td>
+      </tr>
+      <tr>
+        <td><a href="#Version"><font face="Verdana">VERSION</font></a></td>
+        <td>Version string</td>
+      </tr>
+      <tr>
+        <td><a href="#String"><font face="Verdana">STRING</font></a></td>
+        <td>String</td>
+      </tr>
+      <tr>
+        <td><a href="#Categories"><font face="Verdana">CATEGORIES</font></a></td>
+        <td>Default category names</td>
+      </tr>
+      <tr>
+        <td><a href="#ApplicationIconName"><font face="Verdana">APPLICATIONICONNAME</font></a></td>
+        <td>Application Icon's Name</td>
+      </tr>
+      <tr>
+        <td><a href="#Application"><font face="Verdana">APPLICATION</font></a></td>
+        <td>Application four character type</td>
+      </tr>
+      <tr>
+        <td><a href="#Icon"><font face="Verdana">ICON</font></a></td>
+        <td>Icon bitmap</td>
+      </tr>
+      <tr>
+        <td><a href="#SmallIcon"><font face="Verdana">SMALLICON</font></a></td>
+        <td>Icon bitmap</td>
+      </tr>
+      <tr>
+        <td><font face="Verdana"><a href="#Bitmap">BITMAP</a>.<a href="#Bitmap">BITMAPGREY</a></font></td>
+        <td>Bitmap</td>
+      </tr>
+      <tr>
+        <td><a href="#Trap"><font face="Verdana">TRAP</font></a></td>
+        <td>Trap (HackMaster)</td>
+      </tr>
+      <tr>
+        <td><a href="#Font"><font face="Verdana">FONT</font></a></td>
+        <td>User defined font</td>
+      </tr>
+      <tr>
+        <td><a href="#Translation"><font face="Verdana">TRANSLATION</font></a></td>
+        <td>Language string translation</td>
+      </tr>
+    </table>
+  </blockquote>
 </blockquote>
 
 <blockquote>
@@ -299,301 +364,248 @@ Language Reference</strong></font></h3>
 <p><a name="Form"></a><font size="4" face="Verdana">FORM (tFRM)</font></p>
 
 <blockquote>
-    <pre>FORM ID <font color="#008000">&lt;FormResourceId.n&gt;</font> AT (<font
+  <pre>FORM ID <font color="#008000">&lt;FormResourceId.n&gt;</font> AT (<font
 color="#008000">&lt;Left.p&gt;</font> <font color="#008000">&lt;Top.p&gt;</font> <font
 color="#008000">&lt;Width.p&gt;</font> <font color="#008000">&lt;Height.p&gt;</font>)
-[FRAME]
+[<font
+color="#0000FF">FRAME</font>]
 [NOFRAME]
 [MODAL]
-[SAVEBEHIND]
-[USABLE]
+[<font color="#0000FF">SAVEBEHIND</font>]
+[NOSAVEBEHIND]
+[<font
+color="#0000FF">USABLE</font>]
 [HELPID <font color="#008000">&lt;HelpId.n&gt;</font>]
-[DEFAULTBTNID <font color="#008000">&lt;BtnId.n&gt;</font>]
+[DEFAULTBTNID <font
+color="#008000">&lt;BtnId.n&gt;</font>]
 [MENUID <font color="#008000">&lt;MenuId.n&gt;</font>]
 BEGIN
-	<font color="#008000">&lt;OBJECTS&gt;</font>
+	<font
+color="#008000">&lt;OBJECTS&gt;</font>
 END</pre>
-    <p><font color="#008000">&lt;OBJECTS&gt;</font>: one or more
-    of: </p>
-    <table border="0" cellspacing="0">
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">TITLE</font></td>
-            <td valign="top"><font color="#008000" size="2"
-            face="Courier New">&lt;Title.s&gt;</font></td>
-        </tr>
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">BUTTON</font></td>
-            <td valign="top"><font color="#008000" size="2"
-            face="Courier New">&lt;Label.s&gt;</font><font
-            size="2" face="Courier New"> ID </font><font
-            color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
-            size="2" face="Courier New"> AT (</font><font
-            color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
-            size="2" face="Courier New">) [USABLE] [NONUSABLE]
-            [DISABLED] [LEFTANCHOR] [RIGHTANCHOR] [FRAME]
-            [NOFRAME] [BOLDFRAME] [FONT </font><font
-            color="#008000" size="2" face="Courier New">&lt;FontId.n&gt;</font><font
-            size="2" face="Courier New">]</font></td>
-        </tr>
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">PUSHBUTTON
-            </font></td>
-            <td valign="top"><font color="#008000" size="2"
-            face="Courier New">&lt;Label.s&gt;</font><font
-            size="2" face="Courier New"> ID </font><font
-            color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
-            size="2" face="Courier New"> AT (</font><font
-            color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
-            size="2" face="Courier New">) [USABLE] [NONUSABLE]
-            [DISABLED] [LEFTANCHOR] [RIGHTANCHOR] [FONT </font><font
-            color="#008000" size="2" face="Courier New">&lt;FontId&gt;</font><font
-            size="2" face="Courier New">] [GROUP </font><font
-            color="#008000" size="2" face="Courier New">&lt;GroupId.n&gt;</font><font
-            size="2" face="Courier New">]</font></td>
-        </tr>
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">CHECKBOX</font></td>
-            <td valign="top"><font color="#008000" size="2"
-            face="Courier New">&lt;Label.s&gt;</font><font
-            size="2" face="Courier New"> ID </font><font
-            color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
-            size="2" face="Courier New"> AT (</font><font
-            color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
-            size="2" face="Courier New">) [USABLE] [NONUSABLE]
-            [DISABLED] [LEFTANCHOR] [RIGHTANCHOR] [FONT </font><font
-            color="#008000" size="2" face="Courier New">&lt;FontId&gt;</font><font
-            size="2" face="Courier New">] [GROUP </font><font
-            color="#008000" size="2" face="Courier New">&lt;GroupId.n&gt;</font><font
-            size="2" face="Courier New">] [CHECKED]</font></td>
-        </tr>
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">POPUPTRIGGER</font></td>
-            <td valign="top"><font color="#008000" size="2"
-            face="Courier New">&lt;Label.s&gt;</font><font
-            size="2" face="Courier New"> ID </font><font
-            color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
-            size="2" face="Courier New"> AT (</font><font
-            color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
-            size="2" face="Courier New">) [USABLE] [NONUSABLE]
-            [DISABLED] [LEFTANCHOR] [RIGHTANCHOR] [FONT </font><font
-            color="#008000" size="2" face="Courier New">&lt;FontId.n&gt;</font><font
-            size="2" face="Courier New">]</font></td>
-        </tr>
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">SELECTORTRIGGER
-            </font></td>
-            <td valign="top"><font color="#008000" size="2"
-            face="Courier New">&lt;Label.s&gt;</font><font
-            size="2" face="Courier New"> ID </font><font
-            color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
-            size="2" face="Courier New"> AT (</font><font
-            color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
-            size="2" face="Courier New">) [USABLE] [NONUSABLE]
-            [DISABLED] [LEFTANCHOR] [RIGHTANCHOR] [FONT </font><font
-            color="#008000" size="2" face="Courier New">&lt;FontId.n&gt;</font><font
-            size="2" face="Courier New">]</font></td>
-        </tr>
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">REPEATBUTTON</font></td>
-            <td valign="top"><font color="#008000" size="2"
-            face="Courier New">&lt;Label.s&gt;</font><font
-            size="2" face="Courier New"> ID </font><font
-            color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
-            size="2" face="Courier New"> AT (</font><font
-            color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
-            size="2" face="Courier New">) [USABLE] [NONUSABLE]
-            [DISABLED] [LEFTANCHOR] [RIGHTANCHOR] [FRAME]
-            [NOFRAME] [BOLDFRAME] [FONT </font><font
-            color="#008000" size="2" face="Courier New">&lt;FontId.n&gt;</font><font
-            size="2" face="Courier New">]</font></td>
-        </tr>
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">LABEL</font></td>
-            <td valign="top"><font color="#008000" size="2"
-            face="Courier New">&lt;Label.s&gt;</font><font
-            size="2" face="Courier New"> ID </font><font
-            color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
-            size="2" face="Courier New"> AT (</font><font
-            color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
-            size="2" face="Courier New">)[USABLE] [NONUSABLE]
-            [FONT </font><font color="#008000" size="2"
-            face="Courier New">&lt;FontId.n&gt;</font><font
-            size="2" face="Courier New">]</font></td>
-        </tr>
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">FIELD</font></td>
-            <td valign="top"><font size="2" face="Courier New">ID
-            </font><font color="#008000" size="2"
-            face="Courier New">&lt;Id.n&gt;</font><font size="2"
-            face="Courier New"> AT (</font><font color="#008000"
-            size="2" face="Courier New">&lt;Left.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
-            size="2" face="Courier New">)[USABLE] [NONUSABLE]
-            [DISABLED] [LEFTALIGN] [RIGHTALIGN] [FONT </font><font
-            color="#008000" size="2" face="Courier New">&lt;FontId.n&gt;</font><font
-            size="2" face="Courier New">] [EDITABLE]
-            [NONEDITABLE] [UNDERLINED] [SINGLELINE]
-            [MULTIPLELINES] [MAXCHARS </font><font
-            color="#008000" size="2" face="Courier New">&lt;MaxChars.n&gt;</font><font
-            size="2" face="Courier New">]</font></td>
-        </tr>
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">POPUPLIST</font></td>
-            <td valign="top"><font size="2" face="Courier New">ID
-            </font><font color="#008000" size="2"
-            face="Courier New">&lt;Id.n&gt;</font><font size="2"
-            face="Courier New"> </font><font color="#008000"
-            size="2" face="Courier New">&lt;IdList.n&gt;</font></td>
-        </tr>
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">LIST</font></td>
-            <td valign="top"><font color="#008000" size="2"
-            face="Courier New">&lt;Item.s&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Item2.s&gt;</font><font
-            size="2" face="Courier New">... ID </font><font
-            color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
-            size="2" face="Courier New"> AT (</font><font
-            color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
-            size="2" face="Courier New">) [USABLE] [NONUSABLE]
-            [DISABLED] [VISIBLEITEMS </font><font color="#008000"
-            size="2" face="Courier New">&lt;NumVisItems.n&gt;</font><font
-            size="2" face="Courier New">] [FONT </font><font
-            color="#008000" size="2" face="Courier New">&lt;FontId.n&gt;</font><font
-            size="2" face="Courier New">]</font></td>
-        </tr>
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">FORMBITMAP</font></td>
-            <td valign="top"><font size="2" face="Courier New">AT
-            (</font><font color="#008000" size="2"
-            face="Courier New">&lt;Left.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
-            size="2" face="Courier New">) BITMAP </font><font
-            color="#008000" size="2" face="Courier New">&lt;BitmapId.n&gt;</font><font
-            size="2" face="Courier New"> [NONUSABLE] </font></td>
-        </tr>
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">GADGET</font></td>
-            <td valign="top"><font size="2" face="Courier New">ID
-            </font><font color="#008000" size="2"
-            face="Courier New">&lt;Id.n&gt;</font><font size="2"
-            face="Courier New"> AT (</font><font color="#008000"
-            size="2" face="Courier New">&lt;Left.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
-            size="2" face="Courier New">) [USABLE] [NONUSABE]</font></td>
-        </tr>
-        <tr>
-            <td valign="top"><font size="2" face="Verdana">TABLE</font></td>
-            <td valign="top"><font size="2" face="Courier New">ID
-            </font><font color="#008000" size="2"
-            face="Courier New">&lt;Id.n&gt;</font><font size="2"
-            face="Courier New"> AT (</font><font color="#008000"
-            size="2" face="Courier New">&lt;Left.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
-            size="2" face="Courier New">) ROWS </font><font
-            color="#008000" size="2" face="Courier New">&lt;NumRows.n&gt;</font><font
-            size="2" face="Courier New"> COLUMNS </font><font
-            color="#008000" size="2" face="Courier New">&lt;NumCols.n&gt;</font><font
-            size="2" face="Courier New"> COLUMNWIDTHS </font><font
-            color="#008000" size="2" face="Courier New">&lt;Col1Width.n&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Col2Width.n.&gt;</font><font
-            size="2" face="Courier New">...</font></td>
-        </tr>
-    </table>
-    <table border="0" cellspacing="0">
-        <tr>
-            <td><font size="2" face="Courier New">GRAFFITISTATEINDICATOR
-            </font></td>
-            <td><font size="2" face="Courier New">AT (</font><font
-            color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
-            size="2" face="Courier New"> </font><font
-            color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
-            size="2" face="Courier New">)</font></td>
-        </tr>
-    </table>
+  <p><font color="#008000">&lt;OBJECTS&gt;</font>: one or more of: (Defaults are colored <font
+  color="#0000FF">BLUE</font>)</p>
+  <table border="0" cellspacing="0">
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">TITLE</font></td>
+      <td valign="top"><font color="#008000" size="2" face="Courier New">&lt;Title.s&gt;</font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">BUTTON</font></td>
+      <td valign="top"><font color="#008000" size="2" face="Courier New">&lt;Label.s&gt;</font><font
+      size="2" face="Courier New"> ID </font><font color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
+      size="2" face="Courier New"> AT (</font><font color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
+      size="2" face="Courier New">) [</font><font color="#0000FF" size="2" face="Courier New">USABLE</font><font
+      size="2" face="Courier New">] [NONUSABLE] [DISABLED] [LEFTANCHOR] [RIGHTANCHOR] [</font><font
+      color="#0000FF" size="2" face="Courier New">FRAME</font><font size="2" face="Courier New">]
+      [NOFRAME] [BOLDFRAME] [FONT </font><font color="#008000" size="2" face="Courier New">&lt;FontId.n&gt;</font><font
+      size="2" face="Courier New">]</font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">PUSHBUTTON </font></td>
+      <td valign="top"><font color="#008000" size="2" face="Courier New">&lt;Label.s&gt;</font><font
+      size="2" face="Courier New"> ID </font><font color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
+      size="2" face="Courier New"> AT (</font><font color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
+      size="2" face="Courier New">) [</font><font color="#0000FF" size="2" face="Courier New">USABLE</font><font
+      size="2" face="Courier New">] [NONUSABLE] [DISABLED] [LEFTANCHOR] [RIGHTANCHOR] [FONT </font><font
+      color="#008000" size="2" face="Courier New">&lt;FontId&gt;</font><font size="2"
+      face="Courier New">] [GROUP </font><font color="#008000" size="2" face="Courier New">&lt;GroupId.n&gt;</font><font
+      size="2" face="Courier New">]</font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">CHECKBOX</font></td>
+      <td valign="top"><font color="#008000" size="2" face="Courier New">&lt;Label.s&gt;</font><font
+      size="2" face="Courier New"> ID </font><font color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
+      size="2" face="Courier New"> AT (</font><font color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
+      size="2" face="Courier New">) [</font><font color="#0000FF" size="2" face="Courier New">USABLE</font><font
+      size="2" face="Courier New">] [NONUSABLE] [DISABLED] [LEFTANCHOR] [RIGHTANCHOR] [FONT </font><font
+      color="#008000" size="2" face="Courier New">&lt;FontId&gt;</font><font size="2"
+      face="Courier New">] [GROUP </font><font color="#008000" size="2" face="Courier New">&lt;GroupId.n&gt;</font><font
+      size="2" face="Courier New">] [CHECKED]</font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">POPUPTRIGGER</font></td>
+      <td valign="top"><font color="#008000" size="2" face="Courier New">&lt;Label.s&gt;</font><font
+      size="2" face="Courier New"> ID </font><font color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
+      size="2" face="Courier New"> AT (</font><font color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
+      size="2" face="Courier New">) [</font><font color="#0000FF" size="2" face="Courier New">USABLE</font><font
+      size="2" face="Courier New">] [NONUSABLE] [DISABLED] [LEFTANCHOR] [RIGHTANCHOR] [FONT </font><font
+      color="#008000" size="2" face="Courier New">&lt;FontId.n&gt;</font><font size="2"
+      face="Courier New">]</font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">SELECTORTRIGGER </font></td>
+      <td valign="top"><font color="#008000" size="2" face="Courier New">&lt;Label.s&gt;</font><font
+      size="2" face="Courier New"> ID </font><font color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
+      size="2" face="Courier New"> AT (</font><font color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
+      size="2" face="Courier New">) [</font><font color="#0000FF" size="2" face="Courier New">USABLE</font><font
+      size="2" face="Courier New">] [NONUSABLE] [DISABLED] [LEFTANCHOR] [RIGHTANCHOR] [FONT </font><font
+      color="#008000" size="2" face="Courier New">&lt;FontId.n&gt;</font><font size="2"
+      face="Courier New">]</font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">REPEATBUTTON</font></td>
+      <td valign="top"><font color="#008000" size="2" face="Courier New">&lt;Label.s&gt;</font><font
+      size="2" face="Courier New"> ID </font><font color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
+      size="2" face="Courier New"> AT (</font><font color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
+      size="2" face="Courier New">) [</font><font color="#0000FF" size="2" face="Courier New">USABLE</font><font
+      size="2" face="Courier New">] [NONUSABLE] [DISABLED] [LEFTANCHOR] [RIGHTANCHOR] [</font><font
+      color="#0000FF" size="2" face="Courier New">FRAME</font><font size="2" face="Courier New">]
+      [NOFRAME] [BOLDFRAME] [FONT </font><font color="#008000" size="2" face="Courier New">&lt;FontId.n&gt;</font><font
+      size="2" face="Courier New">]</font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">LABEL</font></td>
+      <td valign="top"><font color="#008000" size="2" face="Courier New">&lt;Label.s&gt;</font><font
+      size="2" face="Courier New"> ID </font><font color="#008000" size="2" face="Courier New">&lt;Id.n&gt;</font><font
+      size="2" face="Courier New"> AT (</font><font color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
+      size="2" face="Courier New">)[USABLE] [NONUSABLE] [FONT </font><font color="#008000"
+      size="2" face="Courier New">&lt;FontId.n&gt;</font><font size="2" face="Courier New">]</font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">FIELD</font></td>
+      <td valign="top"><font size="2" face="Courier New">ID </font><font color="#008000"
+      size="2" face="Courier New">&lt;Id.n&gt;</font><font size="2" face="Courier New"> AT (</font><font
+      color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font size="2"
+      face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
+      size="2" face="Courier New">)[</font><font color="#0000FF" size="2" face="Courier New">USABLE</font><font
+      size="2" face="Courier New">] [NONUSABLE] [DISABLED] [</font><font color="#0000FF"
+      size="2" face="Courier New">LEFTALIGN</font><font size="2" face="Courier New">]
+      [RIGHTALIGN] [FONT </font><font color="#008000" size="2" face="Courier New">&lt;FontId.n&gt;</font><font
+      size="2" face="Courier New">] [</font><font color="#0000FF" size="2" face="Courier New">EDITABLE</font><font
+      size="2" face="Courier New">] [NONEDITABLE] [UNDERLINED] [</font><font color="#0000FF"
+      size="2" face="Courier New">SINGLELINE</font><font size="2" face="Courier New">]
+      [MULTIPLELINES] [DYNAMICSIZE] [MAXCHARS </font><font color="#008000" size="2"
+      face="Courier New">&lt;MaxChars.n&gt;</font><font size="2" face="Courier New">]
+      [AUTOSHIFT] [NUMERIC]</font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">POPUPLIST</font></td>
+      <td valign="top"><font size="2" face="Courier New">ID </font><font color="#008000"
+      size="2" face="Courier New">&lt;Id.n&gt;</font><font size="2" face="Courier New"> </font><font
+      color="#008000" size="2" face="Courier New">&lt;IdList.n&gt;</font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">LIST</font></td>
+      <td valign="top"><font color="#008000" size="2" face="Courier New">&lt;Item.s&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Item2.s&gt;</font><font
+      size="2" face="Courier New">... ID </font><font color="#008000" size="2"
+      face="Courier New">&lt;Id.n&gt;</font><font size="2" face="Courier New"> AT (</font><font
+      color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font size="2"
+      face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
+      size="2" face="Courier New">) [</font><font color="#0000FF" size="2" face="Courier New">USABLE</font><font
+      size="2" face="Courier New">] [NONUSABLE] [DISABLED] [VISIBLEITEMS </font><font
+      color="#008000" size="2" face="Courier New">&lt;NumVisItems.n&gt;</font><font size="2"
+      face="Courier New">] [FONT </font><font color="#008000" size="2" face="Courier New">&lt;FontId.n&gt;</font><font
+      size="2" face="Courier New">]</font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">FORMBITMAP</font></td>
+      <td valign="top"><font size="2" face="Courier New">AT (</font><font color="#008000"
+      size="2" face="Courier New">&lt;Left.p&gt;</font><font size="2" face="Courier New"> </font><font
+      color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font size="2"
+      face="Courier New">) BITMAP </font><font color="#008000" size="2" face="Courier New">&lt;BitmapId.n&gt;</font><font
+      size="2" face="Courier New"> [</font><font color="#0000FF" size="2" face="Courier New">USABLE</font><font
+      size="2" face="Courier New">] [NONUSABLE] </font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">GADGET</font></td>
+      <td valign="top"><font size="2" face="Courier New">ID </font><font color="#008000"
+      size="2" face="Courier New">&lt;Id.n&gt;</font><font size="2" face="Courier New"> AT (</font><font
+      color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font size="2"
+      face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
+      size="2" face="Courier New">) [</font><font color="#0000FF" size="2" face="Courier New">USABLE</font><font
+      size="2" face="Courier New">] [NONUSABE]</font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">TABLE</font></td>
+      <td valign="top"><font size="2" face="Courier New">ID </font><font color="#008000"
+      size="2" face="Courier New">&lt;Id.n&gt;</font><font size="2" face="Courier New"> AT (</font><font
+      color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font size="2"
+      face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
+      size="2" face="Courier New">) ROWS </font><font color="#008000" size="2"
+      face="Courier New">&lt;NumRows.n&gt;</font><font size="2" face="Courier New"> COLUMNS </font><font
+      color="#008000" size="2" face="Courier New">&lt;NumCols.n&gt;</font><font size="2"
+      face="Courier New"> COLUMNWIDTHS </font><font color="#008000" size="2" face="Courier New">&lt;Col1Width.n&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Col2Width.n.&gt;</font><font
+      size="2" face="Courier New">...</font></td>
+    </tr>
+    <tr>
+      <td valign="top"><font size="2" face="Verdana">SCROLLBAR</font></td>
+      <td><font size="2" face="Courier New">ID </font><font color="#008000" size="2"
+      face="Courier New">&lt;Id.n&gt;</font><font size="2" face="Courier New"> AT (</font><font
+      color="#008000" size="2" face="Courier New">&lt;Left.p&gt;</font><font size="2"
+      face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Width.p&gt;</font><font
+      size="2" face="Courier New"> </font><font color="#008000" size="2" face="Courier New">&lt;Height.p&gt;</font><font
+      size="2" face="Courier New">) [</font><font color="#0000FF" size="2" face="Courier New">USABLE</font><font
+      size="2" face="Courier New">] [NONUSABLE] VALUE </font><font color="#008000" size="2"
+      face="Courier New">&lt;Value.n&gt;</font><font size="2" face="Courier New"> MIN </font><font
+      color="#008000" size="2" face="Courier New">&lt;MinValue.n&gt;</font><font size="2"
+      face="Courier New"> MAX </font><font color="#008000" size="2" face="Courier New">&lt;MaxValue.n&gt;</font><font
+      size="2" face="Courier New"> PAGESIZE </font><font color="#008000" size="2"
+      face="Courier New">&lt;PageSize.n&gt;</font></td>
+    </tr>
+  </table>
+  <table border="0" cellspacing="0">
+    <tr>
+      <td><font size="2" face="Courier New">GRAFFITISTATEINDICATOR </font></td>
+      <td><font size="2" face="Courier New">AT (</font><font color="#008000" size="2"
+      face="Courier New">&lt;Left.p&gt;</font><font size="2" face="Courier New"> </font><font
+      color="#008000" size="2" face="Courier New">&lt;Top.p&gt;</font><font size="2"
+      face="Courier New">)</font></td>
+    </tr>
+  </table>
 </blockquote>
 
 <blockquote>
-    <table border="0" cellspacing="10">
-        <tr>
-            <td valign="top"><font size="4"><em>Notes</em></font>:</td>
-            <td valign="top">The bitmap referenced by <font
-            size="2" face="Verdana">FORMBITMAP</font> must appear
-            as a seperate resource in the rcp file via the <a
-            href="#Bitmap"><font size="2" face="Verdana">BITMAP</font></a>
-            command.<p>MAXCHARS is required for FIELD to work
-            properly</p>
-            </td>
-        </tr>
-    </table>
+  <table border="0" cellspacing="10">
+    <tr>
+      <td valign="top"><font size="4"><em>Notes</em></font>:</td>
+      <td valign="top"><strong>New in v1.9: ID &lt;Id.n&gt; may be replaced with AUTOID</strong>.
+      PilRC will assign an identifier for each control which doesn't specifies AUTOID. This is
+      useful for controls which you won't refer to in your code, LABELs being the most common.
+      Auto ID's begin at at 9000 and increase sequentially. <p>The bitmap referenced by <font
+      size="2" face="Verdana">FORMBITMAP</font> must appear as a seperate resource in the rcp
+      file via the <a href="#Bitmap"><font size="2" face="Verdana">BITMAP</font></a> command.</p>
+      <p>MAXCHARS is required for FIELD to work properly</p>
+      <p>Any user defined fonts defined by FONT &gt;= 128 and FONT &lt;= 255 must appear above
+      the FORM via the <a href="#FONT">FONT</a> command.</td>
+    </tr>
+  </table>
 </blockquote>
 
-<p><font size="3">Example (This is a cliff notes version of
-AlarmHack's resource)</font></p>
+<p><font size="3">Example (See example\pilrctst.rcp for more examples):</font></p>
 
 <blockquote>
-    <pre>FORM ID 1 AT (2 2 156 156)
+  <pre>FORM ID 1 AT (2 2 156 156)
 USABLE
 MODAL
 HELPID 1
@@ -605,14 +617,14 @@ BEGIN
 	PUSHBUTTON &quot;2&quot; ID 2002 AT (PrevRight+1  PrevTop PrevWidth PrevHeight) GROUP 1
 	PUSHBUTTON &quot;3&quot; ID 2003 AT (PrevRight+1  PrevTop PrevWidth PrevHeight) GROUP 1
 
-	LABEL &quot;times.  Ring again every&quot; ID 601 AT(CENTER PrevBottom+2) FONT 0
+	LABEL &quot;times.  Ring again every&quot; AUTOID AT(CENTER PrevBottom+2) FONT 0
 
 	PUSHBUTTON &quot;never&quot; ID 3000 AT (13 PrevBottom+2 32 12) GROUP 2
 	PUSHBUTTON &quot;10 sec&quot; ID 3001 AT (PrevRight+1 PrevTop PrevWidth PrevHeight) GROUP 2
 	PUSHBUTTON &quot;30 sec&quot; ID 3002 AT (PrevRight+1 PrevTop PrevWidth PrevHeight) GROUP 2
 	PUSHBUTTON &quot;1 min&quot; ID 3003 AT (PrevRight+1 PrevTop PrevWidth PrevHeight) GROUP 2
 
-	LABEL &quot;Alarm sound:&quot; ID 601 AT (24 PrevBottom+4)
+	LABEL &quot;Alarm sound:&quot; AUTOID AT (24 PrevBottom+4)
 	POPUPTRIGGER &quot;          &quot; ID 5000 AT (PrevRight+4 PrevTop 62 AUTO) LEFTANCHOR
 	LIST &quot;Standard&quot; &quot;Skip Along&quot; &quot;Beethoven&quot; &quot;EuroCop&quot; &quot;Cricket&quot; &quot;Bleep&quot; &quot;Computer2&quot; ID 6000 AT (PrevLeft PrevTop 52 1) VISIBLEITEMS 10 NONUSABLE
 	POPUPLIST ID 5000 6000
@@ -625,32 +637,39 @@ END</pre>
 <p><a name="Menu"></a><font size="4" face="Verdana">MENU (MBAR)</font></p>
 
 <blockquote>
-    <pre>MENU ID <font color="#008000">&lt;MenuResourceId&gt;</font>
+  <pre>MENU ID <font color="#008000">&lt;MenuResourceId&gt;</font>
 BEGIN
-	<font color="#008000">&lt;PULLDOWNS&gt;</font>
+	<font
+color="#008000">&lt;PULLDOWNS&gt;</font>
 END
 
 
 <font color="#008000">&lt;PULLDOWNS&gt;</font>: one or more of:
 
-PULLDOWN <font color="#008000">&lt;PulldownTitle.s&gt;</font>
+PULLDOWN <font
+color="#008000">&lt;PulldownTitle.s&gt;</font>
 BEGIN
 	<font color="#008000">&lt;MENUITEMS&gt;</font>
 END
 
-<font color="#008000">&lt;MENUITEMS&gt;</font>: : one or more of:
-	MENUITEM <font color="#008000">&lt;MenuItem.s&gt;</font> <font
-color="#008000">&lt;MenuItemId.n&gt;</font> [AccelChar.c]</pre>
+<font
+color="#008000">&lt;MENUITEMS&gt;</font>: : one or more of:
+	MENUITEM <font color="#008000">&lt;MenuItem.s&gt;</font> ID <font
+color="#008000">&lt;MenuItemId.n&gt;</font> [AccelChar.c]
+	MENUITEM SEPARATOR</pre>
 </blockquote>
 
 <pre><font size="4" face="Times New Roman">Example</font></pre>
 
+<p>&nbsp;</p>
+
 <blockquote>
-    <pre>MENU ID 100
+  <pre>MENU ID 100
 BEGIN
 	PULLDOWN &quot;File&quot;
 	BEGIN
 		MENUITEM &quot;Open...&quot; ID 100 &quot;O&quot;	
+		MENUITEM SEPARATOR
 		MENUITEM &quot;Close&quot; ID 101 &quot;C&quot;
 	END
 	PULLDOWN &quot;Options&quot;
@@ -663,22 +682,38 @@ END</pre>
 <p><a name="Alert"></a><font size="4" face="Verdana">ALERT (tALT)</font></p>
 
 <blockquote>
-    <pre>ALERT ID <font color="#008000">&lt;AlertResrouceId.n&gt;</font>
-[HELPID <font color="#008000">&lt;HelpId.n&gt;</font>]
+  <pre>ALERT ID <font color="#008000">&lt;AlertResrouceId.n&gt;</font>
+[HELPID <font
+color="#008000">&lt;HelpId.n&gt;</font>]
+[DEFAULTBUTTON <font color="#008000">&lt;ButtonIdx.n&gt;</font>]
 [INFORMATION] [CONFIRMATION] [WARNING] [ERROR]
 BEGIN
-	TITLE <font color="#008000">&lt;Title.s&gt;</font>
+	TITLE <font
+color="#008000">&lt;Title.s&gt;</font>
 	MESSAGE <font color="#008000">&lt;Message.ss&gt;</font>
-	BUTTONS <font color="#008000">&lt;Button.s&gt;</font> <font
-color="#008000">&lt;BUTTON.s&gt;</font>...
+	BUTTONS <font
+color="#008000">&lt;Button.s&gt;</font> <font color="#008000">&lt;BUTTON.s&gt;</font>...
 END</pre>
 </blockquote>
+<table border="0" cellspacing="10">
+  <tr>
+    <td valign="top"><font size="4"><em>Notes</em></font>:</td>
+    <td valign="top">
+    The DEFAULTBUTTON command can be used to specify the button number to select
+    if the user switches to another application without pressing any button in 
+    the alert. An event will be generated for this button before the form
+    is closed. The command argument is the index of the button, with the 
+    left-most button in the form being index '0'.
+    </td>
+  </tr>
+</table>
 
 <pre>Example</pre>
 
 <blockquote>
-    <pre>ALERT ID 1000
+  <pre>ALERT ID 1000
 HELPID 100
+DEFAULTBUTTON 1
 CONFIRMATION
 BEGIN
 	TITLE &quot;AlarmHack&quot;
@@ -688,176 +723,398 @@ BEGIN
 END</pre>
 </blockquote>
 
-<p><a name="Version"></a><font size="4" face="Verdana">VERSION
-(tVER)</font></p>
+<p><a name="Version"></a><font size="4" face="Verdana">VERSION (tVER)</font></p>
 
 <blockquote>
-    <pre>VERSION ID <font color="#008000">&lt;VersionResourceId.n&gt;</font> <font
+  <pre>VERSION ID <font color="#008000">&lt;VersionResourceId.n&gt;</font> <font
 color="#008000">&lt;Version.s&gt;</font></pre>
 </blockquote>
 
 <pre>Example</pre>
 
 <blockquote>
-    <pre>VERSION ID 1 &quot;0.09&quot;</pre>
+  <pre>VERSION ID 1 &quot;0.09&quot;</pre>
 </blockquote>
 
-<p><a name="String"></a><font size="4" face="Verdana">STRING
-(tSTR)</font></p>
+<p><a name="String"></a><font size="4" face="Verdana">STRING (tSTR)</font></p>
 
 <blockquote>
-    <pre>STRING ID <font color="#008000">&lt;StringResourceId.n&gt;</font> <font
-color="#008000">&lt;String.ss&gt;</font></pre>
+  <pre>STRING ID <font color="#008000">&lt;StringResourceId.n&gt;</font> <font
+color="#008000">&lt;String.ss&gt;
+</font><font color="#000000">STRING</font><font
+color="#008000"> ID &lt;StringResourceId.n&gt; </font><font color="#000000">FILE</font><font
+color="#008000"> &lt;StringFile.s&gt;</font></pre>
 </blockquote>
 
-<pre>Example:</pre>
+<p>Examples</p>
 
 <blockquote>
-    <pre>STRING ID 100 &quot;This is a very long string that demonstrates carriage retuns\n&quot; \
-	&quot;as well as continued .ss syntax strings&quot;</pre>
+  <pre>STRING ID 100 &quot;This is a very long string that demonstrates carriage retuns\n&quot; \
+	&quot;as well as continued .ss syntax strings&quot;
+STRING ID 101 FILE &quot;string.txt&quot;</pre>
 </blockquote>
 
-<p><a name="ApplicationIconName"></a><font size="4"
-face="Verdana">APPLICATIONICONNAME (tAIN)</font></p>
+<p><a name="Categories"></a><font size="4" face="Verdana">CATEGORIES (tAIS)</font></p>
 
 <blockquote>
-    <pre>APPLICATIONICONNAME ID <font color="#008000">&lt;AINResourceId.n&gt;</font> <font
+  <pre>CATEGORIES ID <font color="#008000">&lt;CategoryResourceId.n&gt;</font> <font
+color="#008000">&lt;Category1.s&gt; &lt;Category2.s&gt;...</font></pre>
+</blockquote>
+
+<table border="0" cellspacing="10">
+  <tr>
+    <td valign="top"><font size="4"><em>Notes</em></font>:</td>
+    <td valign="top">
+    The CATEGORIES command can be used to specify the default category
+    names for the application. This resource can then be passed to the
+    <b>CategoryInitialize()</b> Palm API function to create the category
+    strings in the application info block. Each name is limited to 15
+    characters and there can be at most 16 categories. If there are too
+    many strings, a warning will be printed and the extra strings will
+    be ignored.
+    </td>
+  </tr>
+</table>
+
+<p>Example</p>
+
+<blockquote>
+  <pre>CATEGORIES ID 100 &quot;Unfiled&quot; &quot;Business&quot; &quot;Personal&quot;</pre>
+
+</blockquote>
+
+
+
+<p><a name="Application IconName"></a><font size="4" face="Verdana">APPLICATIONICONNAME
+(tAIN)</font></p>
+
+<blockquote>
+  <pre>APPLICATIONICONNAME ID <font color="#008000">&lt;AINResourceId.n&gt;</font> <font
 color="#008000">&lt;ApplicationName.s&gt;</font></pre>
 </blockquote>
 
-<pre>Example</pre>
+<p>Example</p>
 
 <blockquote>
-    <pre>APPLICATIONICONNAME ID 100 &quot;AlarmHack&quot;</pre>
+  <pre>APPLICATIONICONNAME ID 100 &quot;AlarmHack&quot;</pre>
 </blockquote>
 
-<p><a name="Application"></a><font size="4" face="Verdana">APPLICATION
-(APPL)</font></p>
+<p><a name="Application"></a><font size="4" face="Verdana">APPLICATION (APPL)</font></p>
 
 <blockquote>
-    <pre>APPLICATION ID <font color="#008000">&lt;ApplResourceId.n&gt;</font> <font
+  <pre>APPLICATION ID <font color="#008000">&lt;ApplResourceId.n&gt;</font> <font
 color="#008000">&lt;APPL.s&gt;</font> </pre>
-    <pre>&lt;APPL.s&gt; must be 4 characters long</pre>
+  <pre>&lt;APPL.s&gt; must be 4 characters long</pre>
 </blockquote>
 
-<pre>Example</pre>
+<p>Example</p>
 
 <blockquote>
-    <pre>APPLICATION ID 1 &quot;ALHK&quot;</pre>
+  <pre>APPLICATION ID 1 &quot;ALHK&quot;</pre>
 </blockquote>
 
 <p><a name="Icon"></a><font size="4" face="Verdana">ICON (tAIB)</font></p>
 
 <blockquote>
-    <p>Converts a Microsoft Windows style monochrome bitmap to
-    tAIB Pilot icon resources with ID 1000.</p>
+  <p>Converts a Microsoft Windows style 32x32 (recommended) or 22x22 (may not be centered in app launcher) monochrome bitmap to tAIB Pilot icon
+  resources with ID 1000.</p>
 </blockquote>
 
 <blockquote>
-    <pre>ICON <font color="#008000">&lt;IconFileName.s&gt;</font> </pre>
+  <pre>ICON <font color="#008000">&lt;IconFileName.s&gt;</font> </pre>
+</blockquote>
+
+<p>Example</p>
+
+<blockquote>
+  <pre>ICON &quot;myicon.bmp&quot;</pre>
+</blockquote>
+
+<p><a name="SmallIcon"></a><font size="4" face="Verdana">SMALLICON (tAIB)</font></p>
+
+<blockquote>
+  <p>Converts a Microsoft Windows style 15x9 monochrome bitmap to tAIB Pilot icon resources
+  with ID 1001.</p>
+</blockquote>
+
+<blockquote>
+  <pre>SMALLICON <font color="#008000">&lt;IconFileName.s&gt;</font> </pre>
+</blockquote>
+
+<p>Example</p>
+
+<blockquote>
+  <pre>SMALLICON &quot;myicon.bmp&quot;</pre>
+</blockquote>
+
+<p><a name="Bitmap"></a><font size="4" face="Verdana">BITMAP (Tbmp)</font></p>
+
+<blockquote>
+  <p>Converts The following monochrome bitmap formats to TBmp Pilot bitmap resources.</p>
+  <p>BMP, PBITM, XBM, PBM</p>
+  <p>Compression may be specified via COMPRESS or FORCECOMPRESS. COMPRESS will compress only
+  if it results in a resource that is smaller than an uncompressed bitmap. FORCECOMPRESS
+  compresses unconditionally.</p>
+</blockquote>
+
+<blockquote>
+  <pre>BITMAP ID &lt;BitmapResourceId.n&gt; <font color="#008000">&lt;BitmapFileName.s&gt;</font> [<font
+color="#0000FF">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]</pre>
+  <p>Additionally, 16 color BMP files may be converted to 2bpp bitmaps using BITMAPGREY. The
+  bitmap must be authored with only black, dark grey, light grey and white pixels.
+  Compression may give unpredictable results with grey bitmaps. 2bpp bitmaps are written in
+  the standard pilot bitmap format except the rowBytes field is 2x what it would be for 1bpp
+  bitmaps. The PalmOS does not support 2bpp bitmaps. For a 2bpp replacement for the standard
+  Win* drawing routines, check out ScumbySoft's <a
+  href="http://www.scumby.com/scumbysoft/pilot/win2/">Win2 2bpp Drawing Library</a>.
+  Information on 2bpp mode can also be found in Edward Keyes article <a
+  href="http://www.cdpubs.com/hhsj/archives/46/14keyes.pdf">Hacking the Pilot</a></p>
+  <pre>BITMAPGREY ID &lt;BitmapResourceId.n&gt; <font color="#008000">&lt;BitmapFileName.s&gt;</font></pre>
+</blockquote>
+
+<p>Examples:</p>
+
+<blockquote>
+  <pre>BITMAP ID 100 &quot;mybitmap.bmp&quot; COMPRESS
+BITMAPGREY ID 101 &quot;my16cbmp.bmp&quot;</pre>
+</blockquote>
+
+<p><a name="Trap"></a><font size="4" face="Verdana">TRAP (TRAP)</font></p>
+
+<blockquote>
+  <p>Emits a HackMaster TRAP resource. For more info on Hackmaster system extensions check
+  out <a href="http://www.daggerware.com/hackmstr.htm">DaggerWare's HackMaster</a>. TrapIds
+  must be greater than 1000.</p>
+  <pre>TRAP ID &lt;TrapId.n&gt; &lt;TrapNumber.n&gt;</pre>
+</blockquote>
+
+<p>Example:</p>
+
+<blockquote>
+  <pre>TRAP ID 1000 367</pre>
+</blockquote>
+
+<p><a name="Font"></a><font size="4" face="Verdana">FONT (FONT)</font></p>
+
+<blockquote>
+  <p>(Font compiler and this section written by David Turnbull dpt@newsguy.com)</p>
+  <p>To compile a font into you application you need to add a directive to your resource
+  file. FONTID must be between 128 (per the Palm 3.0 SDK) and 255 (a limit of the compiler).
+  </p>
+  <pre>FONT ID &lt;FontResourceId.n&gt; FONTID &lt;FontId.n&gt; &lt;FontFileName.s&gt; </pre>
+</blockquote>
+
+<p>Example:</p>
+
+<blockquote>
+  <pre>FONT ID 1000 FONTID 128 &quot;font.txt&quot; </pre>
+  <p>A font must be compiled (declared first in the .rcp file) before it can be used in any
+  forms. Designing forms with user defiend fonts will only work on a V3.0 PalmOS. Please
+  refer to the V3.0 PalmOS documentation on how to use these fonts. I still don't have a
+  Palm III so this is untested, but basically you would do something like this:</p>
+  <pre>FontPtr font128;
+font128=MemHandleLock(DmGetResource('NFNT', 1000));
+FntDefineFont(128, font128);</pre>
+  <p>OS versions prior to (and including) V3.0 can be tricked into using your font. However,
+  you can only use the SDK calls to use this font, it is not supported for use in forms. The
+  following demonstrates how to do this. </p>
+  <pre>void * font128;
+font128=MemHandleLock(DmGetResource('NFNT', 1000));
+UICurrentFontPtr = font128;</pre>
+  <h4>FONT FILE </h4>
+  <p>The file containing the font information is plain ASCII. To understand how it works it
+  is first necessary to understand how a font is arranged in memory. A font consists of four
+  main parts, a header, a bitmap image, a bitmap location table, and an offset/width table.
+  The bitmap image and location table are generated for you 100% automatically.&nbsp; I
+  tried getting more information about the font structure from Palm Computing, but they did
+  not respond to any of my emails. All of the information I used is from inspection of the
+  fonts in the ROMs and from the NFNT font type on the Macintosh. There are a lot of
+  unknowns that hopefully will be understood soon. Until then, you can feel comfortable
+  ignoring them as they will default to harmless values. The ASCII file consists of two
+  parts, the header and the font data. There are three types of lines in the file, a comment
+  line, a token/value line, and bitmap data. Comment lines begin with //. Token/value lines
+  contain a keyword token and a value that can be decimal or a character enclosed in single
+  quotes. Bitmap lines contain a minus or period to indicate a not-set bit and any other
+  character to indicate a set bit. A very simple font would look like this:</p>
+  <pre>// An overly simple font</pre>
+  <pre>fontType 36864
+ascent 3
+descent 1
+
+GLYPH 32
+--
+--
+--
+--</pre>
+  <pre>GLYPH 'A'
+OFFSET 0
+-X--
+XXX-
+X-X-
+----</pre>
+  <pre>GLYPH 'B'
+WIDTH 3
+##-
+##-
+##-
+---</pre>
+  <p>A full font is included in the pilrc distribution.&nbsp; See example\font.txt</p>
+  <h4>HEADER</h4>
+  <p>The header has the following fields:</p>
+  <table border="1" width="100%" height="221">
+    <tr>
+      <td width="10%" height="19">fontType</td>
+      <td width="90%" height="19">I'm not sure what this does. I have inspected many ROM fonts
+      and they all have type 36864.</td>
+    </tr>
+    <tr>
+      <td width="10%" height="19">maxWidth </td>
+      <td width="90%" height="19">Defined as &quot;maximum character width&quot;. If not set it
+      is automatically set to the width of the widest character.</td>
+    </tr>
+    <tr>
+      <td width="10%" height="19">kernMax</td>
+      <td width="90%" height="19">Defined as &quot;negative of maximum kern value&quot;. I'm not
+      sure what this does or even if it is used.</td>
+    </tr>
+    <tr>
+      <td width="10%" height="19">nDescent </td>
+      <td width="90%" height="19">Defined as &quot;negative of descent&quot;. This is not set in
+      any of the ROMs I've inspected.</td>
+    </tr>
+    <tr>
+      <td width="10%" height="19">fRectWidth</td>
+      <td width="90%" height="19">Defined as &quot;width of font rectangle&quot;. If not set it
+      is automatically set to the width of the widest character.</td>
+    </tr>
+    <tr>
+      <td width="10%" height="19">fRectHeight </td>
+      <td width="90%" height="19">Defined as &quot;height of font rectangle&quot;. If not set it
+      is automatically set when the first glyph is defined. All characters must be exactly this
+      height.</td>
+    </tr>
+    <tr>
+      <td width="10%" height="15">ascent </td>
+      <td width="90%" height="15">The number of rows that make up the ascending part of the
+      glyphs. Ascent plus descent equals fRectHeight. It is strongly recommended this be set.</td>
+    </tr>
+    <tr>
+      <td width="10%" height="19">descent </td>
+      <td width="90%" height="19">The number of rows that make up the descending part of the
+      glyphs. Descent plus ascent equals fRectHeight. It is strongly recommended this be set.</td>
+    </tr>
+    <tr>
+      <td width="10%" height="19">leading</td>
+      <td width="90%" height="19">Don't know it's function and if it's used by the Pilot. I can
+      assume it has something to do with kerning, but that may be totally wrong.</td>
+    </tr>
+  </table>
+  <h4>GLYPHS</h4>
+  <p>Each glyph has a bitmap, and offset, and a width associated with it. The WIDTH can be
+  overridden if needed, but it's effects are unknown at this time. Normally it is set
+  automatically. Some of the special characters in the ROMs had the WIDTH different than the
+  number of bits stored in the bitmap. The function of OFFSET is unknown as well. Font #1
+  (boldFont) has all of it's characters as OFFSET 1 and a few characters in the symbol fonts
+  has values as well. Once again, I believe this has something to do with kerning.</p>
+  <h4>NOTES</h4>
+  <p>For support, I strongly recommend you go to these newsgroups. I'm sure I won't be able
+  to answer any questions I haven't answered in this document, so unless you have comments
+  or a bug to report it's probably no use contacting me directly. </p>
+  <p><a href="news://news.massena.com/pilot.programmer">news://news.massena.com/pilot.programmer</a><br>
+  <a href="news://news.massena.com/pilot.programmer.gcc">news://news.massena.com/pilot.programmer.gcc</a></p>
+  <p>If you can supply any more information about how the fonts are used by PalmOS please
+  send me email. Hint, hint, you Palm Computing folks!!!</p>
+  <p>- David Turnbull dpt@newsguy.com</p>
+</blockquote>
+
+<h3><a name="International"></a><font size="4" face="Verdana"><b>International Support</b></font></h3>
+
+<blockquote>
+  <p>PilRC supports a limited form of international tokenization. It works by substituting
+  strings in the resource definitions with replacements specified in a TRANSLATION section.
+  Multiple translation blocks may be specified in a resource script. The active language is
+  specified with the -L flag to PilRC. (Yeah, I know this is a pretty cheezy way to do this,
+  but it has worked so far. </p>
+  <p>The biggest problem is with positioning of controls. If you use AUTO, CENTER and
+  PREVRIGHT et al it might not involve any position changing in your script. If you do need
+  to change the position, right now the only workaround is to put some #ifdefs in your file
+  and hook up a custom rule to preprocess your source file). </p>
+  <table border="0" cellspacing="10">
+    <tr>
+      <td valign="top"><font size="4"><em>Note</em></font>:</td>
+      <td valign="top">The TRANSLATION section must appear first in the .rcp file, before any
+      use of the strings to be translated.</td>
+    </tr>
+  </table>
 </blockquote>
 
 <pre>Example</pre>
 
 <blockquote>
-    <pre>ICON &quot;myicon.bmp&quot;</pre>
-</blockquote>
-
-<p><a name="Bitmap"></a><font size="4" face="Verdana">BITMAP
-(Tbmp)</font></p>
-
-<blockquote>
-    <p>Converts Microsoft Windows style monochrome bitmaps to
-    TBmp Pilot bitmap resources.</p>
-</blockquote>
-
-<blockquote>
-    <pre>BITMAP ID &lt;BitmapResourceId.n&gt; <font
-color="#008000">&lt;BitmapFileName.s&gt;</font> </pre>
-</blockquote>
-
-<pre>Example:</pre>
-
-<blockquote>
-    <pre>BITMAP ID 100 &quot;mybitmap.bmp&quot;</pre>
-</blockquote>
-
-<p>&nbsp;</p>
-
-<h3><a name="International"></a><font size="4" face="Verdana"><b>International
-Support</b></font></h3>
-
-<blockquote>
-    <p>PilRC supports a limited form of international
-    tokenization. It works by substituting strings in the
-    resource definitions with replacements specified in a
-    TRANSLATION section. Multiple translation blocks may be
-    specified in a resource script. The active language is
-    specified with the -L flag to PilRC. (Yeah, I know this is a
-    pretty cheezy way to do this, but it has worked so far. </p>
-    <p>The biggest problem is with positioning of controls. If
-    you use AUTO, CENTER and PREVRIGHT et al it might not involve
-    any position changing in your script. If you do need to
-    change the position, right now the only workaround is to put
-    some #ifdefs in your file and hook up a custom rule to
-    preprocess your source file). </p>
-    <table border="0" cellspacing="10">
-        <tr>
-            <td valign="top"><font size="4"><em>Note</em></font>:</td>
-            <td valign="top">The TRANSLATION section must appear
-            first in the .rcp file, before any use of the strings
-            to be translated.</td>
-        </tr>
-    </table>
-</blockquote>
-
-<pre>Example</pre>
-
-<blockquote>
-    <pre>pilrc -L FRENCH myscript.rcp res</pre>
+  <pre>pilrc -L FRENCH myscript.rcp res</pre>
 </blockquote>
 
 <p><a name="Translation"></a><font size="4" face="Verdana">TRANSLATION</font></p>
 
 <blockquote>
-    <pre>TRANSLATION <font color="#008000">&lt;Language.s&gt;</font>
+  <pre>TRANSLATION <font color="#008000">&lt;Language.s&gt;</font>
 BEGIN
-	<font color="#008000">&lt;STRINGTRANSLATIONS&gt;</font>
+	<font
+color="#008000">&lt;STRINGTRANSLATIONS&gt;</font>
 END</pre>
-    <pre>Where <font color="#008000">&lt;STRINGTRANSLATINOS&gt;</font> is one or more of:</pre>
-    <blockquote>
-        <pre><font color="#008000">&lt;Original.s&gt;</font> = <font
-color="#008000">&lt;Translated.ss&gt;</font></pre>
-    </blockquote>
+  <pre>Where <font color="#008000">&lt;STRINGTRANSLATINOS&gt;</font> is one or more of:</pre>
+  <blockquote>
+    <pre><font color="#008000">&lt;Original.s&gt;</font> = <font color="#008000">&lt;Translated.ss&gt;</font></pre>
+  </blockquote>
 </blockquote>
 
 <blockquote>
-    <pre><font color="#0000FF">TIP:</font> For long strings define a short keyword and then define both native and foriegn translations for it. </pre>
+  <pre><font color="#0000FF">TIP:</font> For long strings define a short keyword and then define both native and foriegn translations for it. </pre>
 </blockquote>
 
 <pre>Example</pre>
 
 <blockquote>
-    <pre>TRANSLATION &quot;FRENCH&quot;
+  <pre>TRANSLATION &quot;FRENCH&quot;
 BEGIN
 	&quot;Repeat Datebook alarm sound&quot; = &quot;Répétitions Alarme Agenda&quot; 
 	&quot;Ring again every&quot; = &quot;Rappel tous les&quot; 
 END</pre>
 </blockquote>
 
-<p><a name="KnownBugs"></a><font size="4" face="Verdana"><b>Known
-Bugs</b></font></p>
+<p><a name="KnownBugs"></a><font size="4" face="Verdana"><b>Known Bugs</b></font> 
 
 <ul>
-    <li>LIST: DISABLED doesn't work. Seems to be a PalmOS bug.</li>
-    <li>LIST: VISIBLEITEMS may be required for list objects to
-        show properly.</li>
-    <li>FIELD: MAXCHARS required for field control to accept
-        characters to work.</li>
-    <li>Comments are only allowed at the outermost scope level.
-        Comments withing FORM, MENU or other commands are syntax
-        errors.<br>
-        </li>
+  <li>LIST: DISABLED doesn't work. Seems to be a PalmOS bug.</li>
+  <li>LIST: VISIBLEITEMS may be required for list objects to show properly.</li>
+  <li>FIELD: MAXCHARS required for field control to accept characters to work.</li>
+  <li>Comments are only allowed at the outermost scope level. Comments withing FORM, MENU or
+    other commands are syntax errors.</li>
+  <li>FIELD: NUMERIC doesn't work in PalmOS 2.0 (or 1.0)</li>
+  <li>FIELD: AUTOSHIFT is flaky in PalmOS 2.0</li>
+  <li><p align="left">SAVEBEHIND is the default for forms. Turning this off with NOSAVEBEHIND
+    may cause your program to crash (or it may not)<br>
+    </p>
+  </li>
 </ul>
+
+<p><a name="Further"></a><font size="4" face="Verdana"><b>Further Reading</b></font></p>
+
+<blockquote>
+  <p>For an excellent expose on how to create dynamic resources on the fly, check out: Gary
+  Desrosiers' &quot;PalmPilot Dynamic UI Construction&quot; at <a
+  href="http://www.pcnet.com/~desrosi/DynamUI.html">http://www.pcnet.com/~desrosi/DynamUI.html</a>.
+  This is a great primer on how resources are constructed on the pilot.</p>
+</blockquote>
+
+<blockquote>
+  <p>Check out RoadCoders for lots of samples and other pilot programming information.<a
+  href="http://www.roadcoders.com/pilot/"> http://www.roadcoders.com/pilot/</a></p>
+</blockquote>
+
+<blockquote>
+  <p>Darrin Massena's site, though not updated frequently is another good starting point.<a
+  href="http://www.massena.com"> http://www.massena.com</a></p>
+</blockquote>
 </body>
 </html>

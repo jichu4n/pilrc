@@ -1,9 +1,8 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
+#include <stdio.h>
 
-int DxCalcExtent(unsigned char *sz, BOOL fBold);
-int DxCalcRgdx(unsigned char *sz, BOOL fBold, int *rgdx);
 VOID Error(char *sz);
 VOID Error2(char *sz1, char *sz2);
 VOID Error3(char *sz1, char *sz2, char *sz3);

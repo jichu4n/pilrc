@@ -9,6 +9,8 @@
 #include "std.h"
 #include "util.h"
 #include "lex.h"
+#include "plex.h"
+#include "font.h"
 
 /*-----------------------------------------------------------------------------
 |	 PILOT STRUCTS
@@ -79,7 +81,8 @@ Enum(formObjects) {
 	frmTitleObj,
 	frmPopupObj,
 	frmGraffitiStateObj,
-	frmGadgetObj
+	frmGadgetObj,
+	frmScrollbarObj,
 } EndEnum FormObjectKind;
 
 Enum(fontID) { stdFont, boldFont, largeFont, symbolFont, symbol11Font, 
@@ -103,36 +106,36 @@ typedef struct _Rcrect
 typedef struct _rcframebits
 	{
 	int cornerDiam;  /* b */
-	/* int reserved; // zt4 */
+	/* int reserved;  zt4 */
 	int shadowWidth; /* t2 */
 	int width;	     /* t2 */
 	} RCFRAMEBITS;
 
 typedef struct _rcwindowflags
 	{
-    /* Word format:1;   // zt */
-    /* Word offscreen:1;// zt */
+    /* Word format:1;    zt */
+    /* Word offscreen:1; zt */
     int modal;		    /* t */
     int focusable;	    /* t */
-    /*	Word enabled:1; // zt */
-    /* Word visible:1;  // zt  */
+    /*	Word enabled:1;  zt */
+    /* Word visible:1;   zt  */
     int dialog;    		/* t */
-    /* Word compressed:1// zt */
-    /* Word reserved :8;// zb */
+    /* Word compressed:1 zt */
+    /* Word reserved :8; zb */
 	} RCWINDOWFLAGS;
 
 typedef struct _rcwindow
 	{
 	int displayWidth;	       /* w */
 	int displayHeight;	       /* w */
-	/* int displayAddr;	       // zl */
+	/* int displayAddr;	        zl */
 	RCWINDOWFLAGS windowFlags; /* ztztttztzttztzb */
 	RCRECT windowBounds;  	   /* w4 */
-	/* RCRECT clippingBounds;  // zw4 */
-	/* PointType viewOrigin;   // zw2 */
+	/* RCRECT clippingBounds;   zw4 */
+	/* PointType viewOrigin;    zw2 */
 	RCFRAMEBITS frameType;	   /* bzt4t2t2 */
-	/* GraphicStatePtr gstate; // zl */
-	/* struct WinTygpeStruct *nextWindow; // zl */
+	/* GraphicStatePtr gstate;  zl */
+	/* struct WinTygpeStruct *nextWindow;  zl */
 	} RCWINDOW;
 #define szRCWINDOW "w,w,zl,ztzttt,ztzttzt,zb,w4,zw4,zw2,bzt4t2t2,zl,zl"
 
@@ -142,7 +145,7 @@ typedef struct _rclistattr
 	int enabled;    /* t */
 	int visible;    /* t */
 	int poppedUp;	/* t */
-	/* int reserved;// zt4,zb */
+	/* int reserved; zt4,zb */
 	} RCLISTATTR;
 
 
@@ -154,11 +157,11 @@ typedef struct _rclist
 	RCLISTATTR attr;     /* ttttzt4zb */
 	char *itemsText;     /* p */
 	int numItems;        /* w */
-	/* Word currentItem; // zw */
-	/* Word topItem;     // zw */
+	/* Word currentItem;  zw */
+	/* Word topItem;      zw */
 	int	font;		     /* b,zb */
-	/* WinHandle popupWin;// zl */
-	/* ListDrawDataFuncPtr	drawItemsCallback; // zl */
+	/* WinHandle popupWin; zl */
+	/* ListDrawDataFuncPtr	drawItemsCallback;  zl */
 
 	/* private, not stored into file */
 	int cbListItems;
@@ -179,27 +182,30 @@ typedef struct _rcfieldattr
 
 	int underlined;	  /* t2    */
 	int justification;/* t2	 */
-					  /* zt4 */
+	int autoShift;
+	int hasScrollBar;
+	int numeric;
+					  /* zt1 */
 	} RCFIELDATTR;
 
 typedef struct _rcfield
 	{
 	int id;	              /* w */
 	RCRECT rect;          /* w4 */
-	RCFIELDATTR attr;     /* ttttttttt2t2zt4 */
+	RCFIELDATTR attr;     /* ttttttttt2t2tttzt1 */
 	char *text;		      /* p */
-	/* VoidHand		      // zl	textHandle;			// block the contains the text string */
-	/* LineInfoPtr	      // zl	lines; */
-	/* Word			      // zw	textLen; */
-	/* Word			      // zw	textBlockSize; */
+	/* VoidHand		       zl	textHandle;			 block the contains the text string */
+	/* LineInfoPtr	       zl	lines; */
+	/* Word			       zw	textLen; */
+	/* Word			       zw	textBlockSize; */
 	int maxChars;	      /* w */
-	/* int selFirstPos;   // zw  */
-	/* int selLastPos;    // zw */
-	/* int insPtXPos;     // zw */
-	/* int insPtYPos;     // zw */
+	/* int selFirstPos;    zw  */
+	/* int selLastPos;     zw */
+	/* int insPtXPos;      zw */
+	/* int insPtYPos;      zw */
 	int	fontID;		      /* b */
 	} RCFIELD;
-#define szRCFIELD "w,w4,tttt,tttt,t2t2zt4,p,zl,zl,zw,zw,w,zw,zw,zw,zw,b,zb"
+#define szRCFIELD "w,w4,tttt,tttt,t2t2tttzt1,p,zl,zl,zw,zw,w,zw,zw,zw,zw,b,zb"
 
 
 typedef struct RCTableColumnAttrType {
@@ -216,7 +222,7 @@ typedef struct RCTableRowAttrType
 	{
 	int id;	/* w */
 	int height; /* w */
-	/*   DWord data; // zl */
+	/*   DWord data;  zl */
    int usable; /* b */
    int selectable; /* b */
    int invalid; /* b,zb */
@@ -296,7 +302,7 @@ typedef struct _rcformgadget
 	int id;		        /* w */
 	RCFORMOBJATTR attr; /* t,zt7,zb */
 	RCRECT rect;	    /* w4 */
-	/* VoidPtr data;    // zl */
+	/* VoidPtr data;     zl */
 	} RCFORMGADGET;
 #define szRCFORMGADGET "w,tzt7zb,w4,zl"
 
@@ -330,6 +336,29 @@ typedef struct _rcontrol
 	} RCCONTROL;        
 #define szRCCONTROL "w,w4,p,tttt,tt3,zb,b,b,b,zb"
 
+typedef struct _rcscrollbarattr
+	{
+	int usable;
+	int visible;
+	int hilighted;
+	int shown;
+	int activeRegion;
+	} RCSCROLLBARATTR;
+
+typedef struct _rcscrollbar
+	{
+	RCRECT bounds;          /* w4 */
+	int id;                 /* w */
+	RCSCROLLBARATTR attr;   /* ttttt4zb */
+	int value;				/* w */
+	int minValue;           /* w */
+	int maxValue;           /* w */
+	int pageSize;           /* w */
+	/*Short penPosInCar;*/	/* zw */
+	/*Short savePos;*/      /* zw */ 
+	} RCSCROLLBAR;
+#define szRCSCROLLBAR "w4,w,ttttt4zb,w,w,w,w,zw,zw"
+
 typedef union _rcformobject
 	{                  
 	void *                  ptr;
@@ -346,6 +375,7 @@ typedef union _rcformobject
 	RCFORMPOPUP *	    	popup;
 	RCFORMGRAFFITISTATE *    grfState;
 	RCFORMGADGET *	    	gadget;
+	RCSCROLLBAR	*			scrollbar;
 	} RCFORMOBJECT;    
 
 typedef struct _rcformobjlist
@@ -375,14 +405,14 @@ typedef struct _rcform
 	RCWINDOW window;
 	int formId;	       /* w */
 	RCFORMATTR attr;
-	/* WinHandle bitsBehindForm;    // zl */
-	/* FormEventHandlerPtr handler; // zl */
-	/* Word	focus;     // zw */
+	/* WinHandle bitsBehindForm;     zl */
+	/* FormEventHandlerPtr handler;  zl */
+	/* Word	focus;      zw */
 	int defaultButton; /* w */
 	int helpRscId;     /* w */
 	int menuRscId;	   /* w */
 	int numObjects;    /* w */
-	/* FormObjListType *objects;    // zl */
+	/* FormObjListType *objects;     zl */
 	} RCFORM;
 
 #define szRCFORM szRCWINDOW##"w,tttttt,zt2zt8zt1zt7zb,zl,zl,zw,w,w,w,w,zl"
@@ -402,9 +432,9 @@ typedef struct _rcmenuitem
 
 typedef struct _RCMENUPULLDOWN
 	{
-	/* WinHandle menuWin;    // zl */
+	/* WinHandle menuWin;     zl */
 	RCRECT bounds;           /* w4 */
-	/* WinHandle bitsBehind; // zl */
+	/* WinHandle bitsBehind;  zl */
 	RCRECT titleBounds;      /* w4 */
 	char *title;	         /* l */
 	int numItems;            /* w */
@@ -415,22 +445,22 @@ typedef struct _RCMENUPULLDOWN
 typedef struct _RCMENUBARATTR
 	{
 	int visible;	/* t */
-	/*WORD cmdPending	// zt */
-	/*WORD insPtEnabled // zt */
+	/*WORD cmdPending	 zt */
+	/*WORD insPtEnabled  zt */
 	} RCMENUBARATTR;
 
 typedef struct _RCMENUBAR
 	{
-	/*WinHandle barWin;		     // zl    */
-	/*WinHandle bitsBehind;      // zl    */
-	/*WinHandle savedActiveWin;	 // zl */
-	/*WinHandle bitsBehindStatus;// zl */
+	/*WinHandle barWin;		      zl    */
+	/*WinHandle bitsBehind;       zl    */
+	/*WinHandle savedActiveWin;	  zl */
+	/*WinHandle bitsBehindStatus; zl */
 	RCMENUBARATTR attr;	         /* tzt7zb */
-	/*SWord curMenu;             // zw */
+	/*SWord curMenu;              zw */
 	int curItem;	             /* w */
-	/* SDWord commandTick;	     // zl */
-	int numMenus;	/* w         // number of menus */
-	/* MenuPullDownPtr menus; zl // array of menus */
+	/* SDWord commandTick;	      zl */
+	int numMenus;	/* w          number of menus */
+	/* MenuPullDownPtr menus; zl  array of menus */
 	} RCMENUBAR;
 #define szRCMENUBAR "zl,zl,zl,zl,tzt7zb,zw,w,zl,w,zl"
 
@@ -453,15 +483,20 @@ typedef struct _rcALERTTEMPLATE
 |	BITMAP
 -------------------------------------------------------------WESC------------*/
 typedef struct _rcBITMAP
-	{ // bm
+	{ /* bm */
     int cx;					/* w */
 	int cy;					/* w */
 	int cbRow;				/* w */
 	int ff;					/* w */
-	/* short ausUnk[4] */	/* z4w */
+    int pixelsize;          /* b */
+    int version;            /* b */
+	/* ushort nextDepthOffset_and_reserved_and_colorTable[3] */	/* z3w */
 	unsigned char *pbBits;
+
+	/* private, not stored into file */
+	int cbDst;
 	} RCBITMAP;
-#define szRCBITMAP "w,w,w,w,zwzwzwzw"
+#define szRCBITMAP "w,w,w,w,b,b,zwzwzw"
 
 
 
@@ -469,16 +504,18 @@ typedef struct _rcBITMAP
 |	Other PILRC types and such
 -------------------------------------------------------------WESC------------*/
 
-#define ifrmMax 32
+//#define ifrmMax 32
+DEFPL(PLEXFORMOBJLIST);
 typedef struct _FRM
 	{
 	RCFORM form;
-	RCFORMOBJLIST *rglt;
+	PLEXFORMOBJLIST pllt;
+//	RCFORMOBJLIST *rglt;
 	} FRM;
 
-extern FRM rgfrm[];
-extern int ifrmMac;
-void FreeAll();
+//extern FRM rgfrm[];
+//extern int ifrmMac;
+
 
 void ErrorLine(char *sz);
 				
@@ -497,33 +534,50 @@ typedef struct _sym
 	{
 	char *sz;
 	int wVal;
+	BOOL fAutoId;
 	struct _sym *psymNext;
 	} SYM;
 
+
+/* RCPFILE -- contains everything in a .rcp file */
+DEFPL(PLEXFRM)
+typedef struct _rcpfile
+	{
+	PLEXFRM plfrm;
+	} RCPFILE;	
+void FreeRcpfile(RCPFILE *prcpfile);	
 
 /* ReservedWord */
 typedef enum 
 	{
 	rwFLD, rwLST, rwTBL, rwFBM, rwLBL, rwTTL, rwPUL, rwGSI, rwGDT,
-	rwBTN, rwPBN, rwCBX, rwPUT, rwSLT, rwREP,
+	rwBTN, rwPBN, rwCBX, rwPUT, rwSLT, rwREP, rwSCL,
 
-	rwForm, rwBegin, rwEnd, rwModal, rwSaveBehind, rwHelpId, rwDefaultBtnId, rwMenuId, 
+	rwForm, rwBegin, rwEnd, rwModal, rwSaveBehind, rwNoSaveBehind, rwHelpId, rwDefaultBtnId, rwMenuId, 
 	rwEnabled, rwDisabled, rwUsable, rwNonUsable, rwLeftAnchor, rwRightAnchor, rwGroup, rwFont, 
 	rwFrame, rwNoFrame, rwBoldFrame,
 	
 	rwEditable, rwNonEditable, rwUnderlined, rwSingleLine, rwMultipleLines, rwDynamicSize, rwLeftAlign, rwRightAlign, rwMaxChars,
-	rwVisibleItems,	
+	rwVisibleItems, rwAutoShift, rwNumeric,
 	rwChecked,
 	rwBitmap,
+	rwBitmapGrey,
+
 	rwPrevLeft, rwPrevRight, rwPrevWidth, rwPrevTop, rwPrevBottom, rwPrevHeight,
 	rwMenu,
 	rwPullDown,
 	rwMenuItem,
 	rwSeparator,
 
+	rwValue,
+	rwMinValue,
+	rwMaxValue,
+	rwPageSize,
+
 	rwAlert,
 	rwMessage,
 	rwButtons,
+	rwDefaultBtn,
 
 	rwInformation, /* order assumed */
 	rwConfirmation,
@@ -532,15 +586,20 @@ typedef enum
 
 	rwVersion,
 	rwString,
+	rwFile,
 	rwApplicationIconName,
 	rwApplication,
+ 	rwCategories,
 
 	rwTranslation,
 
 	rwCenter,
+	rwRight,
+	rwBottom,
 	rwAuto,
 	rwAt,
 	rwId,
+	rwAutoId,
 	
 	rwNumColumns,
 	rwNumRows,
@@ -551,12 +610,22 @@ typedef enum
 	rwEqu,
 
 	rwIcon,
+	rwIconSmall,
+	
+	rwTrap,
+
+	rwFontId,
+
+	rwNoCompress,
+	rwAutoCompress,
+	rwForceCompress,
 
 	rwPublic,
 	rwShort,
 	rwInt,
 	rwStatic,
 	rwFinal,
+	
 
 	rwNil
 	} RW;
@@ -578,10 +647,11 @@ RWT rgrwt[] =
 	{"tTBL",	 "table",            rwTBL}, /* Table */
 	{"tFBM",	 "formbitmap",       rwFBM}, /* Form Bitmap */
 	{"tLBL",	 "label",            rwLBL}, /* Label */
-	{"tTTL",     "title",            rwTTL}, /* Title	//?	 */
+	{"tTTL",     "title",            rwTTL}, /* Title		 */
 	{"tPUL",     "popuplist",        rwPUL},
 	{"tGSI",     "graffitistateindicator",rwGSI}, /* Graffiti State */
 	{"tGDT",      "gadget",          rwGDT}, /* Gadget */
+	{"tSCL",      "scrollbar",       rwSCL}, /* Scrollbar */
 	                                     
 	{"tBTN",     "button",           rwBTN},
 	{"tPBN",     "pushbutton",       rwPBN},
@@ -595,6 +665,7 @@ RWT rgrwt[] =
 	{"end",          NULL,           rwEnd}, 
 	{"modal",        NULL,           rwModal}, 
 	{"savebehind",   NULL,           rwSaveBehind},
+	{"nosavebehind",   NULL,           rwNoSaveBehind},
 	{"helpid",       NULL,           rwHelpId},  
 	{"defaultbtnid", NULL,           rwDefaultBtnId},    
 	{"menuid",       NULL,           rwMenuId}, 
@@ -616,16 +687,24 @@ RWT rgrwt[] =
 	{"noneditable",  NULL,           rwNonEditable}, 
 	{"underlined",   NULL,           rwUnderlined}, 
 	{"singleline",   NULL,           rwSingleLine}, 
-	{"multiplelines","mulipleline",  rwMultipleLines}, 
+	{"multiplelines","multipleline",  rwMultipleLines}, 
 	{"dynamicsize",  NULL,           rwDynamicSize}, 
 	{"leftalign",    NULL,           rwLeftAlign}, 
 	{"rightalign",   NULL,           rwRightAlign}, 
 	{"maxchars",     NULL,           rwMaxChars}, 
+	{"autoshift",    NULL,           rwAutoShift},
+	{"numeric",	     NULL,           rwNumeric},
 	
 	{"visibleitems", NULL,           rwVisibleItems}, 
+
+	{"value",        NULL,           rwValue},
+	{"min",          "minvalue",     rwMinValue},
+	{"max",          "maxvalue",     rwMaxValue},
+	{"pagesize",     NULL,           rwPageSize},
   
 	{"checked",      "on",           rwChecked}, 
 	{"bitmap",       NULL,           rwBitmap},
+	{"bitmapgrey",   "bitmapgray",   rwBitmapGrey},
 
 	{"prevleft",     NULL,           rwPrevLeft},
 	{"prevright",    NULL,           rwPrevRight},
@@ -642,6 +721,7 @@ RWT rgrwt[] =
 
 	{"alert",        "tALT",         rwAlert},
 	{"message",      NULL,           rwMessage},
+	{"defaultbutton",NULL,           rwDefaultBtn},
 	{"buttons",      NULL,           rwButtons},
 	{"information",  NULL,           rwInformation},
 	{"confirmation", NULL,           rwConfirmation},
@@ -650,16 +730,21 @@ RWT rgrwt[] =
 
 	{"version",      "tVER",         rwVersion},
 	{"string",       "tSTR",         rwString},
+	{"file",         "tSTR",         rwFile},
 	{"applicationiconname", NULL,    rwApplicationIconName},
 	{"application", "APPL",          rwApplication},
+	{"categories",   "tAIS",         rwCategories},
 
 	{"translation",  NULL,           rwTranslation},
 
 	{"center",       NULL,           rwCenter},
+	{"right",       NULL,           rwRight},
+	{"bottom",       NULL,           rwBottom},
 	{"auto",         NULL,           rwAuto},
 
 	{"at",           NULL,           rwAt},
 	{"id",           NULL,           rwId},
+	{"autoid",       NULL,           rwAutoId},
 	
 	{"columns",      "numcolumns",   rwNumColumns},
 	{"rows",         "numrows",      rwNumRows},
@@ -670,6 +755,14 @@ RWT rgrwt[] =
 	{"include",      NULL,           rwInclude},
 
 	{"icon",         NULL,           rwIcon},
+	{"smallicon",    NULL,           rwIconSmall},
+	
+	{"trap",         NULL,           rwTrap},
+	{"fontid",       NULL,         rwFontId},
+
+	{"nocompress",   NULL,           rwNoCompress},
+	{"autocompress", "compress",     rwAutoCompress},
+	{"forcecompress",NULL,           rwForceCompress},
 
 	/* Java specific */
 	{"public",       NULL,           rwPublic},
@@ -687,11 +780,24 @@ typedef struct _tok
 	RW rw;
 	LEX lex;
 	} TOK;
+	
+	
 
 
 extern BOOL vfWinGUI;
+extern BOOL vfAutoId;
+extern BOOL vfQuiet;
+extern BOOL vfCheckDupes;
+extern BOOL vfRTL;
+extern char *szLanguage;
+
 
 #define dxScreen 160
 #define dyScreen 160
+#define maxCategories  16
+#define categoryLength 16
 
 int CbEmitStruct(void *pv, char *szPic, char **ppchText, BOOL fEmit);
+RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile, int fontType);
+SYM *PsymLookupId(int id);
+
