@@ -30,6 +30,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "pilrc.h"
 
 /**
@@ -49,6 +50,7 @@ Usage(void)
         "                     The current directory is always searched\n"
         "        -R <resfile> Generate JUMP/PilA .res file\n"
         "        -H <incfile> Autoassign IDs and write .h file with #defines\n"
+	"        -D <macro>   Define a pre-processor macro symbol\n"
         "        -F5          Use Big5 Chinese font widths\n"
         "        -Fkt         Use Korean font widths (hantip font)\n"
         "        -Fkm         Use Korean font widths (hanme font)\n"
@@ -77,12 +79,15 @@ main(int  cArg,
   char *szOutputPath;
   char *szInputFile;
   char *szResFile;
+  char *szMacro;
+  char *szValue;
   char *szIncFile;
   int  i;
   int  fontType;
+  int  macroValue;
 	
   // display the (c) string
-  printf("PilRC v2.5c\n");
+  printf("PilRC v2.6\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000      Aaron Ardiri (ardiri@palmgear.com)\n");
 
@@ -116,6 +121,26 @@ main(int  cArg,
         Usage();
       }
       includePaths[ totalIncludePaths++ ] = rgszArg[i];
+      continue;
+    }
+
+    // define macro(s) for #ifdef's
+    if (FSzEqI(rgszArg[i], "-D")) {
+      if (i++ == cArg) Usage();
+
+      szMacro = strdup(rgszArg[i]);
+
+      // Check if there is a value defined for the macro, otherwise use '1'
+      if ((szValue = strchr(szMacro, '=')) != NULL) {
+        *szValue++ = '\0';
+        macroValue = atoi(szValue);
+      }
+      else {
+        macroValue = 1;
+      }
+
+      AddSym(szMacro, macroValue);
+      free(szMacro);
       continue;
     }
 

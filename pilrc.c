@@ -2559,7 +2559,8 @@ void ParseDumpBitmapFile(int bitmapType)
 	pchFileName[0] = PchGetSz("Bitmap Filename");
 
 	// family? need to get 1bpp, 2bpp, 4bpp and 8bpp!
-        if (bitmapType == rwBitmapFamily) {
+        if ((bitmapType == rwBitmapFamily) ||
+            (bitmapType == rwBitmapFamily_special)) {
 	  pchFileName[1] = PchGetSz("Bitmap Filename");
 	  pchFileName[2] = PchGetSz("Bitmap Filename");
 	  pchFileName[3] = PchGetSz("Bitmap Filename");
@@ -2604,6 +2605,7 @@ void ParseDumpBitmapFile(int bitmapType)
         if (bitmapType == rwBitmapFamily) {
 
           int i, flag = 0x00;
+	  int bitmapTypes[] = { rwBitmap, rwBitmapGrey, rwBitmapGrey16, rwBitmapColor256 };
         
           if (strcmp(pchFileName[0], "") != 0) flag |= 0x01;
           if (strcmp(pchFileName[1], "") != 0) flag |= 0x02;
@@ -2616,7 +2618,29 @@ void ParseDumpBitmapFile(int bitmapType)
 
             if ((flag & 0x01) == 0x01)
               DumpBitmap(pchFileName[i], 0, compress, 
-                         rwBitmap+i, colortable, transparencyData, ((flag & 0xfe) != 0x00));
+                         bitmapTypes[i], colortable, transparencyData, ((flag & 0xfe) != 0x00));
+            flag = flag >> 1;
+            i++;
+          }
+        }
+	else
+        if (bitmapType == rwBitmapFamily_special) {
+
+          int i, flag = 0x00;
+	  int bitmapTypes[] = { rwBitmap, rwBitmapGrey, rwBitmapColor16, rwBitmapColor256 };
+        
+          if (strcmp(pchFileName[0], "") != 0) flag |= 0x01;
+          if (strcmp(pchFileName[1], "") != 0) flag |= 0x02;
+          if (strcmp(pchFileName[2], "") != 0) flag |= 0x04;
+          if (strcmp(pchFileName[3], "") != 0) flag |= 0x08;
+
+          // only process the bitmaps that have been supplied!
+          i=0;
+          while (flag != 0x00) {
+
+            if ((flag & 0x01) == 0x01)
+              DumpBitmap(pchFileName[i], 0, compress, 
+                         bitmapTypes[i], colortable, transparencyData, ((flag & 0xfe) != 0x00));
             flag = flag >> 1;
             i++;
           }
@@ -2627,7 +2651,8 @@ void ParseDumpBitmapFile(int bitmapType)
 	CloseOutput();
 
 	free(pchFileName[0]);
-        if (bitmapType == rwBitmapFamily) {
+        if ((bitmapType == rwBitmapFamily) ||
+            (bitmapType == rwBitmapFamily_special)) {
 	  free(pchFileName[1]);
 	  free(pchFileName[2]);
 	  free(pchFileName[3]);
@@ -2685,6 +2710,7 @@ void ParseDumpIcon(BOOL fSmall, int bitmapType)
 	if (bitmapType == rwBitmapFamily) {
 
           int i, flag = 0x00;
+	  int bitmapTypes[] = { rwBitmap, rwBitmapGrey, rwBitmapGrey16, rwBitmapColor256 };
 
           if (strcmp(pchFileName[0], "") != 0) flag |= 0x01;
           else ErrorLine("ICONFAMILY/SMALLICONFAMILY must have a 1bpp bitmap");
@@ -2698,7 +2724,7 @@ void ParseDumpIcon(BOOL fSmall, int bitmapType)
 
             if ((flag & 0x01) == 0x01)
               DumpBitmap(pchFileName[i], fSmall ? 2 : 1, rwNoCompress, 
-                         rwBitmap+i, colortable, transparencyData, ((flag & 0xfe) != 0x00));
+                         bitmapTypes[i], colortable, transparencyData, ((flag & 0xfe) != 0x00));
             flag = flag >> 1;
             i++;
           }
@@ -3450,8 +3476,11 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 		case rwBitmap:
 		case rwBitmapGrey:
 		case rwBitmapGrey16:
-		case rwBitmapColor:
+		case rwBitmapColor16:
+		case rwBitmapColor256:
+		case rwBitmapColor16k:
 		case rwBitmapFamily:
+		case rwBitmapFamily_special:
 			ParseDumpBitmapFile(tok.rw);
 			break;
 		case rwIcon:

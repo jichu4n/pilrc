@@ -1,19 +1,8 @@
-<!--
- @(#)palm/PilRC/manual.html
-
- Copyright 2000, Aaron Ardiri (mailto:aaron@ardiri.com)
- All rights reserved.
-
- This file was generated as part of the "ardiri.com" website hosted
- at the internet web site: "http://www.ardiri.com"
-
- The contents of this file is confidential and proprietrary in nature 
- ("Confidential Information"). Redistribution or modification without 
- prior consent of the original author is prohibited.
-  -->
-
 <html>
-<body bgcolor="#000000" text="#ffffff" link="#7f3fff" vlink="#7f3fff">
+<head><title>
+PilRC
+</title></head>
+<body bgcolor="#00000" text="#ffffff" link="#7f3fff" vlink="#7f3fff">
 
 <center>
 <tt>
@@ -32,18 +21,20 @@
 <tr>
 <td>
 <font face="Arial,Helvetica">
-<h2>PilRC v2.5c / PilRCUI<br>
+<h2>PilRC v2.6 / PilRCUI<br>
     User Manual</h2>
 </font>
+</td>
 <td valign=top align=right>
 <font face="Arial,Helvetica">
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
-  29 June 2000
+  31 October 2000
 </font>
+</td>
 </tr>
 </table>
 
-Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc" target="_">PilRC Home Page</a> for the latest version.<p>
+Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC Home Page</a> for the latest version.<p>
 
 <b><u>Description</u></b>
 <ul>
@@ -53,16 +44,19 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc" target=
     <font face="Arial,Helvetica">
     PilRC
     </font>
+    </td>
     <td>
     <font face="Arial,Helvetica">
     A resource compiler for the Palm Computing Platform
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     PilRCUI
     </font>
+    </td>
     <td>
     <font face="Arial,Helvetica">
     A form previewer. It launches a window which previews a close 
@@ -71,6 +65,7 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc" target=
     script.<p>
     <i><b>NOT UPDATED:</b> - any GUI programmers want to help?</i>
     </font>
+    </td>
   </tr>
   </table>
 </ul>
@@ -83,36 +78,42 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc" target=
     <font face="Arial,Helvetica">
     <a href="#usage">Usage</a>
     </font>
+    </td>
   </tr>
   <tr>
     <td>
     <font face="Arial,Helvetica">
     <a href="#understanding">Understanding the Manual</a>
     </font>
+    </td>
   </tr>
   <tr>
     <td>
     <font face="Arial,Helvetica">
     <a href="#language">Resource Language Reference</a>
     </font>
+    </td>
   </tr>
   <tr>
     <td>
     <font face="Arial,Helvetica">
     <a href="#international">International Support</a>
     </font>
+    </td>
   </tr>
   <tr>
     <td>
     <font face="Arial,Helvetica">
     <a href="#knownbugs">Known Bugs</a>
     </font>
+    </td>
   </tr>
   <tr>
     <td>
     <font face="Arial,Helvetica">
     <a href="#reading">Further Reading</a>
     </font>
+    </td>
   </tr>
   </table>
 </ul>
@@ -122,7 +123,7 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc" target=
 </font>
 <ul>
 <pre>
-pilrc   [-L LANGUAGE] [-I INCLUDE PATH] [-R RESFILE] 
+pilrc   [-L LANGUAGE] [-I INCLUDE PATH] [-D MACRO(=VAL)] [-R RESFILE] 
         [-q] [-V] [-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] 
 	file.rcp [output path]
 pilrcui [-L LANGUAGE] file.rcp</pre>
@@ -134,38 +135,60 @@ pilrcui [-L LANGUAGE] file.rcp</pre>
   <font face="Arial,Helvetica">
   -L LANGUAGE
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Generate resource files for target language, LANGUAGE.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
   -I INCLUDE PATH
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Search INCLUDE PATH when looking for include or bitmap files. <br>
   <b>NOTE</b>: multiple paths be repeating the -I option.
   </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -D MACRO[=VAL]
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Define a pre-processor symbol with an optional value. <br>
+  The macros defined with the -D option can be referenced in #ifdef
+  statements in the resource file for conditional compilation. <br>
+  <b>NOTE</b>: if no value is specified, the symbol will given the value of 1.
+  </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
   -R RESFILE
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Output a <tt>.res</tt> file specifying all the resources emitted by 
   <tt>PilRC</tt>.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
   -H INCFILE
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Output a <tt>.h</tt> file containing auto-generated resource item IDs for
@@ -173,92 +196,110 @@ pilrcui [-L LANGUAGE] file.rcp</pre>
   <b>NOTE</b>: If -H is not specified then undefined IDs are considered 
   errors.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
   -q
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Less noisy output, for you minimalists.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
   -V
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Generate M$ (VS-style) warning/error output (default is GNU-style).
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
   -Fh
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Use Hebrew font widths for AUTO width calculations.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
   -Fj
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Use Japanese font widths for AUTO width calculations.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
   -F5
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Use Chinese (Big5) font widhts for AUTO width calcuations.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
   -Fg
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Use Chinese (GB) font widhts for AUTO width calcuations.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
   -Fkm
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Use Korean font widhts for AUTO width calcuations (Hanme font)
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
   -Fkt
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Use Korean font widhts for AUTO width calcuations (Hantip font)
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
   file.rcp
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Input file describing the resources to be emitted. Each resource is 
@@ -266,16 +307,19 @@ pilrcui [-L LANGUAGE] file.rcp</pre>
   filename is constructed by appending the hexcode resource ID to the 
   four character resource type. <br>
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <font face="Arial,Helvetica">
   output path
   </font>
+  </td>
   <td valign=top>
   <font face="Arial,Helvetica">
   Directory where .bin files should be generated.
   </font>
+  </td>
 </tr>
 </table>
 </ul>
@@ -309,34 +353,42 @@ Each field's required type is indicated by a suffix after the field name
   <tr>
     <td valign=top width=50>
     <tt>.i</tt>
+    </td>
     <td valign=top>
     <font face="Arial,Helvetica">
     identifier <br>
     example: <tt>kFoo</tt>
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>.c</tt>
+    </td>
     <td valign=top>
     <font face="Arial,Helvetica">
     character <br>
     (may contain normal C style character escapes) <br>
     example: <tt>"O"</tt> 
     </font>
+    </td>
+  </tr>
   <tr>
     <td valign=top>
     <tt>.s</tt>
+    </td>
     <td valign=top>
     <font face="Arial,Helvetica">
     string <br>
     (may contain normal C style character escapes) <br>
     example: <tt>"Click Me"</tt> 
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>.ss</tt>
+    </td>
     <td valign=top>
     <font face="Arial,Helvetica">
     multi line string <br>
@@ -346,10 +398,12 @@ Each field's required type is indicated by a suffix after the field name
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <tt>"men to come and aid of their country"</tt>
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>.n</tt>
+    </td>
     <td valign=top>
     <font face="Arial,Helvetica">
     number <br>
@@ -368,10 +422,12 @@ Each field's required type is indicated by a suffix after the field name
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <tt>'PALM'</tt> <br>
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>.p</tt>
+    </td>
     <td valign=top>
     <font face="Arial,Helvetica">
     position co-ordinate <br>
@@ -387,6 +443,7 @@ Each field's required type is indicated by a suffix after the field name
         Automatic width or height. <br>
         Value is computed based on the text in the item.
 	</font>
+        </td>
       </tr>
       <tr>
 	<td valign=top>
@@ -396,6 +453,7 @@ Each field's required type is indicated by a suffix after the field name
         <font face="Arial,Helvetica">
         Centers the item either horizontally or vertically. 
 	</font>
+        </td>
       </tr>
       <tr>
 	<td valign=top>
@@ -405,6 +463,7 @@ Each field's required type is indicated by a suffix after the field name
         <font face="Arial,Helvetica">
         Centers the item at the co-ordinate following.
 	</font>
+        </td>
       </tr>
       <tr>
 	<td valign=top>
@@ -414,6 +473,7 @@ Each field's required type is indicated by a suffix after the field name
         <font face="Arial,Helvetica">
         Aligns the item at the right co-ordinate following.
 	</font>
+        </td>
       </tr>
       <tr>
 	<td valign=top>
@@ -423,6 +483,7 @@ Each field's required type is indicated by a suffix after the field name
         <font face="Arial,Helvetica">
         Aligns the item at the bottom co-ordinate following.
 	</font>
+        </td>
       </tr>
       <tr>
 	<td valign=top>
@@ -432,6 +493,7 @@ Each field's required type is indicated by a suffix after the field name
         <font face="Arial,Helvetica">
         Previous items left co-ordinate. 
 	</font>
+        </td>
       </tr>
       <tr>
 	<td valign=top>
@@ -441,6 +503,7 @@ Each field's required type is indicated by a suffix after the field name
         <font face="Arial,Helvetica">
         Previous items right co-ordinate. 
 	</font>
+        </td>
       </tr>
       <tr>
 	<td valign=top>
@@ -450,6 +513,7 @@ Each field's required type is indicated by a suffix after the field name
         <font face="Arial,Helvetica">
         Previous items top co-ordinate. 
 	</font>
+        </td>
       </tr>
       <tr>
 	<td valign=top>
@@ -459,6 +523,7 @@ Each field's required type is indicated by a suffix after the field name
         <font face="Arial,Helvetica">
         Previous items bottom co-ordinate. 
 	</font>
+        </td>
       </tr>
       <tr>
 	<td valign=top>
@@ -468,6 +533,7 @@ Each field's required type is indicated by a suffix after the field name
         <font face="Arial,Helvetica">
         Previous items width. 
 	</font>
+        </td>
       </tr>
       <tr>
 	<td valign=top>
@@ -477,6 +543,7 @@ Each field's required type is indicated by a suffix after the field name
         <font face="Arial,Helvetica">
         Previous items height. 
 	</font>
+        </td>
       </tr>
       </table>
     </ul>
@@ -488,6 +555,7 @@ Each field's required type is indicated by a suffix after the field name
     <b>NOTE</b>: <tt>AUTO</tt> and <tt>CENTER</tt> are not valid in 
     arithmetic expressions. 
     </font>
+    </td>
   </tr>
   </table>
 </ul>
@@ -516,20 +584,25 @@ symbols as can <tt>PilRC</tt>. <p>
   <tr>
     <td valign=top width=100>
     <tt>.h</tt>
+    </td>
     <td valign=top>
     <tt>
     #define <font color="#00ff00">&lt;Symbol.i&gt;&lt;Value.n&gt;</font></tt>
+    </td>
   </tr>
   <tr>
     <td valign=top width=100>
     <tt>.inc</tt>
+    </td>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Symbol.i&gt;</font> equ <font color="#00ff00">&lt;Value.n&gt;</font></tt>
+    </td>
   </tr>
   <tr>
     <td valign=top width=100>
     <tt>.java, .jav</tt>
+    </td>
     <td valign=top>
     <tt>
     package &lt;PackageName&gt; <p>
@@ -537,6 +610,7 @@ symbols as can <tt>PilRC</tt>. <p>
       &nbsp;&nbsp;&nbsp;&nbsp;
       public static final short <font color="#00ff00">&lt;Symbol.i&gt;</font> = <font color="#00ff00">&lt;Value.n&gt;</font>; <br>
     } </tt>
+    </td>
   </tr>
 </table> <p>
 </ul>
@@ -558,90 +632,108 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     <font face="Arial,Helvetica">
     <a href="#lang_form">FORM</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     Form Resource
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_menu">MENU</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     Form Menu Bar
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_alert">ALERT</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     Alert Dialog Resource
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_version">VERSION</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     Version String
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_string">STRING</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     String Resource
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_stringtable">STRINGTABLE</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     String List Resource
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_categories">CATEGORIES</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     Default Category Names 
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_appiconname">APPLICATIONICONNAME</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     Application Icon Name
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_appid">APPLICATION</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     Application Creator Identification
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
@@ -649,10 +741,12 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     <a href="#lang_icon">ICON</a> <br>
     <a href="#lang_icon">ICONFAMILY</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     Icon Bitmap Resource
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
@@ -660,10 +754,12 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     <a href="#lang_smicon">SMALLICON</a> <br>
     <a href="#lang_smicon">SMALLICONFAMILY</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     Small Icon Bitmap Resource
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
@@ -671,63 +767,77 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     <a href="#lang_bitmap">BITMAP</a> <br>
     <a href="#lang_bitmap">BITMAPGREY</a> <br>
     <a href="#lang_bitmap">BITMAPGREY16</a> <br>
+    <a href="#lang_bitmap">BITMAPCOLOR16</a> <br>
     <a href="#lang_bitmap">BITMAPCOLOR</a> <br>
-    <a href="#lang_bitmap">BITMAPFAMILY</a>
+    <a href="#lang_bitmap">BITMAPFAMILY</a> <br>
+    <a href="#lang_bitmap">BITMAPFAMILYSPECIAL</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     Bitmap Resource
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_trap">TRAP</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     HackMaster Trap Resource
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_font">FONT</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     User Defined Font Resource
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_hex">HEX</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     Binary Resource (Hex/String based)
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_data">DATA</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     Binary Resource (Data File based)
     </font>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
     <a href="#lang_translation">TRANSLATION</a>
     </font>
+    </td>
     <td valign=center>
     <font face="Arial,Helvetica">
     Language String Translation Resource
     </font>
+    </td>
   </tr>
   </table>
 </ul>
@@ -763,14 +873,17 @@ is one or more of: <p>
   <tr>
     <td valign=top width=180>
     <tt>TITLE</tt>
+    </td>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Title.s&gt;</font>
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>BUTTON</tt>
+    </td>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font> 
@@ -781,10 +894,12 @@ is one or more of: <p>
     [<font color="#0000ff">FRAME</font>] [NOFRAME] [BOLDFRAME] 
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>PUSHBUTTON</tt>
+    </td>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font> 
@@ -795,10 +910,12 @@ is one or more of: <p>
     [FONT <font color="#00ff00">&lt;FontId&gt;</font>] 
     [GROUP <font color="#00ff00">&lt;GroupId.n&gt;</font>]
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>CHECKBOX</tt>
+    </td>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font>
@@ -809,10 +926,12 @@ is one or more of: <p>
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] 
     [GROUP <font color="#00ff00">&lt;GroupId.n&gt;</font>] [CHECKED]
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>POPUPTRIGGER</tt>
+    </td>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font>
@@ -822,10 +941,12 @@ is one or more of: <p>
     [RIGHTANCHOR] <br>
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>SELECTORTRIGGER</tt>
+    </td>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font>
@@ -835,10 +956,12 @@ is one or more of: <p>
     [RIGHTANCHOR] <br>
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>REPEATBUTTON</tt>
+    </td>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font>
@@ -849,10 +972,12 @@ is one or more of: <p>
     [<font color="#0000ff">FRAME</font>] [NOFRAME] [BOLDFRAME]
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>LABEL</tt>
+    </td>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Label.s&gt;</font>
@@ -861,13 +986,14 @@ is one or more of: <p>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] 
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>FIELD</tt>
+    </td>
     <td valign=top>
     <tt>
-    <font color="#00ff00">&lt;Label.s&gt;</font>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] 
@@ -878,19 +1004,23 @@ is one or more of: <p>
     [MAXCHARS <font color="#00ff00">&lt;MaxChars.n&gt;</font>] <br>
     [AUTOSHIFT] [NUMERIC] [HASSCROLLBAR] 
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>POPUPLIST</tt>
+    </td>
     <td valign=top>
     <tt>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
     <font color="#00ff00">&lt;ControlId.n&gt; &lt;ListId.n&gt;</font>
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>LIST</tt>
+    </td>
     <td valign=top>
     <tt>
     <font color="#00ff00">&lt;Item.s&gt;</font> ...
@@ -901,31 +1031,36 @@ is one or more of: <p>
     [VISIBLEITEMS <font color="#00ff00">&lt;NumVisItems.n&gt;</font>] <br>
     [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>FORMBITMAP</tt>
+    </td>
     <td valign=top>
     <tt>
-    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt;</font>) <br>
     [BITMAP <font color="#00ff00">&lt;BitmapId.n&gt;</font>] 
     [<font color="#0000ff">USABLE</font>] [NONUSABLE]
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>GADGET</tt>
+    </td>
     <td valign=top>
     <tt>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE]
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>TABLE</tt>
+    </td>
     <td valign=top>
     <tt>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
@@ -935,10 +1070,12 @@ is one or more of: <p>
     [COLUMNWIDTHS <font color="#00ff00">&lt;Col1Width.n&gt;</font> ...
                   <font color="#00ff00">&lt;ColNWidth.n&gt;</font>] 
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>SCROLLBAR</tt>
+    </td>
     <td valign=top>
     <tt>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
@@ -949,14 +1086,17 @@ is one or more of: <p>
     [MAX <font color="#00ff00">&lt;MaxValue.n&gt;</font>] 
     [PAGESIZE <font color="#00ff00">&lt;PageSize.n&gt;</font>] 
     </tt>
+    </td>
   </tr>
   <tr>
     <td valign=top>
     <tt>GRAFFITISTATEINDICATOR</tt>
+    </td>
     <td valign=top>
     <tt>
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt;</font>)
     </tt>
+    </td>
   </tr>
 </table>
 </ul>
@@ -995,7 +1135,7 @@ FORM ID 1 AT (2 2 156 156)
   MENUID 1
 BEGIN
   TITLE "AlarmHack"
-  LABEL "Repeat Datebook alarm sound" AUTOID) AT (CENTER 16)
+  LABEL "Repeat Datebook alarm sound" AUTOID AT (CENTER 16)
   PUSHBUTTON "1" ID 2001 AT (20 PrevBottom+2 12) AUTO GROUP 1
   PUSHBUTTON "2" ID 2002 AT (PrevRight+1 PrevTop PrevWidth PrevHeight) GROUP 1
   PUSHBUTTON "3" ID 2003 AT (PrevRight+1 PrevTop PrevWidth PrevHeight) GROUP 1
@@ -1081,7 +1221,7 @@ END</pre>
 
 <font face="Arial,Helvetica">
 <a name="lang_alert"></a>
-<b>ALERT (tALT)</b><p>
+<b>ALERT (Talt)</b><p>
 </font>
 
 <ul>
@@ -1123,7 +1263,7 @@ END</pre>
 
 <font face="Arial,Helvetica">
 <a name="lang_version"></a>
-<b>VERSION (tVER)</b><p>
+<b>VERSION (tver)</b><p>
 </font>
 
 <ul>
@@ -1169,7 +1309,7 @@ STRING ID 101 FILE "string.txt"</pre>
 
 <ul>
 <pre>
-STRINGTABLE ID <font color="#00ff00">&lt;StringTableResourceId.n&gt;</font> <font color="#00ff00">&lt;PrefixString.ss&gt; &lt;String.ss&gt;</font> ... <font color="#00ff00">&lt;String.ss&gt;</font></pre>
+STRINGTABLE ID <font color="#00ff00">&lt;StringTableResourceId.n&gt;</font> <font color="#00ff00">&lt;PrefixString.ss&gt; </font> ... <font color="#00ff00">&lt;String.ss&gt;</font></pre>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -1195,7 +1335,7 @@ memHandle = DmGetResource('tSTL', stringTableMetric);
 ptrTable  = (MemPtr)MemHandleLock(memHandle);
 
 // get the string count &lt;-- "messy"
-count         = 
+count     = 
   (*((UInt8 *)(ptrTable + StrLen((Char *)ptrTable) + 1)) &lt;&lt; 8) |
    *((UInt8 *)(ptrTable + StrLen((Char *)ptrTable) + 2));
 
@@ -1410,11 +1550,17 @@ BITMAPGREY   ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileN
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
 BITMAPGREY16 ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt;</font> 
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+BITMAPCOLOR16 ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt;</font> 
+             [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
 BITMAPCOLOR  ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt; </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
              [TRANSPARENT r g b] [TRANSPARENTINDEX index]
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
 BITMAPFAMILY ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt; * 4 </font>
+             [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
+             [TRANSPARENT r g b] [TRANSPARENTINDEX index]
+             [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+BITMAPFAMILYSPECIAL ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt; * 4 </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
              [TRANSPARENT r g b] [TRANSPARENTINDEX index]
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]</pre>
@@ -1431,14 +1577,54 @@ BITMAPFAMILY ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileN
 <li>
 <tt>BITMAPGREY16</tt> creates a 4bpp (16 color grayscale) bitmap resource.
 <li>
+<tt>BITMAPCOLOR16</tt> creates a 4bpp (16 color) bitmap resource.
+<li>
 <tt>BITMAPCOLOR</tt> creates a 256 color bitmap resource.
 <li>
-<tt>BITMAPFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp and 256 color) icon 
-resources.
+<tt>BITMAPFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp and 256 color) icon resources.
+<li>
+<tt>BITMAPFAMILYSPECIAL</tt> creates a multibit (1bpp, 2bpp, 4bpp color and 256 color) icon resources.
 <li>
 The inclusion of the bitmap color table is <b>not</b> recommended as it slows
 down system performance. PilRC implements a simple color table matching 
 algorithm to match the bitmaps colortable to the system palette. 
+<li> <b>16 COLOR GRAPHICS!</b> <br>
+A new exiting graphics mode is available for application developers who wish
+to use only a standard 16 color palette (running at 4bpp means half as much
+memory to copy). BITMAPCOLOR16 and BITMAPFAMILYSPECIAL can be used with the
+following code: <p>
+
+</font>
+<pre>
+{
+  UInt32       depth;
+  RGBColorType palette[] = {
+                             {  0, 0xff, 0xff, 0xff },
+                             {  1, 0x80, 0x80, 0x80 },
+                             {  2, 0x80, 0x00, 0x00 },
+                             {  3, 0x80, 0x80, 0x00 },
+                             {  4, 0x00, 0x80, 0x00 },
+                             {  5, 0x00, 0x80, 0x80 },
+                             {  6, 0x00, 0x00, 0x80 },
+                             {  7, 0x80, 0x00, 0x80 },
+                             {  8, 0xff, 0x00, 0xff },
+                             {  9, 0xc0, 0xc0, 0xc0 },
+                             { 10, 0xff, 0x00, 0x00 },
+                             { 11, 0xff, 0xff, 0x00 },
+                             { 12, 0x00, 0xff, 0x00 },
+                             { 13, 0x00, 0xff, 0xff },
+                             { 14, 0x00, 0x00, 0xff },
+                             { 15, 0x00, 0x00, 0x00 }
+                           };
+
+  // change to 4bpp grayscale
+  depth = 4;
+  WinScreenMode(winScreenModeSet,NULL,NULL,&amp;depth,NULL);
+
+  // and tweak to the 16 color palette
+  WinPalette(winPaletteSet,0,16,palette);
+} </pre>
+</ul>
 </ul>
 
 <u>Example:</u><p>
@@ -1446,14 +1632,15 @@ algorithm to match the bitmaps colortable to the system palette.
 
 <ul>
 <pre>
-BITMAP       ID 1 "mybitmap.bmp" COMPRESS
-BITMAPGREY   ID 2 "bitm2bpp.bmp" COMPRESS
-BITMAPGREY16 ID 3 "bitm4bpp.bmp" COMPRESS
-BITMAPCOLOR  ID 4 "bitm8bpp.bmp" COMPRESS COLORTABLE
-BITMAPFAMILY ID 5 "bitm1bpp.bmp" "bitm2bpp.bmp" "bitm4bpp.bmp" "bitm8bpp.bmp" COMPRESS
-BITMAPFAMILY ID 6 "bitm1bpp.bmp" "" "" "bitm8bpp.bmp" COMPRESS
-BITMAPFAMILY ID 7 "bitm1bpp.bmp" "" "" "bitm8bpp.bmp" COMPRESS TRANSPARENT 255 255 255
-BITMAPFAMILY ID 8 "bitm1bpp.bmp" "" "" "bitm8bpp.bmp" COMPRESS TRANSPARENTINDEX 255</pre>
+BITMAP        ID 1 "bitmap.bmp" COMPRESS
+BITMAPGREY    ID 2 "bmp2bpp.bmp" COMPRESS
+BITMAPGREY16  ID 3 "bmp4bpp.bmp" COMPRESS
+BITMAPCOLOR16 ID 4 "bmp4bpc.bmp" COMPRESS
+BITMAPCOLOR   ID 4 "bmp8bpp.bmp" COMPRESS COLORTABLE
+BITMAPFAMILY  ID 5 "bmp1bpp.bmp" "bmp2bpp.bmp" "bmp4bpp.bmp" "bmp8bpp.bmp" COMPRESS
+BITMAPFAMILY  ID 6 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS
+BITMAPFAMILY  ID 7 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENT 255 255 255
+BITMAPFAMILY  ID 8 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENTINDEX 255</pre>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -1511,83 +1698,101 @@ The FONT header has the following fields: <p>
 <tr>
   <td valign=top width=100>
   <tt>fontType</tt>
+  </td>
   <td>
   <font face="Arial,Helvetica">
   The purpose of this field is unknown. <br>
   The ROM fonts define this value to be 36864.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <tt>maxWidth</tt>
+  </td>
   <td>
   <font face="Arial,Helvetica">
   Defined as "maximum character width". <br>
   If not set it is automatically set to the width of the widest character.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <tt>kernMax</tt>
+  </td>
   <td>
   <font face="Arial,Helvetica">
   Defined as "negative of maximum kern value". <br>
   The purpose of this field is unknown. <br>
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <tt>nDescent</tt>
+  </td>
   <td>
   <font face="Arial,Helvetica">
   Defined as "negative of descent". <br>
   The purpose of this field is unknown, and is not used in the ROM fonts.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <tt>fRectWidth</tt>
+  </td>
   <td>
   <font face="Arial,Helvetica">
   Defined as "width of font rectangle". <br>
   If not set it is automatically set to the width of the widest character.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <tt>fRectHeight</tt>
+  </td>
   <td>
   <font face="Arial,Helvetica">
   Defined as "height of font rectangle". <br>
   If not set it is automatically set when the first glyph is defined. <br>
   All characters must be exactly this height.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <tt>ascent</tt>
+  </td>
   <td>
   <font face="Arial,Helvetica">
   The number of rows that make up the ascending part of the glyphs. <br>
   Ascent plus descent equals fRectHeight. This value should be set.
   </font>
+  </td>
 </tr>
 <tr>
   <td valign=top>
   <tt>descent</tt>
+  </td>
   <td>
   <font face="Arial,Helvetica">
   The number of rows that make up the descending part of the glyphs. <br>
   Descent plus ascent equals fRectHeight. This value should be set.
   </font>
-<tr>
+  </td>
+</tr>
 <tr>
   <td valign=top>
   <tt>leading</tt>
+  </td>
   <td>
   <font face="Arial,Helvetica">
   The purpose of this field is unknown.
   </font>
+  </td>
 </tr>
 </table>
 </ul> <p>
@@ -1790,5 +1995,6 @@ following websites: <p>
 </ul>
 
 </font>
+
 </body>
 </html>

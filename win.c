@@ -246,7 +246,7 @@ void DrawForm(HDC hdc, RCPFILE *prcpfile, int ifrm)
 			if (!ctl.attr.usable)
 				break;
 //			ctl.text = (CharPtr) IbOut() + cbLt;
-			pchText = pobj->control->text;
+			pchText = pobj->control->u.text; // RNi
 			switch (ctl.style)
 				{
 			case buttonCtl:

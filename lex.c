@@ -47,6 +47,7 @@ static char *pchLex;
 static char *_pchParseError;
 static BOOL _fReportErrors;
 
+static int commentDepth;
 
 BOOL FInitLexer(char *pch, BOOL fMarkErrors)
 	{
@@ -318,12 +319,24 @@ static BOOL FSkipToEndOfCComment(void)
 	{
 	while (*pchLex)
 		{
+		if ((pchLex[0] == '/') && (pchLex[1] == '*'))
+			{
+			WarningLine("nested comment");
+			commentDepth++;
+			pchLex += 2;
+			return(fFalse);
+			}
+
 		if ((pchLex[0] == '*') && (pchLex[1] == '/'))
 			{
+			commentDepth--;
 			pchLex += 2;
-			return(fTrue);
+			if (commentDepth)
+				return(fFalse);	/* end of nested comment */
+			else
+				return(fTrue);	/* true end of comment */
 			}
-		++pchLex;
+		pchLex++;
 		}
 
 	return(fFalse);
@@ -394,6 +407,8 @@ BOOL FGetLex(LEX *plex, BOOL fInComment)
 					}
 				else if (*pchLex == '*')
 					{
+					commentDepth = 1;
+					pchLex++;
 					if (!FSkipToEndOfCComment())
 						lex.lt = ltCComment;
 					else
@@ -419,7 +434,7 @@ BOOL FGetLex(LEX *plex, BOOL fInComment)
 					lex.lt = ltLT;
 				break;
 			case '>':
-				if (*pchLex++ == '=')
+				if (*pchLex == '=')
 					{
 					*pchStore++ = *pchLex++;
 					*pchStore = 0;

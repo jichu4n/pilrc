@@ -1,19 +1,8 @@
-<!--
- @(#)palm/PilRC/history.html
-
- Copyright 2000, Aaron Ardiri (mailto:aaron@ardiri.com)
- All rights reserved.
-
- This file was generated as part of the "ardiri.com" website hosted
- at the internet web site: "http://www.ardiri.com"
-
- The contents of this file is confidential and proprietrary in nature 
- ("Confidential Information"). Redistribution or modification without 
- prior consent of the original author is prohibited.
-  -->
-
 <html>
-<body bgcolor="#000000" text="#ffffff" link="#7f3fff" vlink="#7f3fff">
+<head><title>
+PilRC
+</title></head>
+<body bgcolor="#00000" text="#ffffff" link="#7f3fff" vlink="#7f3fff">
 
 <center>
 <tt>
@@ -27,6 +16,18 @@
 </center> <p>
 
 <pre>
+What's new in 2.6   (Mon, 31 Oct 2000)
+-----------------
+o added -D MACRO(=VAL) option
+- provide support for "pre-processor" like symbols for use with #ifdef
+o added BITMAPCOLOR16 and BITMAPFAMILYSPECIAL tags
+- support for 16 color graphics on IIIc and other color devices
+o updated RGBToColorIndex
+- reversed the color location algorithm to identify (0,0,0) as index 255
+o minor parsing fixes here and there :)
+- comments, one small fix in lex.c (from Wes himself)
+o MANUAL errata
+
 What's new in 2.5c  (Thu, 29 Jun 2000)
 ------------------
 o ICON*, SMALLICON*, BITMAP* adjustments:

@@ -589,12 +589,16 @@ typedef enum
 	rwVisibleItems, rwAutoShift, rwNumeric,
 	rwChecked,
 
+// 2.6 modifications/additions
 	rwBitmap,
 	rwBitmapGrey,
 	rwBitmapGrey16,
-	rwBitmapColor,
+	rwBitmapColor16,
+	rwBitmapColor256,
+	rwBitmapColor16k,
 	rwBitmapFamily,
-
+	rwBitmapFamily_special,
+// end
 	rwPrevLeft, rwPrevRight, rwPrevWidth, rwPrevTop, rwPrevBottom, rwPrevHeight,
 	rwMenu,
 	rwPullDown,
@@ -769,8 +773,13 @@ RWT rgrwt[] =
 	{"bitmap",       NULL,           rwBitmap},
 	{"bitmapgrey",   "bitmapgray",   rwBitmapGrey},
 	{"bitmapgrey16", "bitmapgray16", rwBitmapGrey16},
-	{"bitmapcolor",  "bitmapcolour", rwBitmapColor},
+// 2.6 modifications/additions
+	{"bitmapcolor16",  "bitmapcolour16", rwBitmapColor16},
+	{"bitmapcolor",  "bitmapcolour", rwBitmapColor256},
+	{"bitmapcolor16k",  "bitmapcolour16k", rwBitmapColor16k},
 	{"bitmapfamily", NULL, 		 rwBitmapFamily},
+	{"bitmapfamilyspecial", NULL, 	 rwBitmapFamily_special},
+// end 
 
 	{"prevleft",     NULL,           rwPrevLeft},
 	{"prevright",    NULL,           rwPrevRight},
@@ -903,4 +912,5 @@ extern char *szLanguage;
 int CbEmitStruct(void *pv, char *szPic, char **ppchText, BOOL fEmit);
 RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile, int fontType);
 SYM *PsymLookupId(int id);
+VOID AddSym(char *sz, int wVal);
 

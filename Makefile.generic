@@ -1,5 +1,5 @@
 #
-# @(#)Makefile.generic
+# @(#)Makefile.gcc
 #
 # Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
 #                2000, Aaron Ardiri (mailto:aaron@ardiri.com)
@@ -42,6 +42,7 @@ CCFLAGS = -O2 -Wall -DUNIX
 # compile requirements
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) $(CCFLAGS) -o $(EXEC)
+	make -f Makefile.generic clean
 
 # compile rules
 .SUFFIXES: .c .o

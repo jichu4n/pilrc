@@ -151,6 +151,17 @@ int PalmPalette4bpp[16][3] =
 };
 
 /*
+ * The 4bit-16 color system palette for Palm Computing Devices.
+ */
+int PalmPalette4bppColor[16][3] = 
+{
+  { 255, 255, 255}, { 128, 128, 128 }, { 128,   0,   0 }, { 128, 128,   0 },
+  {   0, 128,   0}, {   0, 128, 128 }, {   0,   0, 128 }, { 128,   0, 128 },
+  { 255,   0, 255}, { 192, 192, 192 }, { 255,   0,   0 }, { 255, 255,   0 },
+  {   0, 255,   0}, {   0, 255, 255 }, {   0,   0, 255 }, {   0,   0,   0 }
+};
+
+/*
  * The 8bit-256 color system palette for Palm Computing Devices.
  */
 int PalmPalette8bpp[256][3] = 
@@ -254,9 +265,20 @@ BMP_RGBToColorIndex(int r,
   }
 
   // find the palette index that has the smallest color "difference"
-  index    = 0;
-  lowValue = diffArray[0];
-  for (i=1; i<paletteSize; i++) {
+
+// OLD ALGORITHM
+//
+//index    = 0;
+//lowValue = diffArray[0];
+//for (i=1; i<paletteSize; i++) {
+
+// NEW ALGORITHM
+//
+// by Scott Ludwig - ensures (0,0,0) in 8bpp color is index 255
+
+  index    = paletteSize-1;
+  lowValue = diffArray[index];
+  for (i=index-1; i>=0; i--) {
     if (diffArray[i] < lowValue) {
       lowValue = diffArray[i];
       index    = i;
@@ -516,7 +538,7 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
   BITMAPINFO       *pbmi;
   BITMAPINFOHEADER bmi;
   int              (*getBits)(int, PILRC_BYTE *, int, int, int) = NULL;
-  int              dstPalette[256][3] = { };
+  int              dstPalette[256][3] = { { 0, 0, 0 } };
   int              dstPaletteSize     = 0;
 
   pbmi = (BITMAPINFO *)(pbResData + sizeof(BITMAPFILEHEADER)); 
@@ -585,7 +607,17 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
 	 } 
          break;
 
-    case rwBitmapColor:
+    case rwBitmapColor16:
+         cbitsPel = 4;
+	 dstPaletteSize = 16;
+	 for (i=0; i<dstPaletteSize; i++) {
+           dstPalette[i][0] = PalmPalette4bppColor[i][0];
+           dstPalette[i][1] = PalmPalette4bppColor[i][1];
+           dstPalette[i][2] = PalmPalette4bppColor[i][2];
+	 } 
+         break;
+
+    case rwBitmapColor256:
          cbitsPel = 8;
 	 dstPaletteSize = 256;
 	 for (i=0; i<dstPaletteSize; i++) {
@@ -594,6 +626,14 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
            dstPalette[i][2] = PalmPalette8bpp[i][2];
 	 } 
          if (colortable) colorDat = COLOR_TABLE_SIZE;
+         break;
+
+    case rwBitmapColor16k:
+
+         //
+         // ADD CODE HERE
+         //
+
          break;
 
     default:
@@ -613,11 +653,12 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
     case rwBitmap:
     case rwBitmapGrey:
     case rwBitmapGrey16:
+    case rwBitmapColor16:
          rcbmp->pixelsize = cbitsPel;
          rcbmp->version   = 1;
          break;
 
-    case rwBitmapColor:
+    case rwBitmapColor256:
          rcbmp->pixelsize = cbitsPel;
          rcbmp->version   = 2;
 
@@ -671,6 +712,14 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
          }
          break;
 
+    case rwBitmapColor16k:
+
+         //
+         // ADD CODE HERE
+         //
+
+         break;
+
     default:
          break;
   }
@@ -707,12 +756,13 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
              break;
 
         case rwBitmapGrey16:
+        case rwBitmapColor16:
              {
                BMP_SetBits4bpp(dx, rcbmp->pbBits, x, y, v, 16);
              }
              break;
 
-        case rwBitmapColor:
+        case rwBitmapColor256:
              {
 	       // if we need a color table, use original bitmap data
 	       if (colortable) 
@@ -722,6 +772,14 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
                else
 	         BMP_SetBits8bpp(dx, (rcbmp->pbBits+colorDat), x, y, v, 16);
              }
+             break;
+
+        case rwBitmapColor16k:
+
+             //
+             // ADD CODE HERE
+             //
+
              break;
 
         default:
@@ -1125,8 +1183,16 @@ WriteTbmp (RCBITMAP *rcbmp,
 	 depth = 4;
 	 break;
 
-    case rwBitmapColor:
+    case rwBitmapColor256:
 	 depth = 8;
+	 break;
+
+    case rwBitmapColor16k:
+
+         //
+	 // ADD CODE HERE
+	 //
+
 	 break;
 
     default:
