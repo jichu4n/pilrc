@@ -6543,8 +6543,6 @@ ParseFile(char *szIn,
   FreeSymTable();
   FreeTranslations();
   CloseResFile();
-//bug fix: john marshall
-//FreeRcpfile(prcpfile);
   if (vfPrc)
     CloseResDBFile();
   return prcpfile;

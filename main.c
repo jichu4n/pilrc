@@ -570,8 +570,6 @@ main(int cArg,
 
   ResTypeInit();
   CbInit();
-// bug fix: john marshall
-//ParseFile(szInputFile, szOutputPath, szResFile, szIncFile, fontType);
   FreeRcpfile(ParseFile(szInputFile, szOutputPath, szResFile, szIncFile, fontType));
   FreeAccessPathsList();
   
