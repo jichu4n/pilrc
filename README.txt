@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
- PilRC version 3.0alpha                                         May 12, 2003
+ PilRC version 3.0 beta 4                                   October 10, 2003
 ----------------------------------------------------------------------------
 
   INSTALLATION:
@@ -28,15 +28,10 @@
   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
   You should obtain the latest version of PilRC before compiling it. It is
-  available from the following location:
+  available from the following locations:
 
-    http://www.ardiri.com/index.php?redir=palm&cat=pilrc&subcat=download
-
-  If you wish to link to the PilRC development website, please provide the
-  link as it is shown. Scott Ludwig has kindly donated the redirection url
-  of that links directly to the PilRC pages for convenience:
-
-    http://www.pilrc.com/
+    http://sourceforge.net/projects/pilrc
+    http://pilrc.sourceforge.net/
 
   BUILDING
   ========
