@@ -364,7 +364,6 @@ DumpBytes(VOID * pv,
         else
           printf(".");
       }
-      printf("\n");
     }
     ibLine = 0;
     nbrBytesOut = 0;
@@ -388,11 +387,10 @@ DumpBytes(VOID * pv,
   while (cb--)
   {
     if (ibLine == 0)
-      printf("%08x  ", nbrBytesOut);
+      printf("\n%08x  ", nbrBytesOut);
     rgbLine[ibLine++] = *pb;
     printf("%02x ", *pb);
     pb++;
-    //              ibOut++;                                        /* RMa bug  correction */
     if (ibLine == 8)
       printf(" ");
     if (ibLine == 16)
@@ -407,7 +405,6 @@ DumpBytes(VOID * pv,
         else
           printf(".");
       }
-      printf("\n");
     }
   }
 #endif
@@ -576,7 +573,7 @@ OpenOutput(char *szBase,
     Error3("Unable to open binary file:", szFileName, strerror(errno));
 
   if (!vfQuiet)
-    printf("Writing %s (", szPrettyName);
+    printf("Writing %s ", szPrettyName);
   ibOut = 0;
 
   /*
@@ -601,6 +598,7 @@ CloseOutput()
 #else
 #ifdef HEXOUT                                    /* RMA call little hack to display clean Hex output */
   DumpBytes(NULL, 0);
+  putchar('\n');
 #endif
 
 
@@ -611,7 +609,7 @@ CloseOutput()
     return;
 
   if (!vfQuiet)
-    printf("%d bytes)\n", ibOut);
+    printf("(%d bytes)\n", ibOut);
   
   if (!vfAllowLargeResources && ibOut > maxSafeResourceSize)
   {
