@@ -906,7 +906,7 @@ BMP_GetBits16bpp(BITMAPINFO * pbmi,
   *g = (((w & 0x07E0) >> 3) | ((w & 0x0060) >> 5));
   *b = (((w & 0x001F) << 3) | (w & 0x0007));     // MiR 1st July 2002 was  *b = (((w & 0x001F) >> 3) | (w & 0x0007));
   // which shifts the blue bits the wrong way resulting in color corruption
-  // in Bitmap displayed on PlamOS
+  // in Bitmap displayed on Palm OS
   // This should be mirror operation of shift carried out in "BMP_ConvertWindowsBitmap()"
 
   return -1;                                     // no index, direct color
@@ -2190,7 +2190,7 @@ BMP_ConvertPNMBitmap(RCBITMAP * rcbmp,
 }
 
 /**
- * Compress a Bitmap (Tbmp or tAIB) resource.
+ * Scanline Compress a Bitmap (Tbmp or tAIB) resource.
  * 
  * @param rcbmp      a reference to the Palm Computing resource data.
  * @param compress   compression style?
@@ -2231,7 +2231,7 @@ BMP_CompressBitmap(RCBITMAP * rcbmp,
   if (colortable)                                // don't compress color table
     rcbmp->pbBits += COLOR_TABLE_SIZE;
 
-  // do the compression (at least, attempt it)
+  // do the scanline compression (at least, attempt it)
   for (i = 0; i < rcbmp->cy; i++)
   {
     flag = 0;
