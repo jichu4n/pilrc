@@ -93,6 +93,9 @@
  *                 place of string constants.
  *                 Added support for preprocessor directives within MENU,
  *                 FORM, and ALERT defintions.
+ *     25-Sep-2003 John Marshall
+ *                 Added support for Handspring's BITMAP syntax to the
+ *                 unified bitmap parser.
  */
 
 #include <stdio.h>
@@ -3937,7 +3940,51 @@ nullify(char *s)
 }
 
 static int
-ParseBitmapAttrs(BMPDEF *attr)
+DecodeDepthRW (RW rw)
+{
+  switch (rw)
+  {
+    case rwDepth2:   return 2;
+    case rwDepth4:   return 4;
+    case rwDepth8:   return 8;
+    case rwDepth16:  return 16;
+    default:         return 0;
+  }
+}
+
+static int
+DecodeBitmapType(RW type)
+{
+  switch (type)
+  {
+    case rwBitmap:          return 1;
+    case rwBitmapGrey:      return 2;
+    case rwBitmapGrey16: case rwBitmapColor16:  return 4;
+    case rwBitmapColor256:  return 8;
+    case rwBitmapColor16k:  return 16;
+    case rwBitmapColor24k:  return 24;
+    case rwBitmapColor32k:  return 32;
+    default:                return 0;
+  }
+}
+
+typedef struct
+{
+  RW type, compress;
+} FamilyItemAttr;
+
+static int
+FindDepth(const FamilyItemAttr *eachAttr, int depth)
+{
+  int i;
+  for (i = 0; eachAttr[i].type != rwNil; i++)
+    if (DecodeBitmapType(eachAttr[i].type) == depth)
+      return i;
+  return i;
+}
+
+static int
+ParseBitmapAttrs(BMPDEF *attr, FamilyItemAttr *eachAttr)
 {
   char *fname;
   int inattrs = fTrue;
@@ -3950,6 +3997,20 @@ ParseBitmapAttrs(BMPDEF *attr)
       case rwAutoCompress:
       case rwForceCompress:
         attr->compress = tok.rw;
+
+	if (eachAttr)
+	{
+	  if (FPeekTok()->lex.lt == ltConst)
+	    while (FPeekTok()->lex.lt == ltConst)
+	      eachAttr[FindDepth(eachAttr, WGetConst("bitmap depth"))].compress
+		  = attr->compress;
+	  else
+	  {
+	    int i;
+	    for (i = 0; eachAttr[i].type != rwNil; i++)
+	      eachAttr[i].compress = attr->compress;
+	  }
+	}
         break;
 
       case rwCompressRLE:
@@ -4063,6 +4124,7 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
   BOOL inpreamble, isicon, isbootscreen;
   char *locale = NULL;
   BMPDEF defattr, bm[MAXDEPTH];
+  FamilyItemAttr eachAttr[MAXDEPTH+1];
   void (*dumper)(int, BMPDEF *, int, BOOL) = NULL;
   int i, dumperdata = 0;
 
@@ -4131,6 +4193,14 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
 	  defattr.compressMethod = tok.rw;
 	  break;
 
+	case rwRscType:
+	  restype = restype_freeme = PchGetSz("Resource Type");
+	  break;
+
+	case rwIncludeClut:
+	  defattr.colortable = fTrue;
+	  break;
+
 	default:
 	  inpreamble = fFalse;
 	  break;
@@ -4152,7 +4222,7 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
 
     BMPDEF attr = defattr;
     char *pchFileName[MAXDEPTH];
-    int maxfiles, nfiles = 0;
+    int maxfiles, ndx;
     const RW *bitmapTypes;
 
     switch (kind)
@@ -4179,27 +4249,45 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
 	break;
     }
 
-    UngetTok();
-    while (FPeekTok()->lex.lt == ltStr)
+    for (i = 0; i < maxfiles; i++)
     {
-      char *fname = nullify(PchGetSz("Bitmap filename"));
-      if (nfiles < maxfiles)
-	pchFileName[nfiles++] = fname;
+      pchFileName[i] = NULL;
+      eachAttr[i].type = bitmapTypes[i];
+      eachAttr[i].compress = attr.compress;
+    }
+    eachAttr[maxfiles].type = rwNil;
+
+    UngetTok();
+    ndx = 0;
+    while (FPeekTok()->lex.lt == ltStr || DecodeDepthRW(FPeekTok()->rw) != 0)
+    {
+      if (FPeekTok()->lex.lt != ltStr)
+      {
+	FGetTok(&tok);
+	ndx = FindDepth(eachAttr, DecodeDepthRW(tok.rw));
+      }
+	
+      if (ndx < maxfiles)
+	pchFileName[ndx++] = nullify(PchGetSz("Bitmap filename"));
       else
+      {
+	free(PchGetSz("Bitmap filename"));
 	WarningLine("Excess bitmap filenames ignored.");
+      }
     }
 
-    ParseBitmapAttrs(&attr);
+    ParseBitmapAttrs(&attr, eachAttr);
 
-    for (i = 0; i < nfiles; i++)
+    for (i = 0; i < maxfiles; i++)
     {
       bm[i] = attr;
       bm[i].pchFileName = pchFileName[i];
-      bm[i].bitmapType = bitmapTypes[i];
+      bm[i].bitmapType = eachAttr[i].type;
+      bm[i].compress = eachAttr[i].compress;
     }
 
     dumper = DumpBMPDEFs;
-    dumperdata = nfiles;
+    dumperdata = maxfiles;
   }
   else if (tok.rw == rwBegin && begin_allowed)
   {
@@ -4213,7 +4301,7 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
       int ndx;
       BMPDEF cur = defattr;
       cur.pchFileName = nullify(PchGetSz("Bitmap filename"));
-      ndx = ParseBitmapAttrs(&cur);
+      ndx = ParseBitmapAttrs(&cur, NULL);
 
       if (ndx == -1)
 	ErrorLine("BPP expected.");

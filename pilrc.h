@@ -1887,6 +1887,13 @@ RCPFILE;
        rwCompressPackBits,
        rwCompressBest,
 
+       rwRscType,
+       rwIncludeClut,
+       rwDepth2,
+       rwDepth4,
+       rwDepth8,
+       rwDepth16,
+
        rwResetAutoID,
        rwGenerateHeader,
 
@@ -2209,6 +2216,13 @@ RWT;
        {"compressrle", NULL, rwCompressRLE},
        {"compresspackbits", NULL, rwCompressPackBits},
        {"compressbest", NULL, rwCompressBest},
+
+       {"rsctype", NULL, rwRscType},
+       {"includeclut", NULL, rwIncludeClut},
+       {"depth2", NULL, rwDepth2},
+       {"depth4", NULL, rwDepth4},
+       {"depth8", NULL, rwDepth8},
+       {"depth16", NULL, rwDepth16},
 
        {"resetautoid", NULL, rwResetAutoID},
        {"generateheader", NULL, rwGenerateHeader},
