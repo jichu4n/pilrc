@@ -1,4 +1,3 @@
-
 /*
  * @(#)main.c
  *
@@ -91,11 +90,14 @@ static void
 Usage(void)
 {
   header();
-  Error
+  /* These parentheses ensure that we get the printf() function rather than
+     a printf() macro.  If we got a macro, the #ifdefs within its arguments
+     would constitute undefined behaviour.  */
+  (printf)
     ("This program is free software; you may redistribute it under the\n"
      "terms of the GNU General Public License. This program has absolutely\n"
      "no warranty, you use it AS IS at your own risk.\n\n"
-     "usage: pilrc {<options>} infile [outfiledir]\n\n" "Options:\n"
+     "Usage: pilrc {<options>} infile [outfiledir]\n\n" "Options:\n"
      "        -L LANGUAGE    Use the TRANSLATION section for the given language\n"
      "                       Up to " XStr(MAXLANG) " -L options may be given\n"
      "        -I <path>      Search for bitmap and include files in <path>\n"
@@ -143,9 +145,9 @@ Usage(void)
      "                       or name of the file to generate containing all\n"
      "                       the generated resources\n"
      "        -M             Generate dependency list only; suppress all other output\n"
-     "        -MD            Generate dependency list"
+     "        -MD            Generate dependency list\n"
      );
-  exit(1);
+  exit(0);
 }
 
 /**
