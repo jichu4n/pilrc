@@ -60,6 +60,9 @@
 #endif
 #endif
 
+#define Str(x)  #x
+#define XStr(x) Str(x)
+
 /**
  * Display the usage information for PilRC.
  */
@@ -71,7 +74,8 @@ Usage(void)
      "terms of the GNU General Public License. This program has absolutely\n"
      "no warranty, you use it AS IS at your own risk.\n\n"
      "usage: pilrc {<options>} infile [outfiledir]\n\n" "Options:\n"
-     "        -L LANGUAGE  Compile resources for specific language\n"
+     "        -L LANGUAGE  Use the TRANSLATION section for the given language\n"
+     "                     Up to " XStr(MAXLANG) " -L options may be given\n"
      "        -I <path>    Search for bitmap and include files in <path>\n"
      "                     More than one -I <path> options may be given\n"
      "                     The current directory is always searched\n"
@@ -143,13 +147,9 @@ main(int cArg,
   int macroValue;
 
   // display the (c) string
-#ifdef PALM_INTERNAL
-  printf("PilRC v2.9 patch release 10-CW-3 - (C)2002 A. Ardiri\n");
-#else
-  printf("PilRC v2.9 patch release 10-CW-3 \n");
+  printf("PilRC v3.0\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000-2003 Aaron Ardiri (aaron@ardiri.com)\n");
-#endif
 
   // initialize
   if (cArg < 2)
@@ -201,10 +201,10 @@ main(int cArg,
     // language
     if (FSzEqI(rgszArg[i], "-L"))
     {
-      if (i++ == cArg)
+      if (i++ == cArg || totalLanguages >= MAXLANG)
         Usage();
 
-      szLanguage = rgszArg[i];
+      aszLanguage[totalLanguages++] = rgszArg[i];
       continue;
     }
 

@@ -158,7 +158,8 @@ BOOL vfVSErrors;
 /*
  * Translations 
  */
-char *szLanguage;
+int totalLanguages = 0;
+const char *aszLanguage[MAXLANG] = { NULL };
 TE *pteFirst;
 
 /*
@@ -5235,9 +5236,15 @@ ParseTranslation()
   BOOL fAddTranslation;
   char *pch;
   TE *pte = NULL;
+  int i;
 
   GetExpectLt(&tok, ltStr, "Language");
-  fAddTranslation = szLanguage != NULL && FSzEqI(tok.lex.szId, szLanguage);
+
+  fAddTranslation = fFalse;
+  for (i = 0; i < totalLanguages; i++)
+    if (FSzEqI(tok.lex.szId, aszLanguage[i]))
+      fAddTranslation = fTrue;
+
   GetExpectRw(rwBegin);
   while (FGetTok(&tok))
   {

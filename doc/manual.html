@@ -33,7 +33,7 @@
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
   <a href="mailto:combee@techwood.org">Ben Combee</a> (combee@techwood.org)<br>
   <a href="mailto:johnm@falch.net">John Marshall</a> (johnm@falch.net)<br>
-  1 March 2003
+  2 March 2003
 </font>
 </td>
 </tr>
@@ -140,7 +140,9 @@ Check the <a href="http://www.ardiri.com/index.php?redir=palm&cat=pilrc">PilRC H
   </td>
   <td valign=top>
   <font face="Arial,Helvetica">
-  Generate resource files for target language, LANGUAGE.
+  Generate resource files translated to the target language LANGUAGE -- see
+  the <a href="#international">International Support</a> section for details.
+  This option may be given more than once if so desired.
   </font>
   </td>
 </tr>
@@ -3684,8 +3686,14 @@ RESETAUTOID 1000</pre>
 PilRC supports a limited form of international tokenization. It works by 
 substituting strings in the resource definitions with replacements
 specified in a <a href="#lang_translation">TRANSLATION</a> section. 
-Multiple translation blocks may be specified in a resource script. The 
-active language is specified with the <a href="#switch_L">-L</a> flag to PilRC. <p> 
+Multiple translation blocks may be specified in a resource script.
+<p>
+The active language is specified with the <a href="#switch_L">-L</a> option.
+If you use more than one <tt>-L</tt> option, several translation sections
+will be active; if several of these active translations contain substitutions
+for the same original string, the one that appears <b>first</b> in the source
+file will be used.
+<p> 
 
 Positioning of controls is a <b>large</b> problem if absolute values are
 used. It is recommended you use AUTO, CENTER and PREVRIGHT et al when 

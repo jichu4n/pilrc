@@ -2464,7 +2464,9 @@ extern BOOL vfIFIH;
 #define DEFAULT_PRCTYPE 0x64617461               // 'data'
 
 // Translations
-extern char *szLanguage;
+#define MAXLANG 10
+extern int totalLanguages;
+extern const char *aszLanguage[];
 
 // Localisation management
 extern char *szLocaleP;
