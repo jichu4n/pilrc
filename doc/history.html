@@ -18,14 +18,27 @@ PilRC
 <pre>
 What's new in 3.0
 -----------------
-o Support for more flexible bitmap families, including high-density support;
-  also supports the bitmap syntax used by Handspring's Palm-RC tool
+o Enhanced bitmap family support
+  - 108dpi (1.5x) and 144dpi (2x) density support
+  - Handspring PalmRC bitmap syntax support
+  - Unified bitmap parser
 o Transparency implemented for PBM/PGM/PPM/PNM files
 o .pbitm files now generate type 1 bitmaps (suitable for use in families)
   rather than type 0 bitmaps
 o Accepts #error, #line, and "linemarkers" as emitted by the GNU preprocessor
 o Predefines the preprocessor symbols __rcp__ and __PILRC__
-o Font family support added
+o Supports #defines for strings
+o All text strings now support line continuation
+o FONTFAMILY resource support
+o NAVIGATION resource support (useful for the PalmOne Treo 600)
+o Palm OS 5 "LE32" resource format support
+o Added GENERATEHEADER and RESETAUTOID keywords
+o MENU SEPARATOR now supports an ID field to allow you to match PalmRez 
+  menu formats
+o New Warnings
+  - resources too large
+  - icon bitmap sizes don't follow PalmSource specifications
+  - forms with edit fields lack Graffiti State Indicator
 o Many miscellaneous bug fixes
 
 What's new in 2.9p4 

@@ -78,8 +78,9 @@ home page</a> for the latest version.
 <tt>[-R RESFILE]</tt> <tt>[-H INCLUDE PATH]</tt> <tt>[-ro]</tt> <tt>[-ts]</tt>
 <tt>[-q]</tt> <tt>[-V]</tt> <tt>[-Loc CODE]</tt> <tt>[-StripLoc]</tt>
 <tt>[-Fh]</tt> <tt>[-Fj]</tt> <tt>[-F5]</tt> <tt>[-Fg]</tt> <tt>[-Fkm]</tt>
-<tt>[-Fkt]</tt> <tt>[-Fc]</tt> <tt>[-allowEditID]</tt> <tt>[-LE32]</tt>
-<tt>[-noIFIH]</tt>
+<tt>[-Fkt]</tt> <tt>[-Fc]</tt> 
+<tt>[-allowEditID]</tt> <tt>[-allowBadSize]</tt> <tt>[-allowLargeRes]</tt> 
+<tt>[-LE32]</tt> <tt>[-noIFIH]</tt>
 <span class=palmInternal><tt>[-AppIcon68K]</tt> <tt>[-amdc NAME]</tt></span>
 <tt>[-noEllipsis]</tt> <tt>[-o OUTPUTPATH]</tt> <tt>[-M]</tt> <tt>[-MD]</tt>
 <tt>file.rcp</tt> <tt>[output path]</tt>
@@ -247,6 +248,23 @@ home page</a> for the latest version.
 </tr>
 <tr>
   <td valign=top>
+  -allowBadSize
+  </td>
+  <td valign=top>
+  Turn off warnings about bitmaps used for icons not matching the suggested sizes from the Palm OS UI guidelines.
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  -allowLargeRes
+  </td>
+  <td valign=top>
+  Turn off warnings about resources being emitted that exceed the safe size
+  allowed for HotSync and Exchange Manager on most Palm OS devices.
+  </td>
+</tr>
+<tr>
+  <td valign=top>
   -noEllipsis
   </td>
   <td valign=top>
@@ -372,7 +390,8 @@ home page</a> for the latest version.
   -M
   </td>
   <td valign=top>
-  Generate dependency list only; suppress all other output.
+  Generate dependency list only; suppress all other output.  The list will be 
+  named the same as the input file, but with a .d extension appended.
   </td>
 </tr>
 <tr>
@@ -883,6 +902,14 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     </td>
     <td valign=center>
     4-byte Integer Value List
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <a href="#lang_navigation">NAVIGATION</a>
+    </td>
+    <td valign=center>
+    Form Navigation Order Specification
     </td>
   </tr>
   <tr>
@@ -2296,6 +2323,68 @@ BEGIN
 END
 </pre>
 
+
+<a name="lang_navigation"></a>
+<b>NAVIGATION (fnav)</b><p>
+
+<pre class=syntax>
+NAVIGATION ID <var>&lt;ResId.n&gt;</var>&nbsp;
+    [VERSION <var>&lt;version.n&gt;</var>]
+    INITIALSTATE <var>&lt;state.n&gt;</var>
+    [INITIALOBJECTID <var>&lt;id.n&gt;</var>]
+    [JUMPOBJECTID <var>&lt;id.n&gt;</var>]
+    [BOTTOMLEFTOBJECTID <var>&lt;id.n&gt;</var>]
+    BEGIN
+        ID <var>&lt;ID.n&gt;</var> ABOVE <var>&lt;ID.n&gt;</var> BELOW <var>&lt;ID.n&gt;</var>
+            [SKIP] [FORCEINTERACTION] [BIGBUTTON]
+        ...
+    END
+
+    or
+
+    NAVIGATIONMAP
+        ROW { <var>&lt;ID.n&gt;</var> [SKIP] [FORCEINTERACTION] [BIGBUTTON] } *
+        ...
+    END
+</pre>
+
+<P>This resource is associated with a form with the same ID and defines
+the tab order of controls on the form, along with the up/down navigation
+order and where object focus should initially be placed.  For a full
+description of this, see the PalmOne Treo 600 developer documentation.
+This format will likely be used for future PalmOne devices.</P>
+
+<P>For either syntax, the tab order is determined by the order that IDs
+are listed in the BEGIN/END or NAVIGATIONMAP section.  For a
+navigation map, the ABOVE and BELOW values for a row are the value of
+the ID that starts the previous and next rows, respectively.</P>
+
+<u>Example:</u>
+<pre>
+NAVIGATION ID 1000
+    INITIALSTATE kFrmNavHeaderFlagsObjectFocusStartState
+    INITIALOBJECTID 1
+    JUMPOBJECTID 2
+    BOTTOMLEFTOBJECTID 3
+    BEGIN
+      ID 1001 BELOW 1003
+      ID 1002 BELOW 1003 SKIP
+      ID 1003 ABOVE 1001 BELOW 1004 FORCEINTERACTION
+      ID 1004 ABOVE 1003 BIGBUTTON
+      ID 1005 ABOVE 1003 SKIP FORCEINTERACTION BIGBUTTON
+    END
+
+NAVIGATION ID 2000
+    INITIALSTATE kFrmNavHeaderFlagsObjectFocusStartState
+    INITIALOBJECTID 2001
+    NAVIGATIONMAP
+      ROW 2001 
+          2002 SKIP
+      ROW 2003 FORCEINTERACTION
+      ROW 2004 BIGBUTTON
+          2005 SKIP FORCEINTERACTION BIGBUTTON
+    END
+</pre>
 
 <a name="lang_palettetable"></a>
 <b>PALETTETABLE (tclt)</b><p>
