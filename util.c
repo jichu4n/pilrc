@@ -896,17 +896,6 @@ struct DependsNode
 
 static struct DependsNode *pdDependsRoot = NULL;
 
-static char szDependsTarget[FILENAME_MAX] = "";
-
-/*-----------------------------------------------------------------------------
-|      SetDependsTarget
--------------------------------------------------------------BLC-------------*/
-
-void SetDependsTarget(const char *szIn)
-{
-    strcpy(szDependsTarget, szIn);
-}
-
 /*-----------------------------------------------------------------------------
 |      InitDependsList
 -------------------------------------------------------------BLC-------------*/
@@ -978,7 +967,7 @@ static char *EscapeChars(char *dest, const char *src)
 |      OutputDependsList
 -------------------------------------------------------------BLC-------------*/
 
-void OutputDependsList(FILE *dependsFile)
+void OutputDependsList(FILE *dependsFile, const char *szDependsTarget)
 {
     char buffer[512];
     struct DependsNode *pdNode;

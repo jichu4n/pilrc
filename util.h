@@ -118,10 +118,9 @@ const char *FindAndOpenFile(const char *szIn,
                       const char *mode,
                       FILE ** returnFile);
 
-void SetDependsTarget(const char *szIn);
 void InitDependsList(void);
 void AddEntryToDependsList(const char *filename);
-void OutputDependsList(FILE *dependsFile);
+void OutputDependsList(FILE *dependsFile, const char *szDependsTarget);
 void FreeDependsList(void);
 
 extern char rgbZero[];

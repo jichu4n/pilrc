@@ -6511,6 +6511,7 @@ ParseFile(const char *szIn,
           int fontType)
 {
   RCPFILE *prcpfile;
+  char *szMainOutput;
 
   if (szIncFile != NULL)
   {
@@ -6522,8 +6523,6 @@ ParseFile(const char *szIn,
 
   if (vfPrc)
   {
-    char *szMainOutput;
-
     if (strcmp(szOutDir, ".") == 0)
     {
       /*
@@ -6545,11 +6544,12 @@ ParseFile(const char *szIn,
     }
 
     OpenResDBFile(szMainOutput);
-    SetDependsTarget(szMainOutput);
-    free(szMainOutput);
   }
   else
+  {
     SetOutFileDir(szOutDir);
+    szMainOutput = MakeFilename("%s/%s", szOutDir, "%.bin");
+  }
 
   /*
    * Predefined symbols: this is the .rcp language, and in particular
@@ -6580,13 +6580,9 @@ ParseFile(const char *szIn,
     FILE *dependsFile = fopen(szDependsFile, "w");
     if (dependsFile)
     {
-        OutputDependsList(dependsFile);
-
-	if (szOutputHeaderFile[0] != '\0')
-	{
-	    SetDependsTarget(szOutputHeaderFile);
-	    OutputDependsList(dependsFile);
-	}
+        OutputDependsList(dependsFile, szMainOutput);
+        if (szOutputHeaderFile[0] != '\0')
+            OutputDependsList(dependsFile, szOutputHeaderFile);
         fclose(dependsFile);
     }
     else
@@ -6629,5 +6625,6 @@ ParseFile(const char *szIn,
   CloseResFile();
   if (vfPrc)
     CloseResDBFile();
+  free(szMainOutput);
   return prcpfile;
 }
