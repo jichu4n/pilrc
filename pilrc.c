@@ -4365,10 +4365,6 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
     if (tok.rw != rwEnd)
       ErrorLine("BITMAP or END expected");
 
-    if ((flag & 0x000000FF) == 0)
-      ErrorLine("Bitmap family must have "
-		"at least one single (72) density bitmap.");
-
     dumper = DumpMultidensityBMPDEFs;
     dumperdata = flag;
   }
