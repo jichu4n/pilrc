@@ -108,7 +108,7 @@ main(int cArg,
   int macroValue;
 
   // display the (c) string
-  printf("PilRC v2.9 patch release 1\n");
+  printf("PilRC v2.9 patch release 2\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000-2001 Aaron Ardiri (aaron@ardiri.com)\n");
 

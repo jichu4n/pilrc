@@ -4431,9 +4431,13 @@ ParseDumpTrap()
 {
   int id;
   int wTrap;
+  TOK tok;
 
   id = WGetId("TRAP ResourceId", fFalse);
-  GetExpectRw(rwValue);                          // RMa july 2001 add a tag  
+  /* Skip "value" if it's present.  */
+  FGetTok(&tok);
+  if (tok.rw != rwValue)
+    UngetTok();
   wTrap = WGetConst("Trap number");
   if (id < 1000)
     ErrorLine
@@ -4802,6 +4806,9 @@ ParseDumpInteger()
   }
   else if (vfStripNoLocRes)
     return;
+
+  if (!(itm.grif2Out & if2Value))
+    itm.value = WGetConstEx("Integer Value");
 
   id = itm.id;
   nInteger = itm.value;
