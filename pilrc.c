@@ -4885,31 +4885,20 @@ ParseDumpData()
 static void
 ParseDumpInteger()
 {
-  int id;
-  long nInteger;
   ITM itm;
 
   ParseItm(&itm, ifId, if2Value, if3Locale, if4Null);
-  /*
-   * RMa localisation 
-   */
-  if (!DesirableLocale(itm.Locale))
-  {
-    return;
-  }
 
-  /*
-   * Skip "value" if it's present.  
-   */
   if (!(itm.grif2Out & if2Value))
     itm.value = WGetConstEx("Integer Value");
 
-  id = itm.id;
-  nInteger = itm.value;
-  OpenOutput(kPalmResType[kConstantRscType], id);       /* "tint" */
-  EmitL(nInteger);
-
-  CloseOutput();
+  if (DesirableLocale(itm.Locale))
+  {
+    long nInteger = itm.value;
+    OpenOutput(kPalmResType[kConstantRscType], itm.id);       /* "tint" */
+    EmitL(nInteger);
+    CloseOutput();
+  }
 }
 
 /*-----------------------------------------------------------------------------
@@ -5482,20 +5471,12 @@ ParseNavigation(void)
   RCNAVIGATION navigation;
   RCNAVIGATIONITEM *navigationItems = NULL;
   ITM itm;
-  int resID = 0;
   int i;
   
   ParseItm(&itm, 
       ifId, if2Null, if3Vers | if3Locale,
       if4InitialState | if4InitialObjectID |
       if4JumpObjectID | if4BottomLeftObjectID);
-
-  if (!DesirableLocale(itm.Locale))
-  {
-    return;
-  }
-
-  resID = itm.id;
 
   if (itm.grif4Out & if3Vers && itm.version != 1)
   {
@@ -5526,13 +5507,17 @@ ParseNavigation(void)
   else
       Error("Expected BEGIN or NAVIGATIONMAP");
  
-  OpenOutput(kPalmResType[kNavigationType], resID);
-  CbEmitStruct(&navigation, szRCNAVIGATION, NULL, fTrue);
-  for (i = 0; i < navigation.numOfObjects; ++i)
+  if (DesirableLocale(itm.Locale))
   {
-    CbEmitStruct(navigationItems + i, szRCNAVIGATIONITEM, NULL, fTrue);
+    OpenOutput(kPalmResType[kNavigationType], itm.id);
+    CbEmitStruct(&navigation, szRCNAVIGATION, NULL, fTrue);
+    for (i = 0; i < navigation.numOfObjects; ++i)
+    {
+      CbEmitStruct(navigationItems + i, szRCNAVIGATIONITEM, NULL, fTrue);
+    }
+    CloseOutput();
   }
-  CloseOutput();
+
   free(navigationItems);
 }
 
