@@ -34,7 +34,7 @@ User Manual
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
   <a href="mailto:combee@techwood.org">Ben Combee</a> (combee@techwood.org)<br>
   <a href="mailto:jmarshall@users.sourceforge.net">John Marshall</a> (jmarshall@users.sf.net)<br>
-  <!--date-->1 February 2004
+  <!--date-->9 February 2004
 </td>
 </tr>
 </table>
@@ -1323,6 +1323,11 @@ Where <tt class=syntax><var>&lt;OBJECTS&gt;</var></tt> is one or more of:
   </tr>
   <tr>
     <td valign=top>
+    <tt>NOGRAFFITISTATEINDICATOR</tt>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
     <tt>SLIDER</tt>
     </td>
     <td valign=top>
@@ -1348,8 +1353,9 @@ Where <tt class=syntax><var>&lt;OBJECTS&gt;</var></tt> is one or more of:
 <tt class=syntax>ID <var>&lt;Id.n&gt;</var></tt> can be replaced with
 <tt>AUTOID</tt>. <tt>PilRC</tt> will assign an identifier for each control 
 which specifies <tt>AUTOID</tt>. This is useful for controls which you won't 
-refer to within the application (ie: LABEL's). Auto ID's begin at at 9000 
-and increase sequentially.
+refer to within the application (ie: LABEL's). Auto ID numbers normally
+start at 9999 and count down, but that can be changed using the 
+<tt>RESETAUTOID</tt> command.
 <li>
 The bitmap referenced by the <tt>FORMBITMAP</tt> tag must appear as a 
 separate resource in the rcp file via the 
@@ -1366,7 +1372,10 @@ using the
 <tt><a href="#lang_translation">TRANSLATION</a></tt> tag.
 <li>
 <tt>SEARCH</tt> is option for <tt>LIST</tt> and works only with <tt>POPUPTRIGGER</tt>.
-
+<li>
+<tt>NOGRAFFITISTATEINDICATOR</tt> is used to tell PilRC that your form 
+intentionally has no Graffiti State Inficator, so it should not emit a
+warning it.
 </ul>
 
 <u>Example:</u><p>
@@ -2355,19 +2364,26 @@ description of this, see the PalmOne Treo 600 developer documentation.
 This format will likely be used for future PalmOne devices.</P>
 
 <P>For either syntax, the tab order is determined by the order that IDs
-are listed in the BEGIN/END or NAVIGATIONMAP section.  For a
-navigation map, the ABOVE and BELOW values for a row are the value of
-the ID that starts the previous and next rows, respectively.  The IDs
-in the navigation mapping correspond with the IDs of objects on the form 
-has the same ID as the navigation resource.</P>
+are listed in the BEGIN/END or NAVIGATIONMAP section.  These IDs should 
+be the same as those used for form objects in the corresponding form resource.
+For a navigation map, the ABOVE and BELOW values for a row are the value of
+the ID that starts the previous and next rows, respectively.
+</P>
+
+<P>PilRC doesn't provide keywords for the values of INITIALSTATE.  You should
+#define your own constant definitions, based on those in the Treo 600 headers.
+See the example for the most commonly used values.</P>
 
 <u>Example:</u>
 <pre>
+#define	kFrmNavHeaderFlagsObjectFocusStartState  0x00000001
+#define	kFrmNavHeaderFlagsAppFocusStartState     0x00000002
+
 NAVIGATION ID 1000
     INITIALSTATE kFrmNavHeaderFlagsObjectFocusStartState
-    INITIALOBJECTID 1
-    JUMPOBJECTID 2
-    BOTTOMLEFTOBJECTID 3
+    INITIALOBJECTID 1001
+    JUMPOBJECTID 1001
+    BOTTOMLEFTOBJECTID 1005
     BEGIN
       ID 1001 BELOW 1003
       ID 1002 BELOW 1003 SKIP
@@ -2985,7 +3001,7 @@ END
 <b><u>ID Generation Support</u></b><p>
 
 <ul>
-PilRC supports automatically generating a C header file with
+<p>PilRC supports automatically generating a C header file with
 ID symbols used in the text.  You can either specify this using the
 <a href="#switch_H">-H</a> command line option, or by using
 a GENERATEHEADER command in your RCP file.  To control the
@@ -2994,7 +3010,11 @@ build without conflicting ID numbers, you use the
 <a href="#lang_resetautoid">RESETAUTOID</a> command to give each file its own ID number
 range. You can also use it to do different ranges for different items in one
 file.  To emulate Constructor's numbering behavior, you could reset the auto ID
-number before each form to the next multiple of 100.<p>
+number before each form to the next multiple of 100.</p>
+<p>As of version 3.2, PilRC will not update the header file if it would generate the same
+file that already exists on disk.  This helps with systems that use file modification times
+to trigger rebuilds, as a change to your RCP file that doesn't affect ID numbering
+won't cause your other source files to be rebuilt.</p>
 </ul>
 
 <a name="lang_generateheader"></a>
