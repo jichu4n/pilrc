@@ -2,7 +2,7 @@
  * @(#)main.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *                2000, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -26,6 +26,10 @@
  *                 creation
  *     18-Jun-2000 Aaron Ardiri
  *                 GNU GPL documentation additions
+ *     20-Nov-2000 Renaud malaval (rmalaval@palm.com)
+ *                 Add full support of PalmOS 3.5 (bitfields, structures, ...)
+ *                 Add resource LAUNCHERCATEGORY (taic)
+ *                 Add support for ARM
  */
 
 #include <stdio.h>
@@ -60,6 +64,7 @@ Usage(void)
         "        -rtl         Right to left support\n"
         "        -q           Less noisy output\n"
         "        -V           Generate M$ (VS-type) error/warning output\n"
+	"        -allowEditID Allow edit menu IDs (10000-10007)\n"
   );
 
   exit(1);
@@ -87,9 +92,13 @@ main(int  cArg,
   int  macroValue;
 	
   // display the (c) string
-  printf("PilRC v2.6\n");
+#ifdef ARM
+  printf("PilRC ARM v2.7\n");
+#else
+  printf("PilRC 68k v2.7\n");
+#endif
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
-  printf("  Copyright 2000      Aaron Ardiri (ardiri@palmgear.com)\n");
+  printf("  Copyright 2000-2001 Aaron Ardiri (ardiri@palmgear.com)\n");
 
   // initialize
   if (cArg < 2) Usage();
@@ -164,6 +173,12 @@ main(int  cArg,
     // be quiet?
     if (FSzEqI(rgszArg[i], "-q")) {
       vfQuiet = fTrue;
+      continue;
+    }
+
+    // allow "edit" ID's?
+    if (FSzEqI(rgszArg[i], "-allowEditID")) {
+      vfAllowEditIDs = fTrue;
       continue;
     }
 

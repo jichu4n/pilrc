@@ -21,14 +21,14 @@ PilRC
 <tr>
 <td>
 <font face="Arial,Helvetica">
-<h2>PilRC v2.6 / PilRCUI<br>
+<h2>PilRC v2.7 / PilRCUI<br>
     User Manual</h2>
 </font>
 </td>
 <td valign=top align=right>
 <font face="Arial,Helvetica">
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
-  31 October 2000
+  5 Janurary 2001
 </font>
 </td>
 </tr>
@@ -124,7 +124,7 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
 <ul>
 <pre>
 pilrc   [-L LANGUAGE] [-I INCLUDE PATH] [-D MACRO(=VAL)] [-R RESFILE] 
-        [-q] [-V] [-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] 
+        [-q] [-V] [-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] [-allowEditID]
 	file.rcp [output path]
 pilrcui [-L LANGUAGE] file.rcp</pre>
 <font face="Arial,Helvetica">
@@ -291,6 +291,18 @@ pilrcui [-L LANGUAGE] file.rcp</pre>
   <td valign=top>
   <font face="Arial,Helvetica">
   Use Korean font widhts for AUTO width calcuations (Hantip font)
+  </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -allowEditID
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Allow the use of "edit menu" ID values (10000-10007 inclusive).
   </font>
   </td>
 </tr>
@@ -738,6 +750,18 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
+    <a href="#lang_launchcat">LAUNCHERCATEGORY</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    Default launcher Category Name
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
     <a href="#lang_icon">ICON</a> <br>
     <a href="#lang_icon">ICONFAMILY</a>
     </font>
@@ -769,6 +793,9 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     <a href="#lang_bitmap">BITMAPGREY16</a> <br>
     <a href="#lang_bitmap">BITMAPCOLOR16</a> <br>
     <a href="#lang_bitmap">BITMAPCOLOR</a> <br>
+    <a href="#lang_bitmap">BITMAPCOLOR16K</a> <br>
+    <a href="#lang_bitmap">BITMAPCOLOR24K</a> <br>
+    <a href="#lang_bitmap">BITMAPCOLOR32K</a> <br>
     <a href="#lang_bitmap">BITMAPFAMILY</a> <br>
     <a href="#lang_bitmap">BITMAPFAMILYSPECIAL</a>
     </font>
@@ -824,6 +851,18 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     <td valign=center>
     <font face="Arial,Helvetica">
     Binary Resource (Data File based)
+    </font>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_integer">INTEGER</a>
+    </font>
+    </td>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    4-byte Integer Value
     </font>
     </td>
   </tr>
@@ -892,7 +931,10 @@ is one or more of: <p>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR] 
     [RIGHTANCHOR] <br>
     [<font color="#0000ff">FRAME</font>] [NOFRAME] [BOLDFRAME] 
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
+    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] <br> 
+    [GRAPHICAL]
+    [BITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
+    [SELECTEDBITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
     </tt>
     </td>
   </tr>
@@ -908,7 +950,10 @@ is one or more of: <p>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR] 
     [RIGHTANCHOR] <br>
     [FONT <font color="#00ff00">&lt;FontId&gt;</font>] 
-    [GROUP <font color="#00ff00">&lt;GroupId.n&gt;</font>]
+    [GROUP <font color="#00ff00">&lt;GroupId.n&gt;</font>] <br>
+    [GRAPHICAL]
+    [BITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
+    [SELECTEDBITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
     </tt>
     </td>
   </tr>
@@ -939,7 +984,10 @@ is one or more of: <p>
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
     [RIGHTANCHOR] <br>
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
+    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] <br>
+    [GRAPHICAL]
+    [BITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
+    [SELECTEDBITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
     </tt>
     </td>
   </tr>
@@ -954,7 +1002,10 @@ is one or more of: <p>
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
     [RIGHTANCHOR] <br>
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
+    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] <br>
+    [GRAPHICAL]
+    [BITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
+    [SELECTEDBITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
     </tt>
     </td>
   </tr>
@@ -970,7 +1021,10 @@ is one or more of: <p>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
     [RIGHTANCHOR] <br>
     [<font color="#0000ff">FRAME</font>] [NOFRAME] [BOLDFRAME]
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
+    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] <br>
+    [GRAPHICAL]
+    [BITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
+    [SELECTEDBITMAPID <font color="#00ff00">&lt;BitmapId.n&gt;</font>]
     </tt>
     </td>
   </tr>
@@ -1095,6 +1149,20 @@ is one or more of: <p>
     <td valign=top>
     <tt>
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt;</font>)
+    </tt>
+    </td>
+  </tr>
+  <tr>
+    <td valign=top>
+    <tt>SLIDER</tt>
+    </td>
+    <td valign=top>
+    <tt>
+    ID <font color="#00ff00">&lt;Id.n&gt;</font> 
+    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
+    [<font color="#0000FF">USABLE</font>] [NONUSABLE] [DISABLED] [VERTICAL] [FEEDBACK] <br>
+    [THUMBID <font color="#00ff00">&lt;BitmapId.n&gt;</font>] 
+    [BACKGROUNDID <font color="#00ff00">&lt;BitmapId.n&gt;</font>] 
     </tt>
     </td>
   </tr>
@@ -1273,6 +1341,12 @@ VERSION <font color="#00ff00">&lt;Version.s&gt;</font></pre>
 </ul>
 
 <font face="Arial,Helvetica">
+<u>Notes:</u>
+<ul>
+<li>
+The ID can be 1 or 1000 - either will be accepted by the default launcher.
+</ul>
+
 <u>Example:</u>
 <ul>
 </font>
@@ -1454,14 +1528,35 @@ APPLICATION ID 1 "PALM"</pre>
 </ul>
 
 <font face="Arial,Helvetica">
+<a name="lang_launchcat"></a>
+<b>LAUNCHERCATEGORY (taic)</b><p>
+</font>
+
+<ul>
+<pre>
+LAUNCHERCATEGORY [ID <font color="#00ff00">&lt;LaunchCatResourceId.n&gt;</font>] <font color="#00ff00">&lt;APPL.s&gt;</font></pre>
+</ul>
+
+<font face="Arial,Helvetica">
+<u>Example:</u>
+</font>
+<ul>
+<pre>
+LAUNCHERCATEGORY "Games"
+LAUNCHERCATEGORY ID 1000 "Games"</pre>
+</ul>
+
+<font face="Arial,Helvetica">
 <a name="lang_icon"></a>
 <b>ICON (tAIB)</b><p>
 
 </font>
 <ul>
 <pre>
-ICON <font color="#00ff00">&lt;IconFileName.s&gt;</font>
-ICONFAMILY <font color="#00ff00">&lt;BitmapFileName.s&gt; * 4 </font>[<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
+ICON [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>] <font color="#00ff00">&lt;IconFileName.s&gt;</font>
+ICONFAMILY [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>] 
+           <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
+           [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
            [TRANSPARENT r g b] [TRANSPARENTINDEX index]</pre>
 </ul>
 
@@ -1473,7 +1568,8 @@ The bitmap must be 32x32, 32x22 or 22x22 in dimension.
 <li> 
 Compression is not available for ICONS.
 <li> 
-A <tt>tAIB</tt> resource with ID 1000 is created.
+A <tt>tAIB</tt> resource with ID 1000 is created unless an alternate ID is 
+specified. 
 <li>
 <tt>ICON</tt> creates a monochrome icon resource.
 <li>
@@ -1483,6 +1579,8 @@ resources.
 The inclusion of the bitmap color table is <b>not</b> recommended as it slows
 down system performance. PilRC implements a simple color table matching 
 algorithm to match the bitmaps colortable to the system palette. 
+<li>
+When an alternate ID is used for the ICON resource, bitmap size is not checked.
 </ul>
 
 <u>Example:</u><p>
@@ -1491,6 +1589,7 @@ algorithm to match the bitmaps colortable to the system palette.
 <ul>
 <pre>
 ICON "myicon.bmp"
+ICONFAMILY "icon1bpp.bmp" "icon2bpp.bmp"
 ICONFAMILY "icon1bpp.bmp" "icon2bpp.bmp" "icon4bpp.bmp" "icon8bpp.bmp"
 ICONFAMILY "icon1bpp.bmp" "" "" "icon8bpp.bmp" TRANSPARENTINDEX 255</pre>
 </ul>
@@ -1502,8 +1601,10 @@ ICONFAMILY "icon1bpp.bmp" "" "" "icon8bpp.bmp" TRANSPARENTINDEX 255</pre>
 </font>
 <ul>
 <pre>
-SMALLICON <font color="#00ff00">&lt;IconFileName.s&gt;</font>
-SMALLICONFAMILY <font color="#00ff00">&lt;BitmapFileName.s&gt; * 4 </font>[<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
+SMALLICON [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>] <font color="#00ff00">&lt;IconFileName.s&gt;</font>
+SMALLICONFAMILY [ID <font color="#00ff00">&lt;IconResourceId.n&gt;</font>] 
+                <font color="#00ff00">&lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
+                [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
                 [TRANSPARENT r g b] [TRANSPARENTINDEX index]</pre>
 </ul>
 
@@ -1515,7 +1616,8 @@ The bitmap must be 15x9 in dimension.
 <li> 
 Compression is not available for SMALLICONS.
 <li> 
-A <tt>tAIB</tt> resource with ID 1001 is created.
+A <tt>tAIB</tt> resource with ID 1001 is created unless an alternate ID is 
+specified. 
 <li>
 <tt>SMALLICON</tt> creates a monochrome icon resource.
 <li>
@@ -1525,6 +1627,8 @@ resources.
 The inclusion of the bitmap color table is <b>not</b> recommended as it slows
 down system performance. PilRC implements a simple color table matching 
 algorithm to match the bitmaps colortable to the system palette. 
+<li>
+When an alternate ID is used for the SMALLICON resource, bitmap size is not checked.
 </ul>
 
 <u>Example:</u><p>
@@ -1533,6 +1637,7 @@ algorithm to match the bitmaps colortable to the system palette.
 <ul>
 <pre>
 SMALLICON "mysmicon.bmp"
+SMALLICONFAMILY "smic1bpp.bmp" "smic2bpp.bmp"
 SMALLICONFAMILY "smic1bpp.bmp" "smic2bpp.bmp" "smic4bpp.bmp" "smic8bpp.bmp"
 SMALLICONFAMILY "smic1bpp.bmp" "" "" "smic8bpp.bmp" TRANSPARENTINDEX 255</pre>
 </ul>
@@ -1544,27 +1649,30 @@ SMALLICONFAMILY "smic1bpp.bmp" "" "" "smic8bpp.bmp" TRANSPARENTINDEX 255</pre>
 
 <ul>
 <pre>
-BITMAP       ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt;</font> 
+BITMAP       [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt;</font> 
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPGREY   ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt;</font> 
+BITMAPGREY   [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt;</font> 
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPGREY16 ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt;</font> 
+BITMAPGREY16 [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt;</font> 
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPCOLOR16 ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt;</font> 
+BITMAPCOLOR16 [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt;</font> 
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPCOLOR  ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt; </font>
+BITMAPCOLOR  [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt; </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
              [TRANSPARENT r g b] [TRANSPARENTINDEX index]
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPFAMILY ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt; * 4 </font>
+BITMAPCOLOR16K [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt; </font>
+             [TRANSPARENT r g b] [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
+BITMAPFAMILY [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; 
+             &lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
              [TRANSPARENT r g b] [TRANSPARENTINDEX index]
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]
-BITMAPFAMILYSPECIAL ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; &lt;BitmapFileName.s&gt; * 4 </font>
+BITMAPFAMILYSPECIAL [<font color="#00ff00">&lt;ResType.s&gt;</font>] ID <font color="#00ff00">&lt;BitmapResourceId.n&gt; 
+             &lt;BitmapFileName.s&gt;</font> ... <font color="#00ff00">&lt;BitmapFileName.s&gt; </font>
              [<font color="#0000ff">NOCOLORTABLE</font>] [COLORTABLE]
              [TRANSPARENT r g b] [TRANSPARENTINDEX index]
              [<font color="#0000ff">NOCOMPRESS</font>] [COMPRESS] [FORCECOMPRESS]</pre>
-</ul>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -1625,7 +1733,6 @@ following code: <p>
   WinPalette(winPaletteSet,0,16,palette);
 } </pre>
 </ul>
-</ul>
 
 <u>Example:</u><p>
 </font>
@@ -1637,10 +1744,11 @@ BITMAPGREY    ID 2 "bmp2bpp.bmp" COMPRESS
 BITMAPGREY16  ID 3 "bmp4bpp.bmp" COMPRESS
 BITMAPCOLOR16 ID 4 "bmp4bpc.bmp" COMPRESS
 BITMAPCOLOR   ID 4 "bmp8bpp.bmp" COMPRESS COLORTABLE
-BITMAPFAMILY  ID 5 "bmp1bpp.bmp" "bmp2bpp.bmp" "bmp4bpp.bmp" "bmp8bpp.bmp" COMPRESS
-BITMAPFAMILY  ID 6 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS
-BITMAPFAMILY  ID 7 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENT 255 255 255
-BITMAPFAMILY  ID 8 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENTINDEX 255</pre>
+BITMAPFAMILY  ID 5 "bmp1bpp.bmp" "bmp2bpp.bmp" COMPRESS
+BITMAPFAMILY  ID 6 "bmp1bpp.bmp" "bmp2bpp.bmp" "bmp4bpp.bmp" "bmp8bpp.bmp" COMPRESS
+BITMAPFAMILY  ID 7 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS
+BITMAPFAMILY  ID 8 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENT 255 255 255
+BITMAPFAMILY  ID 9 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENTINDEX 255</pre>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -1851,6 +1959,13 @@ HEX <font color="#00ff00">&lt;ResType.s&gt;</font> ID <font color="#00ff00">&lt;
 </ul>
 
 <font face="Arial,Helvetica">
+<u>Notes:</u><p>
+<ul>
+<li>
+String values within the data DO NOT have implicit null termination. You must 
+add a 0x00 hex value after the string if needed.
+</ul>
+
 <u>Example:</u>
 </font>
 <ul>
@@ -1876,6 +1991,30 @@ DATA <font color="#00ff00">&lt;ResType.s&gt;</font> ID <font color="#00ff00">&lt
 <ul>
 <pre>
 DATA "junk" ID 1000 "binary.bin"</pre>
+</ul>
+
+<font face="Arial,Helvetica">
+<a name="lang_integer"></a>
+<b>INTEGER (tint)</b><p>
+</font>
+
+<ul>
+<pre>
+INTEGER ID <font color="#00ff00">&lt;ResId.n&gt; &lt;Value.n&gt;</font></pre>
+</ul>
+
+<font face="Arial,Helvetica">
+<u>Notes:</u><p>
+<ul>
+<li>
+<tt>ResLoadConstant(..)</tt> API can be used to load the 'tint' resource.
+</ul>
+
+<u>Example:</u>
+</font>
+<ul>
+<pre>
+INTEGER ID 1000 1974 </pre>
 </ul>
 
 <font face="Arial,Helvetica">

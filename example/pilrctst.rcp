@@ -33,7 +33,7 @@ BEGIN
   LABEL "All rights reserved" AUTOID AT (8 PrevTop+12)
 
   LABEL "PilRC demo" AUTOID AT (8 PrevTop+20) FONT 1
-  LABEL "version 0.1beta" AUTOID AT (8 PrevTop+12) FONT 1
+  LABEL "version 0.2beta" AUTOID AT (8 PrevTop+12) FONT 1
 
   BUTTON "Ok" ID infoFormOkButton AT (CENTER 138 40 AUTO)
 END
@@ -66,9 +66,9 @@ BEGIN
   BUTTON "" ID globalFormAboutButton AT (147 1 12 12) NOFRAME
   FORMBITMAP AT (PrevLeft PrevTop) BITMAP bitmapAbout
 
-  LABEL "PilRC v2.5b9" AUTOID AT (0 PrevBottom+4) FONT 1
+  LABEL "PilRC v2.7" AUTOID AT (0 PrevBottom+4) FONT 1
   LABEL "Copyright 1997-1999 Wes Cherry" AUTOID AT (0 PrevBottom) FONT 128
-  LABEL "Copyright 2000      Aaron Ardiri" AUTOID AT (0 PrevBottom) FONT 128
+  LABEL "Copyright 2000-2001 Aaron Ardiri" AUTOID AT (0 PrevBottom) FONT 128
 END
 
 MENU ID mainMenu
@@ -97,7 +97,7 @@ BEGIN
   BUTTON "Ok" ID tSTLFormOkButton AT (CENTER 138 40 AUTO)
 END
 
-VERSION "0.1 beta"
+VERSION "0.2 beta"
 
 ICONFAMILY 
   "images/icon1bpp.bmp" "images/icon2bpp.bmp" 

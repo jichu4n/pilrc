@@ -4,7 +4,7 @@
 
 # TARGTYPE "Win32 (x86) Console Application" 0x0103
 
-CFG=pilrc - Win32 Release
+CFG=pilrc - Win32 Debug ARM
 !MESSAGE This is not a valid makefile. To build this project using NMAKE,
 !MESSAGE use the Export Makefile command and run
 !MESSAGE 
@@ -13,20 +13,20 @@ CFG=pilrc - Win32 Release
 !MESSAGE You can specify a configuration when running NMAKE
 !MESSAGE by defining the macro CFG on the command line. For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "pilrc.mak" CFG="pilrc - Win32 Release"
+!MESSAGE NMAKE /f "pilrc.mak" CFG="pilrc - Win32 Debug ARM"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
 !MESSAGE "pilrc - Win32 Release" (based on "Win32 (x86) Console Application")
 !MESSAGE "pilrc - Win32 Debug" (based on "Win32 (x86) Console Application")
-!MESSAGE "pilrc - Win32 WinGUI" (based on "Win32 (x86) Console Application")
-!MESSAGE "pilrc - Win32 RelUI" (based on "Win32 (x86) Console Application")
+!MESSAGE "pilrc - Win32 Release ARM" (based on "Win32 (x86) Console Application")
+!MESSAGE "pilrc - Win32 Debug ARM" (based on "Win32 (x86) Console Application")
 !MESSAGE 
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""
-# PROP Scc_LocalPath ""
+# PROP Scc_ProjName "pilrc"
+# PROP Scc_LocalPath "."
 CPP=cl.exe
 RSC=rc.exe
 
@@ -72,7 +72,7 @@ F90=fl32.exe
 # ADD BASE F90 /I "Debug/"
 # ADD F90 /I "Debug/"
 # ADD BASE CPP /nologo /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /YX /c
-# ADD CPP /nologo /Zp2 /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "_CONSOLE" /D "WIN32" /D "BINOUT" /D "SWAPBYTES" /YX /FD /c
+# ADD CPP /nologo /Zp2 /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "_CONSOLE" /D "WIN32" /D "BINOUT" /D "SWAPBYTES" /FR /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -82,23 +82,50 @@ LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386
 # ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib /nologo /subsystem:console /debug /machine:I386
 
-!ELSEIF  "$(CFG)" == "pilrc - Win32 WinGUI"
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Release ARM"
+
+# PROP BASE Use_MFC 0
+# PROP BASE Use_Debug_Libraries 0
+# PROP BASE Output_Dir "pilrc___Win32_Release_ARM"
+# PROP BASE Intermediate_Dir "pilrc___Win32_Release_ARM"
+# PROP BASE Target_Dir ""
+# PROP Use_MFC 0
+# PROP Use_Debug_Libraries 0
+# PROP Output_Dir "Release_ARM"
+# PROP Intermediate_Dir "Release_ARM"
+# PROP Ignore_Export_Lib 0
+# PROP Target_Dir ""
+F90=fl32.exe
+# ADD BASE F90 /I "Release/"
+# ADD F90 /I "Release/"
+# ADD BASE CPP /nologo /Zp2 /W3 /GX /O2 /D "NDEBUG" /D "_CONSOLE" /D "WIN32" /D "BINOUT" /D "SWAPBYTES" /YX /FD /c
+# ADD CPP /nologo /Zp2 /W3 /GX /O2 /D "NDEBUG" /D "_CONSOLE" /D "WIN32" /D "BINOUT" /D "SWAPBYTES" /D "ARM" /YX /FD /c
+# ADD BASE RSC /l 0x409 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
+BSC32=bscmake.exe
+# ADD BASE BSC32 /nologo
+# ADD BSC32 /nologo
+LINK32=link.exe
+# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib /nologo /subsystem:console /machine:I386
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib /nologo /subsystem:console /machine:I386 /out:"../Bin/pilrcARM.exe"
+
+!ELSEIF  "$(CFG)" == "pilrc - Win32 Debug ARM"
 
 # PROP BASE Use_MFC 0
 # PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir ".\debugui"
-# PROP BASE Intermediate_Dir ".\debugui"
+# PROP BASE Output_Dir "pilrc___Win32_Debug_ARM"
+# PROP BASE Intermediate_Dir "pilrc___Win32_Debug_ARM"
 # PROP BASE Target_Dir ""
 # PROP Use_MFC 0
 # PROP Use_Debug_Libraries 1
-# PROP Output_Dir ".\debugui"
-# PROP Intermediate_Dir ".\debugui"
+# PROP Output_Dir "Debug_ARM"
+# PROP Intermediate_Dir "Debug_ARM"
 # PROP Target_Dir ""
 F90=fl32.exe
-# ADD BASE F90 /I "debugui/"
-# ADD F90 /I "debugui/"
-# ADD BASE CPP /nologo /Zp2 /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /YX /c
-# ADD CPP /nologo /Zp2 /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "WINGUI" /D "WIN32" /D "BINOUT" /D "SWAPBYTES" /YX /FD /c
+# ADD BASE F90 /I "Debug/"
+# ADD F90 /I "Debug/"
+# ADD BASE CPP /nologo /Zp2 /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "_CONSOLE" /D "WIN32" /D "BINOUT" /D "SWAPBYTES" /FR /YX /FD /c
+# ADD CPP /nologo /Zp2 /W3 /Gm /GX /ZI /Od /D "_DEBUG" /D "_CONSOLE" /D "WIN32" /D "BINOUT" /D "SWAPBYTES" /D "ARM" /FR /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -106,36 +133,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib /nologo /subsystem:console /debug /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib /nologo /subsystem:windows /debug /machine:I386 /out:".\debugui\Pilrcui.exe"
-# SUBTRACT LINK32 /pdb:none /map
-
-!ELSEIF  "$(CFG)" == "pilrc - Win32 RelUI"
-
-# PROP BASE Use_MFC 0
-# PROP BASE Use_Debug_Libraries 1
-# PROP BASE Output_Dir ".\pilrc___"
-# PROP BASE Intermediate_Dir ".\pilrc___"
-# PROP BASE Target_Dir ""
-# PROP Use_MFC 0
-# PROP Use_Debug_Libraries 1
-# PROP Output_Dir ".\relui"
-# PROP Intermediate_Dir ".\relui"
-# PROP Target_Dir ""
-F90=fl32.exe
-# ADD BASE F90 /I "pilrc___/"
-# ADD F90 /I "relui/"
-# ADD BASE CPP /nologo /Zp2 /W3 /Gm /GX /Zi /Od /D "WIN32" /D "_DEBUG" /D "WINGUI" /YX /c
-# ADD CPP /nologo /Zp2 /W3 /GX /O2 /D "NDEBUG" /D "WINGUI" /D "WIN32" /D "BINOUT" /D "SWAPBYTES" /YX /FD /c
-# ADD BASE RSC /l 0x409 /d "_DEBUG"
-# ADD RSC /l 0x409 /d "_DEBUG"
-BSC32=bscmake.exe
-# ADD BASE BSC32 /nologo
-# ADD BSC32 /nologo
-LINK32=link.exe
-# ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib /nologo /subsystem:windows /map /debug /machine:I386 /out:"debugui/Pilrcui.exe"
-# SUBTRACT BASE LINK32 /pdb:none
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib /nologo /subsystem:windows /map /debug /machine:I386 /out:".\relui\Pilrcui.exe"
-# SUBTRACT LINK32 /pdb:none
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib /nologo /subsystem:console /debug /machine:I386
 
 !ENDIF 
 
@@ -143,14 +141,14 @@ LINK32=link.exe
 
 # Name "pilrc - Win32 Release"
 # Name "pilrc - Win32 Debug"
-# Name "pilrc - Win32 WinGUI"
-# Name "pilrc - Win32 RelUI"
+# Name "pilrc - Win32 Release ARM"
+# Name "pilrc - Win32 Debug ARM"
 # Begin Group "Source Files"
 
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;hpj;bat;for;f90"
 # Begin Source File
 
-SOURCE=.\BITMAP.C
+SOURCE=.\bitmap.c
 # End Source File
 # Begin Source File
 
@@ -163,21 +161,6 @@ SOURCE=.\lex.c
 # Begin Source File
 
 SOURCE=.\main.c
-
-!IF  "$(CFG)" == "pilrc - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "pilrc - Win32 Debug"
-
-!ELSEIF  "$(CFG)" == "pilrc - Win32 WinGUI"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "pilrc - Win32 RelUI"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -189,30 +172,11 @@ SOURCE=.\plex.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\resource.rc
+SOURCE=.\restype.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\util.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\win.c
-
-!IF  "$(CFG)" == "pilrc - Win32 Release"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "pilrc - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ELSEIF  "$(CFG)" == "pilrc - Win32 WinGUI"
-
-!ELSEIF  "$(CFG)" == "pilrc - Win32 RelUI"
-
-!ENDIF 
-
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -233,6 +197,10 @@ SOURCE=.\lex.h
 # Begin Source File
 
 SOURCE=.\pilrc.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\restype.h
 # End Source File
 # Begin Source File
 

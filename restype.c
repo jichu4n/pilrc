@@ -1,5 +1,5 @@
 /*
- * @(#)std.h
+ * @(#)restype.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
  *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
@@ -22,23 +22,64 @@
  * Revisions:
  * ==========
  *
- * pre 18-Jun-2000 <numerous developers>
+ *     18-Aug-2000 RMa
  *                 creation
- *     18-Jun-2000 Aaron Ardiri
- *                 GNU GPL documentation additions
  */
 
-#ifndef __STD_H__
-#define __STD_H__
+#include "restype.h"
 
-typedef int BOOL;
-#define fTrue 1
-#define fFalse 0
-#define VOID void
-
-typedef unsigned char BYTE;
-
-#include <assert.h>
-#define Assert(f) assert(f)
-
+char	*kPalmResType[kMaxNumberResType] =
+{
+#ifdef ARM
+/*  0 */	"tAIN",
+/*  1 */	"tSTR",
+/*  2 */	"tver",
+/*  3 */	"tAIS",
+/*  4 */	"taic",
+/*  5 */	"tSTL",
+/*  6 */	"aaib",
+/*  7 */	"abmp",
+/*  8 */	"absb",
+/*  9 */	"aalt",
+/* 10 */	"akbd",
+/* 11 */	"amnu",
+/* 12 */	"afnt",
+/* 13 */	"afti",
+/* 14 */	"amid",
+/* 15 */	"aclt",
+/* 16 */	"acbr",
+/* 17 */	"aint",
+/* 18 */	"afrm",
+/* 19 */	"awrd",
+/* 20 */	"APPL",
+/* 21 */	"TRAP",
+/* 22 */	"tTTL",
+/* 23 */	"tLBL",
+#else
+/*  0 */	"tAIN",
+/*  1 */	"tSTR",
+/*  2 */	"tver",
+/*  3 */	"tAIS",
+/*  4 */	"taic",
+/*  5 */	"tSTL",
+/*  6 */	"tAIB",
+/*  7 */	"Tbmp",
+/*  8 */	"Tbsb",
+/*  9 */	"Talt",
+/* 10 */	"tkbd",
+/* 11 */	"MBAR",
+/* 12 */	"NFNT",
+/* 13 */	"fnti",
+/* 14 */	"MIDI",
+/* 15 */	"tclt",
+/* 16 */	"tcbr",
+/* 17 */	"tint",
+/* 18 */	"tFRM",
+/* 19 */	"wrdl",
+/* 20 */	"APPL",
+/* 21 */	"TRAP",
+/* 22 */	"tTTL",
+/* 23 */	"tLBL",
 #endif
+};
+

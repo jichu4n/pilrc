@@ -9,7 +9,7 @@ endif
 
 bin_PROGRAMS=pilrc $(PILRCUI_PROG)
 
-COMMON_SOURCES=pilrc.c lex.c util.c bitmap.c font.c plex.c
+COMMON_SOURCES=pilrc.c lex.c util.c restype.c bitmap.c font.c plex.c
 
 pilrc_SOURCES=$(COMMON_SOURCES) main.c
 noinst_HEADERS=bitmap.h macres.h plex.h std.h \

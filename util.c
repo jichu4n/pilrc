@@ -2,7 +2,7 @@
  * @(#)util.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *                2000, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -184,8 +184,13 @@ void EmitB(unsigned char b)
 -------------------------------------------------------------WESC------------*/
 void EmitW(unsigned short w)
 	{
+#ifdef ARM	/* RMa little indian */
+	EmitB((unsigned char) (w & 0xff));
+	EmitB((unsigned char) ((w & 0xff00) >> 8));
+#else			/* big indian */
 	EmitB((unsigned char) ((w & 0xff00) >> 8));
 	EmitB((unsigned char) (w & 0xff));
+#endif
 	}
 
 /*-----------------------------------------------------------------------------
@@ -195,10 +200,17 @@ void EmitW(unsigned short w)
 -------------------------------------------------------------WESC------------*/
 void EmitL(unsigned long l)
 	{
+#ifdef ARM	/* RMa little indian */
+	EmitB((unsigned char) (l & 0xff));
+	EmitB((unsigned char) ((l & 0xff00) >> 8));
+	EmitB((unsigned char) ((l & 0xff0000) >> 16));
+	EmitB((unsigned char) ((l & 0xff000000) >> 24));
+#else			/* big indian */
 	EmitB((unsigned char) ((l & 0xff000000) >> 24));
 	EmitB((unsigned char) ((l & 0xff0000) >> 16));
 	EmitB((unsigned char) ((l & 0xff00) >> 8));
 	EmitB((unsigned char) (l & 0xff));
+#endif
 	}
 
 
@@ -219,6 +231,39 @@ int IbOut()
 -------------------------------------------------------------WESC------------*/
 void DumpBytes(void *pv, int cb)
 	{
+#ifdef HEXOUT		/* RMa activate Hex dump in debug */
+	BYTE *pb;
+	int ib;
+	static int nbrBytesOut;
+	static int ibLine;
+	static BYTE rgbLine[16];
+
+	if (!pv)		/* RMa little hack to display clean Hex output */
+		{
+		if ((ibLine > 0) && (ibLine < 16))
+			{
+			for (ib = ibLine; ib < 16; ib++)
+				{
+				rgbLine[ib] = ' ';
+				printf("   ");
+				if (ibLine == 8)
+					printf(" ");
+				}
+			printf(" ");
+			for (ib = 0; ib < 16; ib++)
+				{
+				if (isprint(rgbLine[ib]))
+					printf("%c", rgbLine[ib]);
+				else
+					printf(".");
+				}
+			printf("\n");
+			}
+		ibLine = 0;
+		nbrBytesOut = 0;
+		return;
+		}
+#endif
 	if (vfWinGUI)
 		return;
 /*#ifdef BINOUT */
@@ -226,23 +271,20 @@ void DumpBytes(void *pv, int cb)
 	ibOut += cb;
 /*#endif */
 #ifdef HEXOUT 
-	BYTE *pb;
-	
 	pb = (BYTE *)pv;
 	while(cb--)
 		{
-		int ib;
-		static int ibLine;
-		static BYTE rgbLine[16];
-		
 		if (ibLine == 0)
-			printf("%08x   ", ibOut);
+			printf("%08x  ", nbrBytesOut);
 		rgbLine[ibLine++] = *pb;
 		printf("%02x ", *pb);
 		pb++;
-		ibOut++;
+//		ibOut++;					/* RMa bug  correction */
+		if (ibLine == 8)
+			printf(" ");
 		if (ibLine == 16)
 			{
+			nbrBytesOut += ibLine;
 			ibLine = 0;
 			printf(" ");
 			for (ib = 0; ib < 16; ib++)
@@ -265,8 +307,30 @@ void DumpBytes(void *pv, int cb)
 -------------------------------------------------------------WESC------------*/
 void PadWordBoundary()
 	{
+#ifdef ARM	/* RMa little indian */
+/*	4 % 4 = 0
+	5 % 4 = 1
+	6 % 4 = 2
+	7 % 4 = 3
+	8 % 4 = 0	*/
+		switch (ibOut % 4)
+		{
+		case 1 :
+			DumpBytes(rgbZero, 1);
+			/* fall thru */
+		case 2 :
+			DumpBytes(rgbZero, 1);
+			/* fall thru */
+		case 3 :
+			DumpBytes(rgbZero, 1);			
+			/* fall thru */
+		case 0 :
+			break;
+		}
+#else
 	if (ibOut & 1)
 		DumpBytes(rgbZero, 1);
+#endif
 	}
 
 /*-----------------------------------------------------------------------------
@@ -318,6 +382,9 @@ VOID OpenOutput(char *szBase, int id)
 -------------------------------------------------------------WESC------------*/
 VOID CloseOutput()
 	{
+#ifdef HEXOUT			/* RMA call little hack to display clean Hex output */
+	DumpBytes(NULL, 0);
+#endif
 /*#ifdef BINOUT */
 	if (vfWinGUI)
 		return;
@@ -364,26 +431,30 @@ VOID CloseResFile()
 |	FindAndOpenFile
 -------------------------------------------------------------DAVE------------*/
 char *FindAndOpenFile(char *szIn, char *mode, FILE **returnFile )
-	{
+{
 	FILE *file = fopen(szIn, mode);
 
 	if ( file == NULL ) 
-	    {
+	{
 
 		int i;
-		for ( i = 0; i < totalIncludePaths; i++ ) {
-
-#ifdef WIN322
-		  sprintf( szFullName, "%s\\%s", includePaths[i], szIn);
+		for ( i = 0; i < totalIncludePaths; i++ )
+		{
+#ifdef WIN32
+			sprintf( szFullName, "%s\\%s", includePaths[i], szIn);
 #else
-		  sprintf( szFullName, "%s/%s", includePaths[i], szIn);
+			sprintf( szFullName, "%s/%s", includePaths[i], szIn);
 #endif
 		
-		    file = fopen( szFullName, mode);
-		    if ( file != NULL )
+			file = fopen( szFullName, mode);
+			if ( file != NULL )
 			{
-			    break;
+			   break;
 			}
+/* RNi: Why is this test here ? It breaks the multiple path searching !!!
+			else
+				Error2("Could not open file: ", szFullName);
+*/
 		}
 
 		if ( i == totalIncludePaths ) {
@@ -392,13 +463,13 @@ char *FindAndOpenFile(char *szIn, char *mode, FILE **returnFile )
 
 		*returnFile = file;
 		return szFullName;
-	    } 
+	} 
 	else 
-	    {
+	{
 		*returnFile = file;
 		return szIn;
-	    }
 	}
+}
 
 /* case insenstitive string comparison	*/
 BOOL FSzEqI(char *sz1, char *sz2)

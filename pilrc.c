@@ -2,7 +2,7 @@
  * @(#)pilrc.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *                2000, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,14 @@
  *                 both *.rcp files and *.h files. 
  *     24-Jun-2000 Kurt Spaugh
  *                 Additions for tSTL resource support
+ *     27-Jul-2000 Michal Kouril
+ *                 Additions for slider control resource support
+ *     20-Nov-2000 Renaud Malaval
+ *                 Additions for PalmOS 3.5 support
+ *     30-Nov-2000 Renaud Malaval
+ *                 Debug tSTL resource support in ARM generation
+ *     30-Dec-2000 Ben Combee
+ *                 Added 'tint' resource support
  */
 
 #include <stdio.h>
@@ -44,8 +52,11 @@
 #include "bitmap.h"
 #include "font.h"
 
+#include "restype.h"		// RMa
+
 #define idAutoInit 9999
 #define idPalmOSReservedMin 10000
+#define idPalmOSReservedMinWithEditIDs 10008
 
 /*-----------------------------------------------------------------------------
 |	 Globals
@@ -57,6 +68,8 @@ BOOL vfWinGUI;
 int ifdefSkipping = 0;
 int ifdefLevel    = 0;
 
+/* Allow edit ID's (10000-10007 inclusive)*/
+BOOL vfAllowEditIDs;
 /* Quiet output */
 BOOL vfQuiet;
 /* M$ (VS-type) error/warning output */
@@ -77,10 +90,13 @@ BOOL vfCheckDupes;
 
 /* Form globals */
 FRM *vpfrm;
+
 //RCFORM form;	/* current form being parsed */
 //#define cobjMax 256
 //RCFORMOBJLIST rglt[cobjMax];
 
+/* RMa Little or Big indian support */
+// BOOL vfArm = fFalse;
 
 /* Menu globals */
 RCMENUBAR menu;
@@ -97,6 +113,9 @@ int rgidMenu[iidMenuMax];
 #define iidStringMax 512
 int iidStringMac;
 int rgidString[iidStringMax];
+#define iidStringTableMax 384					// RMa add for make difference between tSTR and tSTL string
+int iidStringTableMac;							// RMa add for make difference between tSTR and tSTL string
+int rgidStringTable[iidStringTableMax];	// RMa add for make difference between tSTR and tSTL string
 #define iidAlertMax 512
 int iidAlertMac;
 int rgidAlert[iidAlertMax];
@@ -796,6 +815,8 @@ typedef struct _itm
 	BOOL underlined;
 	BOOL singleLine;
 	BOOL dynamicSize;
+	BOOL vertical;		/* RMa add: slider */
+	BOOL graphical;	/* RMa add: slider */
 	int justification;
 	int maxChars;
 	int autoShift;
@@ -818,6 +839,11 @@ typedef struct _itm
 	int minValue; /* scrollbar */
 	int maxValue; /* scrollbar */
 	int pageSize; /* scrollbar */
+	int thumbid;				/* RMa add: slider */
+	int backgroundid;			/* RMa add: slider */
+	BOOL feedback;				/* RMa add: slider */
+	int bitmapid;				/* RMa add: graphical button */
+	int selectedbitmapid;	/* RMa add: graphical button */
 	} ITM;
 
 /* Item Flags */
@@ -855,17 +881,38 @@ typedef struct _itm
 #define ifBigMargin    0x40000000
 
 /* if2s -- ran out of bits in if! */
-#define if2Null        0x00000000
-#define if2NumColumns  0x00000001
-#define if2NumRows     0x00000002
-#define if2ColumnWidths 0x00000004
-#define if2Value        0x00000008
-#define if2MinValue     0x00000010
-#define if2MaxValue     0x00000020
-#define if2PageSize     0x00000040
-#define if2AutoShift    0x00000080
-#define if2Scrollbar    0x00000100
-#define if2Numeric      0x00000200
+#define if2Null					0x00000000
+#define if2NumColumns			0x00000001
+#define if2NumRows				0x00000002
+#define if2ColumnWidths			0x00000004
+#define if2Value					0x00000008
+#define if2MinValue				0x00000010
+#define if2MaxValue				0x00000020
+#define if2PageSize				0x00000040
+#define if2AutoShift				0x00000080
+#define if2Scrollbar				0x00000100
+#define if2Numeric				0x00000200
+
+#define if2Type 					0x00000800		/* RMa add */
+#define if2File 					0x00001000		/* RMa add */
+#define if2CreatorID				0x00002000		/* RMa add */
+#define if2AppType				0x00004000		/* RMa add */
+#define if2CreateTime			0x00008000		/* RMa add */
+#define if2ModTime				0x00010000		/* RMa add */
+#define if2BackupTime			0x00020000		/* RMa add */
+#define if2AppInfo				0x00040000		/* RMa add */
+#define if2SortInfo				0x00080000		/* RMa add */
+#define if2ReadOnly				0x00100000		/* RMa add */
+#define if2Backup					0x00200000		/* RMa add */
+#define if2CopyProtect			0x00400000		/* RMa add */
+#define if2Version				0x00800000		/* RMa add */
+#define if2ThumbID				0x01000000		/* RMa add */
+#define if2BackgroundID			0x02000000		/* RMa add */
+#define if2Vertical				0x04000000		/* RMa add */
+#define if2Graphical				0x08000000		/* RMa add */
+#define if2BitmapID				0x10000000		/* RMa add */
+#define if2SelectedBitmapID	0x20000000		/* RMa add */
+#define if2Feedback				0x40000000		/* RMa add */
 
 
 /* Semi-arbitrary margins */
@@ -990,8 +1037,11 @@ int WGetId(char *szErr, BOOL fAutoIDOk)
 			UngetTok();
 		w = WGetConstEx(szErr);
 		}
-	if (w >= idPalmOSReservedMin)
-		WarningLine("ID conflicts with PalmOS reserved ID range (valid values: 0-9999, Ok for predefined IDs for Edit menu)");
+
+ 	if (((!vfAllowEditIDs) && (w >= idPalmOSReservedMin)) ||
+	    (w >= idPalmOSReservedMinWithEditIDs))
+	  WarningLine("ID conflicts with reserved ID range (0-9999 only)");
+
 	return w;
 	}
 
@@ -1146,6 +1196,14 @@ void ParseItm(ITM *pitm, int grif, int grif2)
 			CheckGrif(ifSingleLine);
 			pitm->singleLine = tok.rw == rwSingleLine;
 			break;
+		case rwVertical:		/* RMa add */
+			CheckGrif2(if2Vertical);
+			pitm->vertical = tok.rw == rwVertical;
+			break;
+		case rwGraphical:		/* RMa add */
+			CheckGrif2(if2Graphical);
+			pitm->graphical = tok.rw == rwGraphical;
+			break;
 		case rwDynamicSize:
 			CheckGrif(ifDynamicSize);
 			pitm->dynamicSize = 1;
@@ -1185,6 +1243,26 @@ void ParseItm(ITM *pitm, int grif, int grif2)
 		case rwPageSize:
 			CheckGrif2(if2PageSize);
 			pitm->pageSize = WGetConstEx("PageSize");
+			break;
+		case rwFeedback:				/* RMa add */
+			CheckGrif2(if2Feedback);
+			pitm->feedback = tok.rw == rwFeedback;			
+			break;
+		case rwThumbID:				/* RMa add */
+			CheckGrif2(if2ThumbID);
+			pitm->thumbid = WGetConstEx("ThumbID");
+			break;
+		case rwBackgroundID:			/* RMa add */
+			CheckGrif2(if2BackgroundID);
+			pitm->backgroundid = WGetConstEx("BackgroundID");
+			break;
+		case rwBitmapID:				/* RMa add */
+			CheckGrif2(if2BitmapID);
+			pitm->bitmapid = WGetConstEx("BitmapID");
+			break;
+		case rwSelectedBitmapID:	/* RMa add */
+			CheckGrif2(if2SelectedBitmapID);
+			pitm->selectedbitmapid = WGetConstEx("SelectedBitmapID");
 			break;
 
 		case rwBitmap:
@@ -1271,6 +1349,7 @@ int CbEmitStruct(void *pv, char *szPic, char **ppchText, BOOL fEmit)
 	int *pi;
 	int ibit;
 	unsigned char byte;
+	unsigned short word;		/* RMa add */
 	int cb;
 
 	if (ppchText != NULL)
@@ -1278,6 +1357,7 @@ int CbEmitStruct(void *pv, char *szPic, char **ppchText, BOOL fEmit)
 	cb = 0;
 	ibit = 0;
 	byte = 0;
+	word = 0;	/* RMa add */
 	Assert(sizeof(char *) == sizeof(int));
 	pi = (int *)pv;
 	for (pch = szPic; *pch != 0;)
@@ -1355,16 +1435,47 @@ int CbEmitStruct(void *pv, char *szPic, char **ppchText, BOOL fEmit)
 				cb += 4;
 				}
 			break;
-		case 't':	/* bit */
+		case 't':	/* 8 bits field to byte */
 			ibit += c;
+#ifdef ARM		/* RMa add */
+			byte = (unsigned char)(byte >> c);
+			if (pv != NULL && pi != NULL && !fZero)
+				{
+				byte |= (*pi << (8 - c));
+				pi++;
+				}
+#else
 			byte = (unsigned char)(byte << c);
-			if (!fZero && pi != NULL)
+			if (pv != NULL && pi != NULL && !fZero)		// RMa : Bug correction test Pi != Null
 				byte |= *pi++;
+#endif
 			if (ibit == 8)
 				{
 				CondEmitB(byte);
 				cb++;
 				byte = 0;
+				ibit = 0;
+				}
+			break;
+		case 'u':	/* RMa add: 16 bits field to word */
+			ibit += c;
+#ifdef ARM		/* RMa add */
+			word = (unsigned short)(word >> c);
+			if (pv != NULL && pi != NULL && !fZero)
+				{
+				word |= (*pi << (16 - c));
+				pi++;
+				}
+#else
+			word = (unsigned short)(word << c);
+			if (pv != NULL && pi != NULL && !fZero)
+				word |= *pi++;
+#endif
+			if (ibit == 16)
+				{
+				CondEmitW(word);
+				cb += 2;
+				word = 0;
 				ibit = 0;
 				}
 			break;
@@ -1389,20 +1500,41 @@ int CbStruct(char *szPic)
 /* mapping of form object types to resource ids */
 char * mpotszEmit[] =
 	{
-	szRCFIELD,	/* 'tFLD', */
-	szRCCONTROL,	/* 'tCTL',	 need to special case this one! */
-	szRCLIST,	/* 'tLST', */
-	szRCTABLE, /*	szRCTBL'tTBL', */
-	szRCFORMBITMAP, /* 'tFBM', */
-	NULL, /* 'tLIN',		 bogus */
-	NULL, /* 'tFRA',		 bogus */
-	NULL, /* 'tREC',      bogus */
-	szRCFORMLABEL, /* 'tLBL', */
-	szRCFORMTITLE, /* 'tTTL', */
-	szRCFORMPOPUP, /* 'tPUL', */
-	szRCFORMGRAFFITISTATE, /* 'tGSI', */
-	szRCFORMGADGET, /* 'tGDT' */
-	szRCSCROLLBAR,  /* 'tSCL' */
+#ifdef ARM			/* RMa add */
+	szRCFieldBA32,				/* 'tFLD' */
+	szRCControlBA32,			/* 'tCTL'	 need to special case this one! */
+	szRCListBA32,				/* 'tLST' */
+	szRCTableBA32,				/*	szRCTBL'tTBL', */
+	szRCFormBitMapBA32,		/* 'tFBM' */
+	NULL,							/* 'tLIN'	bogus */
+	NULL,							/* 'tFRA'	bogus */
+	NULL,							/* 'tREC'	bogus */
+	szRCFormLabelBA32,		/* 'tLBL' */
+	szRCFORMTITLE,				/* 'tTTL' */
+	szRCFORMPOPUP,				/* 'tPUL' */
+	szRCFORMGRAFFITISTATE,	/* 'tGSI' */
+	szRCFORMGADGET,			/* 'tGDT' */
+	szRCSCROLLBAR,				/* 'tSCL' */
+	szRCSliderControlBA32,	/* '????' */
+	szRCGRAPHICALCONTROLBA32,	/* '????' */
+#else
+	szRCFieldBA16,				/* 'tFLD' */
+	szRCCONTROLBA16,			/* 'tCTL'	 need to special case this one! */
+	szRCListBA16,				/* 'tLST' */
+	szRCTableBA16,				/*	szRCTBL'tTBL', */
+	szRCFormBitMapBA16,		/* 'tFBM' */
+	NULL,							/* 'tLIN'	bogus */
+	NULL,							/* 'tFRA'	bogus */
+	NULL,							/* 'tREC'	bogus */
+	szRCFormLabelBA16,		/* 'tLBL' */
+	szRCFORMTITLE,				/* 'tTTL' */
+	szRCFORMPOPUP,				/* 'tPUL' */
+	szRCFORMGRAFFITISTATE,	/* 'tGSI' */
+	szRCFORMGADGET,			/* 'tGDT' */
+	szRCSCROLLBAR,				/* 'tSCL' */
+	szRCSliderControlBA16,	/* 'tslf' */
+	szRCGRAPHICALCONTROLBA16, /* '????' */
+#endif
 	};
 
 
@@ -1423,6 +1555,7 @@ int CbFromLt(RCFORMOBJLIST *plt, int fText)
 	cb = 0;
 	pobj = &plt->u.object;
 	pchText = NULL;
+
 	cb = CbEmitStruct(pobj->ptr, mpotszEmit[plt->objectType], &pchText, fFalse);
 	switch (plt->objectType)
 		{
@@ -1432,16 +1565,41 @@ int CbFromLt(RCFORMOBJLIST *plt, int fText)
 		break;
 	case frmTableObj:
 		pchText = NULL;
-		cb += pobj->table->numColumns*CbStruct(szRCTABLECOLUMNATTR)+pobj->table->numRows*CbStruct(szRCTABLEROWATTR)+
-			pobj->table->numColumns*pobj->table->numRows*CbStruct(szRCTABLEPADDING);
+		cb += pobj->table->numColumns*
+			CbStruct(szRCTABLECOLUMNATTR)+pobj->table->numRows*
+			CbStruct(szRCTABLEROWATTR)+pobj->table->numColumns*
+			pobj->table->numRows*CbStruct(szRCTABLEPADDING);
 			;
 		break;
 		}
 
 	if (fText && pchText != NULL)
-		cb += strlen(pchText)+1;	
+		cb += strlen(pchText)+1;
+	/* padding */
+#ifdef ARM		/* RMa add */
+					/*	4 % 4 = 0
+						5 % 4 = 1
+						6 % 4 = 2
+						7 % 4 = 3
+						8 % 4 = 0	*/
+		switch (cb % 4)
+		{
+		case 1 :
+			cb++;
+			/* fall thru */
+		case 2 :
+			cb++;
+			/* fall thru */
+		case 3 :
+			cb++;
+			/* fall thru */
+		case 0 :
+			break;
+		}
+#else
 	if (cb & 1)
 		cb++;
+#endif
 	return cb;
 	}
 	
@@ -1460,8 +1618,7 @@ void DumpForm(FRM *pfrm)
 	int ib;
 	int il;
 
-
-	OpenOutput("tFRM", pfrm->form.formId);
+	OpenOutput(kPalmResType[kFormRscType], pfrm->form.formId);	/* RMa "tFRM" */
 	clt = pfrm->form.numObjects;	
 	Assert(PlexGetCount(&pfrm->pllt) == clt);
 
@@ -1476,6 +1633,9 @@ void DumpForm(FRM *pfrm)
 		lt = *(RCFORMOBJLIST *)PlexGetElementAt(&pfrm->pllt, ilt);
 		cb = CbFromLt(&lt, 1);
 		lt.u.ibobj = ib;
+		/* RMa temporary sollution update that after integration */
+		if (lt.objectType == frmSliderObj) lt.objectType = frmControlObj; // sorry about that
+		if (lt.objectType == frmGraphicalControlObj) lt.objectType = frmControlObj; // sorry about that
 		ib += cb;
 		CbEmitStruct(&lt, szRCFORMOBJLIST, NULL, fTrue);
 		}
@@ -1537,6 +1697,7 @@ void DumpForm(FRM *pfrm)
 			DumpBytes(pchText, strlen(pchText)+1);
 			}
 		}
+	PadWordBoundary();
 	CloseOutput();
 	}
 
@@ -1546,10 +1707,12 @@ BOOL FIdFormObject(FormObjectKind kind, BOOL fIncludeLabels)
 		{
 	case frmFieldObj:
 	case frmControlObj:
+	case frmGraphicalControlObj:
 	case frmListObj:
 	case frmTableObj:
 	
 	case frmScrollbarObj:
+	case frmSliderObj:
 	case frmGadgetObj:
 		return fTrue;
 	case frmLabelObj:
@@ -1577,6 +1740,7 @@ int IdFromObj(RCFORMOBJECT *pobj, FormObjectKind kind)
 		return pobj->field->id;
 		
 	case frmControlObj:
+	case frmGraphicalControlObj:
 		return pobj->control->id;
 	case frmListObj:
 		return pobj->list->id;
@@ -1588,7 +1752,9 @@ int IdFromObj(RCFORMOBJECT *pobj, FormObjectKind kind)
 		return pobj->gadget->id;
 	case frmLabelObj:
 		return pobj->label->id;
-		
+	case frmSliderObj:
+		return pobj->slider->id;
+
 	case frmTitleObj:
 	case frmPopupObj:
 	case frmLineObj:
@@ -1705,6 +1871,7 @@ BOOL FParseObjects()
 	while (FGetTok(&tok))
 		{
 		fok = (FormObjectKind) -1;
+		memset(&itm, 0, sizeof(ITM));		/* RMa add */
 		switch(rwSav = tok.rw)
 			{
 			case rwEnd:
@@ -1716,28 +1883,30 @@ BOOL FParseObjects()
 				fok = frmTitleObj;
 				break;
 			
-		 	case rwBTN: /* */
-		  		ParseItm(&itm, ifText|ifId|ifRc|ifUsable|ifEnabled|ifFont|ifAnchor|ifFrame|ifBigMargin, if2Null);
+		 	case rwBTN:		/* button */
+		  		ParseItm(&itm, ifText|ifId|ifRc|ifUsable|ifEnabled|ifFont|ifAnchor|ifFrame|ifBigMargin, if2Graphical|if2BitmapID|if2SelectedBitmapID);
 				goto Control;
-			case rwPBN:	/* pushbutton */
-		  		ParseItm(&itm, ifText|ifId|ifRc|ifUsable|ifEnabled|ifFont|ifAnchor|ifGroup|ifSmallMargin, if2Null);
+			case rwPBN:		/* pushbutton */
+		  		ParseItm(&itm, ifText|ifId|ifRc|ifUsable|ifEnabled|ifFont|ifAnchor|ifGroup|ifSmallMargin, if2Graphical|if2BitmapID|if2SelectedBitmapID);
 				goto Control;
-			case rwCBX:
-		  		ParseItm(&itm, ifText|ifId|ifRc|ifUsable|ifEnabled|ifFont|ifAnchor|ifGroup|ifOn|ifBigMargin|ifSmallMargin, if2Null);	/* BUG! need to add checkbox extra! */
+			case rwCBX:		/* check box */
+		  		ParseItm(&itm, ifText|ifId|ifRc|ifUsable|ifEnabled|ifFont|ifAnchor|ifGroup|ifOn|ifBigMargin|ifSmallMargin, if2Graphical|if2BitmapID|if2SelectedBitmapID);	/* BUG! need to add checkbox extra! */
 				itm.frame = 0;
+				if (itm.graphical)	/* RMa add some compilation test */
+					ErrorLine("PalmOS 3.5 Graphic control can be a check box control");
 				goto Control;
-			case rwPUT: 
-		  		ParseItm(&itm, ifText|ifId|ifRc|ifUsable|ifEnabled|ifFont|ifAnchor|ifBigMargin|ifSmallMargin, if2Null); /* SAME! */
+			case rwPUT:		/* popuptrigger */
+		  		ParseItm(&itm, ifText|ifId|ifRc|ifUsable|ifEnabled|ifFont|ifAnchor|ifBigMargin|ifSmallMargin|ifFrame, if2Graphical|if2BitmapID|if2SelectedBitmapID); /* SAME! */
 				goto Control;
-			case rwSLT:
-		  		ParseItm(&itm, ifText|ifId|ifRc|ifUsable|ifEnabled|ifFont|ifAnchor|ifSmallMargin, if2Null);
+			case rwSLT:		/* selectortrigger */
+		  		ParseItm(&itm, ifText|ifId|ifRc|ifUsable|ifEnabled|ifFont|ifAnchor|ifSmallMargin|ifFrame, if2Graphical|if2BitmapID|if2SelectedBitmapID);
 				goto Control;
-			case rwREP: /* repeating control */
-		  		ParseItm(&itm, ifText|ifId|ifRc|ifUsable|ifEnabled|ifFrame|ifFont|ifAnchor|ifBigMargin, if2Null);
+			case rwREP:		/* repeating control */
+		  		ParseItm(&itm, ifText|ifId|ifRc|ifUsable|ifEnabled|ifFrame|ifFont|ifAnchor|ifBigMargin, if2Graphical|if2BitmapID|if2SelectedBitmapID);
 Control:
 				obj.control = calloc(1, sizeof(RCCONTROL));
 				obj.control->style = rwSav-rwBTN;
-				obj.control->text = itm.text;
+				obj.control->u.text = itm.text;
 				obj.control->bounds = itm.rc;
 				obj.control->id = itm.id;
 				obj.control->attr.enabled = itm.enabled;
@@ -1748,9 +1917,30 @@ Control:
 				obj.control->font = itm.font;
 				obj.control->attr.frame = itm.frame;
 				obj.control->attr.on = itm.on;
-				fok = frmControlObj;
+				if (itm.graphical) {		/* Graphic control */
+				    obj.control->attr.graphical = itm.graphical;
+				    obj.control->u.ids.thumbid = itm.bitmapid;
+				    obj.control->u.ids.backgroundid = itm.selectedbitmapid;
+				    fok = frmGraphicalControlObj;
+					if (itm.frame != noButtonFrame)
+						WarningLine("graphic control doesn't need a frame!!!");
+					if (((itm.bitmapid + itm.selectedbitmapid) == 0) ||			/* RMa add some compilation test */
+						((itm.bitmapid == itm.selectedbitmapid) && (itm.bitmapid != 0)) ||
+						((itm.bitmapid + itm.selectedbitmapid) == itm.bitmapid) ||
+						((itm.bitmapid + itm.selectedbitmapid) == itm.selectedbitmapid))				
+					{								/* one of the param is missing or no bitmaps or are the same */		
+						if (itm.bitmapid == 0)
+							WarningLine("graphic control custom selectedbitmapid bitmap is missing");
+						if (itm.selectedbitmapid == 0)
+							WarningLine("graphic control custom bitmapid bitmap is missing");
+						if (itm.bitmapid == itm.selectedbitmapid)
+							WarningLine("graphic control custom selectedbitmapid & bitmapid bitmap are the same");
+						ErrorLine("fatal error see warning");
+					}
+				} else
+					fok = frmControlObj;
 				break;
-			case rwLBL: 
+			case rwLBL:		/* label */
 				ParseItm(&itm, ifText|ifId|ifPt|ifFont|ifUsable, if2Null);
 				obj.label = calloc(1, sizeof(RCFORMLABEL));
 				obj.label->text = itm.text;
@@ -1761,7 +1951,7 @@ Control:
 				fok = frmLabelObj;
 				break;
 						
-			case rwFLD:
+			case rwFLD:		/* field */
 				ParseItm(&itm, ifId|ifRc|ifUsable|ifAlign|ifFont|ifEnabled|
 					ifUnderlined|ifSingleLine|ifEditable|ifDynamicSize|ifMaxChars, if2AutoShift|if2Scrollbar|if2Numeric);
 				obj.field = calloc(1, sizeof(RCFIELD));
@@ -1783,14 +1973,14 @@ Control:
 				fok = frmFieldObj;
 				break;
 			
-			case rwPUL:
+			case rwPUL:		/* popuplist */
 				ParseItm(&itm, ifId|ifListId, if2Null);
 				obj.popup = calloc(1, sizeof(RCFORMPOPUP));
 				obj.popup->controlID = itm.id;
 				obj.popup->listID = itm.listid;
 				fok = frmPopupObj;
 				break;
-			case rwLST: 
+			case rwLST:		/* list */
 				ParseItm(&itm, ifMultText|ifId|ifRc|ifUsable|ifFont|ifEnabled|ifCvis|ifSmallMargin, if2Null);
 
 				obj.list = calloc(1, sizeof(RCLIST));				
@@ -1810,14 +2000,14 @@ Control:
 				fok = frmListObj;
 				break;
 				
-			case rwGSI:
+			case rwGSI:		/* graffitistateindicator */
  				ParseItm(&itm, ifPt, if2Null);
 				obj.grfState = calloc(1, sizeof(RCFORMGRAFFITISTATE));
 				obj.grfState->pos = itm.pt;
 				fok = frmGraffitiStateObj;
 				break;
 
-			case rwGDT:
+			case rwGDT:		/* gadget */
 				ParseItm(&itm, ifId|ifRc|ifUsable, if2Null);
 				obj.gadget = calloc(1, sizeof(RCFORMGADGET));
 				obj.gadget->id = itm.id;
@@ -1826,7 +2016,7 @@ Control:
 				fok = frmGadgetObj;
 				break;				
 
-			case rwFBM: 
+			case rwFBM:		/* formbitmap */
 				ParseItm(&itm, ifPt|ifUsable|ifBitmap, if2Null);
 				obj.bitmap = calloc(1, sizeof(RCFORMBITMAP));
 				/*obj.bitmap->id = itm.id; */
@@ -1835,7 +2025,7 @@ Control:
 				obj.bitmap->rscID = itm.rscID;
 				fok = frmBitmapObj;
 				break;
-			case rwTBL:
+			case rwTBL:		/* table */
 				ParseItm(&itm, ifId|ifRc|ifEditable, if2NumColumns|if2NumRows|if2ColumnWidths);
 				obj.table = calloc(1, sizeof(RCTABLE));
 				obj.table->id = itm.id;
@@ -1848,7 +2038,7 @@ Control:
 					obj.table->rgdxcol[icol] = itm.rgdxcol[icol];
 				fok = frmTableObj;
 				break;
-			case rwSCL:
+			case rwSCL:		/* scrollbar */
 				ParseItm(&itm, ifId|ifRc|ifUsable, if2Value|if2MinValue|if2MaxValue|if2PageSize);
 				obj.scrollbar = calloc(1, sizeof(RCSCROLLBAR));
 				obj.scrollbar->id = itm.id;
@@ -1861,6 +2051,44 @@ Control:
 				obj.scrollbar->maxValue = itm.maxValue;
 				obj.scrollbar->pageSize = itm.pageSize;
 				fok = frmScrollbarObj;
+				break;
+			case rwSLD:	/* Slider or Slider feedback */
+				ParseItm(&itm, ifId|ifRc|ifUsable|ifEnabled, if2Value|if2MinValue|if2MaxValue|if2PageSize|if2ThumbID|if2BackgroundID|if2Vertical|if2Feedback);
+				obj.slider = calloc(1, sizeof(RCSLIDERCONTROL));
+				obj.slider ->id = itm.id;
+				if (itm.feedback)
+					obj.slider ->style = feedbackSliderCtl;		/* 7 */
+				else
+					obj.slider ->style = sliderCtl;					/* 6 */
+				obj.slider ->bounds = itm.rc;
+				obj.slider ->attr.usable = itm.usable;
+				obj.slider ->attr.enabled = itm.enabled;
+				obj.slider ->attr.graphical = 1;
+				obj.slider ->attr.vertical = itm.vertical;
+				obj.slider ->value = itm.value;
+				obj.slider ->minValue = itm.minValue;
+				obj.slider ->maxValue = itm.maxValue;
+				obj.slider ->pageSize = itm.pageSize;
+				obj.slider ->thumbid = itm.thumbid;
+				obj.slider ->backgroundid = itm.backgroundid;
+				fok = frmSliderObj;
+				if ((itm.thumbid != 0) || (itm.backgroundid != 0))	/* RMa add some compilation test */
+				{								/* one of the param is present and not the second */						
+					if (itm.thumbid != 0)
+						WarningLine("Slider control custom backgroundid bitmap is missing");
+					else
+						WarningLine("Slider control custom thumbid bitmap is missing");
+					if (itm.thumbid == itm.backgroundid)
+						WarningLine("graphic control custom thumbid & backgroundid bitmap are the same");
+					ErrorLine("fatal error see warning");
+				}
+				else
+				{
+					if (itm.rc.extent.x != 114)
+						WarningLine("Slider width not the recommended 114");
+					if (itm.rc.extent.y != 15)
+						WarningLine("Slider height not the recommended 15");
+				}
 				break;
 			default:
 				 ErrorLine2("Unknown token:", tok.lex.szId);
@@ -1893,14 +2121,15 @@ BOOL FParseForm(RCPFILE *prcpf)
 //	memset(rglt, 0, cobjMax*sizeof(RCFORMOBJLIST));
 
 	vpfrm->form.window.windowFlags.focusable = 1;
-	ParseItm(&itm, ifId|ifRc|ifUsable|ifFrame|ifModal|ifSaveBehind|ifHelpId|ifDefaultBtnId|ifMenuId, if2Null);
+	ParseItm(&itm, ifId|ifRc|ifEnabled|ifUsable|ifFrame|ifModal|ifSaveBehind|ifHelpId|ifDefaultBtnId|ifMenuId, if2Null);
 	vpfrm->form.formId = itm.id;
 	vpfrm->form.window.windowBounds = itm.rc;
 	vpfrm->form.window.frameType.width = itm.frame;
+	vpfrm->form.window.windowFlags.dialog = fTrue;				// RMa on my understanding is it better here 
 	if (itm.modal)
 		{
 		vpfrm->form.window.windowFlags.modal = fTrue;
-		vpfrm->form.window.windowFlags.dialog = fTrue;
+//		vpfrm->form.window.windowFlags.dialog = fTrue;			// RMa it seems it beter up 
 		/* vpfrm->form.window.frameType.word = dialogFrame;		 Need to parse this!!! */
 		vpfrm->form.window.frameType.cornerDiam = 3;
 		vpfrm->form.window.frameType.width = 2;
@@ -1961,7 +2190,7 @@ VOID DumpMenu()
 	int ibCommands;
 	int ibStrings;
 	
-	OpenOutput("MBAR", idMenu);
+	OpenOutput(kPalmResType[kMenuRscType], idMenu);		/* RMa "MBAR" */
 	cmpd = menu.numMenus;
 	CbEmitStruct(&menu, szRCMENUBAR, NULL, fTrue);
 	imi = 0;
@@ -1982,6 +2211,7 @@ VOID DumpMenu()
 		ibCommands += CbStruct(szRCMENUITEM)*rgmpd[impd].numItems;
 		ibStrings += strlen(rgmpd[impd].title)+1;
 		/* word align? */
+		PadWordBoundary();
 		for (imiT = 0; imiT < rgmpd[impd].numItems; imiT++)
 			{
 			ibStrings += strlen(rgmi[imi].itemStr)+1;
@@ -2325,7 +2555,7 @@ WriteAlert:
  	if (at.numButtons > 0 && at.defaultButton >= at.numButtons)
  		ErrorLine("Invalid default button number");
 
-	OpenOutput("Talt", idAlert);
+	OpenOutput(kPalmResType[kAlertRscType], idAlert);		/* RMa "Talt" */
 	CbEmitStruct(&at, szRCALERTTEMPLATE, NULL, fTrue);
 	DumpBytes(pchTitle, strlen(pchTitle)+1);
 	DumpBytes(pchMessage, strlen(pchMessage)+1);
@@ -2355,7 +2585,7 @@ void ParseDumpVersion()
 	}
 
 	pchVersion = PchGetSz("Version Text");
-	OpenOutput("tver", id);
+	OpenOutput(kPalmResType[kVerRscType], id);		/* RMa "tver" */
 	DumpBytes(pchVersion, strlen(pchVersion)+1);
 	CloseOutput();
 	free(pchVersion);
@@ -2363,6 +2593,11 @@ void ParseDumpVersion()
 
 /*-----------------------------------------------------------------------------
 |	ParseDumpStringTable
+|
+| RMa	30-Nov-00	bug correction
+|							for make difference between tSTR and tSTL string
+|							when we compare the Id.
+|
 -------------------------------------------------------------KAS-------------*/
 void ParseDumpStringTable()
 	{
@@ -2377,12 +2612,12 @@ void ParseDumpStringTable()
 	if (vfCheckDupes)
 		{
 		int iid;
-		for (iid = 0; iid < iidStringMac; iid++)
-			if (rgidString[iid] == id)
+		for (iid = 0; iid < iidStringTableMac; iid++)	// RMa add for make difference between tSTR and tSTL string
+			if (rgidStringTable[iid] == id)					// RMa add for make difference between tSTR and tSTL string
 				ErrorLine("Duplicate StringTable Resource ID");
 		}
-	if (iidStringMac < iidStringMax)
-		rgidString[iidStringMac++] = id;
+	if (iidStringTableMac < iidStringTableMax)			// RMa add for make difference between tSTR and tSTL string
+		rgidStringTable[iidStringTableMac++] = id;		// RMa add for make difference between tSTR and tSTL string
 
 	GetExpectLt(&tok, ltStr, "String Text");
 	prefixString = strdup(tok.lex.szId);
@@ -2411,9 +2646,15 @@ void ParseDumpStringTable()
 		if (numStrings >= 384)
 			ErrorLine("Number of strings in table must be less than 384");
 		}
-	OpenOutput("tSTL", id);
+	OpenOutput(kPalmResType[kStrListRscType], id);	/* RMa "tSTL" */
 	DumpBytes(prefixString, strlen(prefixString)+1);
+#ifdef ARM		// RMa add  little hack for generate 68k format stringTable on ARM
+		EmitB( (char )(((unsigned short)numStrings & 0xff00) >> 8));
+		EmitB( (char)((unsigned short)numStrings & 0x00ff) );
+#else
 	EmitW((unsigned short)numStrings);
+#endif
+
 	DumpBytes(buf, tot);
 	CloseOutput();
 
@@ -2458,7 +2699,10 @@ void ParseDumpString()
 		
 		pchString = malloc(16384);
 		GetExpectLt(&tok, ltStr, "String filename");
-		fh = fopen(tok.lex.szId, "rt");
+// 2.7 modifications/additions
+//		fh = fopen(tok.lex.szId, "rt");
+		FindAndOpenFile(tok.lex.szId,"rt", &fh);
+// end
 		if (fh == NULL)
 			ErrorLine2("Unable to open String file ", tok.lex.szId);
 		cch = fread(pchString, 1, 16384, fh);				
@@ -2472,11 +2716,12 @@ void ParseDumpString()
 		UngetTok();
 		pchString = PchGetSzMultiLine("String Text");
 		}
-	OpenOutput("tSTR", id);
+	OpenOutput(kPalmResType[kStrRscType], id);	/* RMa "tSTR" */
 	DumpBytes(pchString, strlen(pchString)+1);
 	CloseOutput();
 	free(pchString);
 	}
+
 /*-----------------------------------------------------------------------------
 |       ParseDumpCategories
 -------------------------------------------------------------JOHNL-----------*/
@@ -2502,18 +2747,33 @@ void ParseDumpCategories()
 	if (iidAISMac < iidAISMax)
 		rgidString[iidAISMac++] = id;
 
-	OpenOutput("tAIS", id);
+	OpenOutput(kPalmResType[kAppInfoStringsRscType], id);	/* RMa "tAIS" */
 
 	count = 0;
 	GetExpectLt(&tok, ltStr, "String Text");
 	do
 		{
-		/* Only read up to maxCategories strings */
+			string = tok.lex.szId;
+			len = strlen(tok.lex.szId);
+			/* Check the size of the string and only write 15 character max */
+			if (len >= categoryLength)
+				len = categoryLength - 1;
+			DumpBytes(string, len);
+			EmitB(0);
+			if (count == maxCategories)
+				WarningLine("More than 16 strings in a Categories. Check it to be sure");
+			count++;
+
+/* RMa  remove  maxCategories limitation.
+			For Categories the max is maxCategories (16 strings)
+			But we can use this type of resource to store other string list (I see that)
+
+		// Only read up to maxCategories strings
 		if (count < maxCategories) 
 			{
 			string = tok.lex.szId;
 			len = strlen(tok.lex.szId);
-			/* Check the size of the string and only write 15 character max */
+			// Check the size of the string and only write 15 character max
 			if (len >= categoryLength)
 				len = categoryLength - 1;
 			DumpBytes(string, len);
@@ -2525,7 +2785,7 @@ void ParseDumpCategories()
 				WarningLine("Too many strings in Categories. Extra strings will be ignored");
 			}
 		count++;
-
+*/
 		if (!FGetTok(&tok))
 			break;
 		} 
@@ -2549,21 +2809,38 @@ void ParseDumpCategories()
 -------------------------------------------------------------DAVE------------*/
 void ParseDumpBitmapFile(int bitmapType)
 	{
+#define MAXDEPTH 7
+	char *pchFileName[MAXDEPTH] = { NULL };
 	int compress;
 	BOOL colortable;
-	int id;
-	char *pchFileName[4];
+	int id, i;
+	char *pchResType;
 	int  transparencyData[4];
+
+        pchResType = NULL;
+	if (FGetTok(&tok)) {
+		UngetTok();
+		if (tok.lex.lt == ltStr) 
+			pchResType = PchGetSz("Resource Type");
+	}
 
 	id = WGetId("Bitmap ResourceId", fFalse);
 	pchFileName[0] = PchGetSz("Bitmap Filename");
 
-	// family? need to get 1bpp, 2bpp, 4bpp and 8bpp!
+	// family? need to get em all :)
         if ((bitmapType == rwBitmapFamily) ||
             (bitmapType == rwBitmapFamily_special)) {
-	  pchFileName[1] = PchGetSz("Bitmap Filename");
-	  pchFileName[2] = PchGetSz("Bitmap Filename");
-	  pchFileName[3] = PchGetSz("Bitmap Filename");
+
+          // lets scan for those bitmap resources.. [if they exist] :)
+          for (i=1; i<MAXDEPTH; i++) {
+
+            pchFileName[i] = NULL;
+	    if (FGetTok(&tok)) {
+		UngetTok();
+		if (tok.lex.lt == ltStr) 
+			pchFileName[i] = PchGetSz("Bitmap Filename");
+            }
+          }
         }
 
 	compress            = rwNoCompress;
@@ -2571,12 +2848,15 @@ void ParseDumpBitmapFile(int bitmapType)
 	transparencyData[0] = 0;
 	while (FGetTok(&tok)) 
 		{
-		if (tok.rw == rwNoCompress || tok.rw == rwAutoCompress || tok.rw == rwForceCompress) 
+		if ((tok.rw == rwNoCompress)   || 
+                    (tok.rw == rwAutoCompress) || 
+                    (tok.rw == rwForceCompress)) 
 			{
 			compress = tok.rw;
 			}
 		else 
-		if (tok.rw == rwNoColorTable || tok.rw == rwColorTable) 
+		if ((tok.rw == rwNoColorTable) || 
+                    (tok.rw == rwColorTable)) 
 			{
 			colortable = (tok.rw == rwColorTable);
 			}
@@ -2601,16 +2881,27 @@ void ParseDumpBitmapFile(int bitmapType)
 			}
 		}
 
-	OpenOutput("Tbmp", id);
+	OpenOutput((pchResType == NULL) 
+	           ? kPalmResType[kBitmapRscType] : pchResType, id);
         if (bitmapType == rwBitmapFamily) {
 
-          int i, flag = 0x00;
-	  int bitmapTypes[] = { rwBitmap, rwBitmapGrey, rwBitmapGrey16, rwBitmapColor256 };
+          int i, flag;
+	  int bitmapTypes[] = { 
+                                rwBitmap, 
+                                rwBitmapGrey, 
+                                rwBitmapGrey16, 
+                                rwBitmapColor256, 
+                                rwBitmapColor16k,
+                                rwBitmapColor24k, 
+                                rwBitmapColor32k 
+                              };
         
-          if (strcmp(pchFileName[0], "") != 0) flag |= 0x01;
-          if (strcmp(pchFileName[1], "") != 0) flag |= 0x02;
-          if (strcmp(pchFileName[2], "") != 0) flag |= 0x04;
-          if (strcmp(pchFileName[3], "") != 0) flag |= 0x08;
+          // which bitmaps do we have? :)
+          flag = 0x00;
+          for (i=0; i<MAXDEPTH; i++) {
+            if ((pchFileName[i] != NULL) && strcmp(pchFileName[i], "") != 0)
+              flag |= (0x01 << i);
+          }
 
           // only process the bitmaps that have been supplied!
           i=0;
@@ -2618,7 +2909,8 @@ void ParseDumpBitmapFile(int bitmapType)
 
             if ((flag & 0x01) == 0x01)
               DumpBitmap(pchFileName[i], 0, compress, 
-                         bitmapTypes[i], colortable, transparencyData, ((flag & 0xfe) != 0x00));
+                         bitmapTypes[i], colortable, transparencyData, 
+                         ((flag & 0xfe) != 0x00));
             flag = flag >> 1;
             i++;
           }
@@ -2626,13 +2918,23 @@ void ParseDumpBitmapFile(int bitmapType)
 	else
         if (bitmapType == rwBitmapFamily_special) {
 
-          int i, flag = 0x00;
-	  int bitmapTypes[] = { rwBitmap, rwBitmapGrey, rwBitmapColor16, rwBitmapColor256 };
+          int i, flag;
+	  int bitmapTypes[] = { 
+                                rwBitmap, 
+                                rwBitmapGrey, 
+                                rwBitmapColor16, 
+                                rwBitmapColor256,
+                                rwBitmapColor16k,
+                                rwBitmapColor24k, 
+                                rwBitmapColor32k 
+                              };
         
-          if (strcmp(pchFileName[0], "") != 0) flag |= 0x01;
-          if (strcmp(pchFileName[1], "") != 0) flag |= 0x02;
-          if (strcmp(pchFileName[2], "") != 0) flag |= 0x04;
-          if (strcmp(pchFileName[3], "") != 0) flag |= 0x08;
+          // which bitmaps do we have? :)
+          flag = 0x00;
+          for (i=0; i<MAXDEPTH; i++) {
+            if ((pchFileName[i] != NULL) && strcmp(pchFileName[i], "") != 0)
+              flag |= (0x01 << i);
+          }
 
           // only process the bitmaps that have been supplied!
           i=0;
@@ -2640,23 +2942,23 @@ void ParseDumpBitmapFile(int bitmapType)
 
             if ((flag & 0x01) == 0x01)
               DumpBitmap(pchFileName[i], 0, compress, 
-                         bitmapTypes[i], colortable, transparencyData, ((flag & 0xfe) != 0x00));
+                         bitmapTypes[i], colortable, transparencyData, 
+                         ((flag & 0xfe) != 0x00));
             flag = flag >> 1;
             i++;
           }
         }
         else {
-	  DumpBitmap(pchFileName[0], fFalse, compress, bitmapType, colortable, transparencyData, fFalse);
+	  DumpBitmap(pchFileName[0], 0, compress, bitmapType, 
+                     colortable, transparencyData, fFalse);
         }
 	CloseOutput();
 
-	free(pchFileName[0]);
-        if ((bitmapType == rwBitmapFamily) ||
-            (bitmapType == rwBitmapFamily_special)) {
-	  free(pchFileName[1]);
-	  free(pchFileName[2]);
-	  free(pchFileName[3]);
-	}
+        // clean up
+        for (i=0; i<MAXDEPTH; i++) 
+	  if (pchFileName[i] != NULL) free(pchFileName[i]);
+
+#undef MAXDEPTH
 	}
 
 /*-----------------------------------------------------------------------------
@@ -2664,24 +2966,47 @@ void ParseDumpBitmapFile(int bitmapType)
 -------------------------------------------------------------DAVE------------*/
 void ParseDumpIcon(BOOL fSmall, int bitmapType)
 	{
-	char *pchFileName[4];
+#define MAXDEPTH 7
+	char *pchFileName[MAXDEPTH] = { NULL };
 	int  transparencyData[4];
+	int  id, i;
+	BOOL nonStandard;
 	BOOL colortable;
+
+	// default icon ID is 1000/1001
+	id = (fSmall ? 1001 : 1000);
+	nonStandard = fFalse;
+	if (FGetTok(&tok)) {
+		UngetTok();
+		if (tok.rw == rwId) {
+			id = WGetId("Icon ResourceId", fFalse);
+			nonStandard = fTrue;
+		}
+	}
 
 	pchFileName[0] = PchGetSz("Icon Filename");
 
 	// family? need to get 1bpp, 2bpp, 4bpp and 8bpp!
         if (bitmapType == rwBitmapFamily) {
-	  pchFileName[1] = PchGetSz("Icon Filename");
-	  pchFileName[2] = PchGetSz("Icon Filename");
-	  pchFileName[3] = PchGetSz("Icon Filename");
+
+          // lets scan for those bitmap resources.. [if they exist] :)
+          for (i=1; i<MAXDEPTH; i++) {
+
+            pchFileName[i] = NULL;
+	    if (FGetTok(&tok)) {
+		UngetTok();
+		if (tok.lex.lt == ltStr) 
+			pchFileName[i] = PchGetSz("Bitmap Filename");
+            }
+          }
         }
 
-        transparencyData[0] = 0;
+	transparencyData[0] = 0;
 	colortable          = fFalse;
 	while (FGetTok(&tok)) 
 		{
-		if (tok.rw == rwNoColorTable || tok.rw == rwColorTable) 
+		if ((tok.rw == rwNoColorTable) || 
+                    (tok.rw == rwColorTable)) 
 			{
 			colortable = (tok.rw == rwColorTable);
 			}
@@ -2705,40 +3030,79 @@ void ParseDumpIcon(BOOL fSmall, int bitmapType)
 			break;
 			}
 		}
-
-	OpenOutput("tAIB", fSmall ? 1001 : 1000);
+	OpenOutput(kPalmResType[kIconType], id); /* RMa "tAIB" */
 	if (bitmapType == rwBitmapFamily) {
 
-          int i, flag = 0x00;
-	  int bitmapTypes[] = { rwBitmap, rwBitmapGrey, rwBitmapGrey16, rwBitmapColor256 };
+          int i, flag;
+	  int bitmapTypes[] = { 
+                                rwBitmap, 
+                                rwBitmapGrey, 
+                                rwBitmapGrey16, 
+                                rwBitmapColor256,
+                                rwBitmapColor16k,
+                                rwBitmapColor24k, 
+                                rwBitmapColor32k 
+                              };
+        
+          // which bitmaps do we have? :)
+          flag = 0x00;
+          for (i=0; i<MAXDEPTH; i++) {
+            if ((pchFileName[i] != NULL) && strcmp(pchFileName[i], "") != 0)
+              flag |= (0x01 << i);
 
-          if (strcmp(pchFileName[0], "") != 0) flag |= 0x01;
-          else ErrorLine("ICONFAMILY/SMALLICONFAMILY must have a 1bpp bitmap");
-          if (strcmp(pchFileName[1], "") != 0) flag |= 0x02;
-          if (strcmp(pchFileName[2], "") != 0) flag |= 0x04;
-          if (strcmp(pchFileName[3], "") != 0) flag |= 0x08;
+            // SPECIAL CASE - must have 1bpp icon!!
+            else if (i == 0) 
+              ErrorLine("ICONFAMILY/SMALLICONFAMILY must have a 1bpp bitmap");
+          }
 
           // only process the bitmaps that have been supplied!
           i=0;
           while (flag != 0x00) {
 
             if ((flag & 0x01) == 0x01)
-              DumpBitmap(pchFileName[i], fSmall ? 2 : 1, rwNoCompress, 
-                         bitmapTypes[i], colortable, transparencyData, ((flag & 0xfe) != 0x00));
+              DumpBitmap(pchFileName[i], id, rwNoCompress, 
+                         bitmapTypes[i], colortable, transparencyData, 
+                         ((flag & 0xfe) != 0x00));
             flag = flag >> 1;
             i++;
           }
-
-	  free(pchFileName[0]);
-	  free(pchFileName[1]);
-	  free(pchFileName[2]);
-	  free(pchFileName[3]);
 	}
 	else {
- 	  DumpBitmap(pchFileName[0], fSmall ? 2 : 1, rwNoCompress, bitmapType, fFalse, transparencyData, fFalse);
-	  free(pchFileName[0]);
+ 	  DumpBitmap(pchFileName[0], id, rwNoCompress, bitmapType, 
+                     fFalse, transparencyData, fFalse);
 	}
 	CloseOutput();
+
+        // clean up
+        for (i=0; i<MAXDEPTH; i++) 
+	  if (pchFileName[i] != NULL) free(pchFileName[i]);
+
+#undef MAXDEPTH
+	}
+
+
+/*-----------------------------------------------------------------------------
+|	ParseDumpLauncherCategory
+-------------------------------------------------------------RMa------------*/
+void ParseDumpLauncherCategory()
+	{
+	int id;
+	char *pchString;
+
+	// default version ID is 1000 (it dont work otherwise) :P
+	id = 1000;
+	if (FGetTok(&tok)) {
+		UngetTok();
+		if (tok.rw == rwId) 
+			id = WGetId("Launcher Category ResourceId", fFalse);
+	}
+
+	pchString = PchGetSz("taic");
+	OpenOutput(kPalmResType[kDefaultCategoryRscType], id);	/* RMa "taic" */
+	DumpBytes(pchString, strlen(pchString)+1);
+	PadWordBoundary();
+	CloseOutput();
+	free(pchString);
 	}
 
 
@@ -2752,8 +3116,9 @@ void ParseDumpApplicationIconName()
 
 	id = WGetId("Application IconName ResourceId", fFalse);
 	pchString = PchGetSz("Icon Name Text");
-	OpenOutput("tAIN", id);
+	OpenOutput(kPalmResType[kAinRscType], id);	/* RMa "tAIN" */
 	DumpBytes(pchString, strlen(pchString)+1);
+	PadWordBoundary();									/* RMa add  BUG correction */
 	CloseOutput();
 	free(pchString);
 	}
@@ -2771,7 +3136,7 @@ void ParseDumpApplication()
 	pchString = PchGetSz("APPL");
 	if (strlen(pchString) != 4)
 		ErrorLine("APPL resource must be 4 chars");
-	OpenOutput("APPL", id);
+	OpenOutput(kPalmResType[kApplicationType], id);		/* RMa "APPL" */
 	DumpBytes(pchString, 4);
 	CloseOutput();
 	free(pchString);
@@ -2789,7 +3154,7 @@ void ParseDumpTrap()
 	wTrap = WGetConst("Trap number");
 	if (id < 1000)
 		ErrorLine("TRAP resource id must be >= 1000, see HackMaster documentation");
-	OpenOutput("TRAP", id);
+	OpenOutput(kPalmResType[kTrapType], id);		/* RMa "TRAP" */
 	EmitW((unsigned short)wTrap);
 	CloseOutput();
 	}
@@ -2810,15 +3175,13 @@ void ParseDumpFont()
 	if (fontid < 128 || fontid > 255)
 		ErrorLine("FontID invalid.  valid values: 128<=FontID<=255");
 	pchFileName = PchGetSz("Font Filename");
-	
-	OpenOutput("NFNT", id);
+	OpenOutput(kPalmResType[kFontRscType], id);		/* RMa "NFNT" */
 	DumpFont(pchFileName, fontid);
 	CloseOutput();
 	
 	free(pchFileName);
 	}
 
-// 2.5b7 additions:
 /*-----------------------------------------------------------------------------
 |     ParseDumpHex
 --------------------------------------------------------------AA-------------*/
@@ -2839,7 +3202,7 @@ void ParseDumpHex()
 		if (tok.lex.lt == ltConst)
 		{
 			if (tok.lex.val > 0xff)
-				ErrorLine("HEX data must be BYTE or less");
+				ErrorLine("HEX data must be BYTE (0..255)");
 
 			EmitB((unsigned char)tok.lex.val);
 		}
@@ -2901,6 +3264,22 @@ void ParseDumpData()
 
 	free(pchResType);
 	free(pchFileName);
+}
+
+// 2.7 modifications/additions
+/*-----------------------------------------------------------------------------
+|	ParseDumpInteger
+-------------------------------------------------------------BLC-------------*/
+void ParseDumpInteger()
+{
+	int id;
+	long nInteger;
+
+	id = WGetId("Integer ResourceId", fFalse);
+	nInteger = WGetConstEx("Integer Value");
+	OpenOutput("tint", id);
+	EmitL(nInteger);
+	CloseOutput();
 }
 // end
 
@@ -2976,6 +3355,7 @@ void ParseCInclude( char *szIncludeFile )
         /* needed at this scope to not interfer with the globals */
         int ifdefSkipping = 0;
         int ifdefLevel    = 0;
+	char	*hackP;
 
 	/* tok contains filename */
 
@@ -2994,140 +3374,147 @@ void ParseCInclude( char *szIncludeFile )
 			if (!FGetTok(&tok))
 				ErrorLine("preprocessor directive expected");
 			switch (tok.rw)
-                        {
-                        case rwDefine:
-                            {
-                                if (ifdefSkipping)
-                                {
-                		    NextLine();
-                
-                                }
-                                else
-                                {
-			            GetExpectLt(&tok, ltId, "identifier");
-			            strcpy(szId, tok.lex.szId);
- 		                    wIdVal = WGetConstEx("Constant");
-		                    AddSym(szId, wIdVal);
-                                }
-                                break;
-                            }
-                            
-// 2.5b8 additions
-                        case rwIfdef:
-                            {
-                                ifdefLevel++;
- 
-                                if( ifdefSkipping)
-                                {
- 
-                                    ifdefSkipping++;
-                                }
-                                else
-                                {
-                                    SYM *psym;
- 
-                                    GetExpectLt(&tok, ltId, "identifier");
-                                    strcpy(szId, tok.lex.szId);
- 
-                                    psym = PsymLookup(szId);
-                                    if (psym == NULL)
-                                    {
-                                        ifdefSkipping = 1;
-                                    }
-                                }
-                                break;
-                            }
- 
-                        case rwIfndef:
-                            {
-                                ifdefLevel++;
- 
-                                if( ifdefSkipping)
-                                {
- 
-                                    ifdefSkipping++;
-                                }
-                                else
-                                {
-                                    SYM *psym;
- 
-	                            GetExpectLt(&tok, ltId, "identifier");
-	                            strcpy(szId, tok.lex.szId);
- 
-                                    psym = PsymLookup(szId);
-                                    if (psym != NULL) 
-                                    {
-                                        ifdefSkipping = 1;
-                                    }
-                                }
-                                break;
-                            }
-                            
-                        case rwElse:
-                            {
-                                /* Verify Else is valid */
-                                if (ifdefLevel)
-                                {
-                                    /* only do something if ifdefSkipping == 0 or 1 */
-                                    if (ifdefSkipping == 1)
-                                    {
-                                         ifdefSkipping = 0;
-                                    }
-                                    else
-                                    {
-                                        if (ifdefSkipping == 0)
-                                        {
-                                             ifdefSkipping = 1;
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                  ErrorLine2("no matching #ifdef for :", tok.lex.szId);
-                                }
-                                break;
-                            }
- 
-                        case rwEndif:
-                            {
-                                if (ifdefLevel)
-                                {
-                                    --ifdefLevel;
-                                    if (ifdefSkipping)
-                                    {
-                                        --ifdefSkipping;
-                                    }
-                                }
-                                else
-                                {
-                                  ErrorLine2("no matching #ifdef for :", tok.lex.szId);
-                                }
- 
-                                break;
-                            }
-// end
+			{
+         case rwDefine:
+				{
+				if (ifdefSkipping)
+				{
+					NextLine();
+				}
+            else
+            {
+					GetExpectLt(&tok, ltId, "identifier");
+					strcpy(szId, tok.lex.szId);
+
+					/* RMa hack to determine if we have or not a value for this define */
+					/*  that determine if it a define for multi include protection or not */
+					hackP = strstr(szLine, tok.lex.szId);
+					hackP += strlen(tok.lex.szId);
+					while ((*hackP == ' ') || (*hackP == '\t'))
+						hackP ++;
+					if (*hackP != 0x0a)
+					{
+						wIdVal = WGetConstEx("Constant");
+						AddSym(szId, wIdVal);
+					}
+					else
+					{
+						WarningLine("Found a define without numeric value. Check it");
+						NextLine();
+					}
+            }
+            break;
+            }
+             
+			case rwIfdef:
+				 {
+					  ifdefLevel++;
+
+					  if( ifdefSkipping)
+					  {
+							ifdefSkipping++;
+					  }
+					  else
+					  {
+							SYM *psym;
+
+							GetExpectLt(&tok, ltId, "identifier");
+							strcpy(szId, tok.lex.szId);
+
+							psym = PsymLookup(szId);
+							if (psym == NULL)
+							{
+								 ifdefSkipping = 1;
+							}
+					  }
+					  break;
+				 }
+
+			case rwIfndef:
+				 {
+					  ifdefLevel++;
+					  if( ifdefSkipping)
+					  {
+
+							ifdefSkipping++;
+					  }
+					  else
+					  {
+							SYM *psym;
+					 GetExpectLt(&tok, ltId, "identifier");
+					 strcpy(szId, tok.lex.szId);
+
+							psym = PsymLookup(szId);
+							if (psym != NULL) 
+							{
+								 ifdefSkipping = 1;
+							}
+					  }
+					  break;
+				 }
+       
+			case rwElse:
+				 {
+					  /* Verify Else is valid */
+					  if (ifdefLevel)
+					  {
+							/* only do something if ifdefSkipping == 0 or 1 */
+							if (ifdefSkipping == 1)
+							{
+								  ifdefSkipping = 0;
+							}
+							else
+							{
+								 if (ifdefSkipping == 0)
+								 {
+										ifdefSkipping = 1;
+								 }
+							}
+					  }
+					  else
+					  {
+						 ErrorLine2("no matching #ifdef for :", tok.lex.szId);
+					  }
+					  break;
+				 }
+
+			case rwEndif:
+				 {
+					  if (ifdefLevel)
+					  {
+							--ifdefLevel;
+							if (ifdefSkipping)
+							{
+								 --ifdefSkipping;
+							}
+					  }
+					  else
+					  {
+						 ErrorLine2("no matching #ifdef for :", tok.lex.szId);
+					  }
+					  break;
+				 }
         
-                        default:
+			default:
 				{
 				NextLine();
 				break;
 				}
-                        }
-                        break;
-                    }
+         }
+         break;
+      }
 		case ltId:
-                        if (ifdefSkipping)
-                        {
-                	    NextLine();
-                
-                        }
-                        else
-                        {
+         if (ifdefSkipping)
+         {
+				NextLine();
+         }
+         else
+         {
 			    strcpy(szId, tok.lex.szId);
 			    GetExpectRw(rwEqu);
 			    wIdVal = WGetConstEx("Constant");
 			    AddSym(szId, wIdVal);
-                        }
+			}
 			break;
 		case ltSemi:
 		case ltDoubleSlash:
@@ -3296,7 +3683,6 @@ void ParseDirectives()
                 break;
             }
         
-// 2.5b8 additions
         case rwIfdef:
             {
                 ifdefLevel++;
@@ -3389,7 +3775,6 @@ void ParseDirectives()
             
                 break;
             }
-// end
 
 	/* Add new directives here	*/
 
@@ -3416,7 +3801,6 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 	prcpfile = calloc(1, sizeof(RCPFILE));
 	InitRcpfile(prcpfile, fontType);
 	
-	
 	SetOutFileDir(szOutDir);
 	OpenInputFile(szIn);
 	OpenResFile(szResFile);
@@ -3425,18 +3809,19 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 	if (!FGetTok(&tok))
 		Error("bogus source file");
 	do
+	{
+		if (ifdefSkipping)
 		{
-                if (ifdefSkipping)
-                {
-		     if (tok.lex.lt == ltPound)
-		     {
-		          ParseDirectives();
-		     }
-		     else {
-			  NextLine();
-                     }
-                     continue;
-                }
+			if (tok.lex.lt == ltPound)
+			{
+				ParseDirectives();
+			}
+			else
+			{
+				NextLine();
+			}
+         continue;
+		}
 		switch(tok.rw)
 			{
 		case rwForm:
@@ -3470,6 +3855,9 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 		case rwApplication:
 			ParseDumpApplication();
 			break;
+		case rwLauncherCategory:		// RMa add: support for this resource
+			ParseDumpLauncherCategory();
+			break;
 		case rwTranslation:
 			ParseTranslation();
 			break;
@@ -3478,11 +3866,20 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 		case rwBitmapGrey16:
 		case rwBitmapColor16:
 		case rwBitmapColor256:
+// 2.7 modifications/additions
 		case rwBitmapColor16k:
+		case rwBitmapColor24k:
+		case rwBitmapColor32k:
+// end
 		case rwBitmapFamily:
 		case rwBitmapFamily_special:
 			ParseDumpBitmapFile(tok.rw);
 			break;
+// 2.7 modifications/additions
+		case rwInteger:
+			ParseDumpInteger();
+			break;
+// end
 		case rwIcon:
 			ParseDumpIcon(fFalse, rwBitmap);
 			break;
@@ -3501,14 +3898,12 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 		case rwFont:
 			ParseDumpFont();
 			break;
-// 2.5b7 additions:
 		case rwHex:
 			ParseDumpHex();
 			break;
 		case rwData:
 			ParseDumpData();
 			break;
-// end
 
 		/* Add a rw here, remember to add to error message below */
 		default:
@@ -3519,7 +3914,11 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 			else if (tok.lex.lt == ltDoubleSlash)
 				NextLine();
 			else
-				ErrorLine("FORM, MENU, ALERT, VERSION, STRINGTABLE, STRING, CATEGORIES, APPLICATIONICONNAME, APPLICATION, BITMAP, BITMAPGREY, BITMAPGREY16, BITMAPCOLOR, BITMAPFAMILY, ICON, ICONFAMILY, SMALLICON, SMALLICONFAMILY, TRAP, FONT, HEX, DATA or TRANSLATION expected");
+				{	/* RMa add error string more explicit */
+					char errorString[128];
+					sprintf(errorString, "Unknown token : '%s'\n", tok.lex.szId);
+					ErrorLine2(errorString, "FORM, MENU, ALERT, VERSION, STRINGTABLE, STRING, CATEGORIES, APPLICATIONICONNAME, APPLICATION, BITMAP, BITMAPGREY, BITMAPGREY16, BITMAPCOLOR16, BITMAPCOLOR256, BITMAPCOLOR16K, BITMAPCOLOR24K, BITMAPCOLOR32K, BITMAPFAMILY, ICON, ICONFAMILY, SMALLICON, SMALLICONFAMILY, TRAP, FONT, HEX, DATA or TRANSLATION expected");
+				}
 			}
 		}
 	while (FGetTok(&tok));

@@ -2,7 +2,7 @@
  * @(#)bitmap.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *                2000, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -44,29 +44,6 @@ typedef unsigned char  PILRC_BYTE;    /* b  */
 typedef unsigned short PILRC_USHORT;  /* us */
 typedef unsigned int   PILRC_ULONG;   /* ul */
 typedef int            bool;	      /* f  */
-
-//
-// local function prototypes
-//
-
-static PILRC_ULONG  LLoadX86(PILRC_ULONG w);
-static PILRC_USHORT WLoadX86(PILRC_USHORT w);
-
-static int  BMP_RGBToColorIndex(int, int, int, int[][3], int);
-static int  BMP_GetBits1bpp(int, PILRC_BYTE *, int, int, int);
-static void BMP_SetBits1bpp(int, PILRC_BYTE *, int, int, int);
-static void BMP_SetBits2bpp(int, PILRC_BYTE *, int, int, int, int);
-static int  BMP_GetBits4bpp(int, PILRC_BYTE *, int, int, int);
-static void BMP_SetBits4bpp(int, PILRC_BYTE *, int, int, int, int);
-static int  BMP_GetBits8bpp(int, PILRC_BYTE *, int, int, int);
-static void BMP_SetBits8bpp(int, PILRC_BYTE *, int, int, int, int);
-static void BMP_ConvertWindowsBitmap(RCBITMAP *, PILRC_BYTE *, int, BOOL, int*);
-static void BMP_ConvertTextBitmap(RCBITMAP *, PILRC_BYTE *, int);
-static void BMP_ConvertX11Bitmap(RCBITMAP *, PILRC_BYTE *, int);
-static void BMP_ConvertPNMBitmap(RCBITMAP *, PILRC_BYTE *, int, int, BOOL);
-static void BMP_CompressBitmap(RCBITMAP *, int, BOOL);
-static void BMP_CompressDumpBitmap(RCBITMAP *, int, int, BOOL, BOOL);
-static void BMP_InvalidExtension(char *);
 
 //
 // data structures
@@ -234,6 +211,35 @@ int PalmPalette8bpp[256][3] =
 #define COLOR_TABLE_SIZE 1026
 
 //
+// local function prototypes
+//
+
+static PILRC_ULONG  LLoadX86(PILRC_ULONG w);
+static PILRC_USHORT WLoadX86(PILRC_USHORT w);
+
+static int  BMP_RGBToColorIndex(int, int, int, int[][3], int);
+static int  BMP_GetBits1bpp(BITMAPINFO *, int, PILRC_BYTE *, int, int, int, int *, int *, int *, int *);
+static void BMP_SetBits1bpp(int, PILRC_BYTE *, int, int, int);
+static void BMP_SetBits2bpp(int, PILRC_BYTE *, int, int, int, int);
+static int  BMP_GetBits4bpp(BITMAPINFO *, int, PILRC_BYTE *, int, int, int, int *, int *, int *, int *);
+static void BMP_SetBits4bpp(int, PILRC_BYTE *, int, int, int, int);
+static int  BMP_GetBits8bpp(BITMAPINFO *, int, PILRC_BYTE *, int, int, int, int *, int *, int *, int *);
+static void BMP_SetBits8bpp(int, PILRC_BYTE *, int, int, int, int);
+static void BMP_ConvertWindowsBitmap(RCBITMAP *, PILRC_BYTE *, int, BOOL, int*);
+static void BMP_ConvertTextBitmap(RCBITMAP *, PILRC_BYTE *, int);
+static void BMP_ConvertX11Bitmap(RCBITMAP *, PILRC_BYTE *, int);
+static void BMP_ConvertPNMBitmap(RCBITMAP *, PILRC_BYTE *, int, int, BOOL);
+static void BMP_CompressBitmap(RCBITMAP *, int, BOOL);
+static void BMP_CompressDumpBitmap(RCBITMAP *, int, int, BOOL, BOOL);
+static void BMP_InvalidExtension(char *);
+
+// ADDED 2.7
+static void BMP_SetBits16bpp(int, PILRC_BYTE *, int, int, int, int);
+static void BMP_SetBits24bpp(int, PILRC_BYTE *, int, int, int, int);
+static void BMP_SetBits32bpp(int, PILRC_BYTE *, int, int, int, int);
+// ADDED 2.7 - end
+
+//
 // code
 //
 
@@ -346,26 +352,45 @@ BMP_CbRow(int cx,
 /**
  * Get a single bit from a 1bpp bitmap 
  *
+ * @param pbmi       bitmap information
  * @param cx         the width of the bitmap.
  * @param pb         a reference to the bitmap resource. 
  * @param x          the x-coordinate of the pixel to process.
  * @param y          the y-coordinate of the pixel to process.
  * @param cBitsAlign the os-dependant byte alignment definition.
+ * @param a          alpha channel of pixel
+ * @param r          red channel of pixel
+ * @param g          green channel of pixel
+ * @param b          blue channel of pixel
  * @return zero if the bit not set, non-zero otherwise.
  */
-static int 
-BMP_GetBits1bpp(int        cx, 
+static int  
+BMP_GetBits1bpp(BITMAPINFO *pbmi,
+                int        cx, 
                 PILRC_BYTE *pb, 
                 int        x, 
                 int        y, 
-                int        cBitsAlign)
+                int        cBitsAlign,
+                int        *a, 
+                int        *r, 
+                int        *g, 
+                int        *b)
 {
   int cbRow;
+  int w;
 	
   cbRow = BMP_CbRow(cx, 1, cBitsAlign);
   pb   += cbRow * y + (x >> 3);
 
-  return (*pb & (0x01 << (7 - (x & 7)))) ? 1 : 0;
+  w = (*pb & (0x01 << (7 - (x & 7)))) ? 1 : 0;
+
+  // return the values we need
+  *a = 0;
+  *r = pbmi->bmiColors[w].rgbRed;
+  *g = pbmi->bmiColors[w].rgbGreen;
+  *b = pbmi->bmiColors[w].rgbBlue;
+
+  return w;
 }
 
 /**
@@ -419,26 +444,46 @@ BMP_SetBits2bpp(int        cx,
 /**
  * Get bits from a 4bpp bitmap 
  *
+ * @param pbmi       bitmap information
  * @param cx         the width of the bitmap.
  * @param pb         a reference to the bitmap resource. 
  * @param x          the x-coordinate of the pixel to process.
  * @param y          the y-coordinate of the pixel to process.
  * @param cBitsAlign the os-dependant byte alignment definition.
+ * @param a          alpha channel of pixel
+ * @param r          red channel of pixel
+ * @param g          green channel of pixel
+ * @param b          blue channel of pixel
+ * @return zero if the bit not set, non-zero otherwise.
  * @return the bit representation for the (x,y) pixel.
  */
 static int 
-BMP_GetBits4bpp(int        cx, 
+BMP_GetBits4bpp(BITMAPINFO *pbmi,
+                int        cx, 
                 PILRC_BYTE *pb, 
                 int        x, 
                 int        y, 
-                int        cBitsAlign)
+                int        cBitsAlign,
+                int        *a, 
+                int        *r, 
+                int        *g, 
+                int        *b)
 {
   int cbRow;
+  int w;
 
   cbRow = BMP_CbRow(cx, 4, cBitsAlign);
   pb   += cbRow * y + (x >> 1);
 
-  return ((x & 1) != 0) ? (*pb & 0x0f) : ((*pb & 0xf0) >> 4);
+  w = ((x & 1) != 0) ? (*pb & 0x0f) : ((*pb & 0xf0) >> 4);
+
+  // return the values we need
+  *a = 0;
+  *r = pbmi->bmiColors[w].rgbRed;
+  *g = pbmi->bmiColors[w].rgbGreen;
+  *b = pbmi->bmiColors[w].rgbBlue;
+
+  return w;
 }
 
 /**
@@ -448,7 +493,7 @@ BMP_GetBits4bpp(int        cx,
  * @param pb         a reference to the bitmap resource. 
  * @param x          the x-coordinate of the pixel to process.
  * @param y          the y-coordinate of the pixel to process.
- * @param bits       the bits to set (0..3).
+ * @param bits       the bits to set (0..15).
  * @param cBitsAlign the os-dependant byte alignment definition.
  */
 static void 
@@ -469,26 +514,45 @@ BMP_SetBits4bpp(int        cx,
 /**
  * Get bits from a 8bpp bitmap 
  *
+ * @param pbmi       bitmap information
  * @param cx         the width of the bitmap.
  * @param pb         a reference to the bitmap resource. 
  * @param x          the x-coordinate of the pixel to process.
  * @param y          the y-coordinate of the pixel to process.
  * @param cBitsAlign the os-dependant byte alignment definition.
+ * @param a          alpha channel of pixel
+ * @param r          red channel of pixel
+ * @param g          green channel of pixel
+ * @param b          blue channel of pixel
  * @return the bit representation for the (x,y) pixel.
  */
 static int 
-BMP_GetBits8bpp(int        cx, 
+BMP_GetBits8bpp(BITMAPINFO *pbmi,
+                int        cx, 
                 PILRC_BYTE *pb, 
                 int        x, 
                 int        y, 
-                int        cBitsAlign)
+                int        cBitsAlign,
+                int        *a, 
+                int        *r, 
+                int        *g, 
+                int        *b)
 {
   int cbRow;
+  int w;
 
   cbRow = BMP_CbRow(cx, 8, cBitsAlign);
   pb   += cbRow * y + x;
 
-  return *pb;
+  w = *pb;
+
+  // return the values we need
+  *a = 0;
+  *r = pbmi->bmiColors[w].rgbRed;
+  *g = pbmi->bmiColors[w].rgbGreen;
+  *b = pbmi->bmiColors[w].rgbBlue;
+
+  return w;
 }
 
 /**
@@ -498,7 +562,7 @@ BMP_GetBits8bpp(int        cx,
  * @param pb         a reference to the bitmap resource. 
  * @param x          the x-coordinate of the pixel to process.
  * @param y          the y-coordinate of the pixel to process.
- * @param bits       the bits to set (0..3).
+ * @param bits       the bits to set (0..255).
  * @param cBitsAlign the os-dependant byte alignment definition.
  */
 static void 
@@ -516,13 +580,96 @@ BMP_SetBits8bpp(int        cx,
   *pb   = bits;
 }
 
+// ADDED 2.7
+/**
+ * Set bits in a 16bpp bitmap 
+ *
+ * @param cx         the width of the bitmap.
+ * @param pb         a reference to the bitmap resource. 
+ * @param x          the x-coordinate of the pixel to process.
+ * @param y          the y-coordinate of the pixel to process.
+ * @param bits       the bits to set (0..65535).
+ * @param cBitsAlign the os-dependant byte alignment definition.
+ */
+static void 
+BMP_SetBits16bpp(int        cx, 
+                 PILRC_BYTE *pb, 
+                 int        x, 
+                 int        y, 
+                 int        bits, 
+                 int        cBitsAlign)
+{
+  int cbRow;
+
+  cbRow   = BMP_CbRow(cx, 16, cBitsAlign);
+  pb     += cbRow * y + (x * 2);
+  *pb     = (PILRC_BYTE)((bits & 0xFF00) >> 8); // 5-6-5 (r-g-b) bit layout
+  *(pb+1) = (PILRC_BYTE)(bits & 0xFF);
+}
+
+/**
+ * Set bits in a 24bpp bitmap 
+ *
+ * @param cx         the width of the bitmap.
+ * @param pb         a reference to the bitmap resource. 
+ * @param x          the x-coordinate of the pixel to process.
+ * @param y          the y-coordinate of the pixel to process.
+ * @param bits       the bits to set (0..65535).
+ * @param cBitsAlign the os-dependant byte alignment definition.
+ */
+static void 
+BMP_SetBits24bpp(int        cx, 
+                 PILRC_BYTE *pb, 
+                 int        x, 
+                 int        y, 
+                 int        bits, 
+                 int        cBitsAlign)
+{
+  int cbRow;
+
+  cbRow = BMP_CbRow(cx, 24, cBitsAlign);
+  pb   += cbRow * y + (x * 3);
+  *pb   = (PILRC_BYTE)((bits & 0xFF0000) >> 16);  // red
+  *pb++ = (PILRC_BYTE)((bits & 0x00FF00) >> 8);   // green
+  *pb++ = (PILRC_BYTE)(bits & 0xFF);              // blue
+}
+
+/**
+ * Set bits in a 32bpp bitmap 
+ *
+ * @param cx         the width of the bitmap.
+ * @param pb         a reference to the bitmap resource. 
+ * @param x          the x-coordinate of the pixel to process.
+ * @param y          the y-coordinate of the pixel to process.
+ * @param bits       the bits to set (0..65535).
+ * @param cBitsAlign the os-dependant byte alignment definition.
+ */
+static void 
+BMP_SetBits32bpp(int        cx, 
+                 PILRC_BYTE *pb, 
+                 int        x, 
+                 int        y, 
+                 int        bits, 
+                 int        cBitsAlign)
+{
+  int cbRow;
+
+  cbRow = BMP_CbRow(cx, 32, cBitsAlign);
+  pb   += cbRow * y + (x * 4);
+  *pb   = (PILRC_BYTE)((bits & 0xFF000000) >> 24);  // alpha
+  *pb++ = (PILRC_BYTE)((bits & 0x00FF0000) >> 16);  // red
+  *pb++ = (PILRC_BYTE)((bits & 0x0000FF00) >> 8);   // green
+  *pb++ = (PILRC_BYTE)(bits & 0xFF);                // blue
+}
+// ADDED 2.7 - end
+
 /**
  * Convert a Microsoft Windows BMP file to Palm Computing resource data.
  *
  * @param rcbmp      a reference to the Palm Computing resource data.
  * @param pbResData  a reference to the bitmap resource. 
  * @param bitmaptype the type of bitmap (B+W, Grey, Grey16 or Color)?
- * @param colortable does a color table need to be generated?
+ * @param colortable does a color table need to be generated? 
  * @param transparencyData anything we need to know about transparency
  */
 static void 
@@ -537,7 +684,9 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
   int              cbRow, cbHeader, cbits, cbitsPel, numClrs;
   BITMAPINFO       *pbmi;
   BITMAPINFOHEADER bmi;
-  int              (*getBits)(int, PILRC_BYTE *, int, int, int) = NULL;
+  int              (*getBits)(BITMAPINFO *, 
+                              int, PILRC_BYTE *, int, int, int, 
+                              int *, int *, int *, int *) = NULL;
   int              dstPalette[256][3] = { { 0, 0, 0 } };
   int              dstPaletteSize     = 0;
 
@@ -628,13 +777,25 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
          if (colortable) colorDat = COLOR_TABLE_SIZE;
          break;
 
+// ADDED 2.7
     case rwBitmapColor16k:
-
-         //
-         // ADD CODE HERE
-         //
-
+         cbitsPel   = 16;
+         colortable = fFalse;
+         colorDat   = 8;      // direct color structure
          break;
+
+    case rwBitmapColor24k:
+         cbitsPel   = 24;
+         colortable = fFalse;
+         colorDat   = 8;      // direct color structure
+         break;
+
+    case rwBitmapColor32k:
+         cbitsPel   = 32;
+         colortable = fFalse;
+         colorDat   = 8;      // direct color structure
+         break;
+// ADDED 2.7 end
 
     default:
          Assert(fFalse);
@@ -668,7 +829,9 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
            PILRC_BYTE *tmpPtr;
            int        i;
 
-           rcbmp->ff |= 0x4000;
+//         rcbmp->ff |= 0x4000; 
+	   rcbmp->flags.hasColorTable = fTrue;
+
            tmpPtr     = rcbmp->pbBits;
            *tmpPtr++  = 0x01;
            *tmpPtr++  = 0x00;
@@ -694,7 +857,9 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
          switch (transparencyData[0]) 
          {
            case rwTransparency:
-                rcbmp->ff |= 0x2000;
+//              rcbmp->ff |= 0x2000;
+		rcbmp->flags.hasTransparency = fTrue;
+
                 rcbmp->transparentIndex = 
                   BMP_RGBToColorIndex(transparencyData[1],
                                       transparencyData[2],
@@ -703,7 +868,9 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
                 break;
        
            case rwTransparencyIndex:
-                rcbmp->ff |= 0x2000;
+//              rcbmp->ff |= 0x2000;
+		rcbmp->flags.hasTransparency = fTrue; 
+
                 rcbmp->transparentIndex = transparencyData[1];
                 break;
 
@@ -712,13 +879,79 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
          }
          break;
 
+// ADDED 2.7 
     case rwBitmapColor16k:
+         rcbmp->pixelsize = cbitsPel;
+         rcbmp->version   = 2;
 
-         //
-         // ADD CODE HERE
-         //
+//       rcbmp->ff       |= 0x0400; 
+ 	 rcbmp->flags.directColor = fTrue;
+         {
+           PILRC_BYTE *tmpPtr;
 
+           tmpPtr     = rcbmp->pbBits;
+           *tmpPtr++  = 5;               // 5 red bits
+           *tmpPtr++  = 6;               // 6 green bits
+           *tmpPtr++  = 5;               // 5 blue bits
+           tmpPtr++;                     // skip over reserved
+
+           // do we need to consider transparency?
+           switch (transparencyData[0]) 
+           {
+             case rwTransparency:
+//                rcbmp->ff |= 0x2000;
+		  rcbmp->flags.hasTransparency = fTrue;
+
+                  tmpPtr++;
+                  *tmpPtr++ = transparencyData[1];
+                  *tmpPtr++ = transparencyData[2];
+                  *tmpPtr++ = transparencyData[3]; // set the transparent color
+
+                  break;
+
+             default:
+                  break;
+           }
+         }
          break;
+
+    case rwBitmapColor24k:
+    case rwBitmapColor32k:
+
+         rcbmp->pixelsize = cbitsPel;
+         rcbmp->version   = 2;
+//       rcbmp->ff       |= 0x0400; 
+
+ 	 rcbmp->flags.directColor = fTrue;
+         {
+           PILRC_BYTE *tmpPtr;
+
+           tmpPtr     = rcbmp->pbBits;
+           *tmpPtr++  = 8;               // 8 red bits
+           *tmpPtr++  = 8;               // 8 green bits
+           *tmpPtr++  = 8;               // 8 blue bits
+           tmpPtr++;                     // skip over reserved
+
+           // do we need to consider transparency?
+           switch (transparencyData[0]) 
+           {
+             case rwTransparency:
+//                rcbmp->ff |= 0x2000;
+		  rcbmp->flags.hasTransparency = fTrue;
+
+                  tmpPtr++;
+                  *tmpPtr++ = transparencyData[1];
+                  *tmpPtr++ = transparencyData[2];
+                  *tmpPtr++ = transparencyData[3]; // set the transparent color
+
+                  break;
+
+             default:
+                  break;
+           }
+         }
+         break;
+// ADDED 2.7 end
 
     default:
          break;
@@ -729,28 +962,30 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
     for (x = 0; x < dx; x++) {
 
       int yT = (dy > 0) ? dy - y - 1 : y;
-      int v, w;
+      int w, a, r, g, b;
 
-      w = getBits(dx, pbSrc, x, yT, 32);
-      v = BMP_RGBToColorIndex(pbmi->bmiColors[w].rgbRed,
-                              pbmi->bmiColors[w].rgbGreen,
-                              pbmi->bmiColors[w].rgbBlue,
-                              dstPalette, dstPaletteSize);
+      // whats the (r,g,b) tupile at the index?
+      w = getBits(pbmi, dx, pbSrc, x, yT, 32, &a, &r, &g, &b);
 
       // what type of bitmap are we dealing with?
       switch (bitmaptype) 
       {
         case rwBitmap:
              {
+               int v = BMP_RGBToColorIndex(r, g, b, 
+                       dstPalette, dstPaletteSize);
+
                // if needed, set the bit
-               if (v == 1) {
+               if (v == 1) 
                  BMP_SetBits1bpp(dx, rcbmp->pbBits, x, y, 16);
-               }
              }
              break;
 
         case rwBitmapGrey:
              {
+               int v = BMP_RGBToColorIndex(r, g, b, 
+                       dstPalette, dstPaletteSize);
+
                BMP_SetBits2bpp(dx, rcbmp->pbBits, x, y, v, 16);
              }
              break;
@@ -758,12 +993,18 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
         case rwBitmapGrey16:
         case rwBitmapColor16:
              {
+               int v = BMP_RGBToColorIndex(r, g, b, 
+                       dstPalette, dstPaletteSize);
+
                BMP_SetBits4bpp(dx, rcbmp->pbBits, x, y, v, 16);
              }
              break;
 
         case rwBitmapColor256:
              {
+               int v = BMP_RGBToColorIndex(r, g, b, 
+                       dstPalette, dstPaletteSize);
+
 	       // if we need a color table, use original bitmap data
 	       if (colortable) 
                  BMP_SetBits8bpp(dx, (rcbmp->pbBits+colorDat), x, y, w, 16);
@@ -774,13 +1015,33 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
              }
              break;
 
+// ADDED 2.7 
         case rwBitmapColor16k:
+             {
+               int pixel = ((((int)r & 0xF8) << 8) |  // 1111100000000000 
+                            (((int)g & 0xFC) << 3) |  // 0000011111100000
+                            (((int)b & 0xF8) >> 3));  // 0000000000011111
 
-             //
-             // ADD CODE HERE
-             //
-
+               BMP_SetBits16bpp(dx, (rcbmp->pbBits+colorDat), x, y, pixel, 16);
+             }
              break;
+
+        case rwBitmapColor24k:
+             {
+               int pixel = ((r << 16) | (g << 8) | b);
+
+               BMP_SetBits24bpp(dx, (rcbmp->pbBits+colorDat), x, y, pixel, 16);
+             }
+             break;
+
+        case rwBitmapColor32k:
+             {
+               int pixel = ((a << 24) | (r << 16) | (g << 8) | b);
+
+               BMP_SetBits32bpp(dx, (rcbmp->pbBits+colorDat), x, y, pixel, 16);
+             }
+             break;
+// ADDED 2.7 end
 
         default:
              break;
@@ -1188,10 +1449,12 @@ WriteTbmp (RCBITMAP *rcbmp,
 	 break;
 
     case rwBitmapColor16k:
+    case rwBitmapColor24k:
+    case rwBitmapColor32k:
 
-         //
-	 // ADD CODE HERE
-	 //
+//
+// UNSUPPORTED RIGHT NOW
+//
 
 	 break;
 
@@ -1206,7 +1469,7 @@ WriteTbmp (RCBITMAP *rcbmp,
   rcbmp->cbRow = ((width * depth + 15) & ~15) >> 3;
   rcbmp->cbDst = rcbmp->cbRow * height;
   rcbmp->pbBits = malloc (rcbmp->cbDst);
-  rcbmp->version = (depth == 8)? 2 : 1;
+  rcbmp->version = (depth >= 8)? 2 : 1;
 
   /* The iterate-over-the-pixels code of these two ought to be unified into
      one function, but because the color conversions inside the loops are so
@@ -1243,7 +1506,9 @@ WriteTbmp (RCBITMAP *rcbmp,
 	memcpy (bits, rcbmp->pbBits, rcbmp->cbDst);
 	free (rcbmp->pbBits);
 
-	rcbmp->ff |= 0x4000;
+//	rcbmp->ff |= 0x4000;
+	rcbmp->flags.hasColorTable = fTrue;
+
 	rcbmp->pbBits = newBits;
 	rcbmp->cbDst += 2 + 4 * nentries;
       }
@@ -1488,7 +1753,7 @@ BMP_CompressBitmap(RCBITMAP *rcbmp,
 
     // change the data chunk to the newly compressed data
     free(rcbmp->pbBits);
-    rcbmp->ff    |= 0x8000;
+	 rcbmp->flags.compressed = fTrue;	/* RMa change: rcbmp->ff    |= 0x8000; */
     rcbmp->pbBits = bits;
     rcbmp->cbDst  = size;
   }
@@ -1500,7 +1765,7 @@ BMP_CompressBitmap(RCBITMAP *rcbmp,
  * Compress and Dump a single Bitmap (Tbmp or tAIB) resource.
  * 
  * @param rcbmp      a reference to the Bitmap resource
- * @param isIcon     an icon? 0 = bitmap, 1 = normal, 2 = small
+ * @param isIcon     an icon? 0 = bitmap, non zero = icon resource ID
  * @param compress   compression style?
  * @param colortable does a color table need to be generated?
  * @param multibit   should this bitmap be prepared for multibit? 
@@ -1515,7 +1780,7 @@ BMP_CompressDumpBitmap(RCBITMAP *rcbmp,
   // anything specific with icons here?
   switch (isIcon) 
   {
-    case 1:
+    case 1000:
          if (((rcbmp->cx != 32) || (rcbmp->cy != 32)) && 
              ((rcbmp->cx != 32) || (rcbmp->cy != 22)) &&
              ((rcbmp->cx != 22) || (rcbmp->cy != 22))) {
@@ -1523,13 +1788,14 @@ BMP_CompressDumpBitmap(RCBITMAP *rcbmp,
          }
          break;
 
-    case 2:
+    case 1001:
          if ((rcbmp->cx != 15) && (rcbmp->cy != 9)) {
-           ErrorLine("Small icon resource not 15x9");
+           WarningLine("Small icon resource not 15x9");
          }
          break;
 
     default:
+         // using non-standard icon resource :)) *tut-tut* :)
          break;
   }
 
@@ -1561,7 +1827,7 @@ BMP_CompressDumpBitmap(RCBITMAP *rcbmp,
   // dump the bitmap header and data
   CbEmitStruct(rcbmp, szRCBITMAP, NULL, fTrue);
   DumpBytes(rcbmp->pbBits, rcbmp->cbDst);
-
+  PadWordBoundary();					/* RMa add: BUG correction */
   // clean up
   free(rcbmp->pbBits);
 }
@@ -1586,7 +1852,7 @@ BMP_InvalidExtension(char *fileName)
  * Dump a single Bitmap (Tbmp or tAIB) resource.
  * 
  * @param fileName   the source file name  
- * @param isIcon     an icon? 0 = bitmap, 1 = normal, 2 = small
+ * @param isIcon     an icon? 0 = bitmap, non zero = icon resource ID
  * @param compress   compression style?
  * @param bitmaptype the type of bitmap (B+W, Grey, Grey16 or Color)?
  * @param colortable does a color table need to be generated?

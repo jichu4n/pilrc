@@ -2,7 +2,7 @@
 # @(#)Makefile.gui
 #
 # Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
-#                2000, Aaron Ardiri (mailto:aaron@ardiri.com)
+#           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
 # All rights reserved.
 # 
 # This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,7 @@
 #                 creation
 #     18-Jun-2000 Aaron Ardiri
 #                 GNU GPL documentation additions
-#     26-Jun-2000 Rall Zimmermann
+#     26-Jun-2000 Ralf Zimmermann
 #                 Modified for building pilrcui
 #
 
@@ -35,7 +35,7 @@ PREFIX   =
 CC       = gcc
 
 # source / outputs
-OBJS 	= pilrc.o lex.o util.o bitmap.o font.o plex.o xwin.o
+OBJS 	= pilrc.o lex.o util.o restype.o bitmap.o font.o plex.o xwin.o
 EXEC    = pilrcui
 
 # compiler flags 

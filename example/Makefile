@@ -30,12 +30,13 @@ CCFLAGS = -O2 -Wall -palmos3.5
 # compile requirements
 $(EXEC).prc: $(EXEC) $(EXEC).def bin.stamp
 	$(BUILDPRC) $(EXEC).def $(EXEC) *.bin
+	make clean
 
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) $(CCFLAGS) -o $(EXEC)
 
 bin.stamp: $(EXEC).rcp
-	$(PILRC) $(EXEC).rcp
+	$(PILRC) -q $(EXEC).rcp
 
 # compile rules
 .SUFFIXES: .c .o

@@ -49,6 +49,7 @@ CLEAN :
 	-@erase "$(INTDIR)\pilrc.obj"
 	-@erase "$(INTDIR)\plex.obj"
 	-@erase "$(INTDIR)\resource.res"
+	-@erase "$(INTDIR)\restype.obj"
 	-@erase "$(INTDIR)\util.obj"
 	-@erase "$(INTDIR)\vc60.idb"
 	-@erase "$(OUTDIR)\pilrc.exe"
@@ -71,6 +72,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\main.obj" \
 	"$(INTDIR)\pilrc.obj" \
 	"$(INTDIR)\plex.obj" \
+	"$(INTDIR)\restype.obj" \
 	"$(INTDIR)\util.obj" \
 	"$(INTDIR)\resource.res" \
 	"$(INTDIR)\font.obj"
@@ -99,6 +101,7 @@ CLEAN :
 	-@erase "$(INTDIR)\pilrc.obj"
 	-@erase "$(INTDIR)\plex.obj"
 	-@erase "$(INTDIR)\resource.res"
+	-@erase "$(INTDIR)\restype.obj"
 	-@erase "$(INTDIR)\util.obj"
 	-@erase "$(INTDIR)\vc60.idb"
 	-@erase "$(INTDIR)\vc60.pdb"
@@ -124,6 +127,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\main.obj" \
 	"$(INTDIR)\pilrc.obj" \
 	"$(INTDIR)\plex.obj" \
+	"$(INTDIR)\restype.obj" \
 	"$(INTDIR)\util.obj" \
 	"$(INTDIR)\resource.res" \
 	"$(INTDIR)\font.obj"
@@ -151,6 +155,7 @@ CLEAN :
 	-@erase "$(INTDIR)\pilrc.obj"
 	-@erase "$(INTDIR)\plex.obj"
 	-@erase "$(INTDIR)\resource.res"
+	-@erase "$(INTDIR)\restype.obj"
 	-@erase "$(INTDIR)\util.obj"
 	-@erase "$(INTDIR)\vc60.idb"
 	-@erase "$(INTDIR)\vc60.pdb"
@@ -176,6 +181,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\lex.obj" \
 	"$(INTDIR)\pilrc.obj" \
 	"$(INTDIR)\plex.obj" \
+	"$(INTDIR)\restype.obj" \
 	"$(INTDIR)\util.obj" \
 	"$(INTDIR)\win.obj" \
 	"$(INTDIR)\resource.res" \
@@ -204,6 +210,7 @@ CLEAN :
 	-@erase "$(INTDIR)\pilrc.obj"
 	-@erase "$(INTDIR)\plex.obj"
 	-@erase "$(INTDIR)\resource.res"
+	-@erase "$(INTDIR)\restype.obj"
 	-@erase "$(INTDIR)\util.obj"
 	-@erase "$(INTDIR)\vc60.idb"
 	-@erase "$(INTDIR)\win.obj"
@@ -229,6 +236,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\lex.obj" \
 	"$(INTDIR)\pilrc.obj" \
 	"$(INTDIR)\plex.obj" \
+	"$(INTDIR)\restype.obj" \
 	"$(INTDIR)\util.obj" \
 	"$(INTDIR)\win.obj" \
 	"$(INTDIR)\resource.res" \
@@ -336,6 +344,10 @@ SOURCE=.\resource.rc
 SOURCE=.\util.c
 
 "$(INTDIR)\util.obj" : $(SOURCE) "$(INTDIR)"
+
+SOURCE=.\restype.c
+
+"$(INTDIR)\restype.obj" : $(SOURCE) "$(INTDIR)"
 
 
 SOURCE=.\win.c

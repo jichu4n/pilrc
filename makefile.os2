@@ -30,7 +30,7 @@
 # ## MACROS ###################################################################
 
 # PilRC sources
-SRCS = pilrc.c lex.c util.c bitmap.c main.c
+SRCS = pilrc.c lex.c util.c bitmap.c restype.c main.c
 
 # compiler (options)
 CC = gcc

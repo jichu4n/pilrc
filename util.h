@@ -2,7 +2,7 @@
  * @(#)util.h
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *                2000, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2001, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -32,6 +32,11 @@
 #define __UTIL_H__
 
 #include <stdio.h>
+
+/* RMa add : Debug mode define */
+#ifdef _DEBUG
+	#define		HEXOUT		1
+#endif
 
 VOID Error(char *sz);
 VOID Error2(char *sz1, char *sz2);

@@ -16,7 +16,36 @@ PilRC
 </center> <p>
 
 <pre>
-What's new in 2.6   (Mon, 31 Oct 2000)
+What's new in 2.7   (Fri,  5 Jan 2001)
+------------------
+o BITMAP*, ICON* changes
+- complete overhaul of bitmap.c :P (boy, that was fun)
+- dynamic file specification (no longer require fixed 4 file names)
+  ie: BITMAPFAMILY ID 1000 "1bpp.bmp" "2bpp.bmp" COMPRESS
+  ie: ICONFAMILY "1bpp.bmp" "2bpp.bmp"
+      - will generate bitmap family with 1bpp and 2bpp bitmaps
+- 16bpp, 24bpp and 32bpp bitmap support YAY!
+  ie: BITMAPCOLOR16K, BITMAPCOLOR24K, BITMAPCOLOR32K
+o tint resource support
+o added 3.5 user interface controls
+- controls now have graphical attributes (as per 3.5 resource definition)
+- new SLIDER control
+o added LAUNCHERCATEGORY resource
+- ie: LAUNCHERCATEGORY "Games"
+o added -allowEditID option
+- no more warnings for people using IDs 10000-10007 (for edit menus)
+o changed non 15x9 small icon resource to generate a warning instead of error
+o added ability to override the "default" icon ID values
+- ie: ICON ID 1000 "..."
+- warnings NOT given about sizes for icon resources that are not 1000/1001
+o added ability to override the "default" type for Bitmap resources
+- ie: BITMAP "SBmp" ID 1000 "..."
+o include paths can be applied to string files in addition to image paths
+o MANUAL addemdum/errata
+* Palm Computing (France Office) R&D
+- experimental ARM resource generation (subject to change, <b>DO NOT</b> use)
+
+What's new in 2.6   (Mon, 30 Oct 2000)
 -----------------
 o added -D MACRO(=VAL) option
 - provide support for "pre-processor" like symbols for use with #ifdef
