@@ -90,8 +90,8 @@ VOID intstrncpy(p_int * dst,
 	%s  inserts the corresponding char* argument;
 	%e  considers the corresponding char* argument to be an extension
 	    to be removed if the output string so far ends thus;
-	/   inserts / or \ as appropriate if the output string so far
-	    doesn't already end in a directory separator.  */
+	/   inserts / or \ as appropriate if the output string so far is
+	    non-empty and doesn't already end in a directory separator.  */
 
 char *MakeFilename(const char *szFormat, ...);
 
