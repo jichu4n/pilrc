@@ -29,12 +29,15 @@
  *                 GNU GPL documentation additions
  */
 
-typedef struct _fobj {
+typedef struct _fobj
+{
   Word idObj;
   DWord rid;
-} RFOBJ;
+}
+RFOBJ;
 
-typedef struct _FRM {
+typedef struct _FRM
+{
   RectangleType rc;
   Word rfUsable;
   Word rfModal;
@@ -49,9 +52,11 @@ typedef struct _FRM {
   Word wUnused4;
   Word nuMObjects;
   FOBJ rgfobj[1];
-} RFORM;
+}
+RFORM;
 
-typedef struct _rbtn {
+typedef struct _rbtn
+{
   Word btnId;
   RectangleType rc;
   Word rfUsable;
@@ -59,9 +64,12 @@ typedef struct _rbtn {
   Word rfFrame;
   Word rfNonBoldFrame;
   Word rfFont;
-} RBTN;
+}
+RBTN;
 
-/*#define CbBtn(pbtn) (sizeof(RBTN)-256+strlen(pbtn->szLabel)+1) */
+/*
+ * #define CbBtn(pbtn) (sizeof(RBTN)-256+strlen(pbtn->szLabel)+1) 
+ */
 
 #define rfTrue 0x100
 #define rfFalse 0

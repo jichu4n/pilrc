@@ -112,7 +112,7 @@ EndEnum AlertType;
 Enum(formObjects)
 {
   frmFieldObj, frmControlObj, frmListObj, frmTableObj, frmBitmapObj, frmLineObj, frmFrameObj, frmRectangleObj, frmLabelObj, frmTitleObj, frmPopupObj, frmGraffitiStateObj, frmGadgetObj, frmScrollbarObj, frmSliderObj, /* RMa add support sliders */
-    frmGraphicalControlObj                      /* RMa add support graphical control */
+    frmGraphicalControlObj                       /* RMa add support graphical control */
 }
 
 EndEnum FormObjectKind;
@@ -941,12 +941,12 @@ typedef struct _rcscrollbar
   /*
    * Short penPosInCar;
  *//*
- * zw 
+ * * * * zw 
  */
   /*
    * Short savePos;
  *//*
- * zw 
+ * * * * zw 
  */
 }
 RCSCROLLBAR;
@@ -1305,7 +1305,7 @@ typedef struct _rcBITMAP
   /*
    * ushort and_reserved_and_colorTable[3] 
  *//*
- * z1w 
+ * * * * z1w 
  */
   unsigned char *pbBits;
 
@@ -1661,51 +1661,51 @@ Using these macros allows to avoid to test vfLE32 and write the code twice...
 
 //#define ifrmMax 32
 DEFPL(PLEXFORMOBJLIST)
-typedef struct _FRMBA16
-{
-  RCFormBA16Type form;
-  PLEXFORMOBJLIST pllt;
-  //      RCFORMOBJLIST *rglt;
-}
+     typedef struct _FRMBA16
+     {
+       RCFormBA16Type form;
+       PLEXFORMOBJLIST pllt;
+       //      RCFORMOBJLIST *rglt;
+     }
 FRMBA16Type;
-typedef struct _FRMBA32
-{
-  RCFormBA32Type form;
-  PLEXFORMOBJLIST pllt;
-  //      RCFORMOBJLIST *rglt;
-}
+     typedef struct _FRMBA32
+     {
+       RCFormBA32Type form;
+       PLEXFORMOBJLIST pllt;
+       //      RCFORMOBJLIST *rglt;
+     }
 FRMBA32Type;
 
-typedef union _FRM
-{
-  FRMBA16Type s16;
-  FRMBA32Type s32;
-}
+     typedef union _FRM
+     {
+       FRMBA16Type s16;
+       FRMBA32Type s32;
+     }
 FRM;
 
-void ErrorLine(char *sz);
+     void ErrorLine(char *sz);
 
 /*
  * Translation Entry -- used to map to foreign languages 
  */
-typedef struct _te
-{
-  char *szOrig;
-  char *szTrans;
-  struct _te *pteNext;
-}
+     typedef struct _te
+     {
+       char *szOrig;
+       char *szTrans;
+       struct _te *pteNext;
+     }
 TE;
 
 /*
  * Symbol Table 
  */
-typedef struct _sym
-{
-  char *sz;
-  int wVal;
-  BOOL fAutoId;
-  struct _sym *psymNext;
-}
+     typedef struct _sym
+     {
+       char *sz;
+       int wVal;
+       BOOL fAutoId;
+       struct _sym *psymNext;
+     }
 SYM;
 
 /*
@@ -2145,6 +2145,10 @@ extern BOOL vfCheckDupes;
 extern BOOL vfAppend;
 extern BOOL vfRTL;
 extern BOOL vfLE32;
+
+//LDu : Output a Prc file
+extern BOOL vfPrc;
+
 extern char *szLanguage;
 
 #define dxScreen 160

@@ -68,4 +68,4 @@ extern char *kPalmResType[kMaxNumberResType];
 
 void ResTypeInit(void);
 
-#endif // __RESTYPE_H__
+#endif                                           // __RESTYPE_H__

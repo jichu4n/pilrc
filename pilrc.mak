@@ -349,6 +349,9 @@ SOURCE=.\restype.c
 
 "$(INTDIR)\restype.obj" : $(SOURCE) "$(INTDIR)"
 
+SOURCE=.\prc.c
+
+"$(INTDIR)\prc.obj" : $(SOURCE) "$(INTDIR)"
 
 SOURCE=.\win.c
 

@@ -163,6 +163,11 @@ FRM *vpfrm;
 BOOL vfLE32 = fFalse;
 
 /*
+ * LDu Output a Prc File
+ */
+BOOL vfPrc = fFalse;
+
+/*
  * Menu globals 
  */
 RCMENUBAR menu;
@@ -4312,7 +4317,8 @@ ParseDumpGraffitiInputArea()
     "Malaysia", "RepChina", "Philippines",
     "Singapore", "Thailand", "Taiwan"
   };
-//int areaType[2] = { 'scrn', 'graf' };
+
+  //int areaType[2] = { 'scrn', 'graf' };
   int areaType[2] = { 0x7363726E, 0x67726166 };
 
   memset(&silk, 0, sizeof(RCSILK));

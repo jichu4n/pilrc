@@ -34,7 +34,9 @@
 
 #include <stdio.h>
 
-/* RMa add : Debug mode define */
+/*
+ * RMa add : Debug mode define 
+ */
 #ifdef _DEBUG
 #define		HEXOUT		1
 #endif
@@ -60,11 +62,17 @@ void EmitB(unsigned char b);
 void EmitW(unsigned short w);
 void EmitL(unsigned long l);
 
-/*void SwapBytes(void *pv, int cb); */
+/*
+ * void SwapBytes(void *pv, int cb); 
+ */
 
-/*void SwapLong(void *pl); */
+/*
+ * void SwapLong(void *pl); 
+ */
 
-/*void SwapStruct(void *pv, char *szPic); */
+/*
+ * void SwapStruct(void *pv, char *szPic); 
+ */
 VOID OpenOutput(char *szBase,
                 int id);
 VOID CloseOutput();

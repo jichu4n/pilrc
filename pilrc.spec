@@ -1,6 +1,6 @@
 Name: pilrc
 Summary: Pilot Resources Compiler
-Version: 2.8p0
+Version: 2.8p1
 Release: 1
 Source: %{name}-%{version}.tar.gz
 Group: Development/Palm

@@ -29,13 +29,15 @@
  *                 GNU GPL documentation additions
  */
 
-typedef struct _plex {
+typedef struct _plex
+{
   int m_iMac;
   int m_iMax;
   int m_dGrow;
   int m_cbItem;
   void *m_rgb;
-} PLEX;
+}
+PLEX;
 
 BOOL PlexInit(PLEX * pplex,
               int cbItem,

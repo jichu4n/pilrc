@@ -58,7 +58,8 @@ Usage(void)
      "        -I <path>    Search for bitmap and include files in <path>\n"
      "                     More than one -I <path> options may be given\n"
      "                     The current directory is always searched\n"
-     "        -R <resfile> Generate JUMP/PilA .res file\n"
+     "        -R <resfile> Generate resource file (JUMP/PilA/prc)\n"
+     "        -prc         the file assigned with -R will be a prc file\n"
      "        -H <incfile> Autoassign IDs and write .h file with #defines\n"
      "        -D <macro>   Define a pre-processor macro symbol\n"
      "        -F5          Use Big5 Chinese font widths\n"
@@ -99,7 +100,7 @@ main(int cArg,
   int macroValue;
 
   // display the (c) string
-  printf("PilRC v2.8 patch release 0\n");
+  printf("PilRC v2.8 patch release 1\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000-2001 Aaron Ardiri (ardiri@palmgear.com)\n");
 
@@ -270,6 +271,13 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-LE32"))
     {
       vfLE32 = fTrue;
+      continue;
+    }
+
+    // Output a prc File
+    if (FSzEqI(rgszArg[i], "-prc"))
+    {
+      vfPrc = fTrue;
       continue;
     }
 

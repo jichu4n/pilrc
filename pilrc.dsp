@@ -125,6 +125,10 @@ SOURCE=.\restype.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\prc.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\util.c
 # End Source File
 # End Group
@@ -150,6 +154,10 @@ SOURCE=.\font.h
 # Begin Source File
 
 SOURCE=.\lex.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\prc.h
 # End Source File
 # Begin Source File
 

@@ -48,7 +48,8 @@
 #define keyboardFont			0
 #define keyboardLargeFont	2
 
-enum { alphaKeyboard = 0, puncKeyboard = 1, accentKeyboard = 2 };
+enum
+{ alphaKeyboard = 0, puncKeyboard = 1, accentKeyboard = 2 };
 
 #define stdAlphaKeyWidth (156 /  12)
 #define stdAccentKeyWidth (156 /  12)
@@ -69,4 +70,4 @@ enum { alphaKeyboard = 0, puncKeyboard = 1, accentKeyboard = 2 };
 void createAndSaveCountryKeyboard(int country,
                                   int resID);
 
-#endif // __MAKEKBD_H__
+#endif                                           // __MAKEKBD_H__

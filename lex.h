@@ -36,7 +36,9 @@ typedef int LT;
 
 #define ltNil     -1
 
-/* must be same as nt's */
+/*
+ * must be same as nt's 
+ */
 #define ltConst    0
 #define ltId       1
 #define ltPlus     2
@@ -78,14 +80,20 @@ typedef int VAL;
 
 #define cchIdMax 4096
 
-/* LEXeme */
-typedef struct _lex {
+/*
+ * LEXeme 
+ */
+typedef struct _lex
+{
   LT lt;
   char szId[cchIdMax];
   VAL val;
-} LEX;
+}
+LEX;
 
-/* Lex function prototypes */
+/*
+ * Lex function prototypes 
+ */
 BOOL FInitLexer(char *pch,
                 BOOL fReportErrors);
 char *PchLexer(void);
@@ -97,4 +105,4 @@ char *PchParseError();
 VOID ParseError(char *,
                 char *);
 
-#endif /* __lex__ */
+#endif                                           /* __lex__ */

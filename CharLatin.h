@@ -319,7 +319,7 @@
 
 #define numericSpaceChrV30			0x80    //      ** COPIED TO 0x19; will be removed **
 #define	commandStrokeChrV30			0x9D    //      ** COPIED TO 0x16; will be removed **
-#define	shortcutStrokeChrV30		0x9E    //      ** COPIED TO 0x17; will be removed **
+#define	shortcutStrokeChrV30		0x9E     //      ** COPIED TO 0x17; will be removed **
 
 #define	numericSpaceChr		_Obsolete__use_ChrNumericSpace_macro
 #define	commandStrokeChr	_Obsolete__use_commandStrokeChrV30_or_chrCommandStroke
@@ -338,5 +338,5 @@
 #define heartChrV30					0x8F    // still appear in the regular fonts for now,
 #define spadeChrV30					0x90    // but they WILL be removed in a future release.
 
-#endif // NON_INTERNATIONAL
-#endif // __CHARLATIN_H__
+#endif                                           // NON_INTERNATIONAL
+#endif                                           // __CHARLATIN_H__

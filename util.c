@@ -40,6 +40,7 @@
 #include "pilrc.h"
 #include "util.h"
 #include "font.h"
+#include "prc.h"
 
 /*
  * Globals 
@@ -134,12 +135,14 @@ ErrorLine2(char *sz,
 
   if (sz2 == NULL)
     sprintf(szErr,
-            ((vfVSErrors) ? "%s(%d): error : %s" :
-             "%s:%d: error : %s"), szInFile, iline, sz);
+            ((vfVSErrors)
+             ? "%s(%d): error : %s"
+             : "%s:%d: error : %s"), szInFile, iline, sz);
   else
     sprintf(szErr,
-            ((vfVSErrors) ? "%s(%d): error : %s %s" :
-             "%s:%d: error : %s %s"), szInFile, iline, sz, sz2);
+            ((vfVSErrors)
+             ? "%s(%d): error : %s %s"
+             : "%s:%d: error : %s %s"), szInFile, iline, sz, sz2);
   Error(szErr);
 }
 
@@ -165,8 +168,9 @@ WarningLine(char *sz)
   char szErr[256];
 
   sprintf(szErr,
-          ((vfVSErrors) ? "%s:(%d): warning : %s" :
-           "%s:%d: warning : %s"), szInFile, iline, sz);
+          ((vfVSErrors)
+           ? "%s(%d): warning : %s"
+           : "%s:%d: warning : %s"), szInFile, iline, sz);
   fprintf(stderr, "\n");
   fprintf(stderr, szErr);
   fprintf(stderr, "\n");
@@ -392,15 +396,27 @@ OpenOutput(char *szBase,
    */
   if (vfWinGUI)
     return;
-  Assert(vfhOut == NULL);
+
+  // LDu : prc output mode
+  if (vfhRes && vfPrc)
+    vfhOut = PrcOpenResFile(szBase, id);
+  else
+  {
+    // LDu : end modification
+
+    Assert(vfhOut == NULL);
 #if WIN32
-  sprintf(szOutFile, "%s\\%s%04x.bin", szOutFileDir, szBase, id);
+    sprintf(szOutFile, "%s\\%s%04x.bin", szOutFileDir, szBase, id);
 #else
-  sprintf(szOutFile, "%s/%s%04x.bin", szOutFileDir, szBase, id);
+    sprintf(szOutFile, "%s/%s%04x.bin", szOutFileDir, szBase, id);
 #endif
-  vfhOut = fopen(szOutFile, "wb");
-  if (vfhOut == NULL)
-    Error3("Unable to open:", szOutFile, strerror(errno));
+    vfhOut = fopen(szOutFile, "wb");
+    if (vfhOut == NULL)
+      Error3("Unable to open:", szOutFile, strerror(errno));
+    // LDu : prc output mode
+  }
+  // LDu : end modification
+
   if (!vfQuiet)
     printf("Writing %s\n", szOutFile);
   ibOut = 0;
@@ -409,7 +425,10 @@ OpenOutput(char *szBase,
    * #endif 
    */
 
-  if (vfhRes != NULL)
+  // LDu : prc output mode
+  // LDu : removed// if (vfhRes != NULL)
+  if (vfhRes && !vfPrc)
+    // LDu : end modification
   {
     fprintf(vfhRes, "\tres '%s', %d, \"%s\"\n", szBase, id, szOutFile);
   }
@@ -430,11 +449,18 @@ CloseOutput()
    */
   if (vfWinGUI)
     return;
+
   if (!vfQuiet)
     printf("%d bytes\n", ibOut);
   if (vfhOut != NULL)
   {
-    fclose(vfhOut);
+    // LDu : prc output mode
+    if (vfhRes && vfPrc)
+      PrcCloseResFile(vfhOut, ibOut);
+    else
+      // LDu : end modification
+
+      fclose(vfhOut);
     vfhOut = NULL;
   }
 
@@ -462,7 +488,14 @@ OpenResFile(char *sz)
 
   if (sz == NULL)
     return;
-  vfhRes = fopen(sz, "wt");
+
+  // LDu : prc output mode
+  if (vfPrc)
+    vfhRes = PrcOpenFile(sz);
+  else
+    // LDu : end modification
+    vfhRes = fopen(sz, "wt");
+
   if (vfhRes == NULL)
     Error3("Unable to open:", sz, strerror(errno));
   if (!vfQuiet)
@@ -477,7 +510,13 @@ CloseResFile()
 
   if (vfhRes != NULL)
   {
-    fclose(vfhRes);
+    // LDu : prc output mode
+    if (vfPrc)
+      PrcCloseFile(vfhRes);
+    else
+      // LDu : end modification
+      fclose(vfhRes);
+
     vfhRes = NULL;
   }
 }

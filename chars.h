@@ -187,9 +187,9 @@
 #define	vchrPrevField				0x010C
 #define	vchrAlarm					0x010D  // sent before displaying an alarm
 #define	vchrRonamatic				0x010E  // stroke from graffiti area to top half of screen
-#define	vchrGraffitiReference	0x010F  // popup the Graffiti reference
+#define	vchrGraffitiReference	0x010F           // popup the Graffiti reference
 #define	vchrKeyboardAlpha			0x0110  // popup the keyboard in alpha mode
-#define	vchrKeyboardNumeric		0x0111  // popup the keyboard in number mode
+#define	vchrKeyboardNumeric		0x0111   // popup the keyboard in number mode
 #define	vchrLock						0x0112  // switch to the Security app and lock the device
 #define	vchrBacklight				0x0113  // toggle state of backlight
 #define	vchrAutoOff					0x0114  // power off due to inactivity timer
@@ -203,12 +203,12 @@
 #define	vchrTsm3						0x011A  // Text Services silk-screen button
 #define	vchrTsm4						0x011B  // Text Services silk-screen button
 // Added for PalmOS 3.2
-#define	vchrRadioCoverageOK		0x011C  // Radio coverage check successful
-#define	vchrRadioCoverageFail	0x011D  // Radio coverage check failure
+#define	vchrRadioCoverageOK		0x011C   // Radio coverage check successful
+#define	vchrRadioCoverageFail	0x011D           // Radio coverage check failure
 #define	vchrPowerOff				0x011E  // Posted after autoOffChr or hardPowerChr
                                                                                                                         // to put system to sleep with SysSleep.
 // Added for PalmOS 3.5
-#define	vchrResumeSleep			0x011F  // Posted by NotifyMgr clients after they
+#define	vchrResumeSleep			0x011F   // Posted by NotifyMgr clients after they
                                                                                                                         // have deferred a sleep request in order 
                                                                                                                         // to resume it.
 #define	vchrLateWakeup				0x0120  // Posted by the system after waking up
@@ -234,11 +234,11 @@
 #define	vchrHard4					0x0207
 #define	vchrHardPower				0x0208
 #define	vchrHardCradle				0x0209  // Button on cradle pressed
-#define	vchrHardCradle2			0x020A  // Button on cradle pressed and hwrDockInGeneric1
+#define	vchrHardCradle2			0x020A   // Button on cradle pressed and hwrDockInGeneric1
                                                                                                                                 // input on dock asserted (low).
 #define	vchrHardContrast			0x020B  // Sumo's Contrast button
-#define	vchrHardAntenna			0x020C  // Eleven's Antenna switch
-#define	vchrHardBrightness		0x020D  // Hypothetical Brightness button
+#define	vchrHardAntenna			0x020C   // Eleven's Antenna switch
+#define	vchrHardBrightness		0x020D   // Hypothetical Brightness button
 
 //      The following keycode RANGES are reserved for use by licensees.
 //      All have the commandKeyMask bit set in the event's modifiers field.
@@ -358,7 +358,8 @@
 	} while (0)
 
 // Characters in the 9 point symbol font.  Resource ID 9003
-enum symbolChars {
+enum symbolChars
+{
   symbolLeftArrow = 3,
   symbolRightArrow,
   symbolUpArrow,
@@ -388,7 +389,8 @@ enum symbolChars {
 };
 
 // Character in the 7 point symbol font.  Resource ID 9005
-enum symbol7Chars {
+enum symbol7Chars
+{
   symbol7ScrollUp = 1,
   symbol7ScrollDown,
   symbol7ScrollUpDisabled,
@@ -396,13 +398,14 @@ enum symbol7Chars {
 };
 
 //      Characters in the 11 point symbol font.  Resource ID 9004
-enum symbol11Chars {
+enum symbol11Chars
+{
   symbolCheckboxOff = 0,
   symbolCheckboxOn,
   symbol11LeftArrow,
   symbol11RightArrow,
-  symbol11LeftArrowDisabled,    // New for Palm OS v3.2
-  symbol11RightArrowDisabled    // New for Palm OS v3.2
+  symbol11LeftArrowDisabled,                     // New for Palm OS v3.2
+  symbol11RightArrowDisabled                     // New for Palm OS v3.2
 };
 
-#endif // __CHARS_H__
+#endif                                           // __CHARS_H__
