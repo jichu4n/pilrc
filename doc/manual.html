@@ -716,8 +716,24 @@ with either <tt>#define</tt> or <tt>equ</tt>.
 
 <p>
 Once defined, a symbol can be used in place of any number.
+</ul>
+<b>Preprocessor Macros and Conditionals</b>
+<ul>
+PilRC includes a rudimentary C-style preprocessor that can handle object-like
+macros and simple conditionals.  The following are accepted:
+<p><ul><table>
+ <tr><td><tt class=syntax>#define <var>&lt;Symbol.i&gt;</var></tt></td><tr>
+ <tr><td><tt class=syntax>#define <var>&lt;Symbol.i&gt;</var> <var>&lt;Value.n&gt;</var></tt></td><tr>
+ <tr><td><tt class=syntax>#define <var>&lt;Symbol.i&gt;</var> <var>&lt;StringValue.ss&gt;</var></tt></td><tr>
+ <tr><td><tt class=syntax>#undef&nbsp; <var>&lt;Symbol.i&gt;</var></tt></td><tr>
+ <tr><td><tt class=syntax>#ifdef&nbsp; <var>&lt;Symbol.i&gt;</var></tt></td><tr>
+ <tr><td><tt class=syntax>#ifndef <var>&lt;Symbol.i&gt;</var></tt></td><tr>
+ <tr><td><tt class=syntax>#else</tt></td><tr>
+ <tr><td><tt class=syntax>#endif</tt></td><tr>
+</table></ul>
 <p>
-<b>NOTE</b>: <tt>#ifdef</tt> derivatives are ignored by <tt>PilRC</tt>.
+<b>NOTE</b>: neither function-like macros with parameters nor <tt>#if</tt>
+expressions are understood.
 </ul>
 
 <a name="language"></a>

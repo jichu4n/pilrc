@@ -1873,6 +1873,7 @@ RCPFILE;
        rwInclude,
        rwDefine,
        rwEqu,
+       rwUndef,
        rwIfdef,
        rwIfndef,
        rwElse,
@@ -2215,6 +2216,7 @@ RWT;
        {"define", NULL, rwDefine},
        {"equ", NULL, rwEqu},
        {"include", NULL, rwInclude},
+       {"undef", NULL, rwUndef},
        {"ifdef", NULL, rwIfdef},
        {"ifndef", NULL, rwIfndef},
        {"else", NULL, rwElse},
@@ -2751,6 +2753,8 @@ RCPFILE *ParseFile(const char *szIn,
 SYM *PsymLookupId(int id);
 VOID AddSym(const char *sz, int wVal);
 VOID AddSymString(const char* sz, const char* val);
+VOID RemoveSym(const char *sz);
+
 VOID AddDefineSymbol(void);
 
 #endif                                           // _pilrc_h

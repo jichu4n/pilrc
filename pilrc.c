@@ -350,6 +350,32 @@ VOID AddSymString(const char* sz, const char* val)
     psymFirst = psym;
 }
 
+static VOID FreeSym(SYM *psym)
+{
+  free(psym->sz);
+  free(psym->sVal);
+  free(psym);
+}
+
+VOID RemoveSym(const char *sz)
+{
+  SYM *psym, *next;
+  SYM **prevNext = &psymFirst;
+
+  for (psym = psymFirst; psym != NULL; psym = next)
+  {
+    next = psym->psymNext;
+
+    if (strcmp(psym->sz, sz) == 0)
+    {
+      *prevNext = next;
+      FreeSym(psym);
+    }
+    else
+      prevNext = &(psym->psymNext);
+  }
+}
+
 /*-----------------------------------------------------------------------------
 |	PsymLookup
 |	
@@ -406,11 +432,7 @@ FreeSymTable()
     for (psym = psymFirst; psym != NULL; psym = psymNext)
     {
         psymNext = psym->psymNext;
-        free(psym->sz);
-        if (NULL != psym->sVal)
-            free(psym->sVal);
-    
-        free(psym);
+        FreeSym(psym);
     }
      
     psymFirst = NULL;
@@ -5626,6 +5648,20 @@ ParseCInclude(char *szIncludeFile,
                 break;
               }
 
+            case rwUndef:
+              {
+                if (ifdefSkipping)
+                {
+                  NextLine();
+                }
+                else
+                {
+                  GetExpectLt(&tok, ltId, "identifier");
+                  RemoveSym(tok.lex.szId);
+                }
+                break;
+              }
+
             case rwIfdef:
               {
                 ifdefLevel++;
@@ -6317,6 +6353,20 @@ ParseDirectives(RCPFILE * prcpfile)
       {
           AddDefineSymbol();
           break;
+      }
+
+    case rwUndef:
+      {
+        if (ifdefSkipping)
+        {
+          NextLine();
+        }
+        else
+        {
+          GetExpectLt(&tok, ltId, "identifier");
+          RemoveSym(tok.lex.szId);
+        }
+        break;
       }
 
     case rwIfdef:
