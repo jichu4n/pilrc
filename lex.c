@@ -75,10 +75,13 @@ PchLexerBuffer(void)
 static void
 AllowLUAtEndOfConstant(int ch)
 {
-  if ((ch == 'l') || (ch == 'L'))
-    ch = (BYTE) * pchLex++;
-  if ((ch == 'u') || (ch == 'U'))
-    pchLex++;
+  /* ISO C allows one of {u,U} optionally followed by one of {l,ll,L,LL},
+     or vice versa.  We allow anything matching [uUlL]*, which is much less
+     strict.  This is okay because we'll ignore this integer-suffix anyway,
+     and any runaway parsing will quickly be stopped by whitespace.  */
+
+  while (tolower(ch) == 'u' || tolower(ch) == 'l')
+    ch = *pchLex++;
 }
 
 static BOOL
