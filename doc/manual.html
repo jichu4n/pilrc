@@ -107,9 +107,10 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
 </font>
 <ul>
 <pre>
-pilrc   [-L LANGUAGE] [-I INCLUDE PATH] [-D MACRO(=VAL)] [-R RESFILE] 
-        [-q] [-V] [-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] [-allowEditID] [-LE32]
-	file.rcp [output path]
+pilrc   [-L LANGUAGE] [-I INCLUDE PATH] [-D MACRO(=VAL)] 
+	[-R RESFILE] [-H INCLUDE PATH] [-ro] [-q] [-V] 
+	[-Fh] [-Fj] [-F5] [-Fg] [-Fkm] [-Fkt] [-allowEditID] [-LE32]
+	[-o OUTPUTPATH] file.rcp [output path]
 pilrcui [-L LANGUAGE] file.rcp</pre>
 <font face="Arial,Helvetica">
 
@@ -179,6 +180,19 @@ pilrcui [-L LANGUAGE] file.rcp</pre>
   resource items that were defined without an ID previously. <br>
   <b>NOTE</b>: If -H is not specified then undefined IDs are considered 
   errors.
+  </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -ro
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Output a single .ro file in PRC format containing all the generated
+  resources, instead of a collection of .bin files.
   </font>
   </td>
 </tr>
@@ -310,10 +324,19 @@ pilrcui [-L LANGUAGE] file.rcp</pre>
   </td>
   <td valign=top>
   <font face="Arial,Helvetica">
-  Input file describing the resources to be emitted. Each resource is 
-  written as a separate file in the output path directory. The output 
-  filename is constructed by appending the hexcode resource ID to the 
-  four character resource type. <br>
+  Input file describing the resources to be emitted. 
+  </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -o OUTPUTPATH
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Alternative way of specifying an output path (below).
   </font>
   </td>
 </tr>
@@ -325,11 +348,28 @@ pilrcui [-L LANGUAGE] file.rcp</pre>
   </td>
   <td valign=top>
   <font face="Arial,Helvetica">
-  Directory where .bin files should be generated.
+  Directory where .bin files should be generated, or name of the file
+  to generate containing all the generated resources.
   </font>
   </td>
 </tr>
 </table>
+<p>
+The resources generated are output as a collection of .bin files or as
+resources within a PRC file, depending on whether <code>-ro</code> is given:
+  <ul>
+  <li>
+  Without <code>-ro</code>, each resource is written as a separate file in
+  the output path directory.  Each output filename is constructed by appending
+  the hexcode resource ID and ".bin" to the four character resource type.
+  <li>
+  With <code>-ro<code>, the resources are written to a single file, with the
+  name given by the <code>output path</code>.  The extension ".ro" is added
+  if the name has no extension.  If no <code>output path</code> has been
+  given, a filename is constructed from the input filename by replacing ".rcp"
+  with ".ro" (or appending ".ro" if the input filename does not end in ".rcp").
+  </ul>
+</p>
 </ul>
 
 <b><u>Example:</u></b>
@@ -338,7 +378,9 @@ pilrcui [-L LANGUAGE] file.rcp</pre>
 <pre>
 pilrc myprogram.rcp
 pilrc -I c:\resources -L FRENCH myprogram.rcp
-pilrc -I c:\resources -L BIG5 -F5 -R myprogram.res myprogram.rcp c:\output </pre>
+pilrc -I c:\resources -L BIG5 -F5 -R myprogram.res myprogram.rcp c:\output
+pilrc -ro -o myresoures.ro myprogram.rcp
+pilrc -ro myprogram.rcp</pre>
 </ul>
 <font face="Arial,Helvetica">
 

@@ -35,10 +35,10 @@
 #define NON_INTERNATIONAL
 #include		"CharLatin.h"
 
+#include		"pilrc.h"
 #include		"makeKbd.h"
 #include		"util.h"
 #include		"restype.h"
-#include		"pilrc.h"
 
 char *keyTopLabels[numKeyTopLabels] = {
   "cap",

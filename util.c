@@ -42,24 +42,50 @@
 #include "pilrc.h"
 #include "util.h"
 #include "font.h"
-#include "prc.h"
+
+#ifdef WIN32
+#define DIRSEPARATOR  '\\'
+#else
+#define DIRSEPARATOR  '/'
+#endif
 
 /*
  * Globals 
  */
-FILE *vfhOut;
 FILE *vfhIn;
-FILE *vfhRes;
-int ibOut;                                       /* current output offset (from current .bin we are emitting)     */
 char szInFile[256];
-char szOutFile[256];
-char szOutFileDir[256];
-char szFullName[256];
 char rgbZero[16];
 BOOL vfErr;
 extern int iline;
-extern BOOL vfQuiet;
-extern BOOL vfVSErrors;
+
+/*
+ * Globals for output file handling
+ */
+
+static FILE *vfhOut;	/* file receiving binary resource data */
+static int ibOut;	/* current output offset (within .bin being emitted) */
+static int ibTotalOut;	/* total output offset (after .bins so far emitted) */
+
+static FILE *vfhRes = NULL;  /* file receiving resource file ("-R") output */
+
+static char szOutFileDir[FILENAME_MAX];  /* directory for *.bin files */
+
+static char szOutResDBFile[FILENAME_MAX];  /* filename for final .ro file */
+static char szTempFile[FILENAME_MAX];      /* temporary filename */
+
+static VOID WriteOutResourceDB();
+
+DEFPL(PLEXRESOURCEDIR);
+typedef struct
+{
+  int type[4];
+  int id;
+  int offset;
+}
+RESOURCEDIRENTRY;
+#define szRESOURCEDIRENTRY "b4,w,l"
+
+static PLEXRESOURCEDIR resdir;
 
 /*
  * Includes 
@@ -388,12 +414,69 @@ PadWordBoundary()
 /*-----------------------------------------------------------------------------
 |	SetOutFileDir
 |	
-|		Set output file path -- no trailing \
+|		Set output file path -- no trailing / or \ 
 -------------------------------------------------------------WESC------------*/
 VOID
 SetOutFileDir(char *sz)
 {
-  strcpy(szOutFileDir, sz);
+  if (sz == NULL || strcmp(sz, ".") == 0)
+    strcpy(szOutFileDir, "");
+  else
+    sprintf(szOutFileDir, "%s%c", sz, DIRSEPARATOR);
+}
+
+/*-----------------------------------------------------------------------------
+|      OpenResDBFile
+|
+|              Set up to write a PRC formatted .ro file
+-------------------------------------------------------------JOHN------------*/
+
+static void
+RemoveTempFile()
+{
+  if (*szTempFile)
+  {
+    remove(szTempFile);
+    strcpy(szTempFile, "");
+  }
+}
+
+VOID
+OpenResDBFile(char *sz)
+{
+  static BOOL registered = fFalse;
+
+  strcpy(szOutResDBFile, sz);
+
+  strcpy(szTempFile, szOutResDBFile);
+  szTempFile[strlen(szTempFile) - 1] = '~';
+
+  remove(szTempFile);
+
+  if (!registered)
+  {
+    atexit(RemoveTempFile);
+    registered = fTrue;
+  }
+
+  PlexInit(&resdir, sizeof(RESOURCEDIRENTRY), 64, 64);
+}
+
+VOID
+CloseResDBFile()
+{
+  if (!vfQuiet)
+    printf("Collecting *.bin files into %s\n", szOutResDBFile);
+
+  Assert(vfhOut == NULL);
+  vfhOut = fopen(szOutResDBFile, "wb");
+  if (vfhOut == NULL)
+    Error3("Unable to open:", szOutResDBFile, strerror(errno));
+
+  WriteOutResourceDB();
+  fclose(vfhOut);
+  RemoveTempFile();
+  PlexFree(&resdir);
 }
 
 /*-----------------------------------------------------------------------------
@@ -411,46 +494,52 @@ OpenOutput(char *szBase,
 #ifdef CW_PLUGIN
   CWOpenOutput(szBase, id);
 #else
+  char szPrettyName[FILENAME_MAX];
+  char *szFileName;
+  char *szMode;
+
   /*
    * #ifdef BINOUT 
    */
   if (vfWinGUI)
     return;
 
-  // LDu : prc output mode
-  if (vfhRes && vfPrc)
-    vfhOut = PrcOpenResFile(szBase, id);
+  Assert(vfhOut == NULL);
+
+  if (vfPrc)
+  {
+    RESOURCEDIRENTRY entry;
+    intstrncpy(entry.type, szBase, 4);
+    entry.id = id;
+    entry.offset = ibTotalOut;
+    PlexAddElement(&resdir, &entry);
+
+    sprintf(szPrettyName, "temporary %s%04x.bin", szBase, id);
+    szFileName = szTempFile;
+    szMode = "ab";
+  }
   else
   {
-    // LDu : end modification
-
-    Assert(vfhOut == NULL);
-#if WIN32
-    sprintf(szOutFile, "%s\\%s%04x.bin", szOutFileDir, szBase, id);
-#else
-    sprintf(szOutFile, "%s/%s%04x.bin", szOutFileDir, szBase, id);
-#endif
-    vfhOut = fopen(szOutFile, "wb");
-    if (vfhOut == NULL)
-      Error3("Unable to open:", szOutFile, strerror(errno));
-    // LDu : prc output mode
+    sprintf(szPrettyName, "%s%s%04x.bin", szOutFileDir, szBase, id);
+    szFileName = szPrettyName;
+    szMode = "wb";
   }
-  // LDu : end modification
+
+  vfhOut = fopen(szFileName, szMode);
+  if (vfhOut == NULL)
+    Error3("Unable to open:", szFileName, strerror(errno));
 
   if (!vfQuiet)
-    printf("Writing %s\n", szOutFile);
+    printf("Writing %s\n", szPrettyName);
   ibOut = 0;
 
   /*
    * #endif 
    */
 
-  // LDu : prc output mode
-  // LDu : removed// if (vfhRes != NULL)
-  if (vfhRes && !vfPrc)
-    // LDu : end modification
+  if (vfhRes)
   {
-    fprintf(vfhRes, "\tres '%s', %d, \"%s\"\n", szBase, id, szOutFile);
+    fprintf(vfhRes, "\tres '%s', %d, \"%s\"\n", szBase, id, szPrettyName);
   }
 #endif
 }
@@ -476,15 +565,10 @@ CloseOutput()
 
   if (!vfQuiet)
     printf("%d bytes\n", ibOut);
+  ibTotalOut += ibOut;
   if (vfhOut != NULL)
   {
-    // LDu : prc output mode
-    if (vfhRes && vfPrc)
-      PrcCloseResFile(vfhOut, ibOut);
-    else
-      // LDu : end modification
-
-      fclose(vfhOut);
+    fclose(vfhOut);
     vfhOut = NULL;
   }
 
@@ -514,12 +598,7 @@ OpenResFile(char *sz)
   if (sz == NULL)
     return;
 
-  // LDu : prc output mode
-  if (vfPrc)
-    vfhRes = PrcOpenFile(sz);
-  else
-    // LDu : end modification
-    vfhRes = fopen(sz, "wt");
+  vfhRes = fopen(sz, "wt");
 
   if (vfhRes == NULL)
     Error3("Unable to open:", sz, strerror(errno));
@@ -535,13 +614,7 @@ CloseResFile()
 
   if (vfhRes != NULL)
   {
-    // LDu : prc output mode
-    if (vfPrc)
-      PrcCloseFile(vfhRes);
-    else
-      // LDu : end modification
-      fclose(vfhRes);
-
+    fclose(vfhRes);
     vfhRes = NULL;
   }
 }
@@ -558,16 +631,12 @@ FindAndOpenFile(char *szIn,
 
   if (file == NULL)
   {
-
+    static char szFullName[FILENAME_MAX];
     int i;
 
     for (i = 0; i < totalIncludePaths; i++)
     {
-#ifdef WIN32
-      sprintf(szFullName, "%s\\%s", includePaths[i], szIn);
-#else
-      sprintf(szFullName, "%s/%s", includePaths[i], szIn);
-#endif
+      sprintf(szFullName, "%s%c%s", includePaths[i], DIRSEPARATOR, szIn);
 
       file = fopen(szFullName, mode);
       if (file != NULL)
@@ -620,4 +689,120 @@ WMax(int w1,
      int w2)
 {
   return w1 > w2 ? w1 : w2;
+}
+
+/*-----------------------------------------------------------------------------
+|      intstrncpy
+-------------------------------------------------------------JOHN------------*/
+VOID
+intstrncpy(p_int *dst,
+          const char *src,
+          int n)
+{
+  while (n > 0)
+  {
+    n--;
+    if ((*dst++ = *src++) == 0)
+      break;
+  }
+
+  while (n > 0)
+  {
+    n--;
+    *dst++ = 0;
+  }
+}
+
+/*-----------------------------------------------------------------------------
+|      WriteOutResourceDB
+-------------------------------------------------------------JOHN------------*/
+
+typedef struct
+{
+  p_int name[32];      /* b32 */
+  p_int attr;          /* w */
+  p_int version;       /* w */
+  p_int created;       /* l */
+  p_int modified;      /* l */
+  //p_int backup;      /* zl */
+  //p_int modnum;      /* zl */
+  //p_int appinfo;     /* zl */
+  //p_int sortinfo;    /* zl */
+  p_int type[4];       /* b4 */
+  p_int creator[4];    /* b4 */
+  //p_int uidseed;     /* zl */
+  //p_int nextlist;    /* zl */
+  p_int nrecords;      /* w */
+}
+DBHEADER;
+#define szDBHEADER "b32,w,w,l,l,zl4,b4,b4,zl2,w"
+
+static VOID
+WriteOutResourceDB()
+{
+  DBHEADER head;
+  char buf[4096];
+  int head_offset;
+  FILE *f;
+  int i;
+  size_t n;
+  BOOL saveLE32;
+
+  /* Even resources with LE32 contents go into a M68K-style PRC file.  */
+  saveLE32 = vfLE32;
+  vfLE32 = fFalse;
+
+  /* It was intended not to provide facilities to set the name, attributes,
+     type, creator, timestamps, etc because that's not really PilRC's job.
+     We're not generating fully flexible .prc files, we're really just using
+     the PRC format as an archive format.  But in the end we've provided
+     command line options for name, type, and creator.  Apparently it is
+     too difficult to use this:  :-)
+       pilrc -prc foo.rcp
+       build-prc -n NAME -t TYPE -c CRID foo.ro
+
+     The random number for the timestamps corresponds to 1996-05-16
+     11:14:40, which is the same fixed number emitted by build-prc from
+     prc-tools 0.5.0.  A little bit of history lives on.  :-)
+
+     We output a constant time because it doesn't seem to be worth getting
+     this right for a temporary file which won't be distributed, because
+     it's non-trivial to output the correct time in a portable way, and
+     especially because variable timestamps embedded in object files are
+     the spawn of the devil: they make it harder to determine when anything
+     has really changed -- cmp always detects differences after a rebuild.
+     This is an issue in certain debugging scenarios that you never want
+     to encounter.  */
+
+  intstrncpy(head.name, (vfPrcName)? vfPrcName : szOutResDBFile, 32);
+  head.attr = 1;  /* dmHdrAttrResDB */
+  head.version = 1;
+  head.created = head.modified = 0xadc0bea0;
+  intstrncpy(head.type, (vfPrcType)? vfPrcType : "RESO", 4);
+  intstrncpy(head.creator, (vfPrcCreator)? vfPrcCreator : "pRES", 4);
+  head.nrecords = PlexGetCount(&resdir);
+
+  head_offset = CbEmitStruct(&head, szDBHEADER, NULL, fTrue);
+  head_offset += head.nrecords * CbStruct(szRESOURCEDIRENTRY);
+  head_offset += 2;  /* Allow for that daft gap */
+
+  for (i = 0; i < head.nrecords; i++)
+  {
+    RESOURCEDIRENTRY *e = PlexGetElementAt(&resdir, i);
+    e->offset += head_offset;
+    CbEmitStruct(e, szRESOURCEDIRENTRY, NULL, fTrue);
+  }
+
+  CbEmitStruct(NULL, "zb2", NULL, fTrue);  /* The dreaded gap */
+
+  f = fopen(szTempFile, "rb");
+  if (f == NULL)
+    Error3("Unable to open:", szTempFile, strerror(errno));
+
+  while ((n = fread(buf, 1, sizeof buf, f)) > 0)
+    DumpBytes(buf, n);
+
+  fclose(f);
+
+  vfLE32 = saveLE32;
 }

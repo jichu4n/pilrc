@@ -62,6 +62,8 @@ void EmitB(unsigned char b);
 void EmitW(unsigned short w);
 void EmitL(unsigned long l);
 
+VOID intstrncpy(p_int *dst, const char *src, int n);
+
 /*
  * void SwapBytes(void *pv, int cb); 
  */
@@ -78,6 +80,11 @@ VOID OpenOutput(char *szBase,
 VOID CloseOutput();
 FILE *getOpenedOutputFile();
 
+VOID SetOutFileDir(char *sz);
+
+VOID OpenResDBFile(char *szFile);
+VOID CloseResDBFile();
+
 VOID OpenResFile(char *szFile);
 VOID CloseResFile();
 void DumpBytes(void *pv,
@@ -85,7 +92,6 @@ void DumpBytes(void *pv,
 void PadBoundary();
 void PadWordBoundary();
 int IbOut();
-VOID SetOutFileDir(char *sz);
 char *FindAndOpenFile(char *szIn,
                       char *mode,
                       FILE ** returnFile);

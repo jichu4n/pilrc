@@ -9,11 +9,11 @@ endif
 
 bin_PROGRAMS=pilrc $(PILRCUI_PROG)
 
-COMMON_SOURCES=pilrc.c lex.c prc.c util.c restype.c bitmap.c font.c plex.c makeKbd.c
+COMMON_SOURCES=pilrc.c lex.c util.c restype.c bitmap.c font.c plex.c makeKbd.c
 
 pilrc_SOURCES=$(COMMON_SOURCES) main.c
 noinst_HEADERS=bitmap.h macres.h plex.h std.h \
-	font.h lex.h pilrc.h prc.h resource.h util.h makeKbd.h
+	font.h lex.h pilrc.h resource.h util.h makeKbd.h
 
 pilrcui_SOURCES=$(COMMON_SOURCES) xwin.c
 pilrcui_LDADD=$(GTK_LIBS)

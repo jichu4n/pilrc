@@ -18,11 +18,10 @@ PilRC
 <pre>
 What's new in 2.x (coming)
 -----------------
-o added "-R output.ro -prc" option
+o added "-ro" option
 - resources are bundled into a prc database (instead of .bin) !yay!
-- DEFAULT: cr8r: 'pRES' type: 'data' name: "PilRC resources"
+- DEFAULT: cr8r: 'pRES' type: 'RESO' name: same as filename
   o ability to custom specify the above using -creator -type and -name 
-  o added creationDate/modificationDate chunks
 o recursive includes (32-level deep) now supported
 o added src2unix.sh script, to strip ^M chars for UN*X users
   - fixed to be "older unix" friendly
@@ -37,7 +36,7 @@ o pilrcui compiles once again
   - code assumes BA16 resource types (m68k resources), someone wanna fix?
 o misc documentation fixes
 o slider defaults of (MIN=0, MAX=100, PAGESIZE=10, VALUE=50) implemented
-o redhat 7.1 (new gcc) pre-processor madness fixup
+o pre-processor madness fixup - no more misuse of ## operator
 
 What's new in 2.8 (Tue, 1 May 2001)
 -----------------

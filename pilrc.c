@@ -166,9 +166,9 @@ BOOL vfLE32 = fFalse;
  * LDu Output a Prc File
  */
 BOOL vfPrc = fFalse;
-char vfPrcName[32];
-int vfPrcCreator;
-int vfPrcType;
+const char *vfPrcName;
+const char *vfPrcCreator;
+const char *vfPrcType;
 
 /*
  * Menu globals 
@@ -5003,6 +5003,7 @@ ParseCInclude(char *szIncludeFile,
                     hackP++;
                   if (*hackP != 0x0a)
                   {
+/* RNi: removed because it was breaking the constant evaluation.
                     if ((*hackP < '0') || (*hackP > '9'))
                     {
                       if (!vfQuiet)
@@ -5011,6 +5012,7 @@ ParseCInclude(char *szIncludeFile,
                       NextLine();
                     }
                     else
+*/
                     {
                       wIdVal = WGetConstEx("Constant");
                       AddSym(szId, wIdVal);
@@ -5761,7 +5763,37 @@ ParseFile(char *szIn,
   prcpfile = calloc(1, sizeof(RCPFILE));
   InitRcpfile(prcpfile, fontType);
 
-  SetOutFileDir(szOutDir);
+  if (vfPrc)
+  {
+    char szFile[FILENAME_MAX];
+
+    if (strcmp(szOutDir, ".") == 0)
+    {
+      /* PRC file format was selected, but no output filename was given.
+         Deduce one from the input filename.  */
+      strcpy(szFile, szIn);
+      if (FSzEqI(szFile + strlen(szFile) - 4, ".rcp"))
+       szFile[strlen(szFile) - 4] = '\0';
+      strcat(szFile, ".ro");
+    }
+    else
+    {
+      /* A filename was given.  Append an extension if it doesn't have one.  */
+      char *dot;
+      strcpy(szFile, szOutDir);
+      dot = strrchr(szFile, '.');
+      if (dot && (strchr(dot, '/') != NULL || strchr(dot, '\\') != NULL))
+       dot = NULL;  /* The dot was in a directory name, not the basename.  */
+
+      if (dot == NULL)
+       strcat(szFile, ".ro");
+    }
+
+    OpenResDBFile(szFile);
+  }
+  else
+    SetOutFileDir(szOutDir);
+
   OpenResFile(szResFile);
   FInitLexer(NULL, fTrue);
 
@@ -5776,5 +5808,7 @@ ParseFile(char *szIn,
   FreeSymTable();
   FreeTranslations();
   CloseResFile();
+  if (vfPrc)
+    CloseResDBFile();
   return prcpfile;
 }

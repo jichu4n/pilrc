@@ -58,8 +58,9 @@ Usage(void)
      "        -I <path>    Search for bitmap and include files in <path>\n"
      "                     More than one -I <path> options may be given\n"
      "                     The current directory is always searched\n"
-     "        -R <resfile> Generate resource file (JUMP/PilA/prc)\n"
-     "        -prc         the file assigned with -R will be a prc file\n"
+     "        -R <resfile> Generate JUMP/PilA .res file\n"
+     "        -ro          Generate resource database file instead of .bins\n"
+     "        -o <filedir> Equivalent to [outfiledir]\n"
      "        -H <incfile> Autoassign IDs and write .h file with #defines\n"
      "        -D <macro>   Define a pre-processor macro symbol\n"
      "        -F5          Use Big5 Chinese font widths\n"
@@ -73,7 +74,7 @@ Usage(void)
      "        -V           Generate M$ (VS-type) error/warning output\n"
      "        -allowEditID Allow edit menu IDs (10000-10007)\n"
      "        -PalmRez     Generate res with PalmRez option\n"
-     "        -LE32        Generate Little Endian 32 bits compatible resources (ARM, NT)\n");
+     "        -LE32        Generate 32 bit little endian (ARM, NT) resources\n");
 
   exit(1);
 }
@@ -95,12 +96,12 @@ main(int cArg,
   char *szMacro;
   char *szValue;
   char *szIncFile;
-  int i, j;
+  int i;
   int fontType;
   int macroValue;
 
   // display the (c) string
-  printf("PilRC v2.8 patch release 5\n");
+  printf("PilRC v2.8 patch release 6\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000-2001 Aaron Ardiri (aaron@ardiri.com)\n");
 
@@ -112,14 +113,15 @@ main(int cArg,
   szIncFile = NULL;
   fontType = fontDefault;
 
-  strcpy(vfPrcName, DEFAULT_PRCNAME);
-  vfPrcCreator = DEFAULT_PRCCR8R;
-  vfPrcType = DEFAULT_PRCTYPE;
+  szOutputPath = ".";
+
+  vfPrcName = NULL;
+  vfPrcCreator = NULL;
+  vfPrcType = NULL;
 
   // process as many command line arguments as possible
   for (i = 1; i < cArg; i++)
   {
-
     // no more options to process
     if (rgszArg[i][0] != '-')
       break;
@@ -278,10 +280,20 @@ main(int cArg,
       continue;
     }
 
-    // Output a prc File
-    if (FSzEqI(rgszArg[i], "-prc"))
+    // Output a 'ro' File
+    if (FSzEqI(rgszArg[i], "-ro"))
     {
       vfPrc = fTrue;
+      continue;
+    }
+
+    // Output filename
+    if (FSzEqI(rgszArg[i], "-o"))
+    {
+      if (i++ == cArg)
+       Usage();
+
+      szOutputPath = rgszArg[i];
       continue;
     }
 
@@ -291,7 +303,7 @@ main(int cArg,
       if (i++ == cArg)
         Usage();
 
-      strcpy(vfPrcName, rgszArg[i]);
+      vfPrcName = rgszArg[i];
       continue;
     }
 
@@ -301,15 +313,7 @@ main(int cArg,
       if (i++ == cArg)
         Usage();
 
-      vfPrcCreator = 0;
-      if (strlen(rgszArg[i]) == 4)
-      {
-        for (j = 0; j < 4; j++)
-        {
-          vfPrcCreator = vfPrcCreator << 8;
-          vfPrcCreator |= (int)rgszArg[i][j];
-        }
-      }
+      vfPrcCreator = rgszArg[i];
       continue;
     }
 
@@ -320,14 +324,8 @@ main(int cArg,
         Usage();
 
       vfPrcType = 0;
-      if (strlen(rgszArg[i]) == 4)
-      {
-        for (j = 0; j < 4; j++)
-        {
-          vfPrcType = vfPrcType << 8;
-          vfPrcType |= (int)rgszArg[i][j];
-        }
-      }
+
+      vfPrcType = rgszArg[i];
       continue;
     }
 
@@ -344,8 +342,6 @@ main(int cArg,
   // determine the ouput path
   if (cArg != i)
     szOutputPath = rgszArg[i++];
-  else
-    szOutputPath = ".";
 
   // last minute check? (extra stuff?)
   if (cArg != i)

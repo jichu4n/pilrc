@@ -38,12 +38,6 @@
 #ifndef _pilrc_h
 #define _pilrc_h                                 // RMA : multiples include protection
 
-#include "std.h"
-#include "util.h"
-#include "lex.h"
-#include "plex.h"
-#include "font.h"
-
 #if (SIZEOF_INT == SIZEOF_CHAR_P)
 typedef int p_int;
 #elif (SIZEOF_LONG == SIZEOF_CHAR_P)
@@ -61,6 +55,12 @@ typedef int p_short;
 #else                                            // big endian
 #define HOST_BIG_ENDIAN
 #endif
+
+#include "std.h"
+#include "util.h"
+#include "lex.h"
+#include "plex.h"
+#include "font.h"
 
 /*-----------------------------------------------------------------------------
 |	 PILOT STRUCTS
@@ -2160,13 +2160,9 @@ extern BOOL vfLE32;
 
 //LDu : Output a Prc file
 extern BOOL vfPrc;
-extern char vfPrcName[32];
-extern int vfPrcCreator;
-extern int vfPrcType;
-
-#define DEFAULT_PRCNAME "PilRC resources"
-#define DEFAULT_PRCCR8R 0x70524553               // 'pRES'
-#define DEFAULT_PRCTYPE 0x64617461               // 'data'
+extern const char *vfPrcName;
+extern const char *vfPrcCreator;
+extern const char *vfPrcType;
 
 extern char *szLanguage;
 
@@ -2180,6 +2176,7 @@ int CbEmitStruct(void *pv,
                  char *szPic,
                  char **ppchText,
                  BOOL fEmit);
+int CbStruct(char *szPic);
 RCPFILE *ParseFile(char *szIn,
                    char *szOutDir,
                    char *szResFile,
