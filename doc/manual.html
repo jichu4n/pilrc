@@ -791,62 +791,10 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
   </tr>
   <tr>
     <td valign=top>
-    <a href="#lang_icon">ICON</a> <br>
-    <a href="#lang_icon">ICONFAMILY</a>
+    <a href="#lang_bitmap">BITMAP, ICON, SMALLICON, etc</a>
     </td>
     <td valign=center>
-    Icon Bitmap Resource
-    </td>
-  </tr>
-  <tr>
-    <td valign=top>
-    <a href="#lang_smicon">SMALLICON</a> <br>
-    <a href="#lang_smicon">SMALLICONFAMILY</a>
-    </td>
-    <td valign=center>
-    Small Icon Bitmap Resource
-    </td>
-  </tr>
-  <tr>
-    <td valign=top>
-    <a href="#lang_icon2">ICONFAMILYEX</a>
-    </td>
-    <td valign=center>
-    New icon family Resource (density support)
-    </td>
-  </tr>
-  <tr>
-    <td valign=top>
-    <a href="#lang_smallicon2">SMALLICONFAMILYEX</a>
-    </td>
-    <td valign=center>
-    New small icon family Resource (density support)
-    </td>
-  </tr>
-  <tr>
-    <td valign=top>
-    <a href="#lang_bitmap">BITMAP</a> <br>
-    <a href="#lang_bitmap">BITMAPGREY</a> <br>
-    <a href="#lang_bitmap">BITMAPGREY16</a> <br>
-    <a href="#lang_bitmap">BITMAPCOLOR16</a> <br>
-    <a href="#lang_bitmap">BITMAPCOLOR</a> <br>
-    <a href="#lang_bitmap">BITMAPCOLOR16K</a> <br>
-    <a href="#lang_bitmap">BITMAPCOLOR24K</a> <br>
-    <a href="#lang_bitmap">BITMAPCOLOR32K</a> <br>
-    <a href="#lang_bitmap">BITMAPFAMILY</a> <br>
-    <a href="#lang_bitmap">BITMAPFAMILYSPECIAL</a> <br>
-    <a href="#lang_bitmap">BOOTSCREENFAMILY</a>
-    </td>
-    <td valign=center>
-    Bitmap Resource
-    </td>
-  </tr>
-  <tr>
-    <td valign=top>
-    <a href="#lang_bitmap2">BITMAPFAMILYEX</a>
-    </td>
-    <td valign=center>
-    New Bitmap Resource (density support)
+    Bitmap or Icon Resource
     </td>
   </tr>
   <tr>
@@ -1694,366 +1642,246 @@ LAUNCHERCATEGORY "Games"
 LAUNCHERCATEGORY ID 1000 "Games"</pre>
 </ul>
 
-<a name="lang_icon"></a>
-<b>ICON (tAIB)</b><p>
-
-<pre class=syntax>
-ICON [ID <var>&lt;IconResourceId.n&gt;</var>]&nbsp;
-[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;IconFileName.s&gt;</var>
-ICONFAMILY [ID <var>&lt;IconResourceId.n&gt;</var>] 
-           <var>&lt;BitmapFileName.s&gt;</var> ... <var>&lt;BitmapFileName.s&gt; </var>
-           [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
-           [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]</pre>
-
-<u>Notes:</u> <p>
-<ul>
-<li> 
-The bitmap must be 32x32, 32x22 or 22x22 in dimension.
-<li> 
-Compression is not available for ICONS.
-<li> 
-A <tt>tAIB</tt> resource with ID 1000 is created unless an alternate ID is 
-specified. 
-<li>
-<tt>ICON</tt> creates a monochrome icon resource.
-<li>
-<tt>ICONFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp and 256 color) icon 
-resources.
-<li>
-The inclusion of the bitmap color table is <b>not</b> recommended as it slows
-down system performance. PilRC implements a simple color table matching 
-algorithm to match the bitmaps colortable to the system palette. 
-<li>
-When an alternate ID is used for the ICON resource, bitmap size is not checked.
-</ul>
-
-<u>Example:</u><p>
-
-<ul>
-<pre>
-ICON "myicon.bmp"
-ICONFAMILY "icon1bpp.bmp" "icon2bpp.bmp"
-ICONFAMILY "icon1bpp.bmp" "icon2bpp.bmp" "icon4bpp.bmp" "icon8bpp.bmp"
-ICONFAMILY "icon1bpp.bmp" "" "" "icon8bpp.bmp" TRANSPARENTINDEX 255</pre>
-</ul>
-
-<a name="lang_smicon"></a>
-<b>SMALLICON (tAIB)</b><p>
-
-<pre class=syntax>
-SMALLICON [ID <var>&lt;IconResourceId.n&gt;</var>]&nbsp;
-[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;IconFileName.s&gt;</var>
-SMALLICONFAMILY [ID <var>&lt;IconResourceId.n&gt;</var>] 
-                <var>&lt;BitmapFileName.s&gt;</var> ... <var>&lt;BitmapFileName.s&gt; </var>
-                [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
-                [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]</pre>
-
-<u>Notes:</u> <p>
-<ul>
-<li> 
-The bitmap must be 15x9 in dimension.
-<li> 
-Compression is not available for SMALLICONS.
-<li> 
-A <tt>tAIB</tt> resource with ID 1001 is created unless an alternate ID is 
-specified. 
-<li>
-<tt>SMALLICON</tt> creates a monochrome icon resource.
-<li>
-<tt>SMALLICONFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp and 256 color) icon 
-resources.
-<li>
-The inclusion of the bitmap color table is <b>not</b> recommended as it slows
-down system performance. PilRC implements a simple color table matching 
-algorithm to match the bitmaps colortable to the system palette. 
-<li>
-When an alternate ID is used for the SMALLICON resource, bitmap size is not checked.
-</ul>
-
-<u>Example:</u><p>
-
-<ul>
-<pre>
-SMALLICON "mysmicon.bmp"
-SMALLICONFAMILY "smic1bpp.bmp" "smic2bpp.bmp"
-SMALLICONFAMILY "smic1bpp.bmp" "smic2bpp.bmp" "smic4bpp.bmp" "smic8bpp.bmp"
-SMALLICONFAMILY "smic1bpp.bmp" "" "" "smic8bpp.bmp" TRANSPARENTINDEX 255</pre>
-</ul>
-
-<a name="lang_icon2"></a>
-<b>ICONFAMILYEX (tAIB)</b><p>
-
-<pre class=syntax>
-ICONFAMILYEX [ID <var>&lt;BitmapResourceId.n&gt;</var>]
-  [LOCALE <var>&lt;LocaleName.s&gt;</var>]
-  [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-  [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
-BEGIN
-  BITMAP <var>&lt;BitmapFileName.s&gt;</var> BPP <var>&lt;BitPerPixel.n&gt;</var>
-         [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
-         [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]				 
-         [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-         [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
-         [DENSITY <var>&lt;BitmapResourceDensity.n&gt;</var>]
-  ...
-END
-</pre>
-
-<u>Notes:</u> <p>
-<ul>
-<li> 
-The bitmap must be 32x32 (or 64x64 with density = 2), 32x22 (or 64x44) or 22x22 (or 44x44) in dimension.
-<li>
-<tt>BPP</tt> must be 1, 2, 4, 5, 8, 16 (5 is for generate 4bpp (16 color) bitmap resource).
-<li>
-<tt>DENSITY</tt> must be 72 (single), 108 (one and one half), or 144 (double).  Legacy values of 1 and 2 are
-supported.  You must have at least one single-density bitmap in an IconFamilyEx.
-<li> 
-A <tt>tAIB</tt> ICONFAMILYEX resource with ID 1000 is created unless an alternate ID is specified.
-<li> 
-A <tt>COMPRESS</tt> option before BEGIN is default option for all bitmap of that family.
-<li> 
-A <tt>TRANSPARENTINDEX</tt> is not compatible with BPP > 8bpp.
-
-</pre>
-</ul>
-
-
-<u>Example:</u><p>
-
-<ul><pre>
-ICONFAMILYEX
-BEGIN
-	BITMAP "bmp-1.bmp" BPP 1 
-	BITMAP "bmp-4.bmp" BPP 2 DENSITY 72
-	BITMAP "bmp-4.bmp" BPP 4 DENSITY 72
-	BITMAP "bmp-8.bmp" BPP 8 DENSITY 72
-	BITMAP "bmp-8d.bmp" BPP 8 DENSITY 144
-END
-</pre></ul>
-
-<a name="lang_smallicon2"></a>
-<b>SMALLICONFAMILYEX (tAIB)</b><p>
-
-<pre class=syntax>
-SMALLICONFAMILYEX [ID <var>&lt;BitmapResourceId.n&gt;</var>]
-  [LOCALE <var>&lt;LocaleName.s&gt;</var>]
-  [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-  [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
-BEGIN
-  BITMAP <var>&lt;BitmapFileName.s&gt;</var> BPP <var>&lt;BitPerPixel.n&gt;</var>
-         [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
-         [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]				 
-         [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-         [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
-         [DENSITY <var>&lt;BitmapResourceDensity.n&gt;</var>]
-  ...
-END
-</pre>
-
-<u>Notes:</u> <p>
-<ul>
-<li> 
-The bitmap must be 15x9 (or 30x18 with density = 2) in dimension.
-<li>
-<tt>BPP</tt> must be 1, 2, 4, 5, 8, 16 (5 is for generate 4bpp (16 color) bitmap resource).
-<li>
-<tt>DENSITY</tt> must be 72 (single), 108 (one and one half), or 144 (double).  Legacy values of 1 and 2 are
-supported.  You must have at least one single-density bitmap in an SmallIconFamilyEx.
-<li> 
-A <tt>tAIB</tt> SMALLICONFAMILYEX resource with ID 1001 is created unless an alternate ID is specified.
-<li> 
-A <tt>COMPRESS</tt> option before BEGIN is default option for all bitmap of that family.
-<li> 
-A <tt>TRANSPARENTINDEX</tt> is not compatible with BPP > 8bpp.
-</pre>
-</ul>
-
-
-<u>Example:</u><p>
-
-<ul><pre>
-SMALLICONFAMILYEX
-BEGIN
-	BITMAP "bmp-1.bmp" BPP 1 
-	BITMAP "bmp-4.bmp" BPP 2 DENSITY 72
-	BITMAP "bmp-4.bmp" BPP 4 DENSITY 72
-	BITMAP "bmp-8.bmp" BPP 8 DENSITY 72
-	BITMAP "bmp-8d.bmp" BPP 8 DENSITY 144
-END
-</pre></ul>
-
 <a name="lang_bitmap"></a>
-<b>BITMAP (Tbmp) (Tbsb) (Sbmp)</b><p>
+<b>BITMAP, ICON, and SMALLICON (Tbmp, Sbmp, tAIB, Tbsb)</b><p>
 
+There are several different ways of specifying bitmaps and icons: PilRC's
+original simple syntax for individual bitmaps; two extensions of that syntax
+allowing several individual bitmaps of different bit depths to be collected
+into one resource (a <em>bitmap family</em>); and a newer more flexible
+syntax for specifying bitmap families.
+<p>
+Common to all of these syntaxes is a set of
+<tt class=syntax><var>&lt;BitmapAttributes&gt;</var></tt> that may be used
+to specify various aspects of bitmap processing:
 <pre class=syntax>
-BITMAP       [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
-             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt;</var> 
-             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-BITMAPGREY   [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
-             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt;</var> 
-             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-BITMAPGREY16 [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
-             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt;</var> 
-             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-BITMAPCOLOR16 [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
-             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt;</var> 
-             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-BITMAPCOLOR  [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
-             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt; </var>
-             [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
-             [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]
-             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-BITMAPCOLOR16K [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
-             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt; </var>
-             [TRANSPARENT r g b] [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-BITMAPFAMILY [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt; 
-             &lt;BitmapFileName.s&gt;</var> ... <var>&lt;BitmapFileName.s&gt; </var>
-             [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
-             [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]
-             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-BITMAPFAMILYSPECIAL [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt; 
-             &lt;BitmapFileName.s&gt;</var> ... <var>&lt;BitmapFileName.s&gt; </var>
-             [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
-             [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]
-             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-BOOTSCREENFAMILY [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
-             [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;BitmapFileName.s&gt;</var> ... <var>&lt;BitmapFileName.s&gt; </var>
-             [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
-             [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]
-             [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
+[<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
+[COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
+[<strong>NOCOLORTABLE</strong>] [COLORTABLE] [BITMAPPALETTE <var>&lt;Filename.s&gt;</var>]
+[TRANSPARENT <var>&lt;R.n&gt; &lt;G.n&gt; &lt;B.n&gt;</var>] [TRANSPARENTINDEX <var>&lt;Index.n&gt;</var>]
 </pre>
+These control compression of the bitmap pixel data, whether a color table
+should be output, what palette to use if not the default Palm&nbsp;OS palette,
+and which color, if any, is really transparent.
+<tt>BITMAPPALETTE</tt> takes a file containing one color per line, each
+consisting of decimal red, green, and blue components (0..255) separated
+by whitespace.
 
-<u>Notes:</u> <p>
-<ul>
-<li>
-<tt>BITMAP</tt> creates a monochrome bitmap resource.
-<li>
-<tt>BITMAPGREY</tt> creates a 2bpp (4 color grayscale) bitmap resource.
-<li>
-<tt>BITMAPGREY16</tt> creates a 4bpp (16 color grayscale) bitmap resource.
-<li>
-<tt>BITMAPCOLOR16</tt> creates a 4bpp (16 color) bitmap resource.
-<li>
-<tt>BITMAPCOLOR</tt> creates a 256 color bitmap resource.
-<li>
-<tt>BITMAPFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp, 8bpp and 16bpp color) bitmap resource.
-<li>
-<tt>BITMAPFAMILYSPECIAL</tt> creates a multibit (1bpp, 2bpp, 4bpp and 8bpp and 16bpp color) bitmap resource.
-<li>
-<tt>BOOTSCREENFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp, 8bpp color) bitmap resource.
-In the header we found a size, a check sum and a BitmapFamily. The Resource created is a 'tbsb'.
-<li>
-<tt>BOOTSCREENFAMILY</tt> is system reserved.
-<li>
-The inclusion of the bitmap color table is <b>not</b> recommended as it slows
-down system performance. PilRC implements a simple color table matching 
-algorithm to match the bitmaps colortable to the system palette. 
-<li> <b>16 COLOR GRAPHICS!</b> <br>
-A new exiting graphics mode is available for application developers who wish
-to use only a standard 16 color palette (running at 4bpp means half as much
-memory to copy). BITMAPCOLOR16 and BITMAPFAMILYSPECIAL can be used with the
-following code: <p>
-
-<pre>
-{
-  UInt32       depth;
-  RGBColorType palette[] = {
-                             {  0, 0xff, 0xff, 0xff },
-                             {  1, 0x80, 0x80, 0x80 },
-                             {  2, 0x80, 0x00, 0x00 },
-                             {  3, 0x80, 0x80, 0x00 },
-                             {  4, 0x00, 0x80, 0x00 },
-                             {  5, 0x00, 0x80, 0x80 },
-                             {  6, 0x00, 0x00, 0x80 },
-                             {  7, 0x80, 0x00, 0x80 },
-                             {  8, 0xff, 0x00, 0xff },
-                             {  9, 0xc0, 0xc0, 0xc0 },
-                             { 10, 0xff, 0x00, 0x00 },
-                             { 11, 0xff, 0xff, 0x00 },
-                             { 12, 0x00, 0xff, 0x00 },
-                             { 13, 0x00, 0xff, 0xff },
-                             { 14, 0x00, 0x00, 0xff },
-                             { 15, 0x00, 0x00, 0x00 }
-                           };
-
-  // change to 4bpp grayscale
-  depth = 4;
-  WinScreenMode(winScreenModeSet,NULL,NULL,&amp;depth,NULL);
-
-  // and tweak to the 16 color palette
-  WinPalette(winPaletteSet,0,16,palette);
-} </pre>
-</ul>
-
-<u>Example:</u><p>
-
-<ul>
-<pre>
-BITMAP        ID 1 LOCALE "enUS" "bitmap.bmp" COMPRESS
-BITMAPGREY    ID 2 "bmp2bpp.bmp" COMPRESS
-BITMAPGREY16  ID 3 "bmp4bpp.bmp" COMPRESS
-BITMAPCOLOR16 ID 4 "bmp4bpc.bmp" COMPRESS
-BITMAPCOLOR   ID 4 "bmp8bpp.bmp" COMPRESS COLORTABLE
-BITMAPFAMILY  ID 5 "bmp1bpp.bmp" "bmp2bpp.bmp" COMPRESS
-BITMAPFAMILY  ID 6 "bmp1bpp.bmp" "bmp2bpp.bmp" "bmp4bpp.bmp" "bmp8bpp.bmp" COMPRESS
-BITMAPFAMILY  ID 7 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS
-BITMAPFAMILY  ID 8 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENT 255 255 255
-BITMAPFAMILY  ID 9 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENTINDEX 255</pre>
-</ul>
-
-<a name="lang_bitmap2"></a>
-<b>BITMAPFAMILYEX (Tbmp) (Sbmp) (Tbsb)</b><p>
-
+<p>
+The flexible bitmap family syntax is the only way to specify high-density
+bitmaps.  Individual bitmaps are added to the family as specified by their
+<tt>BPP</tt> and <tt>DENSITY</tt> values, and attributes can be specified
+for each individual bitmap separately:
 <pre class=syntax>
-BITMAPFAMILYEX [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var> 
-  [LOCALE <var>&lt;LocaleName.s&gt;</var>]
-  [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-  [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
+BITMAP [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;ResId.n&gt;</var> [LOCALE <var>&lt;Locale.s&gt;</var>]
+  [<var>&lt;BitmapCompression&gt;</var>...]
 BEGIN
-  BITMAP <var>&lt;BitmapFileName.s&gt;</var> BPP <var>&lt;BitPerPixel.n&gt;</var>
-         [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
-         [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]				 
-         [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
-         [COMPRESSSCANLINE] [COMPRESSRLE] [COMPRESSPACKBITS] [COMPRESSBEST]
-         [DENSITY <var>&lt;BitmapResourceDensity.n&gt;</var>]
+  BITMAP <var>&lt;Filename.s&gt;</var> BPP <var>&lt;Depth.n&gt;</var> [<var>&lt;BitmapAttribute&gt;</var>...] [DENSITY <var>&lt;Density.n&gt;</var>]
+  ...
+END
+
+[SMALL]ICON [ID <var>&lt;ResId.n&gt;</var>] [LOCALE <var>&lt;Locale.s&gt;</var>]
+  [<var>&lt;BitmapCompression&gt;</var>...]
+BEGIN
+  BITMAP <var>&lt;Filename.s&gt;</var> BPP <var>&lt;Depth.n&gt;</var> [<var>&lt;BitmapAttribute&gt;</var>...] [DENSITY <var>&lt;Density.n&gt;</var>]
   ...
 END
 </pre>
-
-<u>Notes:</u> <p>
 <ul>
 <li>
-<tt>BPP</tt> must be 1, 2, 4, 5, 8, 16 (5 is used to generate 4bpp/16 colors bitmap resources).
+<tt>BPP</tt> must be one of 1, 2, 4, 5, 8, or 16 (5 means 4bpp/16 colors;
+compare to <tt>BITMAPFAMILYSPECIAL</tt> below).
 <li>
-<tt>DENSITY</tt> must be 72 (single), 108 (one and one half), or 144 (double).  Legacy values of 1 and 2 are
-supported.  You must have at least one single-density bitmap in an BitmapFamilyEx.
+<tt>DENSITY</tt> must be 1 or 72 (single density, which is the default),
+108 (one and a half), or 2 or 144 (double density).  (The values 1 and 2 are
+supported for legacy reasons.) Generally a bitmap family must contain at least
+one single-density member.
 <li>
-<tt>"Sbmp"</tt> should not have bmps with density > 1.
-<li> 
-Specifying a <tt>COMPRESS</tt> option before the BEGIN keyword becomes the default option for all bitmaps in that family. It's still possible to specify a different compression option individually though.
-<li> 
-A <tt>TRANSPARENTINDEX</tt> is not compatible with BPP > 8bpp.
-
-</pre>
+<tt>DENSITY</tt> may appear anywhere amongst the list of
+<tt class=syntax><var>&lt;BitmapAttributes&gt;</var></tt>; it need not be last.
+<li>
+For compatibility with previous versions of PilRC, the keywords
+<tt>BITMAPFAMILYEX</tt>, <tt>ICONFAMILYEX</tt>, and <tt>SMALLICONFAMILYEX</tt>
+may also be used to introduce this style of bitmap or icon family definition;
+each is equivalent to the corresponding keyword without "<tt>FAMILYEX</tt>".
+<li>
+You may include <tt class=syntax><var>&lt;BitmapCompression&gt;</var></tt>
+options in the prelude to provide a default for all the bitmaps in the family
+(which may be overridden by an individual bitmap's attributes); it may contain
+any <tt class=syntax><var>&lt;BitmapAttribute&gt;</var></tt> related to
+compression, namely those in the first two lines of the list above.
 </ul>
 
+<p>
+The original syntax allows the creation of bitmap and icon resources
+containing exactly one member bitmap.  That member bitmap's depth depends on
+which of <tt>BITMAP</tt>/<tt>BITMAPGREY</tt>/etc is used, as described below.
+<pre class=syntax>
+BITMAP|BITMAPGREY|etc [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;ResId.n&gt;</var> [LOCALE <var>&lt;Locale.s&gt;</var>]
+  <var>&lt;Filename.s&gt;</var> [<var>&lt;BitmapAttribute&gt;</var>...]
 
-<u>Example:</u><p>
+[SMALL]ICON [ID <var>&lt;ResId.n&gt;</var>] [LOCALE <var>&lt;Locale.s&gt;</var>]
+  <var>&lt;Filename.s&gt;</var> [<var>&lt;BitmapAttribute&gt;</var>...]
+</pre>
+<ul>
+<li><tt>BITMAP</tt> creates a black &amp; white bitmap resource.
+<li><tt>BITMAPGREY</tt> creates a 2bpp (4 level grayscale) bitmap resource.
+<li><tt>BITMAPGREY16</tt> creates a 4bpp (16 level grayscale) bitmap resource.
+<li><tt>BITMAPCOLOR16</tt> creates a 4bpp (16 color) bitmap resource.
+<li><tt>BITMAPCOLOR</tt> creates a 256 color bitmap resource.
+<li><tt>BITMAPCOLOR16K</tt> creates a 16bpp direct color bitmap resource.
+<li><tt>BITMAPCOLOR24K</tt> creates a 24bpp direct color bitmap resource.
+<li><tt>BITMAPCOLOR32K</tt> creates a 32bpp direct color bitmap resource.
+<li><tt>ICON</tt> and <tt>SMALLICON</tt> create black &amp; white icon
+resources.
+</ul>
 
-<ul><pre>
-BITMAPFAMILYEX ID 1000 
+<p>
+An extension to this original syntax allows several bitmaps to be given:
+<pre class=syntax>
+BITMAP|BITMAPFAMILYSPECIAL [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;ResId.n&gt;</var> [LOCALE <var>&lt;Locale.s&gt;</var>]
+  <var>&lt;Filename.s&gt;</var>... [<var>&lt;BitmapAttribute&gt;</var>...]
+
+[SMALL]ICON [ID <var>&lt;ResId.n&gt;</var>] [LOCALE <var>&lt;Locale.s&gt;</var>]
+  <var>&lt;Filename.s&gt;</var>... [<var>&lt;BitmapAttribute&gt;</var>...]
+</pre>
+<ul>
+<li>
+You may specify up to seven filenames, which add black &amp; white,
+4 level grayscale, 16 level grayscale, 256 color, 16bpp direct color,
+24bpp direct color, and 32bpp direct color bitmaps respectively.
+(The exception is <tt>BITMAPFAMILYSPECIAL</tt>, in which the third filename
+adds a <b>16 color</b> bitmap instead.)
+<li>
+Bit-depths can be skipped by writing <tt>""</tt> (an empty string) for the
+filename.
+<li>
+For compatibility with previous versions of PilRC, the keywords
+<tt>BITMAPFAMILY</tt>, <tt>ICONFAMILY</tt>, and <tt>SMALLICONFAMILY</tt>
+may also be used to introduce this style of bitmap or icon family definition;
+each is equivalent to the corresponding keyword without "<tt>FAMILY</tt>".
+<li>
+<tt>BOOTSCREENFAMILY</tt> is another alternative here; it creates a
+'<tt>Tbsb</tt>' bootscreen family, which has extra size and checksum headers.
+It is system reserved.
+</ul>
+
+<p>
+For compatibility with Handspring's tools, PilRC also supports the following
+syntax:
+<pre class=syntax>
+BITMAP ID <var>&lt;ResId.n&gt;</var> [RSCTYPE <var>&lt;ResType.s&gt;</var>] [INCLUDECLUT] [LOCALE <var>&lt;Locale.s&gt;</var>]
+  [<var>&lt;Filename.s&gt;</var>] [DEPTH2 <var>&lt;Filename.s&gt;</var>] [DEPTH4 <var>&lt;Filename.s&gt;</var>]
+  [DEPTH8 <var>&lt;Filename.s&gt;</var>] [DEPTH16 <var>&lt;Filename.s&gt;</var>]
+  [<var>&lt;BitmapAttribute&gt;</var>... | NOCOMPRESS|COMPRESS|FORCECOMPRESS [<var>&lt;Depth.n&gt;</var>...]...]
+</pre>
+<ul>
+<li>
+In addition to the normal compression attributes (which, as usual, set whether
+compression is done for <b>all</b> member bitmaps), the three compression
+attributes listed above can also be specified together with a list of depths
+(1, 2, 4, 8, 16) to which they should be applied.  Multiple compression
+attributes with explicit depths can be present and will be evaluated from
+left to right.
+<li>
+<tt>INCLUDECLUT</tt> is equivalent to the <tt>COLORTABLE</tt> attribute.
+</ul>
+
+<p>
+<u>General notes applicable to all bitmap/icon definitions:</u>
+<ul>
+<li>
+The word "<tt>ID</tt>" may in fact be omitted from
+"<tt class=syntax>ID <var>&lt;ResId.n&gt;</var></tt>"
+in each case, but this is deprecated.
+<li>
+In all of these keywords <tt>GREY</tt> may also be spelt as <tt>GRAY</tt>,
+and <tt>COLOR</tt> may also be spelt as <tt>COLOUR</tt>.
+<li>
+Definitions starting with any of the <tt>BITMAP</tt> keywords must
+specify a <tt class=syntax><var>&lt;ResId.n&gt;</var></tt>, but the
+<tt class=syntax><var>&lt;ResType.s&gt;</var></tt> is optional and
+will default to '<tt>Tbmp</tt>'.
+<li>
+Definitions starting with any of the <tt>ICON</tt> or <tt>SMALLICON</tt>
+keywords are always given type '<tt>tAIB</tt>', and may include an optional
+<tt class=syntax><var>&lt;ResId.n&gt;</var></tt>.  All <tt>ICON</tt>s have
+a default resource ID of 1000, while <tt>SMALLICON</tt>s default to 1001.
+<li>
+By default, the sizes of icons are checked: in single density, standard icons
+should be either 22x22, 32x22, or 32x32 and small icons should be 15x9.
+(And 33x48 et al or 22x13 in one and a half density; 64x44 et al or 30x18 in
+double density.)
+<li>
+Historically, compression has not been available for icons.
+<li>
+The inclusion of the bitmap color table is <b>not</b> recommended as it slows
+down system performance. PilRC implements a simple color table matching 
+algorithm to match the bitmap's color table to the system palette. 
+<li>
+<tt>TRANSPARENTINDEX</tt> is not compatible with direct color bit-depths
+(namely those greater than 8bpp).
+<li>
+Bitmaps with resource type '<tt>Sbmp</tt>' should only contain single density
+member bitmaps.
+<li>
+The 16 color bitmaps produced by <tt>BPP 5</tt>, <tt>BITMAPCOLOR16</tt>,
+and <tt>BITMAPFAMILYSPECIAL</tt> use by default the standard 16 color palette
+given in the code below (running at 4bpp means half as much memory to copy
+compared to 8bpp).  They can be used with the following code:
+<pre>RGBColorType palette[] =
+  {
+    {  0, 0xff, 0xff, 0xff },
+    {  1, 0x80, 0x80, 0x80 },
+    {  2, 0x80, 0x00, 0x00 },
+    {  3, 0x80, 0x80, 0x00 },
+    {  4, 0x00, 0x80, 0x00 },
+    {  5, 0x00, 0x80, 0x80 },
+    {  6, 0x00, 0x00, 0x80 },
+    {  7, 0x80, 0x00, 0x80 },
+    {  8, 0xff, 0x00, 0xff },
+    {  9, 0xc0, 0xc0, 0xc0 },
+    { 10, 0xff, 0x00, 0x00 },
+    { 11, 0xff, 0xff, 0x00 },
+    { 12, 0x00, 0xff, 0x00 },
+    { 13, 0x00, 0xff, 0xff },
+    { 14, 0x00, 0x00, 0xff },
+    { 15, 0x00, 0x00, 0x00 }
+  };
+
+// change to 4bpp grayscale
+UInt32 depth = 4;
+WinScreenMode (winScreenModeSet, NULL, NULL, &amp;depth, NULL);
+
+// and tweak to the 16 color palette
+WinPalette (winPaletteSet, 0, 16, palette);</pre>
+</ul>
+
+<p>
+<u>Examples:</u>
+<ul><pre>ICON "myicon.bmp"
+SMALLICONFAMILY "smic1bpp.bmp" "smic2bpp.bmp"
+ICON ID 1 "icon1bpp.bmp" "" "" "icon8bpp.bmp" TRANSPARENTINDEX 255
+
+BITMAP        ID 1000 LOCALE "enUS" "bitmap.bmp" COMPRESS
+BITMAPCOLOR16 ID 1001 "bmp4bpc.bmp" COMPRESS
+BITMAPCOLOR   ID 1002 "bmp8bpp.bmp" COMPRESS COLORTABLE
+
+BITMAP ID 1003
 COMPRESS
 BEGIN
-	BITMAP "bmp-1.bmp" BPP 1 
-	BITMAP "bmp-4.bmp" BPP 2 DENSITY 72
-	BITMAP "bmp-4.bmp" BPP 4 DENSITY 72
-	BITMAP "bmp-8.bmp" BPP 8 DENSITY 72
-	BITMAP "bmp-16.bmp" BPP 16 DENSITY 72
-	BITMAP "bmp-8x.bmp" BPP 8 NOCOMPRESS DENSITY 108
-	BITMAP "bmp-8d.bmp" BPP 8 NOCOMPRESS DENSITY 144
+    BITMAP "bmp-1.bmp" BPP 1 
+    BITMAP "bmp-4.bmp" BPP 2 DENSITY 72
+    BITMAP "bmp-4.bmp" BPP 4 DENSITY 72
+    BITMAP "bmp-8.bmp" BPP 8 DENSITY 72
+    BITMAP "bmp-16.bmp" BPP 16 DENSITY 72
+    BITMAP "bmp-8x.bmp" BPP 8 NOCOMPRESS DENSITY 108
+    BITMAP "bmp-8d.bmp" BPP 8 NOCOMPRESS DENSITY 144
 END
-</pre></ul>
+
+BITMAP ID 1004 INCLUDECLUT
+  "monochrome.pbitm" DEPTH2 "grey4.pgm" DEPTH8 "color256.ppm" DEPTH16 "direct.ppm"
+  TRANSPARENT 0 255 0 COMPRESS FORCECOMPRESS 8 16 NOCOMPRESS 1</pre></ul>
 
 <a name="lang_trap"></a>
 <b>TRAP (TRAP)</b><p>
