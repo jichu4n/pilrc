@@ -517,10 +517,13 @@ main(int cArg,
   if (cArg != i)
     Usage();
 
-  if (vfLE32)
-    printf("Generating LE32 resources (ARM/NT) from '%s'.\n", szInputFile);
-  else
-    printf("Generating 68K resources from '%s'.\n", szInputFile);
+  if (!vfQuiet)
+  {
+    if (vfLE32)
+      printf("Generating LE32 resources (ARM/NT) from '%s'.\n", szInputFile);
+    else
+      printf("Generating 68K resources from '%s'.\n", szInputFile);
+  }
 
   ResTypeInit();
   CbInit();
