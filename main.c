@@ -3,7 +3,7 @@
  * @(#)main.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2003, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -79,7 +79,7 @@ static void header(void)
 		printf
 		  ("PilRC v%s\n"
 		   "  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n"
-		   "  Copyright 2000-2003 Aaron Ardiri (aaron@ardiri.com)\n"
+		   "  Copyright 2000-2004 Aaron Ardiri (aaron@ardiri.com)\n"
 		   "\n", PILRC_VERSION_STR);
 	}
 }
