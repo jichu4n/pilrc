@@ -5908,11 +5908,11 @@ WriteIncFile(char *szFile)
 {
   FILE *temp_file;
   SYM *psym;
-  char *temp_name = MakeFilename("%s.tmp", szFile);
+  char *temp_name = MakeTempFilename();
 
   temp_file = fopen(temp_name, "w");
   if (temp_file == NULL)
-    Error("Unable to open include file %s for writing: %s", szFile, strerror(errno));
+    Error("Can't write to temporary file %s: %s", temp_name, strerror(errno));
 
   fprintf(temp_file, "/* pilrc generated file.  Do not edit!*/\n");
 
@@ -5933,7 +5933,31 @@ WriteIncFile(char *szFile)
 
     remove(szFile);
     if (rename(temp_name, szFile) != 0)
-      Error("Cannot rename temporary include file %s: %s", szFile, strerror(errno));
+    {
+      /* Attempt to copy manually; rename() may have failed merely because
+         the files are on different filesystems, for example.  */
+
+      FILE *out_file;
+      char buffer[4096];
+      size_t n;
+
+      if ((temp_file = fopen(temp_name, "r")) == NULL)
+        Error("Can't open temporary file %s: %s", temp_name, strerror(errno));
+
+      if ((out_file = fopen(szFile, "w")) == NULL)
+        Error("Can't write to include file %s: %s", szFile, strerror(errno));
+
+      while ((n = fread(buffer, 1, sizeof buffer, temp_file)) > 0)
+        fwrite(buffer, 1, n, out_file);
+
+      if (ferror(out_file))
+        Error("Error writing to include file %s: %s", szFile, strerror(errno));
+
+      fclose(out_file);
+      fclose(temp_file);
+
+      remove(temp_name);
+    }
   }
   else
   {

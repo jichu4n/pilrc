@@ -251,6 +251,22 @@ MakeFilename(const char *szFormat, ...)
   return fname;
 }
 
+/*-----------------------------------------------------------------------------
+|	MakeTempFilename
+|
+|		Return a temporary filename in newly malloc()ed memory
+-------------------------------------------------------------JOHN------------*/
+char *
+MakeTempFilename(void)
+{
+  /* In some situations, the race condition inherent in the use of tmpnam()
+     is a security risk.  This is not a significant issue for PilRC.  */
+  char *fname = tmpnam(NULL);
+  if (fname == NULL)
+    Error("Can't make temporary filename -- tmpnam() failed");
+  return MakeFilename("%s", fname);
+}
+
 
 /*-----------------------------------------------------------------------------
 |	EmitB
@@ -482,9 +498,7 @@ OpenResDBFile(const char *sz)
   static BOOL registered = fFalse;
 
   szOutResDBFile = MakeFilename("%s", sz);
-  szTempFile = MakeFilename("%s%e.tro", sz, ".ro");
-
-  remove(szTempFile);
+  szTempFile = MakeTempFilename();
 
   if (!registered)
   {

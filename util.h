@@ -92,8 +92,13 @@ VOID intstrncpy(p_int * dst,
 	    to be removed if the output string so far ends thus;
 	/   inserts / or \ as appropriate if the output string so far is
 	    non-empty and doesn't already end in a directory separator.  */
-
 char *MakeFilename(const char *szFormat, ...);
+
+/* Returns a pointer (which should be freed by the caller) to memory allocated
+   for a temporary filename (as returned by tmpnam()) string.  Don't count on
+   rename() succeeding with this file: it's quite likely to be on a different
+   filesystem from the one you'd like it to be on.  */
+char *MakeTempFilename(void);
 
 VOID OpenOutput(char *szBase,
                 int id);
