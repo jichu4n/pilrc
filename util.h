@@ -60,7 +60,7 @@ VOID WarningLine(const char *szFormat, ...)  PRINTF_FORMATTING;
 /* The functions above are actually wrappers around this general purpose
    diagnostic function.  Generally there's no need to call this directly,
    but in any case: fError distinguishes between error/warning, and if
-   filename is NULL then it's a non-localised dianostic, as for Error().  */
+   filename is NULL then it's a non-localised diagnostic, as for Error().  */
 
 VOID Diagnostic(BOOL fError, const char *filename, int lineno,
                 const char *szFormat, va_list *args);
@@ -84,17 +84,6 @@ VOID intstrncpy(p_int * dst,
                 const char *src,
                 int n);
 
-/*
- * void SwapBytes(void *pv, int cb); 
- */
-
-/*
- * void SwapLong(void *pl); 
- */
-
-/*
- * void SwapStruct(void *pv, char *szPic); 
- */
 VOID OpenOutput(char *szBase,
                 int id);
 VOID CloseOutput(void);
