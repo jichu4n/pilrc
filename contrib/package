@@ -1,0 +1,48 @@
+#! /bin/sh -e
+#
+# Makes <name>-<version>.tar.gz and <name>-<version>.zip archives with Unix
+# and DOS line termination, respectively, with <version> as specified in
+# the RPM .spec file in the unix subdirectory.  Invoke as
+#
+#	cd <where you want to produce the archives>
+#	<path to source directory>/contrib/package
+
+srcdir=`dirname $0`/..
+tmpdir="staging-$$"
+excludes="--exclude CVS --exclude package --exclude $tmpdir"
+
+mkdir -p $tmpdir/src
+tar cf - -C $srcdir $excludes . | tar xf - -C $tmpdir/src
+chmod -R a+rw $tmpdir/src
+
+(cd $tmpdir/src/unix; aclocal && automake && autoconf; rm -rf *.cache)
+eval `grep '^PACKAGE' $tmpdir/src/unix/configure`
+
+archbase="$PACKAGE_TARNAME-$PACKAGE_VERSION"
+mv $tmpdir/src $tmpdir/$archbase
+
+find $tmpdir/$archbase -type f -exec file '{}' ';' | \
+  grep ':.*text' | sed 's/:.*//' > $tmpdir/textfiles
+
+canon()
+{
+  for f in `cat $tmpdir/textfiles`
+  do
+    $* < $f > $f.$$
+    touch -r $f $f.$$
+    chmod --reference $f $f.$$
+    mv -f $f.$$ $f
+  done
+}
+
+canon tr -d '\r'
+
+(cd $tmpdir; tar cf $archbase.tar $archbase; gzip -9 $archbase.tar)
+
+canon sed 's/$/\r/'
+
+(cd $tmpdir; zip -9qr $archbase.zip $archbase)
+
+mv $tmpdir/$archbase.* .
+
+rm -rf $tmpdir
