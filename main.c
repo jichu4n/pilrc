@@ -53,11 +53,6 @@
 #include "restype.h"
 
 #if !defined(__GNUC__) && !defined(__MWERKS__)
-#ifdef HOST_LITTLE_ENDIAN
-#pragma message( "- little endian" )
-#else
-#pragma message( "- big endian" )
-#endif
 #ifdef PALM_INTERNAL
 #pragma message( "- Palm internal version" )
 #else

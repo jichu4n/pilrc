@@ -1865,6 +1865,9 @@ CbEmitStruct(void *pv,
           cb += 4;
         }
         break;
+      case 's':					/* skip */
+        pi += c;
+        break;
       case 't':                                 /* 8 bits field to byte */
         ibit += c;
         if (vfLE32)
@@ -2420,7 +2423,7 @@ FParseObjects()
       Control:
         obj.control = calloc(1, sizeof(RCControlType));
         SETPBAFIELD(obj.control, style, rwSav - rwBTN);
-        SETPBAFIELD(obj.control, u.text, itm.text);
+        SETPBAFIELD(obj.control, text, itm.text);
         SETPBAFIELD(obj.control, bounds, itm.rc);
         SETPBAFIELD(obj.control, id, itm.id);
         SETPBAFIELD(obj.control, attr.usable, itm.usable);
@@ -2437,16 +2440,8 @@ FParseObjects()
         if (itm.graphical)
         {                                        /* Graphic control */
           SETPBAFIELD(obj.control, attr.graphical, itm.graphical);
-          // RMa : This two value are store in a long (32 bits)
-          // To prevent problem of byte ordering on a pc.
-          // I echange the low and hight word of this 2 param in one 
-#ifdef HOST_LITTLE_ENDIAN                        // little endian
-          SETPBAFIELD(obj.control, u.ids.thumbid, itm.bitmapid);
-          SETPBAFIELD(obj.control, u.ids.backgroundid, itm.selectedbitmapid);
-#else                                            // big endian
-          SETPBAFIELD(obj.control, u.ids.thumbid, itm.selectedbitmapid);
-          SETPBAFIELD(obj.control, u.ids.backgroundid, itm.bitmapid);
-#endif
+          SETPBAFIELD(obj.control, bitmapid, itm.bitmapid);
+          SETPBAFIELD(obj.control, selectedbitmapid, itm.selectedbitmapid);
           fok = frmGraphicalControlObj;
           if ((rwSav != rwBTN) && (itm.frame != noButtonFrame))
             WarningLine("graphic control doesn't need a frame!!!");

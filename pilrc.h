@@ -48,18 +48,6 @@ typedef int p_int;
 typedef long p_int;
 #endif
 
-#if (SIZEOF_SHORT * 2 == SIZEOF_CHAR_P)
-typedef short p_short;
-#elif (SIZEOF_INT * 2 == SIZEOF_CHAR_P)
-typedef int p_short;
-#endif
-
-#if (WIN32 || !WORDS_BIGENDIAN)                  // little endian
-#define HOST_LITTLE_ENDIAN			1
-#else                                            // big endian
-#define HOST_BIG_ENDIAN				1
-#endif
-
 #ifndef strdup
 char *strdup(const char *s);
 #endif
@@ -814,17 +802,9 @@ typedef struct RCControlBA16Type
 {
   p_int id;                                      /* w */
   RCRECT bounds;                                 /* w4 */
-  union
-  {
-    struct
-    {
-      p_short backgroundid;                      /* l/2 switch order on intel */
-      p_short thumbid;                           /* l/2 */
-    }
-    ids;
-    char *text;                                  /* p */
-  }
-  u;
+  p_int bitmapid;                                /* s / w */
+  p_int selectedbitmapid;                        /* s / w */
+  char *text;                                    /* p / s */
   RCCONTROLATTR attr;                            /* uuuuuu3 uuuzu5 */
   p_int style;                                   /* b */
   p_int font;                                    /* b */
@@ -832,25 +812,17 @@ typedef struct RCControlBA16Type
 }
 RCControlBA16Type;
 
-#define szRCControlBA16 "w,w4,p,uuuuuu3,uuuzu5,b,b,b,zb"
-#define szRCGraphicalControlBA16 "w,w4,l,uuuuuu3,uuuzu5,b,b,b,zb"
+#define szRCControlBA16          "w,w4,ssp,uuuuuu3,uuuzu5,b,b,b,zb"
+#define szRCGraphicalControlBA16 "w,w4,wws,uuuuuu3,uuuzu5,b,b,b,zb"
 
 typedef struct RCControlBA32Type
 {
   p_int id;                                      /* w */
   RCCONTROLATTR attr;                            /* uuuuuu3 uuuzu5 */
   RCRECT bounds;                                 /* w4 */
-  union
-  {
-    struct
-    {
-      p_short backgroundid;                      /* l/2 switch order on intel */
-      p_short thumbid;                           /* l/2 */
-    }
-    ids;
-    char *text;                                  /* p */
-  }
-  u;
+  p_int bitmapid;                                /* s / w */
+  p_int selectedbitmapid;                        /* s / w */
+  char *text;                                    /* p / s */
   p_int style;                                   /* b */
   p_int font;                                    /* b */
   p_int group;                                   /* b */
@@ -860,8 +832,8 @@ typedef struct RCControlBA32Type
 }
 RCControlBA32Type;
 
-#define szRCControlBA32 "w,uuuuuu3,uuuzu5,w4,p,b,b,b,zb"
-#define szRCGraphicalControlBA32 "w,uuuuuu3,uuuzu5,w4,l,b,b,b,zb"
+#define szRCControlBA32          "w,uuuuuu3,uuuzu5,w4,ssp,b,b,b,zb"
+#define szRCGraphicalControlBA32 "w,uuuuuu3,uuuzu5,w4,wws,b,b,b,zb"
 
 typedef union RCControlType
 {
@@ -877,12 +849,8 @@ typedef struct RCSliderControlBA16Type
 {
   p_int id;                                      /* w  */
   RCRECT bounds;                                 /* w4 */
-
-  /*
-   * reversing this 2 param to manage word ordering 
-   */
-  p_short backgroundid;                          /* l  */// overlays text in ControlBA16Type
-  p_short thumbid;                               /*     */// overlays text in ControlBA16Type
+  p_int thumbid;                                 /* w */// overlays text in ControlBA16Type
+  p_int backgroundid;                            /* w */// overlays text in ControlBA16Type
   RCCONTROLATTR attr;                            /* uuuuuu3,uuuzu5 */// graphical *is* set
   p_int style;                                   /* b */// must be sliderCtl or repeatingSliderCtl
   /*
@@ -898,15 +866,15 @@ typedef struct RCSliderControlBA16Type
 }
 RCSliderControlBA16Type;
 
-#define szRCSliderControlBA16 "w,w4,l,uuuuuu3,uuuzu5,b,zb,w,w,w,w,zl"
+#define szRCSliderControlBA16 "w,w4,w,w,uuuuuu3,uuuzu5,b,zb,w,w,w,w,zl"
 
 typedef struct RCSliderControlBA32Type
 {
   p_int id;                                      /* w */
   RCCONTROLATTR attr;                            /* uuuuuu3,uuuzu5 */// graphical *is* set
   RCRECT bounds;                                 /* w4 */
-  p_short thumbid;                               /*    */// overlays text in ControlBA16Type
-  p_short backgroundid;                          /* l  */// overlays text in ControlBA16Type
+  p_int thumbid;                                 /* w  */// overlays text in ControlBA16Type
+  p_int backgroundid;                            /* w  */// overlays text in ControlBA16Type
   p_int style;                                   /* b  */// must be sliderCtl or repeatingSliderCtl
   /*
    * UInt8                        reserved;                  zb 
@@ -924,7 +892,7 @@ typedef struct RCSliderControlBA32Type
 }
 RCSliderControlBA32Type;
 
-#define szRCSliderControlBA32 "w,uuuuuu3,uuuzu5,w4,l,b,zb,w,w,w,w,zw,zl"
+#define szRCSliderControlBA32 "w,uuuuuu3,uuuzu5,w4,w,w,b,zb,w,w,w,w,zw,zl"
 
 typedef union RCSliderControlType
 {
