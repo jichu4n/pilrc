@@ -102,6 +102,7 @@ LEX;
  */
 BOOL FInitLexer(const char *pch,
                 BOOL fReportErrors);
+const char *PchLexerBuffer(void);
 BOOL FGetLex(LEX * plex,
              BOOL fInComment);
 VOID PrintLex(LEX * plex);

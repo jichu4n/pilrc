@@ -5709,7 +5709,7 @@ ParseCInclude(const char *szIncludeFile)
             case rwError:
               {
                 if (!ifdefSkipping)
-                  ErrorLine("%s", szLine);
+                  ErrorLine("%s", PchLexerBuffer());
                 break;
               }
 
@@ -6376,7 +6376,7 @@ ParseDirectives(RCPFILE * prcpfile)
     case rwError:
       {
         if (!ifdefSkipping)
-          ErrorLine("%s", szLine);
+          ErrorLine("%s", PchLexerBuffer());
         break;
       }
 

@@ -40,7 +40,6 @@
 static int wBaseCur = 10;
 
 static const char *pchLexBuf;
-static const char *pchLexPrev;
 static const char *pchLex;
 
 static int commentDepth;
@@ -51,8 +50,13 @@ FInitLexer(const char *pch,
 {
   pchLexBuf = pch;
   pchLex = pch;
-  pchLexPrev = pch;
   return fTrue;
+}
+
+const char *
+PchLexerBuffer(void)
+{
+  return pchLexBuf;
 }
 
 static BOOL
@@ -384,7 +388,6 @@ FGetLex(LEX * plex,
   char *pchStore;
 
   lex.lt = plex->lt = ltNil;
-  pchLexPrev = pchLex;
   if (!FSkipWhite())
     return fFalse;
 
