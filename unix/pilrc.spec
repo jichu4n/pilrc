@@ -25,15 +25,13 @@ resources which are to be generated.
 
 %prep
 %setup -q
+mkdir -p fonts
+unzip -d fonts -q contrib/pilfont.zip
 
 %build
 unix/configure --bindir=%{_bindir} --enable-pilrcui
 make
-
-(cd fonts
- unzip *.zip
- make
- cp README README-pilfont.txt)
+(cd fonts; make; cp -p README README-pilfont.txt)
 
 %install
 [ ${RPM_BUILD_ROOT:-/} != / ] && rm -rf $RPM_BUILD_ROOT
