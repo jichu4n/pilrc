@@ -1,28 +1,27 @@
 Name: pilrc
 Summary: Pilot OS resources compiler
-Version: 2.9p9
+Version: 2.9p10
 Release: 1
-Source: %{name}-%{version}.tar.gz
+Source: %{name}-%{version}.tgz
 Group: Development/Palm
 URL: http://www.ardiri.com/index.php?redir=palm&cat=pilrc
 BuildRoot: /var/tmp/%{name}-buildroot
 Copyright: GPL
 Prefix: /usr
-Packager: Martin Brachtl <brachtl@redgrep.cz>
 
 %description
- PilRC (which is an abbreviation of PILot Resource Compiler) takes a text
- description of forms, menus, and other instances of Palm OS resources and
- compiles them into the binary form used on Palm OS.
+PilRC (which is an abbreviation of PILot Resource Compiler) takes a text
+description of forms, menus, and other instances of Palm OS resources and
+compiles them into the binary form used on Palm OS.
  
- %package -n pilrcui
- Summary: A GNOME application for previewing Palm OS resources
- Group: Development/Palm
+%package -n pilrcui
+Summary: A GNOME application for previewing Palm OS resources
+Group: Development/Palm
  
- %description -n pilrcui
- PilRCUI is a GNOME application which reads the same source files as PilRC,
- a Palm OS resource compiler, and displays a preview window showing the
- resources which are to be generated.
+%description -n pilrcui
+PilRCUI is a GNOME application which reads the same source files as PilRC,
+a Palm OS resource compiler, and displays a preview window showing the
+resources which are to be generated.
 
 %prep
 rm -rf $RPM_BUILD_ROOT

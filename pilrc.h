@@ -33,8 +33,8 @@
  *     20-Nov-2000 Renaud Malaval
  *                 additions PalmOS 3.5 support
  *                 additions to support LE32 resouces
- *               03-Jun-2002 Renaud Malaval
- *                                                               additions of SEARCH flag in list
+ *     03-Jun-2002 Renaud Malaval
+ *                 additions of SEARCH flag in list
  */
 
 #ifndef _pilrc_h
@@ -52,7 +52,7 @@ typedef short p_short;
 typedef int p_short;
 #endif
 
-#ifdef WIN32                                     // little endian
+#if (WIN32 || !WORDS_BIGENDIAN)                  // little endian
 #define HOST_LITTLE_ENDIAN			1
 #else                                            // big endian
 #define HOST_BIG_ENDIAN				1

@@ -37,10 +37,10 @@
  *     20-Nov-2000 Renaud Malaval
  *                 Additions for PalmOS 3.5 support
  *     30-Nov-2000 Renaud Malaval
- *                     Debug tSTL resource support in LE32 generation
+ *                 Debug tSTL resource support in LE32 generation
  *     05-Dec-2000 Renaud Malaval
- *                 Remove padding in ParseDumpApplicationIconName()  for resource taic
- *                 Force padding to 16 bits in ParseDumpLauncherCategory() for resource tAIN
+ *                 Remove padding in ParseDumpApplicationIconName() (taic)
+ *                 Force padding to 16bpp in ParseDumpLauncherCategory() (tAIN)
  *     30-Dec-2000 Ben Combee
  *                 Added 'tint' resource support
  *     Jan-2001    Regis Nicolas
@@ -71,10 +71,12 @@
  *                 Added 'pref' resource support
  *     23-Jui-2001 Renaud Malaval
  *                 Added localisation support
- *     31-Aou-2001 Laurent Dutour
+ *     31-Aug-2001 Laurent Dutour
  *                 Re-Added recursive include support
  *     08-Sep-2001 Renaud Malaval
  *                 Added 'tSCH' resource support
+ *     04-Aug-2002 Michael McLagen
+ *                 Fixed BITMAPID/SELECTEDBITMAPID warnings
  */
 
 #include <stdio.h>
@@ -2466,13 +2468,13 @@ FParseObjects()
           {                                      /* one of the param is missing or no bitmaps or are the same */
             if (itm.bitmapid == 0)
               WarningLine
-                ("graphic control custom selectedbitmapid bitmap is missing");
+                ("graphic control custom bitmapid is missing");
             if (itm.selectedbitmapid == 0)
               WarningLine
-                ("graphic control custom bitmapid bitmap is missing");
+                ("graphic control custom selectedbitmapid is missing");
             if (itm.bitmapid == itm.selectedbitmapid)
               WarningLine
-                ("graphic control custom selectedbitmapid & bitmapid bitmap are the same");
+                ("graphic control custom selectedbitmapid & bitmapid are the same");
             //                                              ErrorLine("fatal error see warning");           // RMa remove fatal error then one bitmap is missing
           }
         }
