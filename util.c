@@ -496,7 +496,7 @@ CloseResDBFile(void)
       Assert(vfhOut == NULL);
       vfhOut = fopen(szOutResDBFile, "wb");
       if (vfhOut == NULL)
-        Error3("Unable to open output resource DB:", szOutResDBFile, strerror(errno));
+        Error("Unable to open output resource DB %s: %s", szOutResDBFile, strerror(errno));
 
       WriteOutResourceDB();
       fclose(vfhOut);
@@ -564,7 +564,7 @@ OpenOutput(char *szBase,
 
   vfhOut = fopen(szFileName, szMode);
   if (vfhOut == NULL)
-    Error3("Unable to open binary file:", szFileName, strerror(errno));
+    Error("Unable to open binary file %s: %s", szFileName, strerror(errno));
 
   if (!vfQuiet)
     printf("Writing %s ", szPrettyName);
@@ -606,14 +606,9 @@ CloseOutput(void)
     printf("(%d bytes)\n", ibOut);
   
   if (!vfAllowLargeResources && ibOut > maxSafeResourceSize)
-  {
-    char buffer[120];
-  	snprintf(buffer, sizeof(buffer),
-  		"Resource '%s' %d, %d bytes, exceeds safe "
+    WarningLine("Resource '%s' %d, %d bytes, exceeds safe "
   		"HotSync size limit of %d bytes",
   		outputResStr, outputResID, ibOut, maxSafeResourceSize);
-  	WarningLine(buffer);
-  }
 
   ibTotalOut += ibOut;
   if (vfhOut != NULL)
@@ -651,7 +646,7 @@ OpenResFile(const char *sz)
   vfhRes = fopen(sz, "wt");
 
   if (vfhRes == NULL)
-    Error3("Unable to open res file:", sz, strerror(errno));
+    Error("Unable to open res file %s: %s", sz, strerror(errno));
   if (!vfQuiet)
     printf("Generating res file: %s\n", sz);
 }
@@ -698,7 +693,7 @@ FindAndOpenFile(const char *szIn,
 
     if (i == totalIncludePaths)
     {
-      ErrorLine2("Unable to find ", szIn);
+      ErrorLine("Unable to find %s", szIn);
     }
 
     if (vfTrackDepends)
@@ -870,7 +865,7 @@ WriteOutResourceDB(void)
 
   f = fopen(szTempFile, "rb");
   if (f == NULL)
-    Error3("Unable to open resource DB:", szTempFile, strerror(errno));
+    Error("Unable to open resource DB %s: %s", szTempFile, strerror(errno));
 
   while ((n = fread(buf, 1, sizeof buf, f)) > 0)
     DumpBytes(buf, n);

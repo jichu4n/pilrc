@@ -1,4 +1,3 @@
-
 /*
  * @(#)pilrc.c
  *
@@ -370,15 +369,9 @@ PsymLookup(const char *sz)
 static VOID
 CheckNumericSymbol(const SYM* psym)
 {
-	char msg[80];
-
-    if (NULL != psym->sVal)
-    {
-        snprintf(msg, sizeof(msg),
-        	"Symbol %s should be numeric ID but is defined as string %s",
-            psym->sz, psym->sVal);
-        ErrorLine(msg);
-    }
+  if (NULL != psym->sVal)
+    ErrorLine("Symbol %s should be numeric ID but is defined as string %s",
+              psym->sz, psym->sVal);
 }
 
 static int
@@ -649,21 +642,17 @@ GetExpectLt(TOK * ptok,
     if (szErr == NULL)
     {
       if (lt == ltId)
-        ErrorLine2("Syntax error : expecting identifier, got",
-                   ptok->lex.szId);
+        ErrorLine("Syntax error : expecting identifier, got %s",ptok->lex.szId);
       else if (lt == ltStr)
-        ErrorLine2("Syntax error : expecting string, got", ptok->lex.szId);
+        ErrorLine("Syntax error : expecting string, got %s", ptok->lex.szId);
       else if (lt == ltConst)
-        ErrorLine2("Syntax error : expecting constant, got", ptok->lex.szId);
+        ErrorLine("Syntax error : expecting constant, got %s", ptok->lex.szId);
       else
-        ErrorLine2("syntax error: ", ptok->lex.szId);
+        ErrorLine("syntax error: %s", ptok->lex.szId);
     }
     else
     {
-      char szT[128];
-
-      snprintf(szT, sizeof(szT), "expecting: %s, got", szErr);
-      ErrorLine2(szT, ptok->lex.szId);
+      ErrorLine("expecting: %s, got %s", szErr, ptok->lex.szId);
     }
   }
 }
@@ -681,19 +670,12 @@ GetExpectRw(RW rw)
 
   FGetTok(&tok);
   if (tok.rw != rw)
-  {
-    char szErr[64];
-
-    snprintf(szErr, sizeof(szErr), "%s expected, got", PchFromRw(rw, fTrue));
-    ErrorLine2(szErr, tok.lex.szId);
-  }
+    ErrorLine("%s expected, got %s", PchFromRw(rw, fTrue), tok.lex.szId);
 }
 
 static char* 
 PchCheckSymbol()
 {
-    char msg[80];
-    
     if (!FGetTok(&tok))
         ErrorLine("Unexpected end of file");
     
@@ -701,16 +683,11 @@ PchCheckSymbol()
     {
         SYM* psym = PsymLookup(tok.lex.szId);
         if (NULL == psym)
-        {
-            snprintf(msg, sizeof(msg), "Symbol %s is not defined", tok.lex.szId);
-            ErrorLine(msg);
-        }
+            ErrorLine("Symbol %s is not defined", tok.lex.szId);
         
         if (NULL == psym->sVal)
-        {
-            snprintf(msg, sizeof(msg), "Symbol %s is numeric, a string value is required", psym->sz);
-            ErrorLine(msg);
-        }
+            ErrorLine("Symbol %s is numeric, a string value is required",
+                      psym->sz);
         
         return(strdup(psym->sVal));
     }
@@ -820,8 +797,6 @@ PchGetSzMultiLine(char *szErr)
 int
 WGetConst(char *szErr)
 {
-  char sz[256];
-
   if (!FGetTok(&tok))
     ErrorLine("unexpected end of file");
   /*lint -e{788}*/
@@ -841,16 +816,15 @@ WGetConst(char *szErr)
           }
           else
           {
-            snprintf(sz, sizeof(sz), "Expecting %s, got unknown symbol:", szErr);
-            ErrorLine2(sz, tok.lex.szId);
+            ErrorLine("Expecting %s, got unknown symbol: %s",
+                      szErr, tok.lex.szId);
           }
         }
         return psym->wVal;
       }
       if (tok.lex.lt != ltConst)
       {
-        snprintf(sz, sizeof(sz), "%s expected, got", szErr);
-        ErrorLine2(sz, tok.lex.szId);
+        ErrorLine("%s expected, got %s", szErr, tok.lex.szId);
       }
       return tok.lex.val;
     case rwPrevLeft:
@@ -971,11 +945,7 @@ AddDefineSymbol(void)
     GetExpectLt(&tok, ltId, "identifier");
     strcpy(szId, tok.lex.szId);
     if (NULL != PsymLookup(szId))
-    {
-        char msg[80];
-        snprintf(msg, sizeof(msg), "Symbol %s is defined multiple times", szId);
-        ErrorLine(msg);
-    }
+        ErrorLine("Symbol %s is defined multiple times", szId);
     
     // save current line and check to see if we parse into another
     // line for the value -- if so, reject token and define as 0
@@ -1118,7 +1088,7 @@ ParsePaletteFile(char *pchFileName,
 
   FindAndOpenFile(pchFileName, "rb", &fh);
   if (fh == NULL)
-    ErrorLine2("Unable to open palette file ", pchFileName);
+    ErrorLine("Unable to open palette file %s", pchFileName);
 
   // Start parse of file
 
@@ -1286,7 +1256,7 @@ DoCheckGrif(int grif,
 {
   if (!(grif & ifP))
   {
-    ErrorLine2(tok.lex.szId, "unexpected");
+    ErrorLine("%s unexpected", tok.lex.szId);
   }
 }
 
@@ -2928,7 +2898,7 @@ FParseObjects(RCPFILE * prcpfile)
 	    if (tok.lex.lt == ltPound)
 	      ParseDirectives(prcpfile);
 	    else
-	      ErrorLine2("Unknown token:", tok.lex.szId);
+	      ErrorLine("Unknown token: %s", tok.lex.szId);
         break;
     }
     if (fok != (FormObjectKind) - 1)
@@ -3380,7 +3350,7 @@ FParseMenu(RCPFILE * prcpfile)
     switch (tok.rw)
     {
       default:
-        ErrorLine2("Unknown identifier:", tok.lex.szId);
+        ErrorLine("Unknown identifier: %s", tok.lex.szId);
         break;
       case rwPullDown:
         FParsePullDown(prcpfile);
@@ -3734,7 +3704,7 @@ ParseDumpString()
     FindAndOpenFile(tok.lex.szId, "rt", &fh);
 
     if (fh == NULL)
-      ErrorLine2("Unable to open String file ", tok.lex.szId);
+      ErrorLine("Unable to open String file %s", tok.lex.szId);
     cch = fread(pchString, 1, szMultipleLineMaxLength, fh);
     if (cch == szMultipleLineMaxLength)
       ErrorLine("String too long!");
@@ -4452,7 +4422,7 @@ ParseDumpLauncherCategory(void)
         break;
       }
     else
-      ErrorLine2("Unexpected token: ", tok.lex.szId);
+      ErrorLine("Unexpected token: %s", tok.lex.szId);
   }
 
   if (id == 0)
@@ -4732,9 +4702,7 @@ ParseDumpHex()
           }
           else
           {
-            char msg[256];
-            snprintf(msg, sizeof(msg), "Symbol %s is not defined", tok.lex.szId);
-            ErrorLine(msg);
+            ErrorLine("Symbol %s is not defined", tok.lex.szId);
           }
         }
         
@@ -4849,7 +4817,7 @@ ParseDumpData()
 
         FindAndOpenFile(pchFileName, "rb", &fh);
         if (fh == NULL)
-          ErrorLine2("Unable to open Data file ", pchFileName);
+          ErrorLine("Unable to open Data file %s", pchFileName);
 
         data = malloc(4096);
         if (data == NULL) Error("out of memory");
@@ -5192,7 +5160,7 @@ ParseDumpMidi(void)
 
     FindAndOpenFile(pFileName, "rb", &pFh);      /* open file in read and binary */
     if (pFh == NULL)
-      ErrorLine2("Unable to open midi file ", pFileName);
+      ErrorLine("Unable to open midi file %s", pFileName);
 
     fileSize = ftell(pFh);                       /* compute the file size */
     fseek(pFh, 0, SEEK_END);                     /* jump to the end of file */
@@ -5222,7 +5190,7 @@ ParseDumpMidi(void)
     }
     else
     {
-      ErrorLine2("Unable to read empty midi file ", pFileName);
+      ErrorLine("Unable to read empty midi file %s", pFileName);
     }
   }
   if (pFileName != NULL)
@@ -5730,7 +5698,7 @@ ParseCInclude(char *szIncludeFile,
                 }
                 else
                 {
-                  ErrorLine2("no matching #ifdef for :", tok.lex.szId);
+                  ErrorLine("no matching #ifdef for %s", tok.lex.szId);
                 }
                 break;
               }
@@ -5747,7 +5715,7 @@ ParseCInclude(char *szIncludeFile,
                 }
                 else
                 {
-                  ErrorLine2("no matching #ifdef for :", tok.lex.szId);
+                  ErrorLine("no matching #ifdef for %s", tok.lex.szId);
                 }
                 break;
               }
@@ -5755,7 +5723,7 @@ ParseCInclude(char *szIncludeFile,
             case rwError:
               {
                 if (!ifdefSkipping)
-                  ErrorLine(szLine);
+                  ErrorLine("%s", szLine);
                 break;
               }
 
@@ -5941,7 +5909,7 @@ WriteIncFile(char *szFile)
 	temp_file = fopen(temp_name, "w");
 	if (temp_file == NULL)
 	{
-		Error3("Error: Unable to open include file for writing: ", szFile, strerror(errno));
+		Error("Unable to open include file %s for writing: %s", szFile, strerror(errno));
 		return;
 	}
 
@@ -5967,7 +5935,7 @@ WriteIncFile(char *szFile)
 		    printf("writing include file: %s\n", szFile);
 		(void) remove( szFile );
 		if ( rename( temp_name, szFile ) != 0 )
-			Error3( "Error: Cannot rename temporary include file: ", szFile, strerror(errno) );
+			Error( "Cannot rename temporary include file %s: %s", szFile, strerror(errno) );
 	}
 	else
 	{
@@ -6232,11 +6200,7 @@ ParseRcpFile(const char *szRcpIn,
           NextLine();
         else
         {                                        /* RMa add error string more explicit */
-          char errorString[128];
-
-          snprintf(errorString, sizeof(errorString),
-          	"Unknown token : '%s'\n", tok.lex.szId);
-          ErrorLine2(errorString,
+          ErrorLine ("Unknown token : '%s' ("
                      "FORM, MENU, ALERT, VERSION, STRINGTABLE, STRING, CATEGORIES, "
                      "APPLICATIONICONNAME, APPLICATION, BITMAP, PALETTE, "
                      "BITMAPGREY, BITMAPGREY16, BITMAPCOLOR16, BITMAPCOLOR, "
@@ -6253,7 +6217,8 @@ ParseRcpFile(const char *szRcpIn,
                      "LOCALES, FEATURE, KEYBOARD, HARDSOFTBUTTONDEFAULT, "
                      "SEARCHTABLE, TEXTTABLE, TABLELIST, CHARSETLIST, "
 #endif
-                     "RESETAUTOID, GENERATEHEADER, or TRANSLATION expected");
+                     "RESETAUTOID, GENERATEHEADER, or TRANSLATION expected)",
+                     tok.lex.szId);
         }
     }
   }
@@ -6428,7 +6393,7 @@ ParseDirectives(RCPFILE * prcpfile)
         }
         else
         {
-          ErrorLine2("no matching #ifdef for :", tok.lex.szId);
+          ErrorLine("no matching #ifdef for %s", tok.lex.szId);
         }
         break;
       }
@@ -6445,7 +6410,7 @@ ParseDirectives(RCPFILE * prcpfile)
         }
         else
         {
-          ErrorLine2("no matching #ifdef for :", tok.lex.szId);
+          ErrorLine("no matching #ifdef for %s", tok.lex.szId);
         }
 
         break;
@@ -6465,7 +6430,7 @@ ParseDirectives(RCPFILE * prcpfile)
     case rwError:
       {
         if (!ifdefSkipping)
-          ErrorLine(szLine);
+          ErrorLine("%s", szLine);
         break;
       }
 
@@ -6479,7 +6444,7 @@ ParseDirectives(RCPFILE * prcpfile)
         NextLine();
       }
       else
-        ErrorLine2("directive not supported (try #include):", tok.lex.szId);
+        ErrorLine("directive not supported (try #include): %s", tok.lex.szId);
       break;
   }
 

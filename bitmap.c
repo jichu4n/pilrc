@@ -1,9 +1,8 @@
-
 /*
  * @(#)bitmap.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2003, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -1754,14 +1753,8 @@ WriteGreyTbmp(RCBITMAP * rcbmp,
   free(index);
 
   if (ningreys > (int)(outmaxval + 1))
-  {
-    char buffer[120];
-
-    snprintf(buffer, sizeof(buffer),
-    		"%d input grey levels converted to only %ld",
-            ningreys, outmaxval + 1);
-    WarningLine(buffer);
-  }
+    WarningLine("%d input grey levels converted to only %ld",
+                ningreys, outmaxval + 1);
 }
 
 static int
@@ -1869,11 +1862,7 @@ WriteIndexedColorTbmp(RCBITMAP * rcbmp,
 
   if (ninputcolors > 256)
   {
-    char buffer[120];
-
-    snprintf(buffer, sizeof(buffer),
-    	"%d input colors converted to only 256", ninputcolors);
-    WarningLine(buffer);
+    WarningLine("%d input colors converted to only 256", ninputcolors);
     ninputcolors = 256;
   }
 
@@ -2536,28 +2525,18 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
           ((rcbmp->cx != stdIconSize_x) || (rcbmp->cy != stdIconSize_x)) &&
           ((rcbmp->cx != stdIconSize_x) || (rcbmp->cy != stdIconSize_y)) &&
           ((rcbmp->cx != stdIconSize_y) || (rcbmp->cy != stdIconSize_y)))
-      {
-		  char buffer[128];
-		  snprintf(buffer, sizeof(buffer),
-		  	"Icon resource not %dx%d, %dx%d or %dx%d (preferred)",
-		  	stdIconSize_x, stdIconSize_x, 
-		  	stdIconSize_x, stdIconSize_y,
-		  	stdIconSize_y, stdIconSize_y);
-		  WarningLine(buffer);
-      }
+        WarningLine("Icon resource not %dx%d, %dx%d or %dx%d (preferred)",
+                    stdIconSize_x, stdIconSize_x,
+                    stdIconSize_x, stdIconSize_y,
+                    stdIconSize_y, stdIconSize_y);
       break;
 
     case 1001:
       if (!vfAllowBadIconSizes &&
           (rcbmp->cx != stdSmallIconSize_x) &&
           (rcbmp->cy != stdSmallIconSize_y))
-      {
-		  char buffer[128];
-		  snprintf(buffer, sizeof(buffer),
-		  	"Small icon resource not %dx%d",
-		  	stdSmallIconSize_x, stdSmallIconSize_y);
-          WarningLine(buffer);
-      }
+        WarningLine("Small icon resource not %dx%d",
+                    stdSmallIconSize_x, stdSmallIconSize_y);
       break;
 
     default:
@@ -2709,13 +2688,9 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
 static void
 BMP_InvalidExtension(const char *fileName)
 {
-  char pchLine[500];
-
-  snprintf(pchLine, sizeof(pchLine),
-          "Bitmap file extension not recognized for file %s\n"
-          "\tSupported extensions: .BMP, .pbitm, .xbm and .pbm/.ppm/.pnm",
-          fileName);
-  ErrorLine(pchLine);
+  ErrorLine("Bitmap file extension not recognized for file %s"
+            " (Supported extensions: .BMP, .pbitm, .xbm and .pbm/.ppm/.pnm)",
+            fileName);
 }
 
 /**
@@ -2810,12 +2785,7 @@ void DumpBitmap(const char *fileName,
   // determine the size of the resource to load
   fileName = FindAndOpenFile(fileName, "rb", &pFile);
   if (pFile == NULL)
-  {
-    char pchLine[200];
-    snprintf(pchLine, sizeof(pchLine),
-    	"Could not find Resource %s.", fileName);
-    ErrorLine(pchLine);
-  }
+    ErrorLine("Could not find Resource %s.", fileName);
 
   fseek(pFile, 0, SEEK_END);
   size = ftell(pFile);
@@ -2824,12 +2794,7 @@ void DumpBitmap(const char *fileName,
   // alocate memory and load the resource in
   pBMPData = malloc(size);
   if (pBMPData == NULL)
-  {
-    char pchLine[200];
-    snprintf(pchLine, sizeof(pchLine),
-    	"Resource %s too big to fit in memory", fileName);
-    ErrorLine(pchLine);
-  }
+    ErrorLine("Resource %s too big to fit in memory", fileName);
   fread(pBMPData, 1, size, pFile);
   fclose(pFile);
 

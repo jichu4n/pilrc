@@ -2,7 +2,7 @@
  * @(#)font.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2003, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@
 // #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <string.h>
 #include <ctype.h>
 #include "pilrc.h"
@@ -214,17 +215,23 @@ IsKoreanHantip(unsigned char *cp,
   return 0;
 }
 
+static void
+DiagnosticX(BOOL error, const char *szFormat, ...)
+{
+  va_list args;
+  va_start(args, szFormat);
+  Diagnostic(error, filename, lineno, szFormat, &args);
+  va_end(args);
+}
+
 /*
  * Report an error with line number and filename 
  */
 
 static void
-ErrorX(char *s)
+ErrorX(const char *s)
 {
-  char er[512];
-
-  snprintf(er, sizeof(er), "ERROR: %s, line %u, %s", s, lineno, filename);
-  Error(er);
+  DiagnosticX(fTrue, "%s", s);
 }
 
 /*
@@ -232,9 +239,9 @@ ErrorX(char *s)
  */
 
 static void
-WarningX(char *s)
+WarningX(const char *s)
 {
-  fprintf(stderr, "WARNING: %s, line %u, %s", s, lineno, filename);
+  DiagnosticX(fFalse, "%s", s);
 }
 
 /*
@@ -524,7 +531,7 @@ DumpFont(const char *pchFileName,
 
   }
   if (!feof(in))
-    Error2("Error reading file: ", filename);
+    Error("Error reading file: %s", filename);
 
   fclose(in);
 
@@ -620,9 +627,6 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
 
   FontCharInfoType *singleOW = NULL;
   unsigned int singleH;
-
-  int badGlyphs[kArraySize];
-  int *badGlyph = &badGlyphs[0];
 
   if (densityCount < 2)
     Error("FontFamily must have 2 fonts with density 72 and 144.");
@@ -734,7 +738,7 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
             ErrorX("Unexpected WIDTH token");
           fntOW[fntNo][curChar].width = value;
           if (singleOW && value * firstEntry->density != singleOW[curChar].width * fontFamilyEntries->density)
-            *badGlyph++ = curChar;
+            WarningLine("Widths of '%c' (%d) glyphs not in proportion across different densities", (isprint(curChar))? curChar : '?', curChar);
           continue;
         }
 
@@ -747,7 +751,7 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
             {
               fntOW[fntNo][curChar].width = width;
               if (singleOW && width * firstEntry->density != singleOW[curChar].width * fontFamilyEntries->density)
-                *badGlyph++ = curChar;
+                WarningLine("Widths of '%c' (%d) glyphs not in proportion across different densities", (isprint(curChar))? curChar : '?', curChar);
             }
           }
           else if (width != (int)strlen(s1))
@@ -772,7 +776,7 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
     }
 
     if (!feof(in))
-      Error2("Error reading file: ", filename);
+      Error("Error reading file: %s", filename);
 
     fclose(in);
 
@@ -913,20 +917,6 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
   {
     EmitL( 0);
     EmitL(0xF2000000);
-  }
-
-  if (badGlyph > badGlyphs)
-  {
-    char msg[2048];
-    int *ip;
-    strcpy(msg, "Glyph widths not in proportion across different densities:");
-    for (ip = badGlyphs; ip < badGlyph; ip++)
-    {
-	  int len = strlen(msg);
-      snprintf(msg + len, sizeof(msg) - len,
-      	(isprint(*ip))? " '%c'" : " %d", *ip);
-    }
-    WarningLine(msg);
   }
 
   // Record the single density metrics for future reference
