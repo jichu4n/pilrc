@@ -40,6 +40,7 @@
 #define fontChineseGB    4
 #define fontKoreanHanme  5
 #define fontKoreanHantip 6
+#define fontCyrillic     7
 
 extern int (*pfnChkCode) (unsigned char *cp,
                           int *pdx);

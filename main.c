@@ -92,6 +92,7 @@ Usage(void)
      "        -Fg          Use GB Chinese font widths\n"
      "        -Fj          Use Japense font widths\n"
      "        -Fh          Use Hebrew font widths\n"
+     "        -Fc          Use Cyrillic font widths\n"
      "        -rtl         Right to left support\n"
      "        -q           Less noisy output\n"
      "        -V           Generate M$ (VS-type) error/warning output\n"
@@ -138,9 +139,9 @@ main(int cArg,
 
   // display the (c) string
 #ifdef PALM_INTERNAL
-  printf("PilRC v2.9 patch release 8 - (C)2002 A. Ardiri\n");
+  printf("PilRC v2.9 patch release 9 - (C)2002 A. Ardiri\n");
 #else
-  printf("PilRC v2.9 patch release 8\n");
+  printf("PilRC v2.9 patch release 9\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000-2002 Aaron Ardiri (aaron@ardiri.com)\n");
 #endif
@@ -339,6 +340,13 @@ main(int cArg,
       continue;
     }
 
+    // font cyrillic
+    if (FSzEqI(rgszArg[i], "-Fc"))
+    {
+      fontType = fontCyrillic;
+      continue;
+    }
+
     // right to left?
     if (FSzEqI(rgszArg[i], "-rtl"))
     {
@@ -481,7 +489,9 @@ main(int cArg,
 
   ResTypeInit();
   CbInit();
-  ParseFile(szInputFile, szOutputPath, szResFile, szIncFile, fontType);
+// bug fix: john marshall
+//ParseFile(szInputFile, szOutputPath, szResFile, szIncFile, fontType);
+  FreeRcpfile(ParseFile(szInputFile, szOutputPath, szResFile, szIncFile, fontType));
 
   return 0;
 }

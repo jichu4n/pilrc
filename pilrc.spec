@@ -1,6 +1,6 @@
 Name: pilrc
 Summary: Pilot OS resources compiler
-Version: 2.9p5
+Version: 2.9p9
 Release: 1
 Source: %{name}-%{version}.tar.gz
 Group: Development/Palm

@@ -900,6 +900,58 @@ InitFontMem(int fontType)
   };
 
   /*
+   * 0xA8, 0xB8, 0xC0-0xFF
+   */
+
+  static unsigned char font0Cyrillic[] = {
+    4, 5,
+    5, 5, 5, 5, 7, 4, 8, 5,
+    5, 5, 6, 6, 8, 6, 7, 5,
+    5, 6, 6, 5, 8, 6, 6, 5,
+    6, 7, 6, 7, 5, 5, 7, 5,
+    5, 5, 5, 4, 6, 5, 8, 5,
+    5, 5, 5, 5, 6, 5, 5, 5,
+    5, 4, 6, 6, 6, 6, 6, 5,
+    6, 7, 6, 7, 5, 5, 7, 5
+  };
+
+  static unsigned char font1Cyrillic[] = {
+    5, 6,
+    7, 6, 6, 6, 8, 5, 9, 6,
+    7, 7, 7, 8,10, 8, 8, 8,
+    7, 7, 7, 6,11, 7, 8, 8,
+    9,10, 7, 9, 6, 8, 9, 7,
+    6, 6, 6, 5, 8, 6, 9, 6,
+    6, 6, 7, 7, 9, 6, 6, 6,
+    6, 5, 5, 6, 8, 6, 7, 6,
+    9,10, 7, 9, 6, 6, 9, 6
+  };
+
+  static unsigned char font2Cyrillic[] = {
+    6, 7,
+    9, 6, 6, 6, 8, 6, 8, 6,
+    6, 6, 7, 7,10, 6, 8, 6,
+    6, 7, 6, 6, 8, 7, 7, 6,
+    8, 9, 7, 8, 6, 6, 9, 6,
+    6, 6, 6, 5, 7, 7, 6, 6,
+    7, 7, 6, 6, 8, 6, 7, 7,
+    7, 6, 6, 7, 8, 6, 7, 6,
+    8, 9, 7, 8, 6, 6, 8, 6
+  };
+
+  static unsigned char font7Cyrillic[] = {
+    6, 6,
+    9, 7, 7, 7, 9, 6, 11,6,
+    8, 8, 7, 8, 9, 7, 7, 7,
+    7, 7, 7, 6, 11,8, 7, 7,
+    9,10, 8,10, 7, 6,10, 7,
+    6, 6, 6, 5, 6, 6, 8, 6,
+    6, 6, 6, 7,11, 6, 6, 6,
+    6, 6, 7, 6, 9, 6, 7, 6,
+    9,10, 7, 9, 6, 6, 9, 6
+  };
+
+  /*
    * BUG! font7Hebrew? 
    */
 
@@ -948,6 +1000,26 @@ InitFontMem(int fontType)
       SetBuiltinFont(0, font0Hebrew, 0xe0, sizeof(font0Hebrew));
       SetBuiltinFont(1, font1Hebrew, 0xe0, sizeof(font1Hebrew));
       SetBuiltinFont(2, font2Hebrew, 0xe0, sizeof(font2Hebrew));
+      break;
+
+    case fontCyrillic:
+
+      SetBuiltinFont(0, font0Cyrillic,   0xA8, 1 );
+      SetBuiltinFont(0, font0Cyrillic+1, 0xB8, 1 );
+      SetBuiltinFont(0, font0Cyrillic+2, 0xC0, sizeof(font0Cyrillic)-2);
+
+      SetBuiltinFont(1, font1Cyrillic,   0xA8, 1 );
+      SetBuiltinFont(1, font1Cyrillic+1, 0xB8, 1 );
+      SetBuiltinFont(1, font1Cyrillic+2, 0xC0, sizeof(font1Cyrillic)-2);
+
+      SetBuiltinFont(2, font2Cyrillic,   0xA8, 1 );
+      SetBuiltinFont(2, font2Cyrillic+1, 0xB8, 1 );
+      SetBuiltinFont(2, font2Cyrillic+2, 0xC0, sizeof(font2Cyrillic)-2);
+
+      SetBuiltinFont(7, font7Cyrillic,   0xA8, 1 );
+      SetBuiltinFont(7, font7Cyrillic+1, 0xB8, 1 );
+      SetBuiltinFont(7, font7Cyrillic+2, 0xC0, sizeof(font7Cyrillic)-2);
+
       break;
   }
 
