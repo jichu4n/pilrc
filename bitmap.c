@@ -1686,7 +1686,7 @@ WriteGreyTbmp(RCBITMAP * rcbmp,
         grey = (299L * c.r + 587L * c.g + 114L * c.b) / 1000L;
       }
 
-      if (grey > reader->maxval)
+      if (grey > (unsigned long)reader->maxval)
         grey = reader->maxval;
 
       if (index[grey] == -1)
@@ -1727,7 +1727,7 @@ WriteGreyTbmp(RCBITMAP * rcbmp,
 
   free(index);
 
-  if (ningreys > outmaxval + 1)
+  if (ningreys > (int)(outmaxval + 1))
   {
     char buffer[120];
 
@@ -2348,8 +2348,8 @@ Crc16CalcBlock(const void *bufP,
                unsigned short count,
                unsigned short crc)
 {
-  register const unsigned char *byteP = (unsigned char *)bufP;
-  unsigned short *crctt = (unsigned short *)crctt_16;   // CRC translation table
+  register const unsigned char *byteP = bufP;
+  const unsigned short *crctt = crctt_16;   // CRC translation table
 
   //
   // Calculate the 16 bit CRC using the table lookup method.
@@ -2490,6 +2490,8 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
   else
   {
 	ErrorLine("Unsupported density value");
+	stdIconSize_x = stdIconSize_y = 0;
+	stdSmallIconSize_x = stdSmallIconSize_y = 0;
   }
 
   // anything specific with icons here?
