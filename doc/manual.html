@@ -24,14 +24,14 @@
 <tr>
 <td>
 <font face="Arial,Helvetica">
-<h2>PilRC v2.90 p5<br>
+<h2>PilRC v2.90 p8<br>
     User Manual <div class="palmInternal">PALM internal</div></h2>
 </font>
 </td>
 <td valign=top align=right>
 <font face="Arial,Helvetica">
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
-  30 April 2002
+  22 july 2002
 </font>
 </td>
 </tr>
@@ -326,7 +326,7 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
   </td>
   <td valign=top>
   <font face="Arial,Helvetica">
-  Allow the use of "edit menu" ID values (10000-10007 inclusive).
+  Allow the use of "edit menu" ID values (10000-10007 inclusive) which are usually reserved to Palm.
   </font>
   </td>
 </tr>
@@ -339,6 +339,18 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
   <td valign=top>
   <font face="Arial,Helvetica">
   Disable special handling of "..." and ellipsis character.
+  </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -palmRez
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Uses the same default values than palmRez uses.
   </font>
   </td>
 </tr>
@@ -410,8 +422,8 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
   </td>
   <td valign=top>
   <font face="Arial,Helvetica">
-  Compile only resource with the attribute LOCALE "code".<BR>
-  Code samples: deDE, esES, enUS, frFR, itIT, jpJP.
+  Compile only the resources with the attribute LOCALE "code" set.<BR>
+  Supported LOCALEs: deDE, esES, enUS, frFR, itIT, jpJP.
   </font>
   </td>
 </tr>
@@ -423,11 +435,60 @@ Check the <a href="http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc">PilRC H
   </td>
   <td valign=top>
   <font face="Arial,Helvetica">
-  Don't compile "non localisable resources"<BR>
-  <b>NOTE</b>:<BR>
-  If option equal to "-Loc frFR -StripLoc" compile only resource with the attribute "LOCALE" equal to "frFR".<BR>
-  If option equal to "" compile resource without attribute "LOCALE".<BR>
-  If option equal to "-Loc frFR" compile resource with the attribute "LOCALE" equal to "frFR" and without the attribute.
+  Don't compile "non localized resources".<BR>
+  <b>NOTE</b>:
+  <ul>
+  <li>"-Loc frFR -StripLoc" only includes the resources whose attribute "LOCALE" is set to "frFR".<BR>
+  <li>"-Loc frFR" only includes the resources whose attribute "LOCALE" is set to "frFR" and those without the attribute at all.<BR>
+  <li>When not specifying any of these options (-Loc -StripLoc) pilrc only includes the resources without any "LOCALE" attribute.<BR>
+  <li>Your rcp file should have all the localized resources tagged with the LOCALE and all non localized resources not having a "LOCALE" attribute.<BR>
+  There are 2 different ways to distribute localized applications.
+  <ul>
+  <li> Complete (standalone) French version: You need to use "-Loc frFR" when compiling. The generated prc will contain all non localized and all French localized resources.
+  <li> "Overlaid" version of your application: You would compile the "base" prc with no option at all. This base prc will contain only the non localized resources. 
+  You need to name it "XXX.prc". Then you would compile the "overlays", one for each language with "-Loc frFR -StripLoc". In this example, this would create a second PRC containing French resources only. 
+  This is different from the standalone version which includes French resources AND non localized resources. You have to name this prc "XXX_frFR.prc". 
+  However, this is not sufficient. You need an external tool to create the 'ovly' resources in both the base prc and the overlays. 
+  It is planned to have such a small tool available soon.
+  </ul>
+  This is a different approach than the one provided by the -L flag.
+  </ul>
+  </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -type type
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Specify the type to use when gerenating a prc directly (-ro). The type parameter MUST NOT be single quoted. Use abcd, not 'abcd'.
+  </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -creator crea
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Specify the creator to use when gerenating a prc directly (-ro). The creator parameter MUST NOT be single quoted. Use abcd, not 'abcd'.
+  </font>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  -name FileName
+  </font>
+  </td>
+  <td valign=top>
+  <font face="Arial,Helvetica">
+  Specify the output file name to use. If not specified, it will be deducted from the input filename.
   </font>
   </td>
 </tr>
@@ -471,6 +532,7 @@ resources within a PRC file, depending on whether <code>-ro</code> is given:
   if the name has no extension.  If no <code>output path</code> has been
   given, a filename is constructed from the input filename by replacing ".rcp"
   with ".ro" (or appending ".ro" if the input filename does not end in ".rcp").
+  It is possible to specify the type and creator directly using -type and -creator.
   </ul>
 </p>
 </ul>
@@ -1478,7 +1540,7 @@ is one or more of: <p>
     AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
     [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] 
     [VISIBLEITEMS <font color="#00ff00">&lt;NumVisItems.n&gt;</font>] <br>
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
+    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>] [SEARCH]
     </tt>
     </td>
   </tr>
@@ -1591,6 +1653,8 @@ separate resource in the rcp file via the
 Any translations defined in the must be declared before the FORM definition 
 using the 
 <tt><a href="#lang_translation">TRANSLATION</a></tt> tag.
+<li>
+<tt>SEARCH</tt> is option for <tt>LIST</tt> and works only with <tt>POPUPTRIGGER</tt>.
 
 </ul>
 
@@ -2096,6 +2160,8 @@ The bitmap must be 32x32 (or 64x64 with density = 2), 32x22 (or 64x44) or 22x22 
 A <tt>tAIB</tt> ICONFAMILYEX resource with ID 1000 is created unless an alternate ID is specified.
 <li> 
 A <tt>COMPRESS</tt> option before BEGIN is default option for all bitmap of that family.
+<li> 
+A <tt>TRANSPARENTINDEX</tt> is not compatible with BPP > 8bpp.
 
 </pre>
 </ul>
@@ -2148,7 +2214,8 @@ The bitmap must be 15x9 (or 30x18 with density = 2) in dimension.
 A <tt>tAIB</tt> SMALLICONFAMILYEX resource with ID 1001 is created unless an alternate ID is specified.
 <li> 
 A <tt>COMPRESS</tt> option before BEGIN is default option for all bitmap of that family.
-
+<li> 
+A <tt>TRANSPARENTINDEX</tt> is not compatible with BPP > 8bpp.
 </pre>
 </ul>
 
@@ -2317,13 +2384,15 @@ END
 <u>Notes:</u> <p>
 <ul>
 <li>
-<tt>BPP</tt> must be 1, 2, 4, 5, 8, 16 (5 is for generate 4bpp (16 color) bitmap resource).
+<tt>BPP</tt> must be 1, 2, 4, 5, 8, 16 (5 is used to generate 4bpp/16 colors bitmap resources).
 <li>
-<tt>DENSITY</tt> must be 1 or 2 default is 1. you can not have only bmp with DENSITY 2 in BitmapFamilyEx.
+<tt>DENSITY</tt> must be 1 or 2 (default is 1). You can not have only bmp with DENSITY 2 in BitmapFamilyEx. There must be at least one DENSITY 1 bitmap (or the OS will complain).
 <li>
 <tt>"Sbmp"</tt> should not have bmps with density > 1.
 <li> 
-A <tt>COMPRESS</tt> option before BEGIN is default option for all bitmap of that family.
+Specifying a <tt>COMPRESS</tt> option before the BEGIN keyword becomes the default option for all bitmaps in that family. It's still possible to specify a different compression option individually though.
+<li> 
+A <tt>TRANSPARENTINDEX</tt> is not compatible with BPP > 8bpp.
 
 </pre>
 </ul>
@@ -2508,7 +2577,10 @@ can be overridden, however it is not recommended as it is set automatically.
 <ul>
 <li>
 <tt>FONT</tt> declarations must be defined before the font is used. 
-<li>ALL font declaration must have as last glyph :<ul><pre>
+<li>ALL font declarations must include a 'missing char' glyph as their last glyph. 
+This is used by the OS when trying to display a char not present in the font. 
+If this is not provided PilRC will generate a default empty one.
+For example: <ul><pre>
 GLYPH -1
 -----
 -----

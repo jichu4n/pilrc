@@ -108,6 +108,10 @@ typedef struct tagBITMAPINFO
 BITMAPINFO;
 #endif
 
+#define BI_RGB					0
+#define BI_RLE4					1
+#define BI_RLE8					2
+#define BI_BITFIELDS		3
                                                                 // *INDENT-OFF*
 /*
  * The 1bit-2 color system palette for Palm Computing Devices.
@@ -247,6 +251,8 @@ static int BMP_GetBits4bpp(BITMAPINFO *, int, PILRC_BYTE *,
                            int, int, int, int *, int *, int *, int *);
 static int BMP_GetBits8bpp(BITMAPINFO *, int, PILRC_BYTE *,
                            int, int, int, int *, int *, int *, int *);
+static int BMP_GetBits15bpp(BITMAPINFO *, int, PILRC_BYTE *,
+                            int, int, int, int *, int *, int *, int *);
 static int BMP_GetBits16bpp(BITMAPINFO *, int, PILRC_BYTE *,
                             int, int, int, int *, int *, int *, int *);
 static int BMP_GetBits24bpp(BITMAPINFO *, int, PILRC_BYTE *,
@@ -262,15 +268,15 @@ static void BMP_SetBits16bpp(int, PILRC_BYTE *, int, int, int, int);
 static void BMP_SetBits24bpp(int, PILRC_BYTE *, int, int, int, int);
 static void BMP_SetBits32bpp(int, PILRC_BYTE *, int, int, int, int);
 
-static void BMP_ConvertWindowsBitmap(RCBITMAP *, PILRC_BYTE *, int, BOOL, int *);
+static void BMP_ConvertWindowsBitmap(RCBITMAP *, PILRC_BYTE *, int, BOOL, int *, int);
 static void BMP_ConvertTextBitmap(RCBITMAP *, PILRC_BYTE *, int);
 static void BMP_ConvertX11Bitmap(RCBITMAP *, PILRC_BYTE *, int);
 static void BMP_ConvertPNMBitmap(RCBITMAP *, PILRC_BYTE *, int, int, BOOL);
 static void BMP_CompressBitmap(RCBITMAP *, int, int, BOOL, BOOL);
-static void BMP_CompressDumpBitmap(RCBITMAP *, int, int, BOOL, BOOL, BOOL, BOOL, int);
+static void BMP_CompressDumpBitmap(RCBITMAP *, int, int, BOOL, BOOL, BOOL, BOOL, int, int *);
 static void BMP_InvalidExtension(char *);
 
-static void BMP_FillBitmapV3Header(RCBITMAP *, RCBITMAP_V3 *);
+static void BMP_FillBitmapV3Header(RCBITMAP *, RCBITMAP_V3 *, int *);
                                                                 // *INDENT-ON*
 
 // 
@@ -782,6 +788,50 @@ BMP_SetBits32bpp(int cx,
 }
 
 /**
+ * Get bits from a 15bpp bitmap 
+ *
+ * @param pbmi       bitmap information
+ * @param cx         the width of the bitmap.
+ * @param pb         a reference to the bitmap resource. 
+ * @param x          the x-coordinate of the pixel to process.
+ * @param y          the y-coordinate of the pixel to process.
+ * @param cBitsAlign the os-dependant byte alignment definition.
+ * @param a          alpha channel of pixel
+ * @param r          red channel of pixel
+ * @param g          green channel of pixel
+ * @param b          blue channel of pixel
+ * @return the bit representation for the (x,y) pixel.
+ */
+static int
+BMP_GetBits15bpp(BITMAPINFO * pbmi,
+                 int cx,
+                 PILRC_BYTE * pb,
+                 int x,
+                 int y,
+                 int cBitsAlign,
+                 int *a,
+                 int *r,
+                 int *g,
+                 int *b)
+{
+  int cbRow;
+  int w;
+
+  cbRow = BMP_CbRow(cx, 16, cBitsAlign);
+  pb += cbRow * y + (x * 2);
+
+  // get the pixel
+  w = (*(pb + 1) << 8) | *pb;                    // MAY BE BUGGY!!!!
+
+  // return the values we need
+  *a = 0;
+  *r = (((w & 0x7C00) >> 7) | ((w & 0x1C00) >> 10));
+  *g = (((w & 0x03E0) >> 2) | ((w & 0x00e0) >> 5));
+  *b = (((w & 0x001F) << 3) | (w & 0x0007));
+  return -1;                                     // no index, direct color
+}
+
+/**
  * Get bits from a 16bpp bitmap 
  *
  * @param pbmi       bitmap information
@@ -821,7 +871,10 @@ BMP_GetBits16bpp(BITMAPINFO * pbmi,
   *a = 0;
   *r = (((w & 0xF800) >> 8) | ((w & 0x3800) >> 11));
   *g = (((w & 0x07E0) >> 3) | ((w & 0x0060) >> 5));
-  *b = (((w & 0x001F) >> 3) | (w & 0x0007));
+  *b = (((w & 0x001F) << 3) | (w & 0x0007));     // MiR 1st July 2002 was  *b = (((w & 0x001F) >> 3) | (w & 0x0007));
+  // which shifts the blue bits the wrong way resulting in color corruption
+  // in Bitmap displayed on PlamOS
+  // This should be mirror operation of shift carried out in "BMP_ConvertWindowsBitmap()"
 
   return -1;                                     // no index, direct color
 }
@@ -922,7 +975,8 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
                          PILRC_BYTE * pbResData,
                          int bitmaptype,
                          BOOL colortable,
-                         int *transparencyData)
+                         int *transparencyData,
+                         int density)
 {
   PILRC_BYTE *pbSrc;
   int i, x, y, dx, dy, colorDat;
@@ -958,6 +1012,9 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
   cbitsPel = -1;
   colorDat = 0;
 
+  if ((bmi.biCompression == BI_RLE4) || (bmi.biCompression == BI_RLE8))
+    ErrorLine("Pilrc does not support compressed '.bmp' files ");
+
   // check the format of the bitmap
   switch (cbits)
   {
@@ -973,8 +1030,20 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
       getBits = BMP_GetBits8bpp;
       break;
 
+    case 15:
+      // fall through
     case 16:
-      getBits = BMP_GetBits16bpp;
+      if (bmi.biCompression == BI_BITFIELDS)
+      {
+        if (*((int *)pbSrc + 1) == 0x3E00)       //rgb 5-5-5
+          getBits = BMP_GetBits15bpp;
+        else                                     //rgb 5-6-5
+          getBits = BMP_GetBits16bpp;
+        pbSrc += 12;                             // MiR 1st July 2002, for 16bpp bitmaps the bitmap body data 
+        // starts at pbmi + cbHeader + 12
+      }
+      else
+        getBits = BMP_GetBits15bpp;              // by default 5-5-5
       break;
 
     case 24:
@@ -982,6 +1051,13 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
       break;
 
     case 32:
+      if (bmi.biCompression == BI_BITFIELDS)
+      {
+        pbSrc += 12;                             // MiR 1st July 2002, for 16bpp bitmaps the bitmap body data 
+        // starts at pbmi + cbHeader + 12
+        WarningLine
+          ("32 bits bitmap don't use default color mask. It's not supported by PilRC.");
+      }
       getBits = BMP_GetBits32bpp;
       break;
 
@@ -1054,19 +1130,22 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
     case rwBitmapColor16k:
       cbitsPel = 16;
       colortable = fFalse;
-      colorDat = 8;                              // direct color structure
+      if (!density)
+        colorDat = 8;                            // direct color structure & transparency
       break;
 
     case rwBitmapColor24k:
       cbitsPel = 24;
       colortable = fFalse;
-      colorDat = 8;                              // direct color structure
+      if (!density)
+        colorDat = 8;                            // direct color structure & transparency
       break;
 
     case rwBitmapColor32k:
       cbitsPel = 32;
       colortable = fFalse;
-      colorDat = 8;                              // direct color structure
+      if (!density)
+        colorDat = 8;                            // direct color structure & transparency
       break;
 
     default:
@@ -1198,6 +1277,8 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
 
       // rcbmp->ff |= 0x0400; 
       rcbmp->flags.directColor = fTrue;
+      // do we need to consider transparency?
+      if (!density)
       {
         PILRC_BYTE *tmpPtr;
 
@@ -1205,31 +1286,30 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
         *tmpPtr++ = 5;                           // 5 red bits
         *tmpPtr++ = 6;                           // 6 green bits
         *tmpPtr++ = 5;                           // 5 blue bits
-        tmpPtr++;                                // skip over reserved
+        *tmpPtr++ = 0;                           // skip over reserved
 
-        // do we need to consider transparency?
         switch (transparencyData[0])
         {
           case rwTransparency:
             // rcbmp->ff |= 0x2000;
             rcbmp->flags.hasTransparency = fTrue;
 
-            tmpPtr++;
+            *tmpPtr++ = 0;
             *tmpPtr++ = transparencyData[1];
             *tmpPtr++ = transparencyData[2];
             *tmpPtr++ = transparencyData[3];     // set the transparent color
-
             break;
 
           default:
             break;
         }
       }
+      else if (transparencyData[0] == rwTransparency)
+        rcbmp->flags.hasTransparency = fTrue;
       break;
 
     case rwBitmapColor24k:
     case rwBitmapColor32k:
-
       rcbmp->pixelsize = cbitsPel;
       rcbmp->version = 2;
       if (vfLE32)
@@ -1237,6 +1317,8 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
       // rcbmp->ff |= 0x0400; 
 
       rcbmp->flags.directColor = fTrue;
+      // do we need to consider transparency?
+      if (!density)
       {
         PILRC_BYTE *tmpPtr;
 
@@ -1244,26 +1326,26 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
         *tmpPtr++ = 8;                           // 8 red bits
         *tmpPtr++ = 8;                           // 8 green bits
         *tmpPtr++ = 8;                           // 8 blue bits
-        tmpPtr++;                                // skip over reserved
+        *tmpPtr++ = 0;                           // skip over reserved
 
-        // do we need to consider transparency?
         switch (transparencyData[0])
         {
           case rwTransparency:
             // rcbmp->ff |= 0x2000;
             rcbmp->flags.hasTransparency = fTrue;
 
-            tmpPtr++;
+            *tmpPtr++ = 0;
             *tmpPtr++ = transparencyData[1];
             *tmpPtr++ = transparencyData[2];
             *tmpPtr++ = transparencyData[3];     // set the transparent color
-
             break;
 
           default:
             break;
         }
       }
+      else if (transparencyData[0] == rwTransparency)
+        rcbmp->flags.hasTransparency = fTrue;
       break;
 
     default:
@@ -1337,7 +1419,6 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
         case rwBitmapColor16k:
           {
             int pixel = ((((int)r & 0xF8) << 8) |       // 1111100000000000 
-                         // 
                          (((int)g & 0xFC) << 3) |       // 0000011111100000
                          (((int)b & 0xF8) >> 3));       // 0000000000011111
 
@@ -2083,12 +2164,13 @@ BMP_CompressBitmap(RCBITMAP * rcbmp,
   // determine how much memory is required for compression (hopefully
   // less)
   size = 2;                                      // compressed bmp size in UInt16
+  if (bmpVersion > 2)
+    size += 2;                                   // compressed bmp size in UInt32
   if (colortable)
     size += COLOR_TABLE_SIZE;
-  if (directColor)
+  if ((bmpVersion < 3) && (directColor))
     size += 8;
-  if (bmpVersion > 2)                            // compressed bmp size in UInt32
-    size += 2;
+
   msize = size + ((rcbmp->cbRow + ((rcbmp->cbRow + 7) / 8)) * rcbmp->cy);
 
   // allocat memory and clear
@@ -2096,8 +2178,11 @@ BMP_CompressBitmap(RCBITMAP * rcbmp,
   memset(bits, 0, msize * sizeof(unsigned char));
 
   // prevent transparency data from being compressed in 16bpp
-  if (directColor)
+  if ((bmpVersion < 3) && (directColor))
     rcbmp->pbBits += 8;
+
+  if (colortable)                                // don't compress color table
+    rcbmp->pbBits += COLOR_TABLE_SIZE;
 
   // do the compression (at least, attempt it)
   for (i = 0; i < rcbmp->cy; i++)
@@ -2124,8 +2209,11 @@ BMP_CompressBitmap(RCBITMAP * rcbmp,
     }
   }
 
+  if (colortable)
+    rcbmp->pbBits -= COLOR_TABLE_SIZE;
+
   // fix pointer back for 16bpp (we offset it previously)
-  if (directColor)
+  if ((bmpVersion < 3) && (directColor))
     rcbmp->pbBits -= 8;
 
   // if we must compress, or if it was worth it, save!
@@ -2143,7 +2231,7 @@ BMP_CompressBitmap(RCBITMAP * rcbmp,
       firstByteToWriteLen = COLOR_TABLE_SIZE;
     }
     // direct color info?
-    else if (directColor)
+    else if ((bmpVersion < 3) && (directColor))
     {
       int i;
 
@@ -2273,7 +2361,8 @@ Crc16CalcBlock(const void *bufP,
  */
 static void
 BMP_FillBitmapV3Header(RCBITMAP * rcbmp,
-                       RCBITMAP_V3 * rcbmpv3)
+                       RCBITMAP_V3 * rcbmpv3,
+                       int *transparencyData)
 {
   if ((rcbmp) && (rcbmpv3))
   {
@@ -2287,10 +2376,44 @@ BMP_FillBitmapV3Header(RCBITMAP * rcbmp,
     else
       rcbmpv3->version = 0x03;
     rcbmpv3->size = 0x18;
-    rcbmpv3->pixelFormat = 0;
+
+    if (vfLE32)
+    {
+      if (rcbmp->pixelsize <= 8)
+        rcbmpv3->pixelFormat = pixelFormatIndexedLE;
+      else
+        rcbmpv3->pixelFormat = pixelFormat565LE;
+    }
+    else
+    {
+      if (rcbmp->pixelsize <= 8)
+        rcbmpv3->pixelFormat = pixelFormatIndexed;
+      else
+        rcbmpv3->pixelFormat = pixelFormat565;
+    }
+
     rcbmpv3->compressionType = rcbmp->compressionType;
     rcbmpv3->density = 144;
-    rcbmpv3->transparentValue = rcbmp->transparentIndex;
+    rcbmpv3->transparentValue = 0;
+    if (rcbmp->flags.hasTransparency)
+    {
+      if (rcbmp->pixelsize <= 8)
+        rcbmpv3->transparentValue = rcbmp->transparentIndex;
+      else if (rcbmp->pixelsize == 16)
+      {
+        // RMa bug fix in 16k no palette, no index just the 5-6-5 color intead.
+        rcbmpv3->transparentValue = (((transparencyData[1] & 0xF8) << 8) |      // 1111100000000000 
+                                     ((transparencyData[2] & 0xFC) << 3) |      // 0000011111100000
+                                     ((transparencyData[3] & 0xF8) >> 3));      // 0000000000011111
+      }
+      else
+      {
+        rcbmpv3->transparentValue = 0;
+        rcbmpv3->transparentValue = (transparencyData[1] << 16) & 0x00FF0000;
+        rcbmpv3->transparentValue |= (transparencyData[2] << 8) & 0x0000FF00;
+        rcbmpv3->transparentValue |= (transparencyData[3] << 0) & 0x000000FF;
+      }
+    }
     rcbmpv3->nextDepthOffset = rcbmp->nextDepthOffset;
     rcbmpv3->cbDst = rcbmp->cbDst;
     rcbmpv3->pbBits = rcbmp->pbBits;
@@ -2317,7 +2440,8 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
                        BOOL directColor,
                        BOOL multibit,
                        BOOL bootScreen,
-                       int density)
+                       int density,
+                       int *transparencyData)
 {
   int stdIconSize_x = 32;
   int stdIconSize_y = 22;
@@ -2363,6 +2487,7 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
   }
 
   // do we need to do some compression?
+  // NOTE: compression of 16, 24 and 32bpp DONT work right now
   if ((compress == rwAutoCompress) || (compress == rwForceCompress))
   {
     BMP_CompressBitmap(rcbmp, compress, (density) ? 3 : 2, colortable,
@@ -2425,7 +2550,7 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
     {
       RCBITMAP_V3 rcbmpv3;
 
-      BMP_FillBitmapV3Header(rcbmp, &rcbmpv3);
+      BMP_FillBitmapV3Header(rcbmp, &rcbmpv3, transparencyData);
       CbEmitStruct(&rcbmpv3, szRCBITMAP_V3, NULL, fTrue);
     }
     else
@@ -2474,25 +2599,23 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
     if (density)
     {
       RCBITMAP_V3 rcbmpv3;
-
-      BMP_FillBitmapV3Header(rcbmp, &rcbmpv3);
-      CbEmitStruct(&rcbmpv3, szRCBITMAP_V3, NULL, fTrue);
-    }
-    else
-    {
-      CbEmitStruct(rcbmp, szRCBITMAP, NULL, fTrue);
-    }
-    DumpBytes(rcbmp->pbBits, rcbmp->cbDst);
-    if (density)
-    {
       BOOL savedValue = vfLE32;
+
+      BMP_FillBitmapV3Header(rcbmp, &rcbmpv3, transparencyData);
+      CbEmitStruct(&rcbmpv3, szRCBITMAP_V3, NULL, fTrue);
+      DumpBytes(rcbmp->pbBits, rcbmp->cbDst);
 
       vfLE32 = fTrue;
       PadBoundary();
       vfLE32 = savedValue;
     }
     else
+    {
+      CbEmitStruct(rcbmp, szRCBITMAP, NULL, fTrue);
+      DumpBytes(rcbmp->pbBits, rcbmp->cbDst);
       PadBoundary();                             // RMa add: BUG correction 
+    }
+
   }
   // clean up
   free(rcbmp->pbBits);
@@ -2590,28 +2713,32 @@ DumpBitmap(char *fileName,
   if (FSzEqI(pchExt, "bmp"))
   {
     BMP_ConvertWindowsBitmap(&rcbmp, pBMPData, bitmaptype, colortable,
-                             transparencyData);
+                             transparencyData, density);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, colortable,
-                           directColor, multibit, bootScreen, density);
+                           directColor, multibit, bootScreen, density,
+                           transparencyData);
   }
   else if (FSzEqI(pchExt, "pbitm"))
   {
     BMP_ConvertTextBitmap(&rcbmp, pBMPData, size);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse,
-                           directColor, multibit, bootScreen, density);
+                           directColor, multibit, bootScreen, density,
+                           transparencyData);
   }
   else if (FSzEqI(pchExt, "xbm"))
   {
     BMP_ConvertX11Bitmap(&rcbmp, pBMPData, size);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse,
-                           directColor, multibit, bootScreen, density);
+                           directColor, multibit, bootScreen, density,
+                           transparencyData);
   }
   else if (FSzEqI(pchExt, "pbm") || FSzEqI(pchExt, "pgm")
            || FSzEqI(pchExt, "ppm") || FSzEqI(pchExt, "pnm"))
   {
     BMP_ConvertPNMBitmap(&rcbmp, pBMPData, size, bitmaptype, colortable);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse,
-                           directColor, multibit, bootScreen, density);
+                           directColor, multibit, bootScreen, density,
+                           transparencyData);
   }
   else
   {

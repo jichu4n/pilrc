@@ -1347,6 +1347,10 @@ ParseItm(ITM * pitm,
         CheckGrif(ifOn);
         pitm->on = fTrue;
         break;
+      case rwSearch:
+        CheckGrif(ifSearch);
+        pitm->search = fTrue;
+        break;
       case rwEditable:
       case rwNonEditable:
         CheckGrif(ifEditable);
@@ -2526,7 +2530,8 @@ FParseObjects()
       case rwLST:                               /* list */
         ParseItm(&itm,
                  ifMultText | ifId | ifRc | ifUsable | ifFont | ifEnabled |
-                 ifCvis | ifSmallMargin, if2Null, if3Null, if4Null);
+                 ifCvis | ifSmallMargin | ifSearch, if2Null, if3Null,
+                 if4Null);
 
         obj.list = calloc(1, sizeof(RCListType));
         SETPBAFIELD(obj.list, itemsText, itm.text);
@@ -2539,6 +2544,7 @@ FParseObjects()
           SETPBAFIELD(obj.list, attr.enabled, fFalse);
         else
           SETPBAFIELD(obj.list, attr.enabled, itm.enabled);
+        SETPBAFIELD(obj.list, attr.search, itm.search);
 
         SETPBAFIELD(obj.list, font, itm.font);
         if ( /*vfPalmRez && */ itm.rc.extent.y == 0 && itm.cvis == -1)  // RNi: PalmRez automatically compute height of lists set with a height of 0
@@ -3922,7 +3928,7 @@ ParseDumpBitmapExFile(int bitmapType)
   BMPDEF currentEntry;
   char *pchResType = NULL;
   char *pLocale = NULL;
-  int defaultCompress = rwNoCompress;
+  int defaultCompress = 0;                       // ??? MJM: initialized to 0
   int id = 0, i = 0;
   int flag = 0;
   int index = 0;
@@ -3979,7 +3985,7 @@ ParseDumpBitmapExFile(int bitmapType)
       case rwLocale:
         pLocale = PchGetSz("locale");
         break;
-      default:
+      default:                                  // ??? MJM: added default
         break;
     }
   }
@@ -4112,8 +4118,15 @@ ParseDumpBitmapExFile(int bitmapType)
       if (currentEntry.density == 2)
         index += 8;
 
-      if (flag & (0x01 << index))
+      if ((index >= 4) &&
+          (currentEntry.transparencyData[0] == rwTransparencyIndex))
+        ErrorLine
+          ("16k, 24k and 32k colors bitmap don't support transparancy index.");
+
+      if ((index == 2) && (flag & (0x01 << 2)))
         ErrorLine("Bitmap can't have 4 bit gray and 4 bit color data.");
+      else if (flag & (0x01 << index))
+        ErrorLine("Multiple bitmaps for one depth.");
       else
         flag |= (0x01 << index);
       memcpy(&aBitmapEntries[index], &currentEntry, sizeof(BMPDEF));
@@ -4132,7 +4145,7 @@ ParseDumpBitmapExFile(int bitmapType)
   if ((bitmapType == rwIconFamilyEx) || (bitmapType == rwIconSmallFamilyEx))
   {
     if (id == 0)
-    {
+    {                                            // ??? MJM: ADDED curly braces
       if (bitmapType == rwIconFamilyEx)
         id = 1000;
       else
@@ -4434,39 +4447,61 @@ CLEANUP:
 void
 ParseDumpLauncherCategory(void)
 {
-  int id;
-  char *pString;
-  ITM itm;
+  int id = 0;                                    // ??? MJM: Added initialization to 0
+  char *pString = NULL;
+  char *pLocale = NULL;
 
-  ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
-  /*
-   * RMa localisation 
-   */
-  if (ObjectDesiredInOutputLocale(&itm))
+  while (FGetTok(&tok))
   {
-    while (FGetTok(&tok))                        /* parse to last string in string table */
+    if ((tok.rw == rwId) || (tok.rw == rwAutoId))
     {
-      if (tok.lex.lt != ltStr)
-      {
-        UngetTok();
-        break;
-      }
+      UngetTok();
+      id = WGetId("LauncherCategory ResourceId", fFalse);
+      if (id != 1000)
+        WarningLine
+          ("Default Launcher Category ID is 1000 (it dont work otherwise)");
     }
-    return;
+    else if (tok.rw == rwLocale)
+    {
+      pLocale = PchGetSz("locale");
+    }
+    else if (tok.lex.lt == ltStr)
+    {
+      UngetTok();
+      pString = PchGetSz("taic");
+      break;
+    }
+    else
+      ErrorLine2("Unexpected token: ", tok.lex.szId);
   }
 
-  id = itm.id;
-  if (id != 1000)
-    WarningLine
-      ("Default Launcher Category ID is 1000 (it dont work otherwise)");
+  if (id == 0)
+    id = 1000;
 
-  pString = PchGetSz("taic");
+  /*
+   * * RMa localisation 
+   */
+  if (pLocale)
+  {
+    if (!szLocaleP)
+      goto CLEANUP;
+    else if (strcmp(pLocale, szLocaleP))
+      goto CLEANUP;
+  }
+  else if (vfStripNoLocRes)
+    goto CLEANUP;
+
   OpenOutput(kPalmResType[kDefaultCategoryRscType], id);        /* RMa "taic" */
   DumpBytes(pString, strlen(pString) + 1);
   //      RMa Remove padding is it no necessary padding. it done by prcbuild if needded
   //      PadBoundary();
   CloseOutput();
-  free(pString);
+
+CLEANUP:
+  if (pString)
+    free(pString);
+  if (pLocale)
+    free(pLocale);
 }
 
 /*-----------------------------------------------------------------------------

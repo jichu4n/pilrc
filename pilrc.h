@@ -33,6 +33,8 @@
  *     20-Nov-2000 Renaud Malaval
  *                 additions PalmOS 3.5 support
  *                 additions to support LE32 resouces
+ *               03-Jun-2002 Renaud Malaval
+ *                                                               additions of SEARCH flag in list
  */
 
 #ifndef _pilrc_h
@@ -1305,16 +1307,19 @@ typedef struct _rcBitmapFlagsType
    */
   p_int forScreen;                               /* u *//* system use only */
   p_int directColor;                             /* u  *//* direct color bitmap */
-  //p_int reserved;                 /* zu10 */ 
+
+  p_int indirectColorTable;                      /* u  *//* if true, color table pointer follows BitmapType structure */
+  p_int noDither;                                /* u  *//* if true, blitter does not dither */
+  //p_int reserved;                 /* zu8 */ 
 }
 RCBitmapFlagsType;
 
 typedef struct _rcBITMAP
-{                                                /* bm */
+{                                                /* b */
   p_int cx;                                      /* w */
   p_int cy;                                      /* w */
   p_int cbRow;                                   /* w */
-  RCBitmapFlagsType flags;                       /* uuuuuuzu10 *//* RMa struct updated */
+  RCBitmapFlagsType flags;                       /* uuuuuuuuzu8 *//* RMa struct updated */
   p_int pixelsize;                               /* b */
   p_int version;                                 /* b */
   p_int nextDepthOffset;                         /* w */
@@ -1335,17 +1340,25 @@ typedef struct _rcBITMAP
 }
 RCBITMAP;
 
-#define szRCBITMAP "w,w,w,uuuuuuzu10,b,b,w,b,b,zw"
+#define szRCBITMAP "w,w,w,uuuuuuuuzu8,b,b,w,b,b,zw"
 
 /*
  * RMa add support for density > 1
  */
+Enum(PixelFormatBV3Tag)
+{
+  pixelFormatIndexed, pixelFormat565, pixelFormat565LE, // not used by 68K-based OS
+    pixelFormatIndexedLE                         // not used by 68K-based OS
+}
+
+EndEnum PixelFormatBV3Type;
+
 typedef struct _rcBITMAP_V3
 {                                                /* bm */
   p_int cx;                                      /* w */
   p_int cy;                                      /* w */
   p_int cbRow;                                   /* w */
-  RCBitmapFlagsType flags;                       /* uuuuuuzu10 */
+  RCBitmapFlagsType flags;                       /* uuuuuuuuzu8 */
   p_int pixelsize;                               /* b */
   p_int version;                                 /* b */
   p_int size;                                    /* b */
@@ -1368,7 +1381,7 @@ typedef struct _rcBITMAP_V3
 }
 RCBITMAP_V3;
 
-#define szRCBITMAP_V3 "w,w,w,uuuuuuzu10,b,b,b,b,zb,b,w,l,l"
+#define szRCBITMAP_V3 "w,w,w,uuuuuuuuzu8,b,b,b,b,zb,b,w,l,l"
 
 /*-----------------------------------------------------------------------------
 |	FONT
@@ -1535,6 +1548,7 @@ RCPFILE;
        rwRightAlign, rwMaxChars,
        rwVisibleItems, rwAutoShift, rwNumeric,
        rwChecked,
+       rwSearch,
 
        rwBitmap,
        rwBitmapGrey,
@@ -1840,6 +1854,7 @@ RWT;
        {"autoshift", NULL, rwAutoShift},
        {"numeric", NULL, rwNumeric},
        {"checked", "on", rwChecked},
+       {"search", NULL, rwSearch},
 
        {"bitmap", NULL, rwBitmap},
        {"bitmapgrey", "bitmapgray", rwBitmapGrey},
@@ -2181,6 +2196,7 @@ typedef struct _itm
   BOOL dynamicSize;
   BOOL vertical;                                 /* RMa add: slider */
   BOOL graphical;                                /* RMa add: slider */
+  BOOL search;                                   /* RMa add: lst enable incremental search */
   int justification;
   int maxChars;
   int autoShift;
@@ -2292,6 +2308,7 @@ ITM;
 #define ifListId       0x00080000
 #define ifBitmap       0x00100000
 #define ifExtended     0x00200000                /* MBr add: gadget */
+#define ifSearch	     0x00400000
 
 /*
  * Form ifs 

@@ -106,6 +106,9 @@ Usage(void)
      "        -Loc <code>  Compile only res with the attribute LOCALE \"code\"\n"
      "                     code samples: deDE, esES, enUS, frFR, itIT, jpJP\n"
      "        -StripLoc    Don't compile 'non localisable resources'\n"
+     "        -type        Specify the type to use when generating a prc (-ro)\n"
+     "        -creator     Specify the creator to use when generating a prc (-ro)\n"
+     "        -name        Specify output filename (-R, -ro)\n"
      "        <outfiledir> Directory where .bin files should be generated,\n"
      "                     or name of the file to generate containing all\n"
      "                     the generated resources\n");
@@ -135,9 +138,9 @@ main(int cArg,
 
   // display the (c) string
 #ifdef PALM_INTERNAL
-  printf("PilRC v2.9 patch release 5 - (C)2002 A. Ardiri\n");
+  printf("PilRC v2.9 patch release 8 - (C)2002 A. Ardiri\n");
 #else
-  printf("PilRC v2.9 patch release 5\n");
+  printf("PilRC v2.9 patch release 8\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000-2002 Aaron Ardiri (aaron@ardiri.com)\n");
 #endif
@@ -460,10 +463,11 @@ main(int cArg,
 
 #ifdef PALM_INTERNAL
   // if output folder not exist create it
-  if ((_access(szOutputPath, 0)) == -1)
-  {
-    _mkdir(szOutputPath);
-  }
+  if (strstr(szOutputPath, ".prc") == NULL)
+    if ((_access(szOutputPath, 0)) == -1)
+    {
+      _mkdir(szOutputPath);
+    }
 #endif
 
   // last minute check? (extra stuff?)
