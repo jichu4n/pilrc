@@ -861,6 +861,14 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     User Defined Font Resource
     </td>
   </tr>
+  <tr>
+    <td valign=top>
+    <a href="#lang_fontfamily">FONTFAMILY</a>
+    </td>
+    <td valign=center>
+    User Defined Font Family Resource
+    </td>
+  </tr>
   <tr class="palmInternal">
     <td valign=top>
     <a href="#lang_fontindex">FONTINDEX</a>
@@ -2232,6 +2240,39 @@ FntDefineFont(128, font128);</pre>
 <li>
 FONT support in PilRC is not complete, and has been reverse engineered.
 </ul>
+
+<a name="lang_fontfamily"></a>
+<b>FONTFAMILY (nfnt)</b><p>
+
+<pre class=syntax>
+FONTFAMILY ID <var>&lt;ResId.n&gt;</var> [LOCALE <var>&lt;LocaleName.s&gt;</var>]
+BEGIN
+    FONT <var>&lt;FontFileName.s&gt;</var> DENSITY <var>&lt;Density.n&gt;</var>
+    ...
+END
+</pre>
+
+<p>
+<u>Notes:</u>
+<ul>
+<li>Use in PalmOS version 4.0 and after.
+<li>The densities supported are 72 and 144.
+<li>
+For compatibility with an earlier version of PilRC, the syntax
+"<tt class=syntax>DENSITY <var>&lt;Density.n&gt;</var>
+<var>&lt;FontFileName.s&gt;</var></tt>" is also accepted within the
+<tt>BEGIN</tt>/<tt>END</tt>, but this is deprecated.
+</ul>
+
+<u>Example:</u>
+<ul><pre>
+FONTFAMILY ID 1000 LOCALE "enUS"
+BEGIN
+    FONT "font_100.txt" DENSITY 72
+    FONT "font_101.txt" DENSITY 144
+END
+</pre></ul>
+
 <div class="palmInternal">
 <a name="lang_fontindex"></a>
 <b>FONTINDEX (fnti)</b><p>

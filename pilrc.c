@@ -4484,14 +4484,12 @@ ParseDumpFontFamily()
 
   while (FGetTok(&tok) && (tok.rw != rwEnd))
   {
-    UngetTok();
-    if ((tok.lex.lt == ltConst) || (tok.lex.lt == ltId))
+    if (tok.rw == rwBitmapDensity)
     {
-      GetExpectRw(rwBitmapDensity);
       aFontFamilyEntries[densityCount].density = WGetConstEx("Density");
       aFontFamilyEntries[densityCount].pchFileName = PchGetSz("Font Filename");
     }
-    else if (tok.lex.lt == ltStr)
+    else if (tok.rw == rwFont)
     {
       aFontFamilyEntries[densityCount].pchFileName = PchGetSz("Font Filename");
       GetExpectRw(rwBitmapDensity);
