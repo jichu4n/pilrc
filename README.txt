@@ -37,18 +37,10 @@
   ========
 
   The  source code and  binaries are  available  free of  charge  and  are 
-  Copyrighted 1997-2003 by Wes Cherry and Aaron Ardiri. We'd encourage you
+  Copyrighted 1997-2004 by Wes Cherry and Aaron Ardiri. We'd encourage you
   to send modifications (bug-fixes and/or improvements) of PilRC to  Aaron 
   Ardiri so that they can be integrated into the next release(s). 
 
-  If you are compiling under a  UN*X development environment, you may wish
-  to remove the  ^M (return chars) from the source code using the src2unix
-  script:
-
-     ./src2unix.sh
- 
-  Some UN*X compilers complain about ^M chars, and this is an easy fix :)
- 
   > generic "compile"
 
   A generic  Makefile has  been included that compiles using a very simple
@@ -87,7 +79,7 @@
   which can usefully be edited.  They can be divided into three categories:
 
      Genuine PilRC source files:
-        acinclude.m4, configure.ac, Makefile.am, pilrc.spec
+        acinclude.m4, configure.ac, Makefile.am, pilrc.build, pilrc.spec
 
      Standard utility scripts copied from gnulib:
         depcomp, install-sh, missing, mkinstalldirs
