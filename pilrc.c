@@ -213,7 +213,7 @@ int idAutoDirection = idDefaultDirection;
 /*
  * output header file support
  */
-static char szOutputHeaderFile[256] = "";
+static char *szOutputHeaderFile = NULL;
 
 /*
  * Warning about duplicates in forms and menus 
@@ -5331,7 +5331,8 @@ ParseGenerateHeader()
     TOK tok;
 
     GetExpectLt(&tok, ltStr, "Output header name");
-    strcpy(szOutputHeaderFile, tok.lex.szId);
+    free(szOutputHeaderFile);
+    szOutputHeaderFile = MakeFilename("%s", tok.lex.szId);
     vfAutoId = fTrue;
 }
 
@@ -6514,7 +6515,7 @@ ParseFile(const char *szIn,
 
   if (szIncFile != NULL)
   {
-    strncpy(szOutputHeaderFile, szIncFile, sizeof(szOutputHeaderFile));
+    szOutputHeaderFile = MakeFilename("%s", szIncFile);
   }
 
   prcpfile = calloc(1, sizeof(RCPFILE));
@@ -6580,7 +6581,7 @@ ParseFile(const char *szIn,
     if (dependsFile)
     {
         OutputDependsList(dependsFile, szMainOutput);
-        if (szOutputHeaderFile[0] != '\0')
+        if (szOutputHeaderFile)
             OutputDependsList(dependsFile, szOutputHeaderFile);
         fclose(dependsFile);
     }
@@ -6593,7 +6594,7 @@ ParseFile(const char *szIn,
 
   // LDu 31-8-2001 end modification //
 
-  if (!vfInhibitOutput && szOutputHeaderFile[0] != 0)
+  if (!vfInhibitOutput && szOutputHeaderFile)
   {
     WriteIncFile(szOutputHeaderFile);
   }
@@ -6615,6 +6616,7 @@ ParseFile(const char *szIn,
 #endif
 
     
+  free(szOutputHeaderFile);
   if (vfTrackDepends)
   {
     FreeDependsList();
