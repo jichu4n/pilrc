@@ -2539,7 +2539,10 @@ ITM;
 /* unused              0x20000000 */
 
 /*
- * Ifs defining margins -- extra width to add to an item in addition to it's string width 
+ * Ifs defining margins -- extra width to add to an 
+ * item in addition to it's string width.  These don't
+ * map to keywords used in the RCP file but are used
+ * for AUTO width calculations.
  */
 #define ifBigMargin    0x40000000
 #define ifSmallMargin  0x80000000

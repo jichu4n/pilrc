@@ -2607,14 +2607,14 @@ FParseObjects(RCPFILE * prcpfile)
       case rwREP:                               /* repeating control */
         ParseItm(&itm,
                  ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont |
-                 ifAnchor | ifFrame | ifSmallMargin | ifBigMargin,
+                 ifAnchor | ifFrame | ifBigMargin,
                  if2Graphical | if2BitmapID | if2SelectedBitmapID, 
                  if3Null, if4Null);
         goto Control;
       case rwPBN:                               /* pushbutton */
         ParseItm(&itm,
                  ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont |
-                 ifAnchor | ifGroup | ifSmallMargin | ifBigMargin,
+                 ifAnchor | ifGroup | ifSmallMargin,
                  if2Graphical | if2BitmapID | if2SelectedBitmapID, 
                  if3Null, if4Null);
         itm.frame = noButtonFrame; 
@@ -2635,7 +2635,7 @@ FParseObjects(RCPFILE * prcpfile)
       case rwSLT:                               /* selectortrigger */
         ParseItm(&itm,
                  ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont |
-                 ifAnchor | ifSmallMargin | ifBigMargin,
+                 ifAnchor | ifSmallMargin,
                  if2Graphical | if2BitmapID | if2SelectedBitmapID, 
                  if3Null, if4Null);
         itm.frame = noButtonFrame;
