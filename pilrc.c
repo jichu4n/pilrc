@@ -3245,25 +3245,31 @@ void ParseDumpData()
 	id = WGetId("Data ResourceId", fFalse);
 	pchFileName = PchGetSz("Data Filename");
 
-        // write the data to file
-	OpenOutput(pchResType, id);
-	{
+        // file name available?
+        if ((pchFileName != NULL) && (strcmp(pchFileName, "") != 0)) {
+ 
+          // write the data to file
+ 	  OpenOutput(pchResType, id);
+	  {
 		int  cch;
 		char *data;
 		FILE *fh = fopen(pchFileName, "rb");
 
-		data = malloc(4096);
+	  	data = malloc(4096);
 		cch = fread(data, 1, 4096, fh);
 		while (cch != 0) {
 			DumpBytes(data, cch);
 			cch = fread(data, 1, 4096, fh);
 		}
 		fclose(fh);
-	}
-	CloseOutput();
+	  }
+	  CloseOutput();
+        }
+        else
+          ErrorLine("Empty or no file name provided");
 
 	free(pchResType);
-	free(pchFileName);
+	if (pchFileName != NULL) free(pchFileName);
 }
 
 // 2.7 modifications/additions

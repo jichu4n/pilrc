@@ -420,7 +420,7 @@ typedef struct _rcTableBA16Type
 	/* not emitted */
 	int *rgdxcol; 
 	} RCTableBA16Type;
-#define szRCTableBA16 "w,w4,uuuuuzu11,w,w,w,w,w,w,zl,zl,zl"##szRCFieldBA16
+#define szRCTableBA16 "w,w4,uuuuuzu11,w,w,w,w,w,zl,zl,zl"##szRCFieldBA16
 typedef struct _rcTableBA32Type 
 	{
 	int id;							/* w  */

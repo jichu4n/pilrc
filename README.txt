@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
- PilRC version 2.7a                                        Janurary 6, 2001
+ PilRC version 2.7b                                        Feburary 8, 2001
 ----------------------------------------------------------------------------
 
   INSTALLATION:
@@ -56,7 +56,7 @@
      make -f Makefile.generic
 
   PilRCUI can be compiled  by typing the following at your  command prompt
-  when using a system with "gtk" support:
+  when using a system with "gtk" support (unix systems mainly):
 
      make -f Makefile.gui
 

@@ -229,8 +229,8 @@ static void BMP_ConvertWindowsBitmap(RCBITMAP *, PILRC_BYTE *, int, BOOL, int*);
 static void BMP_ConvertTextBitmap(RCBITMAP *, PILRC_BYTE *, int);
 static void BMP_ConvertX11Bitmap(RCBITMAP *, PILRC_BYTE *, int);
 static void BMP_ConvertPNMBitmap(RCBITMAP *, PILRC_BYTE *, int, int, BOOL);
-static void BMP_CompressBitmap(RCBITMAP *, int, BOOL);
-static void BMP_CompressDumpBitmap(RCBITMAP *, int, int, BOOL, BOOL);
+static void BMP_CompressBitmap(RCBITMAP *, int, BOOL, BOOL);
+static void BMP_CompressDumpBitmap(RCBITMAP *, int, int, BOOL, BOOL, BOOL);
 static void BMP_InvalidExtension(char *);
 
 // ADDED 2.7
@@ -238,6 +238,12 @@ static void BMP_SetBits16bpp(int, PILRC_BYTE *, int, int, int, int);
 static void BMP_SetBits24bpp(int, PILRC_BYTE *, int, int, int, int);
 static void BMP_SetBits32bpp(int, PILRC_BYTE *, int, int, int, int);
 // ADDED 2.7 - end
+
+// ADDED 2.7b
+static int  BMP_GetBits16bpp(BITMAPINFO *, int, PILRC_BYTE *, int, int, int, int *, int *, int *, int *);
+static int  BMP_GetBits24bpp(BITMAPINFO *, int, PILRC_BYTE *, int, int, int, int *, int *, int *, int *);
+static int  BMP_GetBits32bpp(BITMAPINFO *, int, PILRC_BYTE *, int, int, int, int *, int *, int *, int *);
+// ADDED 2.7b - end
 
 //
 // code
@@ -663,6 +669,135 @@ BMP_SetBits32bpp(int        cx,
 }
 // ADDED 2.7 - end
 
+// ADDED 2.7b
+/**
+ * Get bits from a 16bpp bitmap 
+ *
+ * @param pbmi       bitmap information
+ * @param cx         the width of the bitmap.
+ * @param pb         a reference to the bitmap resource. 
+ * @param x          the x-coordinate of the pixel to process.
+ * @param y          the y-coordinate of the pixel to process.
+ * @param cBitsAlign the os-dependant byte alignment definition.
+ * @param a          alpha channel of pixel
+ * @param r          red channel of pixel
+ * @param g          green channel of pixel
+ * @param b          blue channel of pixel
+ * @return the bit representation for the (x,y) pixel.
+ */
+static int 
+BMP_GetBits16bpp(BITMAPINFO *pbmi,
+                 int        cx, 
+                 PILRC_BYTE *pb, 
+                 int        x, 
+                 int        y, 
+                 int        cBitsAlign,
+                 int        *a, 
+                 int        *r, 
+                 int        *g, 
+                 int        *b)
+{
+  int cbRow;
+  int w;
+
+  cbRow = BMP_CbRow(cx, 16, cBitsAlign);
+  pb   += cbRow * y + (x * 2);
+
+  // get the pixel
+  w = (*(pb+1) << 8) | *pb;                                // MAY BE BUGGY!!!!
+
+  // return the values we need
+  *a = 0;
+  *r = (((w & 0xF800) >> 8) | ((w & 0x3800) >> 11));
+  *g = (((w & 0x07E0) >> 3) | ((w & 0x0060) >>  5));
+  *b = (((w & 0x001F) >> 3) |  (w & 0x0007));
+
+  return -1;  // no index, direct color
+}
+
+/**
+ * Get bits from a 24bpp bitmap 
+ *
+ * @param pbmi       bitmap information
+ * @param cx         the width of the bitmap.
+ * @param pb         a reference to the bitmap resource. 
+ * @param x          the x-coordinate of the pixel to process.
+ * @param y          the y-coordinate of the pixel to process.
+ * @param cBitsAlign the os-dependant byte alignment definition.
+ * @param a          alpha channel of pixel
+ * @param r          red channel of pixel
+ * @param g          green channel of pixel
+ * @param b          blue channel of pixel
+ * @return the bit representation for the (x,y) pixel.
+ */
+static int 
+BMP_GetBits24bpp(BITMAPINFO *pbmi,
+                 int        cx, 
+                 PILRC_BYTE *pb, 
+                 int        x, 
+                 int        y, 
+                 int        cBitsAlign,
+                 int        *a, 
+                 int        *r, 
+                 int        *g, 
+                 int        *b)
+{
+  int cbRow;
+
+  cbRow = BMP_CbRow(cx, 24, cBitsAlign);
+  pb   += cbRow * y + (x * 3);
+
+  // return the values we need
+  *a = 0;
+  *r = *(pb+2);
+  *g = *(pb+1);
+  *b = *pb;
+
+  return -1;  // no index, direct color
+}
+
+/**
+ * Get bits from a 32bpp bitmap 
+ *
+ * @param pbmi       bitmap information
+ * @param cx         the width of the bitmap.
+ * @param pb         a reference to the bitmap resource. 
+ * @param x          the x-coordinate of the pixel to process.
+ * @param y          the y-coordinate of the pixel to process.
+ * @param cBitsAlign the os-dependant byte alignment definition.
+ * @param a          alpha channel of pixel
+ * @param r          red channel of pixel
+ * @param g          green channel of pixel
+ * @param b          blue channel of pixel
+ * @return the bit representation for the (x,y) pixel.
+ */
+static int 
+BMP_GetBits32bpp(BITMAPINFO *pbmi,
+                 int        cx, 
+                 PILRC_BYTE *pb, 
+                 int        x, 
+                 int        y, 
+                 int        cBitsAlign,
+                 int        *a, 
+                 int        *r, 
+                 int        *g, 
+                 int        *b)
+{
+  int cbRow;
+
+  cbRow = BMP_CbRow(cx, 32, cBitsAlign);
+  pb   += cbRow * y + (x * 4);
+
+  // return the values we need
+  *a = *(pb+1);
+  *r = *pb;
+  *g = *(pb+3);
+  *b = *(pb+2);                                            // MAY BE BUGGY!!!!
+
+  return -1;  // no index, direct color
+}
+// ADDED 2.7b - end
+
 /**
  * Convert a Microsoft Windows BMP file to Palm Computing resource data.
  *
@@ -699,6 +834,7 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
   cbits    = WLoadX86(bmi.biBitCount);
   numClrs  = LLoadX86(bmi.biClrUsed);
   if (numClrs == 0) numClrs = 1 << cbits;  // MSPaint DONT set this
+  if (numClrs > 256) numClrs = 0;          // direct color FIX
   pbSrc    = ((PILRC_BYTE *)pbmi) + cbHeader + (sizeof(RGBQUAD) * numClrs);
   cbitsPel = -1;
   colorDat = 0;
@@ -718,8 +854,20 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
          getBits = BMP_GetBits8bpp;
          break;
 
+    case 16:
+         getBits = BMP_GetBits16bpp;
+         break;
+
+    case 24:
+         getBits = BMP_GetBits24bpp;
+         break;
+
+    case 32:
+         getBits = BMP_GetBits32bpp;
+         break;
+
     default:
-         ErrorLine ("Bitmap not monochrome, 16 color or 256 color");
+         ErrorLine ("Bitmap not monochrome, 16, 256, 16bit, 24bit or 32bit color");
          break;
   }
 
@@ -1694,17 +1842,21 @@ BMP_ConvertPNMBitmap(RCBITMAP   *rcbmp,
  * @param rcbmp      a reference to the Palm Computing resource data.
  * @param compress   compression style?
  * @param colortable does a color table need to be generated?
+ * @param directColor is the bitmap > 8bpp? (direct color mode)
  */
 static void 
 BMP_CompressBitmap(RCBITMAP *rcbmp, 
                    int      compress, 
-                   BOOL     colortable)
+                   BOOL     colortable, 
+                   BOOL     directColor)
 {
   unsigned char *bits;
   int           size, msize, i, j, k, flag;
 
   // determine how much memory is required for compression (hopefully less)
-  size  = 2 + (colortable? COLOR_TABLE_SIZE : 0);
+  size  = 2;
+  if (colortable)  size += COLOR_TABLE_SIZE;
+  if (directColor) size += 8;
   msize = size + ((rcbmp->cbRow + ((rcbmp->cbRow + 7) / 8)) * rcbmp->cy);
 
   // allocat memory and clear
@@ -1735,7 +1887,7 @@ BMP_CompressBitmap(RCBITMAP *rcbmp,
   if (compress == rwForceCompress || size < rcbmp->cbDst) {
 
     // do we have a color table?
-    if (colortable) {
+    if ((colortable) && (!directColor)) {
 
       int i;
 
@@ -1746,6 +1898,20 @@ BMP_CompressBitmap(RCBITMAP *rcbmp,
       bits[COLOR_TABLE_SIZE]   = (unsigned char)(size >> 8);
       bits[COLOR_TABLE_SIZE+1] = (unsigned char)size;
     }
+
+    // direct color info?
+    if (directColor) {
+
+      int i;
+
+      // copy the direct color info (dont forget it!)
+      for (i=0; i<8; i++) 
+        bits[i] = rcbmp->pbBits[i];
+
+      bits[8] = (unsigned char)(size >> 8);
+      bits[9] = (unsigned char)size;
+    }
+
     else {
       bits[0] = (unsigned char)((size & 0xff00) >> 8);
       bits[1] = (unsigned char) (size & 0x00ff);
@@ -1753,7 +1919,10 @@ BMP_CompressBitmap(RCBITMAP *rcbmp,
 
     // change the data chunk to the newly compressed data
     free(rcbmp->pbBits);
-	 rcbmp->flags.compressed = fTrue;	/* RMa change: rcbmp->ff    |= 0x8000; */
+
+//  rcbmp->ff |= 0x8000;
+    rcbmp->flags.compressed = fTrue;
+
     rcbmp->pbBits = bits;
     rcbmp->cbDst  = size;
   }
@@ -1768,6 +1937,7 @@ BMP_CompressBitmap(RCBITMAP *rcbmp,
  * @param isIcon     an icon? 0 = bitmap, non zero = icon resource ID
  * @param compress   compression style?
  * @param colortable does a color table need to be generated?
+ * @param directColor is the bitmap > 8bpp? (direct color mode)
  * @param multibit   should this bitmap be prepared for multibit? 
  */
 static void 
@@ -1775,6 +1945,7 @@ BMP_CompressDumpBitmap(RCBITMAP *rcbmp,
                        int      isIcon, 
                        int      compress, 
                        BOOL     colortable, 
+                       BOOL     directColor, 
                        BOOL     multibit)
 {
   // anything specific with icons here?
@@ -1800,9 +1971,13 @@ BMP_CompressDumpBitmap(RCBITMAP *rcbmp,
   }
 
   // do we need to do some compression?
+
+// NOTE: compression of 16, 24 and 32bpp DONT work right now
+if (!directColor) { 
   if ((compress == rwAutoCompress) || (compress == rwForceCompress)) {
-    BMP_CompressBitmap(rcbmp, compress, colortable);
+    BMP_CompressBitmap(rcbmp, compress, colortable, directColor);
   }
+}
 
   // is this single resource part of a multibit bitmap family?
   if (multibit) {
@@ -1872,6 +2047,12 @@ extern void DumpBitmap(char *fileName,
   FILE       *pFile;
   long       size;
   RCBITMAP   rcbmp;
+  BOOL       directColor;
+
+  // is it a direct color bitmap? 
+  directColor = ((bitmaptype == rwBitmapColor16k) ||
+                 (bitmaptype == rwBitmapColor24k) ||
+                 (bitmaptype == rwBitmapColor32k));
 
   // determine the size of the resource to load
   fileName = FindAndOpenFile(fileName, "rb", &pFile);
@@ -1906,22 +2087,22 @@ extern void DumpBitmap(char *fileName,
   memset(&rcbmp, 0, sizeof(RCBITMAP));
   if (FSzEqI(pchExt, "bmp")) {
     BMP_ConvertWindowsBitmap(&rcbmp, pBMPData, bitmaptype, colortable, transparencyData);
-    BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, colortable, multibit);
+    BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, colortable, directColor, multibit);
   }
   else 
   if (FSzEqI(pchExt, "pbitm")) {
     BMP_ConvertTextBitmap(&rcbmp, pBMPData, size);
-    BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse, multibit);
+    BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse, directColor, multibit);
   }
   else 
   if (FSzEqI(pchExt, "xbm")) {
     BMP_ConvertX11Bitmap(&rcbmp, pBMPData, size);
-    BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse, multibit);
+    BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse, directColor, multibit);
   }
   else 
   if (FSzEqI(pchExt, "pbm") || FSzEqI(pchExt, "pgm") || FSzEqI(pchExt, "ppm") || FSzEqI(pchExt, "pnm")) {
     BMP_ConvertPNMBitmap(&rcbmp, pBMPData, size, bitmaptype, colortable);
-    BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse, multibit);
+    BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse, directColor, multibit);
   }
   else {
     BMP_InvalidExtension(fileName);

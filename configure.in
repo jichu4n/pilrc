@@ -29,7 +29,7 @@
 #
 
 AC_INIT(pilrc.c)
-AM_INIT_AUTOMAKE(pilrc, 2.7a)
+AM_INIT_AUTOMAKE(pilrc, 2.7b)
 
 AC_PROG_CC
 AC_PROG_RANLIB

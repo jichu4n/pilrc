@@ -16,6 +16,18 @@ PilRC
 </center> <p>
 
 <pre>
+What's new in 2.7b  (Thu, 08 Feb 2001)
+------------------
+o BITMAP*, ICON* changes
+- added support 16, 24 and 32bpp .bmp files :)
+- compression is NOT available for 16bpp bitmap resources at this point
+o DATA parsing error
+- if a "" file name was passed, it crashed. fixed it
+o TABLE emitting error
+- extra word written out, causing problems *tut tut* :P
+- table widths were being corrupted seriously
+o added .rpm spec file
+
 What's new in 2.7a  (Fri,  5 Jan 2001)
 ------------------
 o compile bugfix for xwin.c :P (sorry X11 guys) :P
