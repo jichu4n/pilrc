@@ -33,7 +33,7 @@
  *	unix/pilrc.spec
  */
 
-#define PILRC_VERSION      3, 2, 0, 0
-#define PILRC_VERSION_STR  "3.2"
+#define PILRC_VERSION      3, 2, 90, 0
+#define PILRC_VERSION_STR  "3.2.90"
 
 #endif
