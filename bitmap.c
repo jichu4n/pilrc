@@ -31,10 +31,6 @@
  *                 Applied Eric Clonniger's fix for 32-bit BMPs
  */
 
-#ifndef __GNUC__
-#pragma pack(2)
-#endif
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
@@ -57,23 +53,18 @@ typedef int bool;                                /* f */
  */
 // NCR: 16-feb-00 = bitmapfileheader already defined if compiling for windows
 #if !defined(CW_PLUGIN) || (CWPLUGIN_HOST != CWPLUGIN_HOST_WIN32)
+// define structure using USHORT types to make correct alignment
+// more likely -- resolves SourceForge bug 540640
+
 typedef struct BITMAPFILEHEADER
 {
-#ifdef __GNUC__
-  PILRC_USHORT bfType;                           // gcc will only align the structure 
-  PILRC_USHORT bfSize1;                          // correctly this way :P
+  PILRC_USHORT bfType;
+  PILRC_USHORT bfSize1;
   PILRC_USHORT bfSize2;
   PILRC_USHORT bfReserved1;
   PILRC_USHORT bfReserved2;
   PILRC_USHORT bfOffBits1;
   PILRC_USHORT bfOffBits2;
-#else
-  PILRC_USHORT bfType;
-  PILRC_ULONG bfSize;
-  PILRC_USHORT bfReserved1;
-  PILRC_USHORT bfReserved2;
-  PILRC_ULONG bfOffBits;
-#endif
 }
 BITMAPFILEHEADER;
 
