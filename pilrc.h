@@ -26,6 +26,9 @@
  *                 creation
  *     18-Jun-2000 Aaron Ardiri
  *                 GNU GPL documentation additions
+ *     23-Jun-2000 Mark Garlanger
+ *                 Additions to support #ifdef/#ifndef/#else/#endif in
+ *                 both .rcp files and .h files.
  */
 
 #include "std.h"
@@ -637,6 +640,10 @@ typedef enum
 	rwInclude,
 	rwDefine,
 	rwEqu,
+        rwIfdef,
+        rwIfndef,
+        rwElse,
+        rwEndif,
 
 	rwIcon,
 //	rwIconGrey,
@@ -809,6 +816,12 @@ RWT rgrwt[] =
 	{"define",       NULL,           rwDefine},
 	{"equ",          NULL,           rwEqu},
 	{"include",      NULL,           rwInclude},
+// 2.5b8 additions
+        {"ifdef",        NULL,           rwIfdef},
+        {"ifndef",       NULL,           rwIfndef},
+        {"else",         NULL,           rwElse},
+        {"endif",        NULL,           rwEndif},
+// end
 
 	{"icon",         NULL,           rwIcon},
 //	{"icongrey",     "icongray",     rwIconGrey},

@@ -82,7 +82,7 @@ main(int  cArg,
   int  fontType;
 	
   // display the (c) string
-  printf("PilRC v2.5b7\n");
+  printf("PilRC v2.5b8\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000      Aaron Ardiri (ardiri@palmgear.com)\n");
 

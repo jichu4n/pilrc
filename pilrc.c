@@ -26,6 +26,9 @@
  *                 creation
  *     18-Jun-2000 Aaron Ardiri
  *                 GNU GPL documentation additions
+ *     23-Jun-2000 Mark Garlanger
+ *                 Additions to support #ifdef/#ifndef/#else/#endif in 
+ *                 both *.rcp files and *.h files. 
  */
 
 #include <stdio.h>
@@ -47,6 +50,11 @@
 -------------------------------------------------------------WESC------------*/
 /* Are we PilRCUI -- this was an attempt to merge pilrc and pilrcui */
 BOOL vfWinGUI;
+
+/* Variables to support #ifdef/#else/#endif */
+int ifdefSkipping = 0;
+int ifdefLevel    = 0;
+
 /* Quiet output */
 BOOL vfQuiet;
 /* M$ (VS-type) error/warning output */
@@ -2866,6 +2874,7 @@ VOID OpenInputFile(char *szIn)
 |	ParseCInclude
 |	
 |		Supports #define foo const and foo equ const
+/      Added Support for #ifdef/#else/#endif  (nested #includes still needed).
 -------------------------------------------------------------WESC------------*/
 void ParseCInclude( char *szIncludeFile )
 	{
@@ -2875,6 +2884,10 @@ void ParseCInclude( char *szIncludeFile )
 	char szId[256];
 	int wIdVal;
 	extern char szInFile[];
+        /* Variables to support #ifdef/#else/#endif */
+        /* needed at this scope to not interfer with the globals */
+        int ifdefSkipping = 0;
+        int ifdefLevel    = 0;
 
 	/* tok contains filename */
 
@@ -2889,23 +2902,144 @@ void ParseCInclude( char *szIncludeFile )
 		switch (tok.lex.lt)
 			{
 		case ltPound:
+                     {
 			if (!FGetTok(&tok))
 				ErrorLine("preprocessor directive expected");
-			if (tok.rw != rwDefine)
+			switch (tok.rw)
+                        {
+                        case rwDefine:
+                            {
+                                if (ifdefSkipping)
+                                {
+                		    NextLine();
+                
+                                }
+                                else
+                                {
+			            GetExpectLt(&tok, ltId, "identifier");
+			            strcpy(szId, tok.lex.szId);
+ 		                    wIdVal = WGetConstEx("Constant");
+		                    AddSym(szId, wIdVal);
+                                }
+                                break;
+                            }
+                            
+// 2.5b8 additions
+                        case rwIfdef:
+                            {
+                                ifdefLevel++;
+ 
+                                if( ifdefSkipping)
+                                {
+ 
+                                    ifdefSkipping++;
+                                }
+                                else
+                                {
+                                    SYM *psym;
+ 
+                                    GetExpectLt(&tok, ltId, "identifier");
+                                    strcpy(szId, tok.lex.szId);
+ 
+                                    psym = PsymLookup(szId);
+                                    if (psym == NULL)
+                                    {
+                                        ifdefSkipping = 1;
+                                    }
+                                }
+                                break;
+                            }
+ 
+                        case rwIfndef:
+                            {
+                                ifdefLevel++;
+ 
+                                if( ifdefSkipping)
+                                {
+ 
+                                    ifdefSkipping++;
+                                }
+                                else
+                                {
+                                    SYM *psym;
+ 
+	                            GetExpectLt(&tok, ltId, "identifier");
+	                            strcpy(szId, tok.lex.szId);
+ 
+                                    psym = PsymLookup(szId);
+                                    if (psym != NULL) 
+                                    {
+                                        ifdefSkipping = 1;
+                                    }
+                                }
+                                break;
+                            }
+                            
+                        case rwElse:
+                            {
+                                /* Verify Else is valid */
+                                if (ifdefLevel)
+                                {
+                                    /* only do something if ifdefSkipping == 0 or 1 */
+                                    if (ifdefSkipping == 1)
+                                    {
+                                         ifdefSkipping = 0;
+                                    }
+                                    else
+                                    {
+                                        if (ifdefSkipping == 0)
+                                        {
+                                             ifdefSkipping = 1;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                  ErrorLine2("no matching #ifdef for :", tok.lex.szId);
+                                }
+                                break;
+                            }
+ 
+                        case rwEndif:
+                            {
+                                if (ifdefLevel)
+                                {
+                                    --ifdefLevel;
+                                    if (ifdefSkipping)
+                                    {
+                                        --ifdefSkipping;
+                                    }
+                                }
+                                else
+                                {
+                                  ErrorLine2("no matching #ifdef for :", tok.lex.szId);
+                                }
+ 
+                                break;
+                            }
+// end
+        
+                        default:
 				{
 				NextLine();
 				break;
 				}
-			GetExpectLt(&tok, ltId, "identifier");
-			strcpy(szId, tok.lex.szId);
-GetVal:
-			wIdVal = WGetConstEx("Constant");
-			AddSym(szId, wIdVal);
-			break;
+                        }
+                        break;
+                    }
 		case ltId:
-			strcpy(szId, tok.lex.szId);
-			GetExpectRw(rwEqu);
-			goto GetVal;
+                        if (ifdefSkipping)
+                        {
+                	    NextLine();
+                
+                        }
+                        else
+                        {
+			    strcpy(szId, tok.lex.szId);
+			    GetExpectRw(rwEqu);
+			    wIdVal = WGetConstEx("Constant");
+			    AddSym(szId, wIdVal);
+                        }
 			break;
 		case ltSemi:
 		case ltDoubleSlash:
@@ -3033,6 +3167,7 @@ void WriteIncFile(char *szFile)
 void ParseDirectives()
 	{
 	TOK tok;
+	char szId[256];
 	
 	FGetTok(&tok);
 	switch (tok.rw) 
@@ -3064,6 +3199,109 @@ void ParseDirectives()
 			}
 		break;
 		}
+        case rwDefine:
+            {
+            
+		GetExpectLt(&tok, ltId, "identifier");
+		strcpy(szId, tok.lex.szId);
+                if (PsymLookup(szId) == NULL)
+                break;
+            }
+        
+// 2.5b8 additions
+        case rwIfdef:
+            {
+                ifdefLevel++;
+                
+                if( ifdefSkipping)
+                {
+                    
+                    ifdefSkipping++;
+                }
+                else
+                {
+                    SYM *psym;
+                    
+		    GetExpectLt(&tok, ltId, "identifier");
+		    strcpy(szId, tok.lex.szId);
+                    
+                    psym = PsymLookup(szId);
+                    if (psym == NULL)
+                    {
+                        ifdefSkipping = 1;
+                    }
+                }
+                break;
+            }
+            
+         case rwIfndef:
+            {
+                ifdefLevel++;
+                
+                if( ifdefSkipping)
+                {
+                    
+                    ifdefSkipping++;
+                }
+                else
+                {
+                    SYM *psym;
+                    
+		    GetExpectLt(&tok, ltId, "identifier");
+		    strcpy(szId, tok.lex.szId);
+                    
+                    psym = PsymLookup(szId);
+                    if (psym != NULL)
+                    {
+                        ifdefSkipping = 1;
+                    }
+                }
+                break;
+            }
+       
+        case rwElse:
+            {
+                /* Verify Else is valid */
+                if (ifdefLevel)
+                {
+                    /* only do something if ifdefSkipping == 0 or 1 */
+                    if (ifdefSkipping == 1)
+                    {
+                         ifdefSkipping = 0;
+                    }
+                    else
+                    {
+                        if (ifdefSkipping == 0)
+                        {
+                             ifdefSkipping = 1;
+                        }
+                    }
+                }
+                else
+                {
+		    ErrorLine2("no matching #ifdef for :", tok.lex.szId);
+                }
+                break;
+            }
+        
+        case rwEndif:
+            {
+                if (ifdefLevel)
+                {
+                    --ifdefLevel;
+                    if (ifdefSkipping)
+                    {
+                        --ifdefSkipping;
+                    } 
+                }
+                else
+                {
+		    ErrorLine2("no matching #ifdef for :", tok.lex.szId);
+                }
+            
+                break;
+            }
+// end
 
 	/* Add new directives here	*/
 
@@ -3100,6 +3338,17 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 		Error("bogus source file");
 	do
 		{
+                if (ifdefSkipping)
+                {
+		     if (tok.lex.lt == ltPound)
+		     {
+		          ParseDirectives();
+		     }
+		     else {
+			  NextLine();
+                     }
+                     continue;
+                }
 		switch(tok.rw)
 			{
 		case rwForm:
