@@ -114,9 +114,11 @@ VOID PadWordBoundary(void);
 int IbOut(void);
 void AddAccessPath(const char *path);
 void FreeAccessPathsList(void);
-const char *FindAndOpenFile(const char *szIn,
-                      const char *mode,
-                      FILE ** returnFile);
+
+/* Returns a pointer (which should be freed by the caller) to the full path
+   of the file found, and a file handle (which should be closed by the caller)
+   in returnFile.  */
+char *FindAndOpenFile(const char *szIn, const char *mode, FILE **returnFile);
 
 void InitDependsList(void);
 void AddEntryToDependsList(const char *filename);

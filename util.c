@@ -682,53 +682,40 @@ CloseResFile(void)
 /*-----------------------------------------------------------------------------
 |	FindAndOpenFile
 -------------------------------------------------------------DAVE------------*/
-const char *
+char *
 FindAndOpenFile(const char *szIn,
                 const char *mode,
                 FILE ** returnFile)
 {
-  FILE *file = fopen(szIn, mode);
+  char *szFullName = NULL;
 
-  if (file == NULL)
+  if ((*returnFile = fopen(szIn, mode)) != NULL)
   {
-    static char szFullName[FILENAME_MAX];
-    int i;
-
-    for (i = 0; i < totalIncludePaths; i++)
-    {
-      snprintf(szFullName, sizeof(szFullName), 
-      	"%s%c%s", includePaths[i], DIRSEPARATOR, szIn);
-
-      file = fopen(szFullName, mode);
-      if (file != NULL)
-      {
-        break;
-      }
-    }
-
-    if (i == totalIncludePaths)
-    {
-      ErrorLine("Unable to find %s", szIn);
-    }
-
-    if (vfTrackDepends)
-    {
-        AddEntryToDependsList(szFullName);
-    }
-
-    *returnFile = file;
-    return szFullName;
+    szFullName = MakeFilename("%s", szIn);
   }
   else
   {
-    if (vfTrackDepends)
+    int i;
+    for (i = 0; i < totalIncludePaths; i++)
     {
-        AddEntryToDependsList(szIn);
-    }
+      szFullName = MakeFilename("%s/%s", includePaths[i], szIn);
+      if ((*returnFile = fopen(szFullName, mode)) != NULL)
+        break;
 
-    *returnFile = file;
-    return szIn;
+      free(szFullName);
+    }
   }
+
+  if (*returnFile == NULL)
+  {
+    ErrorLine("Unable to find %s", szIn);
+    return NULL;
+  }
+
+  if (vfTrackDepends)
+    AddEntryToDependsList(szFullName);
+
+  return szFullName;
 }
 
 /*
