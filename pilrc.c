@@ -189,6 +189,7 @@ BOOL vfPrc = fFalse;
 const char *vfPrcName;
 const char *vfPrcCreator;
 const char *vfPrcType;
+BOOL vfPrcTimeStamp = fFalse;
 
 /*
  * Menu globals 

@@ -2288,15 +2288,11 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
   }
 
   // do we need to do some compression?
-
-  // NOTE: compression of 16, 24 and 32bpp DONT work right now
-  if (!directColor)
+  if ((compress == rwAutoCompress) || (compress == rwForceCompress))
   {
-    if ((compress == rwAutoCompress) || (compress == rwForceCompress))
-    {
-      BMP_CompressBitmap(rcbmp, compress, colortable, directColor);
-    }
+    BMP_CompressBitmap(rcbmp, compress, colortable, directColor);
   }
+
   // is this single resource part of a multibit bitmap family?
   if (multibit)
   {

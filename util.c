@@ -787,12 +787,14 @@ WriteOutResourceDB()
   intstrncpy(head.name, (vfPrcName) ? vfPrcName : szOutResDBFile, 32);
   head.attr = 1;                                 /* dmHdrAttrResDB */
   head.version = 1;
-#ifdef JOHN_MARSHALL
-  head.created = head.modified = 0xadc0bea0;
-#else
-  head.created = head.modified = 
-    time (0) + (unsigned long) (66L * (365.25252 * 24 * 60 * 60));
-#endif
+
+  // if we have requested to set a timestamp (POSIX only) do so
+  if (!vfPrcTimeStamp)
+    head.created = head.modified = 0xadc0bea0;
+  else
+    head.created = head.modified = 
+      time (0) + (unsigned long) (66L * (365.25252 * 24 * 60 * 60));
+
   intstrncpy(head.type, (vfPrcType) ? vfPrcType : "RESO", 4);
   intstrncpy(head.creator, (vfPrcCreator) ? vfPrcCreator : "pRES", 4);
   head.nrecords = PlexGetCount(&resdir);

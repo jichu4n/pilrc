@@ -2363,6 +2363,7 @@ extern BOOL vfPrc;
 extern const char *vfPrcName;
 extern const char *vfPrcCreator;
 extern const char *vfPrcType;
+extern BOOL vfPrcTimeStamp;
 
 #define DEFAULT_PRCNAME "PilRC resources"
 #define DEFAULT_PRCCR8R 0x70524553               // 'pRES'

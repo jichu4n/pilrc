@@ -60,6 +60,7 @@ Usage(void)
      "                     The current directory is always searched\n"
      "        -R <resfile> Generate JUMP/PilA .res file\n"
      "        -ro          Generate resource database file instead of .bins\n"
+     "        -ts          put POSIX timestamp on .ro file generated\n"
      "        -o <filedir> Equivalent to [outfiledir]\n"
      "        -H <incfile> Autoassign IDs and write .h file with #defines\n"
      "        -D <macro>   Define a pre-processor macro symbol\n"
@@ -107,7 +108,7 @@ main(int cArg,
   int macroValue;
 
   // display the (c) string
-  printf("PilRC v2.9\n");
+  printf("PilRC v2.9 patch release 1\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000-2001 Aaron Ardiri (aaron@ardiri.com)\n");
 
@@ -313,6 +314,13 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-ro"))
     {
       vfPrc = fTrue;
+      continue;
+    }
+
+    // place timestamp (POSIX standard) on .ro file
+    if (FSzEqI(rgszArg[i], "-ts"))
+    {
+      vfPrcTimeStamp = fTrue;
       continue;
     }
 
