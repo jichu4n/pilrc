@@ -626,7 +626,7 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
   unsigned int aGlyphBitsOffset = 0;
 
   FontCharInfoType *singleOW = NULL;
-  unsigned int singleH;
+  unsigned int singleH = 0;
 
   if (densityCount < 2)
     Error("FontFamily must have 2 fonts with density 72 and 144.");
