@@ -26,10 +26,14 @@
 #                 creation
 #     18-Jun-2000 Aaron Ardiri
 #                 GNU GPL documentation additions
-#
 
-AC_INIT(../pilrc.c)
-AM_INIT_AUTOMAKE(pilrc, 3.0alpha)
+AC_INIT(PilRC,
+  [translit(esyscmd([grep '^Version:' pilrc.spec | sed 's/.*: //']),
+	    esyscmd(echo))])  dnl this translit() strips \n characters
+
+AM_INIT_AUTOMAKE([foreign no-define])
+AC_CONFIG_SRCDIR(../pilrc.c)
+AC_PREREQ(2.50)
 
 AC_PROG_CC
 
