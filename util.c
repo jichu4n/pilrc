@@ -50,8 +50,6 @@
 /*
  * Globals 
  */
-FILE *vfhIn;
-char *szInFile = NULL;
 char rgbZero[16];
 BOOL vfErr;
 
@@ -166,7 +164,7 @@ ErrorLine(const char *szFormat, ...)
 {
   va_list args;
   va_start(args, szFormat);
-  Diagnostic(fTrue, szInFile, iline, szFormat, &args);
+  Diagnostic(fTrue, vIn.szFilename, vIn.line, szFormat, &args);
   va_end(args);
 }
 
@@ -175,7 +173,7 @@ WarningLine(const char *szFormat, ...)
 {
   va_list args;
   va_start(args, szFormat);
-  Diagnostic(fFalse, szInFile, iline, szFormat, &args);
+  Diagnostic(fFalse, vIn.szFilename, vIn.line, szFormat, &args);
   va_end(args);
 }
 

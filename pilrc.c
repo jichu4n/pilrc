@@ -307,7 +307,7 @@ SYM *psymFirst;
 BOOL fTokUngotten;
 TOK tokPrev;
 TOK tok;
-int iline;
+INPUTCONTEXT vIn;
 char szLine[4096];
 
 /*
@@ -537,9 +537,9 @@ NextLine(void)
   retval = fFalse;
 
   szLine[0] = '\0';                              /* just in case there is nothing to be gotten   */
-  if (fgets(szLine, sizeof(szLine), vfhIn) != NULL)
+  if (fgets(szLine, sizeof(szLine), vIn.fh) != NULL)
   {
-    iline++;
+    vIn.line++;
     retval = fTrue;
   }
   FInitLexer(szLine, fTrue);                     /* so program can shut down gracefully      */
@@ -971,12 +971,12 @@ AddDefineSymbol(void)
     
     // save current line and check to see if we parse into another
     // line for the value -- if so, reject token and define as 0
-    current_line = iline;
+    current_line = vIn.line;
     
     if (!FGetTok(&tok))
         ErrorLine("unexpected end of file");
     
-    if (current_line != iline)
+    if (current_line != vIn.line)
     {
     	UngetTok();
     	AddSym(szId, 0);
@@ -5521,8 +5521,8 @@ ParseNavigation(void)
 static VOID
 OpenInputFile(const char *szIn)
 {
-  szInFile = FindAndOpenFile(szIn, "rt", &vfhIn);
-  iline = 0;
+  vIn.szFilename = FindAndOpenFile(szIn, "rt", &vIn.fh);
+  vIn.line = 0;
 }
 
 /*-----------------------------------------------------------------------------
@@ -5534,9 +5534,7 @@ OpenInputFile(const char *szIn)
 static void
 ParseCInclude(const char *szIncludeFile)
 {
-  FILE *fhInSav = vfhIn;
-  char *szInFileSav = szInFile;
-  int ilineSav = iline;
+  INPUTCONTEXT inSav = vIn;
   int ifdefSkippingSav = ifdefSkipping;
   int ifdefLevelSav = ifdefLevel;
 
@@ -5749,11 +5747,9 @@ ParseCInclude(const char *szIncludeFile)
     }
   }
 
-  fclose(vfhIn);
-  vfhIn = fhInSav;
-  free(szInFile);
-  szInFile = szInFileSav;
-  iline = ilineSav;
+  fclose(vIn.fh);
+  free(vIn.szFilename);
+  vIn = inSav;
 
   ifdefSkipping = ifdefSkippingSav;
   ifdefLevel = ifdefLevelSav;
@@ -5775,9 +5771,7 @@ ParseCInclude(const char *szIncludeFile)
 static void
 ParseJavaInclude(char *szIncludeFile)
 {
-  FILE *fhInSav = vfhIn;
-  char *szInFileSav = szInFile;
-  int ilineSav = iline;
+  INPUTCONTEXT inSav = vIn;
 
   char szId[256];
   int wIdVal;
@@ -5834,11 +5828,9 @@ ParseJavaInclude(char *szIncludeFile)
   }
 
 endOfClass:
-  fclose(vfhIn);
-  vfhIn = fhInSav;
-  free(szInFile);
-  szInFile = szInFileSav;
-  iline = ilineSav;
+  fclose(vIn.fh);
+  free(vIn.szFilename);
+  vIn = inSav;
 }
 
 static BOOL
@@ -5948,9 +5940,7 @@ InitRcpfile(RCPFILE * prcpfile,
 static void
 ParseRcpFile(const char *szRcpIn, RCPFILE * prcpfile)
 {
-  FILE *fhInSav = vfhIn;
-  char *szInFileSav = szInFile;
-  int ilineSav = iline;
+  INPUTCONTEXT inSav = vIn;
   int ifdefSkippingSav = ifdefSkipping;
   int ifdefLevelSav = ifdefLevel;
 
@@ -6187,11 +6177,9 @@ ParseRcpFile(const char *szRcpIn, RCPFILE * prcpfile)
   }
   while (FGetTok(&tok));
 
-  fclose(vfhIn);
-  vfhIn = fhInSav;
-  free(szInFile);
-  szInFile = szInFileSav;
-  iline = ilineSav;
+  fclose(vIn.fh);
+  free(vIn.szFilename);
+  vIn = inSav;
 
   ifdefSkipping = ifdefSkippingSav;
   ifdefLevel = ifdefLevelSav;
@@ -6205,12 +6193,12 @@ static void
 ParseLineDirective(BOOL fnameRequired)
 {
   // The constant given is for the *following* line
-  iline = WGetConst("Line number constant") - 1;
+  vIn.line = WGetConst("Line number constant") - 1;
 
   if (fnameRequired || FPeekTok()->lex.lt == ltStr)
   {
-    free(szInFile);
-    szInFile = PchGetSz("Input filename");
+    free(vIn.szFilename);
+    vIn.szFilename = PchGetSz("Input filename");
   }
 }
 
@@ -6472,6 +6460,8 @@ ParseFile(const char *szIn,
   }
 
   OpenResFile(szResFile);
+
+  vIn.szFilename = NULL;
   FInitLexer(NULL, fTrue);
 
   ParseRcpFile(szIn, prcpfile);

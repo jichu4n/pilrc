@@ -2663,10 +2663,19 @@ ITM;
 /*
  * Parse globals 
  */
+
+typedef struct INPUTCONTEXT
+{
+  char *szFilename;
+  FILE *fh;
+  int line;
+}
+INPUTCONTEXT;
+
 extern BOOL fTokUngotten;
 extern TOK tokPrev;
 extern TOK tok;
-extern int iline;
+extern INPUTCONTEXT vIn;
 extern char szLine[4096];
 
 extern BOOL vfWinGUI;

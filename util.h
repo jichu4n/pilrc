@@ -126,8 +126,6 @@ void OutputDependsList(FILE *dependsFile, const char *szDependsTarget);
 void FreeDependsList(void);
 
 extern char rgbZero[];
-extern FILE *vfhIn;
-extern char *szInFile;
 
 #ifdef CW_PLUGIN
 // XXX ncr
