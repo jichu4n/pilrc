@@ -308,7 +308,6 @@ BOOL fTokUngotten;
 TOK tokPrev;
 TOK tok;
 INPUTCONTEXT vIn;
-char szLine[4096];
 
 /*
  * Rect for Prev* keywords 
@@ -532,19 +531,38 @@ FreeTranslations()
 static BOOL
 NextLine(void)
 {
-  BOOL retval;
+  BOOL fEof;
+  char *pchNext;
+  char *eoln = strpbrk(vIn.pch, "\n\x0a\x0d");
 
-  retval = fFalse;
-
-  szLine[0] = '\0';                              /* just in case there is nothing to be gotten   */
-  if (fgets(szLine, sizeof(szLine), vIn.fh) != NULL)
+  if (eoln == NULL)
   {
-    vIn.line++;
-    retval = fTrue;
-  }
-  FInitLexer(szLine, fTrue);                     /* so program can shut down gracefully      */
+    int buflen = strlen(vIn.pch);
+    memmove(vIn.buffer, vIn.pch, buflen + 1);
+    vIn.pch = vIn.buffer;
+    fgets(&vIn.buffer[buflen], sizeof vIn.buffer - buflen, vIn.fh);
 
-  return (retval);
+    eoln = strpbrk(vIn.pch, "\n\x0a\x0d");
+    if (eoln == NULL)
+      eoln = strrchr(vIn.pch, '\0');
+  }
+
+  if (eoln[0] == '\x0d' && eoln[1] == '\x0a')
+    pchNext = eoln + 2;
+  else if (*eoln == '\0')
+    pchNext = eoln;
+  else
+    pchNext = eoln + 1;
+
+  fEof = (*vIn.pch == '\0');
+  *eoln = '\0';
+
+  if (!fEof)
+    vIn.line++;
+
+  FInitLexer(vIn.pch, fTrue);
+  vIn.pch = pchNext;
+  return !fEof;
 }
 
 /*-----------------------------------------------------------------------------
@@ -5536,6 +5554,8 @@ OpenInputFile(const char *szIn)
 {
   vIn.szFilename = FindAndOpenFile(szIn, "rt", &vIn.fh);
   vIn.line = 0;
+  vIn.buffer[0] = '\0';
+  vIn.pch = vIn.buffer;
 }
 
 /*-----------------------------------------------------------------------------

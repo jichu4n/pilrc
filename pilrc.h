@@ -2669,6 +2669,9 @@ typedef struct INPUTCONTEXT
   char *szFilename;
   FILE *fh;
   int line;
+  char buffer[4096];
+  char *pch;
+  const char *pchLex;
 }
 INPUTCONTEXT;
 
@@ -2676,7 +2679,6 @@ extern BOOL fTokUngotten;
 extern TOK tokPrev;
 extern TOK tok;
 extern INPUTCONTEXT vIn;
-extern char szLine[4096];
 
 extern BOOL vfWinGUI;
 extern BOOL vfQuiet;

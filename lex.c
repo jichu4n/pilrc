@@ -39,7 +39,9 @@
 
 static int wBaseCur = 10;
 
-static const char *pchLex;
+/* The lexer state needs to be saved and restored when the input stream
+   changes (due to #include, for example).  */
+#define pchLex (vIn.pchLex)
 
 static int commentDepth;
 
