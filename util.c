@@ -151,9 +151,7 @@ Error(char *sz)
   else
 #endif
   {
-    fprintf(stderr, "\n");
-    fprintf(stderr, "%s", sz);                   // added "%s", AA
-    fprintf(stderr, "\n");
+    fprintf(stderr, "%s\n", sz);                   // added "%s", AA
     exit(1);
   }
 }
@@ -243,11 +241,9 @@ WarningLine(char *sz)
 
   sprintf(szErr,
           ((vfVSErrors)
-           ? "%s(%d): warning : %s"
-           : "%s:%d: warning : %s"), szInFile, iline, sz);
-  fprintf(stderr, "\n");
-  fprintf(stderr, "%s", szErr);                  // added "%s", AA
-  fprintf(stderr, "\n");
+           ? "%s(%d): warning : %s\n"
+           : "%s:%d: warning : %s\n"), szInFile, iline, sz);
+  fputs(szErr, stderr);
 #endif
 }
 
