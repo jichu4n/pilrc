@@ -848,7 +848,11 @@ WGetConst(char *szErr)
         SYM *psym;
 
         psym = PsymLookup(tok.lex.szId);
-        if (psym == NULL)
+        if (psym)
+        {
+          CheckNumericSymbol(psym);
+        }
+        else
         {
           if (vfAutoId)
           {
