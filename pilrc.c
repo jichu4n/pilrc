@@ -1202,10 +1202,10 @@ void ParseItm(ITM *pitm, int grif, int grif2)
 			CheckGrif2(if2AutoShift);
 			pitm->autoShift = 1;
 			break;
-//		case rwSCL:
-			//CheckGrif2(if2Scrollbar);
-			//pitm->hasScrollBar = 1;
-			//break;
+		case rwHasScrollBar:
+			CheckGrif2(if2Scrollbar);
+			pitm->hasScrollBar = 1;
+			break;
 		case rwNumeric:
 			CheckGrif2(if2Numeric);
 			pitm->numeric = 1;
@@ -2021,7 +2021,7 @@ VOID AssignMenuRects()
 		RCMENUPULLDOWN *pmpd;
 		
 		pmpd = &rgmpd[impd];
-		dx = DxCalcExtent((unsigned char *)pmpd->title, fTrue)+9;
+		dx = DxCalcExtent((unsigned char *)pmpd->title, fTrue)+7;
 		pmpd->titleBounds.topLeft.x = xTitle;
 		pmpd->titleBounds.topLeft.y = 0;
 		pmpd->titleBounds.extent.y = 12;
@@ -2034,7 +2034,7 @@ VOID AssignMenuRects()
 			{
 			int dxT;
 
-			dxT = DxCalcExtent((unsigned char *)rgmi[imi].itemStr, fTrue)+8;
+			dxT = DxCalcExtent((unsigned char *)rgmi[imi].itemStr, fTrue)+6;
 			if (rgmi[imi].command != 0)
 				{
 				char szT[2];
@@ -2447,22 +2447,36 @@ void ParseDumpCategories()
 /*-----------------------------------------------------------------------------
 |	ParseDumpBitmapFile
 -------------------------------------------------------------DAVE------------*/
-void ParseDumpBitmapFile(BOOL fGrey)
+void ParseDumpBitmapFile(int bitmapType)
 	{
 	int compress;
+	BOOL colortable;
 	int id;
-	char *pchFileName;
+	char *pchFileName[4];
 
 
 	id = WGetId("Bitmap ResourceId", fFalse);
-	pchFileName = PchGetSz("Bitmap Filename");
+	pchFileName[0] = PchGetSz("Bitmap Filename");
+
+	// family? need to get 1bpp, 2bpp, 4bpp and 8bpp!
+        if (bitmapType == rwBitmapFamily) {
+	  pchFileName[1] = PchGetSz("Bitmap Filename");
+	  pchFileName[2] = PchGetSz("Bitmap Filename");
+	  pchFileName[3] = PchGetSz("Bitmap Filename");
+        }
 
 	compress = rwNoCompress;
+	colortable = fFalse;
 	if (FGetTok(&tok)) 
 		{
 		if (tok.rw == rwNoCompress || tok.rw == rwAutoCompress || tok.rw == rwForceCompress) 
 			{
 			compress = tok.rw;
+			}
+		else 
+		if (tok.rw == rwNoColorTable || tok.rw == rwColorTable) 
+			{
+			colortable = (tok.rw == rwColorTable);
 			}
 		else 
 			{
@@ -2471,26 +2485,56 @@ void ParseDumpBitmapFile(BOOL fGrey)
 		}
 
 	OpenOutput("Tbmp", id);
-	DumpBitmap( pchFileName, fFalse, compress, fGrey );
+        if (bitmapType == rwBitmapFamily) {
+	  DumpBitmap(pchFileName[0], fFalse, compress, rwBitmap, colortable, fTrue);
+	  DumpBitmap(pchFileName[1], fFalse, compress, rwBitmapGrey, colortable, fTrue);
+	  DumpBitmap(pchFileName[2], fFalse, compress, rwBitmapGrey16, colortable, fTrue);
+	  DumpBitmap(pchFileName[3], fFalse, compress, rwBitmapColor, colortable, fFalse);
+        }
+        else {
+	  DumpBitmap(pchFileName[0], fFalse, compress, bitmapType, colortable, fFalse);
+        }
 	CloseOutput();
 
-	free(pchFileName);
+	free(pchFileName[0]);
+        if (bitmapType == rwBitmapFamily) {
+	  free(pchFileName[1]);
+	  free(pchFileName[2]);
+	  free(pchFileName[3]);
+	}
 	}
 
 /*-----------------------------------------------------------------------------
 |	ParseDumpIcon
 -------------------------------------------------------------DAVE------------*/
-void ParseDumpIcon(BOOL fSmall)
+void ParseDumpIcon(BOOL fSmall, int bitmapType)
 	{
-	char *pchFileName;
-
-	pchFileName = PchGetSz("Icon Filename");
+	char *pchFileName[4];
 
 	OpenOutput("tAIB", fSmall ? 1001 : 1000);
-	DumpBitmap(pchFileName, fSmall ? 2 : 1, rwNoCompress, fFalse);
-	CloseOutput();
 
-	free(pchFileName);
+	if (bitmapType == rwBitmapFamily) {
+	  pchFileName[0] = PchGetSz("Icon Filename");
+	  pchFileName[1] = PchGetSz("Icon Filename");
+	  pchFileName[2] = PchGetSz("Icon Filename");
+	  pchFileName[3] = PchGetSz("Icon Filename");
+
+	  DumpBitmap(pchFileName[0], fSmall ? 2 : 1, rwNoCompress, rwBitmap, fFalse, fTrue);
+	  DumpBitmap(pchFileName[1], fSmall ? 2 : 1, rwNoCompress, rwBitmapGrey, fFalse, fTrue);
+	  DumpBitmap(pchFileName[2], fSmall ? 2 : 1, rwNoCompress, rwBitmapGrey16, fFalse, fTrue);
+	  DumpBitmap(pchFileName[3], fSmall ? 2 : 1, rwNoCompress, rwBitmapColor, fFalse, fFalse);
+
+	  free(pchFileName[0]);
+	  free(pchFileName[1]);
+	  free(pchFileName[2]);
+	  free(pchFileName[3]);
+	}
+	else {
+	  pchFileName[0] = PchGetSz("Icon Filename");
+ 	  DumpBitmap(pchFileName[0], fSmall ? 2 : 1, rwNoCompress, bitmapType, fFalse, fFalse);
+	  free(pchFileName[0]);
+	}
+	CloseOutput();
 	}
 
 
@@ -2577,7 +2621,7 @@ void ParseTranslation()
 	{
 	BOOL fAddTranslation;
 	char *pch;
-	TE *pte;
+	TE *pte = NULL;
 
 	GetExpectLt(&tok, ltStr, "Language");
 	fAddTranslation = szLanguage != NULL && FSzEqI(tok.lex.szId, szLanguage);
@@ -2606,6 +2650,9 @@ void ParseTranslation()
 				}
 			else
 				free(pch);
+
+		default:
+			break;
 			}
 		}
 	}
@@ -2732,6 +2779,8 @@ void ParseJavaInclude( char *szIncludeFile )
 			case rwStatic:		
 			case rwFinal:
 				continue;
+			default:
+				break;
 			}
 			
 		switch (tok.lex.lt)
@@ -2892,13 +2941,24 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 			break;
 		case rwBitmap:
 		case rwBitmapGrey:
-			ParseDumpBitmapFile(tok.rw == rwBitmapGrey);
+		case rwBitmapGrey16:
+		case rwBitmapColor:
+		case rwBitmapFamily:
+			ParseDumpBitmapFile(tok.rw);
 			break;
 		case rwIcon:
-			ParseDumpIcon(fFalse);
+		case rwIconGrey:
+		case rwIconGrey16:
+		case rwIconColor:
+		case rwIconFamily:
+			ParseDumpIcon(fFalse, rwBitmap + (tok.rw-rwIcon));
 			break;
 		case rwIconSmall:
-			ParseDumpIcon(fTrue);
+		case rwIconSmallGrey:
+		case rwIconSmallGrey16:
+		case rwIconSmallColor:
+		case rwIconSmallFamily:
+			ParseDumpIcon(fTrue, rwBitmap + (tok.rw-rwIconSmall));
 			break;
 		case rwTrap:
 			ParseDumpTrap();

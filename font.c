@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include <string.h>
+#include <ctype.h>
 #include "pilrc.h"
 #include "util.h"
 
@@ -106,9 +107,17 @@ int IsJapanese(unsigned char *cp, int *pdxChar)
 		*pdxChar = 5;
 		return 1;
 		}
-	else if (((*cp>= 0x81 && *cp<=0x9f) || ((*cp) >= 0xe0 && (*cp) <= 0xef)) &&
-			 (*(cp+1)>=0x40 && *(cp+1)<=0x7e) || (*(cp+1)>=0x80 && *(cp+1)<=0xfc))
-		{
+	else 
+        if (
+            (
+             ((*cp     >= 0x81) && (*cp     <= 0x9f)) || 
+             ((*cp     >= 0xe0) && (*cp     <= 0xef))
+            ) &&
+	    (
+             ((*(cp+1) >= 0x40) && (*(cp+1) <= 0x7e)) || 
+             ((*(cp+1) >= 0x80) && (*(cp+1) <= 0xfc))
+            )
+           ) {
 		*pdxChar = 9;	/* not sure about this */
 		return 2;
 		}

@@ -36,6 +36,7 @@ void Usage()
 /*-----------------------------------------------------------------------------
 |	main
 -------------------------------------------------------------WESC------------*/
+int
 main(int cArg, char *rgszArg[])
 	{
 	char *szOutputPath;
@@ -45,10 +46,9 @@ main(int cArg, char *rgszArg[])
 	int i;
 	int fontType;
 	
-
-		
-	printf("pilrc v2.4.  by Wes Cherry (wesc@ricochet.net)\n");
-	printf("\tbitmap compression (pl2) by Hoshi Takanori (hoshi@sra.co.jp)\n");
+	printf("PilRC v2.5\n");
+	printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
+	printf("  Copyright 2000      Aaron Ardiri (ardiri@palmgear.com)\n");
 
 	vfCheckDupes = 1;	
 	if (cArg < 2)

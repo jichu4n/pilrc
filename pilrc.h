@@ -490,13 +490,16 @@ typedef struct _rcBITMAP
 	int ff;					/* w */
     int pixelsize;          /* b */
     int version;            /* b */
-	/* ushort nextDepthOffset_and_reserved_and_colorTable[3] */	/* z3w */
+    int nextDepthOffset;    /* w */
+    int transparentIndex;   /* b */
+    int compressionType;    /* b */
+	/* ushort and_reserved_and_colorTable[3] */	/* z1w */
 	unsigned char *pbBits;
 
 	/* private, not stored into file */
 	int cbDst;
 	} RCBITMAP;
-#define szRCBITMAP "w,w,w,w,b,b,zwzwzw"
+#define szRCBITMAP "w,w,w,w,b,b,w,b,b,zw"
 
 
 
@@ -557,11 +560,15 @@ typedef enum
 	rwEnabled, rwDisabled, rwUsable, rwNonUsable, rwLeftAnchor, rwRightAnchor, rwGroup, rwFont, 
 	rwFrame, rwNoFrame, rwBoldFrame,
 	
-	rwEditable, rwNonEditable, rwUnderlined, rwSingleLine, rwMultipleLines, rwDynamicSize, rwLeftAlign, rwRightAlign, rwMaxChars,
+	rwEditable, rwNonEditable, rwUnderlined, rwSingleLine, rwMultipleLines, rwDynamicSize, rwLeftAlign, rwHasScrollBar, rwRightAlign, rwMaxChars,
 	rwVisibleItems, rwAutoShift, rwNumeric,
 	rwChecked,
+
 	rwBitmap,
 	rwBitmapGrey,
+	rwBitmapGrey16,
+	rwBitmapColor,
+	rwBitmapFamily,
 
 	rwPrevLeft, rwPrevRight, rwPrevWidth, rwPrevTop, rwPrevBottom, rwPrevHeight,
 	rwMenu,
@@ -610,11 +617,23 @@ typedef enum
 	rwEqu,
 
 	rwIcon,
+	rwIconGrey,
+	rwIconGrey16,
+	rwIconColor,
+	rwIconFamily,
+
 	rwIconSmall,
+	rwIconSmallGrey,
+	rwIconSmallGrey16,
+	rwIconSmallColor,
+	rwIconSmallFamily,
 	
 	rwTrap,
 
 	rwFontId,
+
+	rwNoColorTable,
+	rwColorTable,
 
 	rwNoCompress,
 	rwAutoCompress,
@@ -690,6 +709,7 @@ RWT rgrwt[] =
 	{"multiplelines","multipleline",  rwMultipleLines}, 
 	{"dynamicsize",  NULL,           rwDynamicSize}, 
 	{"leftalign",    NULL,           rwLeftAlign}, 
+	{"hasscrollbar", NULL,           rwHasScrollBar}, 
 	{"rightalign",   NULL,           rwRightAlign}, 
 	{"maxchars",     NULL,           rwMaxChars}, 
 	{"autoshift",    NULL,           rwAutoShift},
@@ -705,6 +725,9 @@ RWT rgrwt[] =
 	{"checked",      "on",           rwChecked}, 
 	{"bitmap",       NULL,           rwBitmap},
 	{"bitmapgrey",   "bitmapgray",   rwBitmapGrey},
+	{"bitmapgrey16", "bitmapgray16", rwBitmapGrey16},
+	{"bitmapcolor",  "bitmapcolour", rwBitmapColor},
+	{"bitmapfamily", NULL, 		 rwBitmapFamily},
 
 	{"prevleft",     NULL,           rwPrevLeft},
 	{"prevright",    NULL,           rwPrevRight},
@@ -755,11 +778,22 @@ RWT rgrwt[] =
 	{"include",      NULL,           rwInclude},
 
 	{"icon",         NULL,           rwIcon},
+	{"icongrey",     "icongray",     rwIconGrey},
+	{"icongrey16",   "icongray16",   rwIconGrey16},
+	{"iconcolor",    "iconcolour",   rwIconColor},
+	{"iconfamily",   NULL,           rwIconFamily},
+
 	{"smallicon",    NULL,           rwIconSmall},
+	{"smallicongrey",     "smallicongray",     rwIconSmallGrey},
+	{"smallicongrey16",   "smallicongray16",   rwIconSmallGrey16},
+	{"smalliconcolor",    "smalliconcolour",   rwIconSmallColor},
+	{"smalliconfamily",   NULL,                rwIconSmallFamily},
 	
 	{"trap",         NULL,           rwTrap},
 	{"fontid",       NULL,         rwFontId},
 
+	{"colortable",   "colourtable",  rwColorTable},
+	{"nocolortable", "nocolourtable",  rwNoColorTable},
 	{"nocompress",   NULL,           rwNoCompress},
 	{"autocompress", "compress",     rwAutoCompress},
 	{"forcecompress",NULL,           rwForceCompress},
