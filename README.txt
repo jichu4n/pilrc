@@ -118,6 +118,13 @@
   
   Note that these files are no longer supported, and have not changed.
 
+  > win32 (CodeWarrior for Windows)
+  
+  If you have CodeWarrior for Windows V8, you can build the pilrc.exe
+  executable using the "pilrc.mcp" project file in the "win32_cw" directory.
+  
+  Just open the project in the CW IDE, and use the Project/Make command.
+
   > OS/2 Warp
 
   PilRC has been built on OS/2 that has E. Matthes' EMX package and DMAKE 
