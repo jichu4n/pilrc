@@ -6052,82 +6052,34 @@ ParseDirectives(RCPFILE * prcpfile)
   {
     case rwInclude:
       {
-        // LDu 31-8-2001 : start modification //
         // ignore include files when skipping
         if (ifdefSkipping == 0)
         {
-          // LDu 31-8-2001 : end modification //
-
           char *szFileName;
-          char *pchExt;
+          const char *pchExt;
 
           GetExpectLt(&tok, ltStr, "include filename");
           szFileName = tok.lex.szId;
 
           pchExt = strrchr(szFileName, '.');
-          if (!pchExt)
-          {
-            /*
-             * Assume it's a .h file 
-             */
-            // LDu 31-8-2001 : deleted// ParseCInclude(szFileName);
-            // LDu 31-8-2001 : start modification //
-            /*
-             * * pass current global values to the ParseCInclude function
-             * * because we need to preserve them
-             * *          szInfile,
-             * *          ifdefSkipping,
-             * *          ifdefLevel,
-             * *          vfhIn,
-             * *          iline,
-             */
-            ParseCInclude(szFileName, szInFile, ifdefSkipping, ifdefLevel,
-                          vfhIn, iline);
-            // LDu 31-8-2001 : end modification //
-            break;
-          }
+	  if (pchExt)
+	    pchExt++;
+	  else
+	    pchExt = "";
 
-          pchExt++;
-          if (FSzEqI(pchExt, "java") || FSzEqI(pchExt, "jav"))
-          {
-            ParseJavaInclude(szFileName);
-          }
-          // LDu 31-8-2001: start modification //
-          // CInclude files only with .h .hpp .hxx extensions
-          else if (FSzEqI(pchExt, "h") || FSzEqI(pchExt, "hxx") ||
-                   FSzEqI(pchExt, "hpp"))
-          {
-            ParseCInclude(szFileName, szInFile, ifdefSkipping, ifdefLevel,
-                          vfhIn, iline);
-          }
-          // RCP files only with .rcp extension
-          else if (FSzEqI(pchExt, "rcp"))
-          {
+	  // If the extension is ".java" or ".jav", it's a Java include;
+	  // otherwise, extensions starting with ".R" or ".r" (e.g. ".rcp")
+	  // are included PilRC source code; and all others are C headers.
+
+	  if (FSzEqI(pchExt, "java") || FSzEqI(pchExt, "jav"))
+	    ParseJavaInclude(szFileName);
+	  else if (tolower(pchExt[0]) == 'r')
             ParseRcpFile(szFileName, prcpfile, szInFile, ifdefSkipping,
                          ifdefLevel, vfhIn, iline);
-          }
-          // LDu 31-8-2001: end modification //
-          else
-          {
-            // LDu 31-8-2001 : deleted// ParseCInclude(szFileName);
-            // LDu 31-8-2001 : start modification //
-            /*
-             * * pass current global values to the ParseCInclude function
-             * * because we need to preserve them
-             * *          szInfile,
-             * *          ifdefSkipping,
-             * *          ifdefLevel,
-             * *          vfhIn,
-             * *          iline,
-             */
+	  else
             ParseCInclude(szFileName, szInFile, ifdefSkipping, ifdefLevel,
                           vfhIn, iline);
-            // LDu 31-8-2001 : end modification //
-          }
-          // LDu 31-8-2001 : start modification //
-          // ignore include files when skipping
         }
-        // LDu 31-8-2001 : end modification //
         break;
       }
     case rwDefine:
