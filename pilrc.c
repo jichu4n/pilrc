@@ -369,8 +369,8 @@ FreeSymTable()
 |	
 |		Maps a reserved word into a string
 -------------------------------------------------------------WESC------------*/
-static char *
-PchFromRw(int rw,
+static const char *
+PchFromRw(RW rw,
           BOOL fTrySecondName)
 {
   RWT *prwt;
@@ -687,18 +687,6 @@ PchGetSzMultiLine(char *szErr)
 #endif
 
 /*-----------------------------------------------------------------------------
-|	PchGetId
-|	
-|		Epect and get an ident. (ltId)
--------------------------------------------------------------WESC------------*/
-static char *
-PchGetId(char *szErr)
-{
-  GetExpectLt(&tok, ltId, szErr);
-  return strdup(tok.lex.szId);
-}
-
-/*-----------------------------------------------------------------------------
 |	WGetConst
 |	
 |		Get an integer constant or one of the Prev* reserved words, returning
@@ -953,10 +941,8 @@ ParsePaletteFile(char *pchFileName,
                  int *nColors)
 {
   FILE *fh;
-  int c = 0, i = 0;
-  int status = 0;
-  int tcolorindex = 0;
-  int r = 0, g = 0, b = 0;
+  int i = 0;
+  int r, g, b;
 
   FindAndOpenFile(pchFileName, "rb", &fh);
   if (fh == NULL)
@@ -1235,7 +1221,8 @@ ParseItm(ITM * pitm,
 	    for (;;)
 	    {
 		  // BLC - check for buffer overflow before the strcpy
-	      if (pch + strlen(tok.lex.szId) + 1 - rgb >= sizeof(rgb))
+	      size_t filled = pch - rgb;
+	      if (filled + strlen(tok.lex.szId) + 1 >= sizeof(rgb))
 	        ErrorLine("Hex string or String are too big");
 
 	      strcpy(pch, tok.lex.szId);
@@ -4213,7 +4200,7 @@ ParseDumpBitmapExFile(int bitmapType)
   // count number of bmp in each case
   for (i = 0; i < MAXDEPTH; i++)
   {
-	if ((flag >> i) & 0x1 == 0x01)
+	if (flag & (1L << i))
 	{
 	    if (aBitmapEntries[i].density == kSingleDensity)
 	      nbrOfBmpDensityOne++;
@@ -5261,6 +5248,7 @@ ParseDumpMidi(void)
     free(pFileName);
 }
 
+#ifdef PALM_INTERNAL
 /*-----------------------------------------------------------------------------
 |	ParseApplicationPreferences : 'pref'
 -------------------------------------------------------------RMa-------------*/
@@ -5295,6 +5283,7 @@ ParseApplicationPreferences(void)
     CbEmitStruct(&(sysAppPrefs.s16), szRCSYSAPPPREFS, NULL, fTrue);
   CloseOutput();
 }
+#endif
 
 /*-----------------------------------------------------------------------------
 |	ParseTranslation
@@ -5361,8 +5350,7 @@ static void
 ParseGenerateHeader()
 {
     TOK tok;
-    static char szOutputHeader[256];
-    
+
     GetExpectLt(&tok, ltStr, "Output header name");
     strcpy(szOutputHeaderFile, tok.lex.szId);
     vfAutoId = fTrue;

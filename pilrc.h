@@ -1761,8 +1761,8 @@ RW;
 
      typedef struct RWT
      {
-       char *sz1;
-       char *sz2;
+       const char *sz1;
+       const char *sz2;
        RW rw;
      }
 RWT;
