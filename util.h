@@ -33,6 +33,7 @@
 #define __UTIL_H__
 
 #include <stdio.h>
+#include "std.h"
 
 /*
  * RMa add : Debug mode define 
@@ -47,9 +48,9 @@ VOID Error2(char *sz1,
 VOID Error3(char *sz1,
             char *sz2,
             char *sz3);
-void ErrorLine(char *sz);
-void WarningLine(char *sz);
-void ErrorLine2(char *sz,
+VOID ErrorLine(char *sz);
+VOID WarningLine(char *sz);
+VOID ErrorLine2(char *sz,
                 char *sz2);
 BOOL FSzEqI(char *sz1,
             char *sz2);
@@ -58,11 +59,13 @@ int WMin(int w1,
 int WMax(int w1,
          int w2);
 
-void EmitB(unsigned char b);
-void EmitW(unsigned short w);
-void EmitL(unsigned long l);
+VOID EmitB(BYTE b);
+VOID EmitW(unsigned short w);
+VOID EmitL(unsigned long l);
 
-VOID intstrncpy(p_int *dst, const char *src, int n);
+VOID intstrncpy(p_int * dst,
+                const char *src,
+                int n);
 
 /*
  * void SwapBytes(void *pv, int cb); 
@@ -87,10 +90,10 @@ VOID CloseResDBFile();
 
 VOID OpenResFile(char *szFile);
 VOID CloseResFile();
-void DumpBytes(void *pv,
+VOID DumpBytes(void *pv,
                int cb);
-void PadBoundary();
-void PadWordBoundary();
+VOID PadBoundary();
+VOID PadWordBoundary();
 int IbOut();
 char *FindAndOpenFile(char *szIn,
                       char *mode,
@@ -102,5 +105,11 @@ extern FILE *vfhIn;
 #define MAXPATHS 64
 extern char *includePaths[];
 extern int totalIncludePaths;
+
+#ifdef CW_PLUGIN
+// XXX ncr
+#undef feof
+#define feof(f)    MyFeof(f)
+#endif
 
 #endif

@@ -74,8 +74,13 @@ Usage(void)
      "        -V           Generate M$ (VS-type) error/warning output\n"
      "        -allowEditID Allow edit menu IDs (10000-10007)\n"
      "        -PalmRez     Generate res with PalmRez option\n"
-     "        -LE32        Generate 32 bit little endian (ARM, NT) resources\n");
-
+     "        -LE32        Generate 32 bit little endian (ARM, NT) resources\n"
+     "        -Loc <code>  Compile only res with the attribute LOCALE \"code\"\n"
+     "                     code samples: deDE, esES, enUS, frFR, itIT, jpJP\n"
+     "        -StripLoc    Don't compile 'non localisable resources'\n"
+     "        <outfiledir> Directory where .bin files should be generated,\n"
+     "                     or name of the file to generate containing all\n"
+     "                     the generated resources\n");
   exit(1);
 }
 
@@ -101,7 +106,7 @@ main(int cArg,
   int macroValue;
 
   // display the (c) string
-  printf("PilRC v2.8 patch release 6\n");
+  printf("PilRC v2.8 patch pre-release 7\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000-2001 Aaron Ardiri (aaron@ardiri.com)\n");
 
@@ -118,6 +123,8 @@ main(int cArg,
   vfPrcName = NULL;
   vfPrcCreator = NULL;
   vfPrcType = NULL;
+  vfStripNoLocRes = fFalse;
+  szLocaleP = NULL;
 
   // process as many command line arguments as possible
   for (i = 1; i < cArg; i++)
@@ -125,6 +132,20 @@ main(int cArg,
     // no more options to process
     if (rgszArg[i][0] != '-')
       break;
+
+    // RMa localisation
+    if (FSzEqI(rgszArg[i], "-Loc"))
+    {
+      if (i++ == cArg)
+        Usage();
+      szLocaleP = rgszArg[i];
+      continue;
+    }
+    if (FSzEqI(rgszArg[i], "-StripLoc"))
+    {
+      vfStripNoLocRes = fTrue;
+      continue;
+    }
 
     // language
     if (FSzEqI(rgszArg[i], "-L"))
@@ -291,7 +312,7 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-o"))
     {
       if (i++ == cArg)
-       Usage();
+        Usage();
 
       szOutputPath = rgszArg[i];
       continue;
@@ -336,12 +357,20 @@ main(int cArg,
     Usage();
   printf("\n");
 
+  if ((!szLocaleP) && (vfStripNoLocRes))
+  {
+    ErrorLine
+      ("no -Loc option and strip no localizable resource, PilRc have nothing to do.");
+  }
+
   // determine the input path
   szInputFile = rgszArg[i++];
 
   // determine the ouput path
   if (cArg != i)
     szOutputPath = rgszArg[i++];
+  //  else
+  //    szOutputPath = ".";
 
   // last minute check? (extra stuff?)
   if (cArg != i)

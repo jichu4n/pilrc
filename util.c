@@ -32,7 +32,7 @@
 #ifdef WINGUI
 #include <windows.h>
 #elif defined(CW_PLUGIN)
-#include "Extra.h"                               // <-- neil, where is this file? :P
+#include "Extra.h"                               // this file is part of the plugin sources, not standard
 #endif
 #include <stdio.h>
 #include <stdlib.h>
@@ -62,16 +62,16 @@ extern int iline;
  * Globals for output file handling
  */
 
-static FILE *vfhOut;	/* file receiving binary resource data */
-static int ibOut;	/* current output offset (within .bin being emitted) */
-static int ibTotalOut;	/* total output offset (after .bins so far emitted) */
+static FILE *vfhOut;                             /* file receiving binary resource data */
+static int ibOut;                                /* current output offset (within .bin being emitted) */
+static int ibTotalOut;                           /* total output offset (after .bins so far emitted) */
 
-static FILE *vfhRes = NULL;  /* file receiving resource file ("-R") output */
+static FILE *vfhRes = NULL;                      /* file receiving resource file ("-R") output */
 
-static char szOutFileDir[FILENAME_MAX];  /* directory for *.bin files */
+static char szOutFileDir[FILENAME_MAX];          /* directory for *.bin files */
 
-static char szOutResDBFile[FILENAME_MAX];  /* filename for final .ro file */
-static char szTempFile[FILENAME_MAX];      /* temporary filename */
+static char szOutResDBFile[FILENAME_MAX];        /* filename for final .ro file */
+static char szTempFile[FILENAME_MAX];            /* temporary filename */
 
 static VOID WriteOutResourceDB();
 
@@ -83,6 +83,7 @@ typedef struct
   int offset;
 }
 RESOURCEDIRENTRY;
+
 #define szRESOURCEDIRENTRY "b4,w,l"
 
 static PLEXRESOURCEDIR resdir;
@@ -159,12 +160,12 @@ Error3(char *sz1,
 |	
 |		Report error w/ current line #
 -------------------------------------------------------------WESC------------*/
-void
+VOID
 ErrorLine2(char *sz,
            char *sz2)
 {
 #ifdef CW_PLUGIN
-  CWErrorLine2(sz, sz2);
+  CWErrorLine2(sz, sz2, iline);
 #else
   char szErr[256];
 
@@ -187,7 +188,7 @@ ErrorLine2(char *sz,
 |	
 |		Report error w/ current line #
 -------------------------------------------------------------WESC------------*/
-void
+VOID
 ErrorLine(char *sz)
 {
   ErrorLine2(sz, NULL);
@@ -198,11 +199,11 @@ ErrorLine(char *sz)
 |	
 |		Report error w/ current line #
 -------------------------------------------------------------WESC------------*/
-void
+VOID
 WarningLine(char *sz)
 {
 #ifdef CW_PLUGIN
-  CWWarningLine(sz);
+  CWWarningLine(sz, iline);
 #else
   char szErr[256];
 
@@ -221,7 +222,7 @@ WarningLine(char *sz)
 |	
 |		Emit a byte to the output
 -------------------------------------------------------------WESC------------*/
-void
+VOID
 EmitB(unsigned char b)
 {
   DumpBytes(&b, 1);
@@ -232,7 +233,7 @@ EmitB(unsigned char b)
 |	
 |		Emit a word
 -------------------------------------------------------------WESC------------*/
-void
+VOID
 EmitW(unsigned short w)
 {
   if (vfLE32)
@@ -258,7 +259,7 @@ EmitW(unsigned short w)
 |	
 |		emit a long
 -------------------------------------------------------------WESC------------*/
-void
+VOID
 EmitL(unsigned long l)
 {
   if (vfLE32)
@@ -299,12 +300,13 @@ IbOut()
 |	
 |		Emit bytes to current output file
 -------------------------------------------------------------WESC------------*/
-void
-DumpBytes(void *pv,
+VOID
+DumpBytes(VOID * pv,
           int cb)
 {
 #ifdef CW_PLUGIN
   CWDumpBytes(pv, cb);
+  ibOut += cb;
 #else
 #ifdef HEXOUT                                    /* RMa activate Hex dump in debug */
   BYTE *pb;
@@ -387,7 +389,7 @@ DumpBytes(void *pv,
 |	
 |		Pads output to a word or a long boundary by emitting a 0 if necessary
 -------------------------------------------------------------WESC------------*/
-void
+VOID
 PadBoundary()
 {
   if (vfLE32)
@@ -404,7 +406,7 @@ PadBoundary()
 |	
 |		Pads output to a word boundary by emitting a 0 if necessary
 -------------------------------------------------------------WESC------------*/
-void
+VOID
 PadWordBoundary()
 {
   if (ibOut & 1)
@@ -431,8 +433,8 @@ SetOutFileDir(char *sz)
 |              Set up to write a PRC formatted .ro file
 -------------------------------------------------------------JOHN------------*/
 
-static void
-RemoveTempFile()
+static VOID
+RemoveTempFile(VOID)
 {
   if (*szTempFile)
   {
@@ -493,6 +495,7 @@ OpenOutput(char *szBase,
 {
 #ifdef CW_PLUGIN
   CWOpenOutput(szBase, id);
+  ibOut = 0;
 #else
   char szPrettyName[FILENAME_MAX];
   char *szFileName;
@@ -509,6 +512,7 @@ OpenOutput(char *szBase,
   if (vfPrc)
   {
     RESOURCEDIRENTRY entry;
+
     intstrncpy(entry.type, szBase, 4);
     entry.id = id;
     entry.offset = ibTotalOut;
@@ -695,9 +699,9 @@ WMax(int w1,
 |      intstrncpy
 -------------------------------------------------------------JOHN------------*/
 VOID
-intstrncpy(p_int *dst,
-          const char *src,
-          int n)
+intstrncpy(p_int * dst,
+           const char *src,
+           int n)
 {
   while (n > 0)
   {
@@ -719,22 +723,23 @@ intstrncpy(p_int *dst,
 
 typedef struct
 {
-  p_int name[32];      /* b32 */
-  p_int attr;          /* w */
-  p_int version;       /* w */
-  p_int created;       /* l */
-  p_int modified;      /* l */
+  p_int name[32];                                /* b32 */
+  p_int attr;                                    /* w */
+  p_int version;                                 /* w */
+  p_int created;                                 /* l */
+  p_int modified;                                /* l */
   //p_int backup;      /* zl */
   //p_int modnum;      /* zl */
   //p_int appinfo;     /* zl */
   //p_int sortinfo;    /* zl */
-  p_int type[4];       /* b4 */
-  p_int creator[4];    /* b4 */
+  p_int type[4];                                 /* b4 */
+  p_int creator[4];                              /* b4 */
   //p_int uidseed;     /* zl */
   //p_int nextlist;    /* zl */
-  p_int nrecords;      /* w */
+  p_int nrecords;                                /* w */
 }
 DBHEADER;
+
 #define szDBHEADER "b32,w,w,l,l,zl4,b4,b4,zl2,w"
 
 static VOID
@@ -748,52 +753,57 @@ WriteOutResourceDB()
   size_t n;
   BOOL saveLE32;
 
-  /* Even resources with LE32 contents go into a M68K-style PRC file.  */
+  /*
+   * Even resources with LE32 contents go into a M68K-style PRC file.  
+   */
   saveLE32 = vfLE32;
   vfLE32 = fFalse;
 
-  /* It was intended not to provide facilities to set the name, attributes,
-     type, creator, timestamps, etc because that's not really PilRC's job.
-     We're not generating fully flexible .prc files, we're really just using
-     the PRC format as an archive format.  But in the end we've provided
-     command line options for name, type, and creator.  Apparently it is
-     too difficult to use this:  :-)
-       pilrc -prc foo.rcp
-       build-prc -n NAME -t TYPE -c CRID foo.ro
+  /*
+   * It was intended not to provide facilities to set the name, attributes,
+   * type, creator, timestamps, etc because that's not really PilRC's job.
+   * We're not generating fully flexible .prc files, we're really just using
+   * the PRC format as an archive format.  But in the end we've provided
+   * command line options for name, type, and creator.  Apparently it is
+   * too difficult to use this:  :-)
+   * pilrc -prc foo.rcp
+   * build-prc -n NAME -t TYPE -c CRID foo.ro
+   * 
+   * The random number for the timestamps corresponds to 1996-05-16
+   * 11:14:40, which is the same fixed number emitted by build-prc from
+   * prc-tools 0.5.0.  A little bit of history lives on.  :-)
+   * 
+   * We output a constant time because it doesn't seem to be worth getting
+   * this right for a temporary file which won't be distributed, because
+   * it's non-trivial to output the correct time in a portable way, and
+   * especially because variable timestamps embedded in object files are
+   * the spawn of the devil: they make it harder to determine when anything
+   * has really changed -- cmp always detects differences after a rebuild.
+   * This is an issue in certain debugging scenarios that you never want
+   * to encounter.  
+   */
 
-     The random number for the timestamps corresponds to 1996-05-16
-     11:14:40, which is the same fixed number emitted by build-prc from
-     prc-tools 0.5.0.  A little bit of history lives on.  :-)
-
-     We output a constant time because it doesn't seem to be worth getting
-     this right for a temporary file which won't be distributed, because
-     it's non-trivial to output the correct time in a portable way, and
-     especially because variable timestamps embedded in object files are
-     the spawn of the devil: they make it harder to determine when anything
-     has really changed -- cmp always detects differences after a rebuild.
-     This is an issue in certain debugging scenarios that you never want
-     to encounter.  */
-
-  intstrncpy(head.name, (vfPrcName)? vfPrcName : szOutResDBFile, 32);
-  head.attr = 1;  /* dmHdrAttrResDB */
+  intstrncpy(head.name, (vfPrcName) ? vfPrcName : szOutResDBFile, 32);
+  head.attr = 1;                                 /* dmHdrAttrResDB */
   head.version = 1;
   head.created = head.modified = 0xadc0bea0;
-  intstrncpy(head.type, (vfPrcType)? vfPrcType : "RESO", 4);
-  intstrncpy(head.creator, (vfPrcCreator)? vfPrcCreator : "pRES", 4);
+  intstrncpy(head.type, (vfPrcType) ? vfPrcType : "RESO", 4);
+  intstrncpy(head.creator, (vfPrcCreator) ? vfPrcCreator : "pRES", 4);
   head.nrecords = PlexGetCount(&resdir);
 
   head_offset = CbEmitStruct(&head, szDBHEADER, NULL, fTrue);
   head_offset += head.nrecords * CbStruct(szRESOURCEDIRENTRY);
-  head_offset += 2;  /* Allow for that daft gap */
+  head_offset += 2;                              /* Allow for that daft gap */
 
   for (i = 0; i < head.nrecords; i++)
   {
     RESOURCEDIRENTRY *e = PlexGetElementAt(&resdir, i);
+
     e->offset += head_offset;
     CbEmitStruct(e, szRESOURCEDIRENTRY, NULL, fTrue);
   }
 
-  CbEmitStruct(NULL, "zb2", NULL, fTrue);  /* The dreaded gap */
+  CbEmitStruct(NULL, "zb2", NULL, fTrue);        /* The dreaded gap */
 
   f = fopen(szTempFile, "rb");
   if (f == NULL)

@@ -72,6 +72,9 @@ ResTypeInit(void)
     kPalmResType[27] = "akbd";
     kPalmResType[28] = "adwd";
     kPalmResType[29] = "abyt";
+    kPalmResType[30] = "alcs";
+    kPalmResType[31] = "abda";
+    kPalmResType[32] = "aprf";
   }
   else
   {
@@ -94,5 +97,8 @@ ResTypeInit(void)
     kPalmResType[27] = "tkbd";
     kPalmResType[28] = "DLST";
     kPalmResType[29] = "BLST";
+    kPalmResType[30] = "locs";
+    kPalmResType[31] = "hsbd";
+    kPalmResType[32] = "pref";
   }
 }

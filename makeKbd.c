@@ -602,7 +602,7 @@ createAndSaveCountryKeyboard(int country,
   realResOffset += CbEmitStruct(pkeyboardLayout + 3, szRCKEYBOARDLAYOUT, NULL, fFalse); /* pPunc2KeyboardLayout */
   realResOffset += CbEmitStruct(pkeyboardLayout + 4, szRCKEYBOARDLAYOUT, NULL, fFalse); /* pAccentKeyboardLayout */
 
-  pRunning = (char *)(pkeyboardLayout + 5);
+  pRunning = (unsigned char *)(pkeyboardLayout + 5);
 
   // Copy the alpha keycaps
   if (numAlphaKeys != pAlphaKeyboardLayout->keysPerRow[0] +

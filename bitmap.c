@@ -33,10 +33,10 @@
 #pragma pack(2)
 #endif
 
-//#include <memory.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stddef.h>
+#include <memory.h>
 #include <string.h>
 #include <ctype.h>
 #include "pilrc.h"
@@ -218,6 +218,9 @@ int PalmPalette8bpp[256][3] =
   {   0,   0,   0 }, {   0,   0,   0 }, {   0,   0,   0 }, {   0,   0,   0 }
 };
 #define COLOR_TABLE_SIZE 1026
+
+#define LE_BITMAP_VERSION_MASK 0x80
+
                                                                 // *INDENT-ON*
 
 // 
@@ -995,11 +998,15 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
     case rwBitmapColor16:
       rcbmp->pixelsize = cbitsPel;
       rcbmp->version = 1;
+      if (vfLE32)
+        rcbmp->version |= LE_BITMAP_VERSION_MASK;
       break;
 
     case rwBitmapColor256:
       rcbmp->pixelsize = cbitsPel;
       rcbmp->version = 2;
+      if (vfLE32)
+        rcbmp->version |= LE_BITMAP_VERSION_MASK;
 
       // do we need to store a color table?
       if (colortable)
@@ -1062,6 +1069,8 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
     case rwBitmapColor16k:
       rcbmp->pixelsize = cbitsPel;
       rcbmp->version = 2;
+      if (vfLE32)
+        rcbmp->version |= LE_BITMAP_VERSION_MASK;
 
       // rcbmp->ff |= 0x0400; 
       rcbmp->flags.directColor = fTrue;
@@ -1101,6 +1110,8 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
 
       rcbmp->pixelsize = cbitsPel;
       rcbmp->version = 2;
+      if (vfLE32)
+        rcbmp->version |= LE_BITMAP_VERSION_MASK;
       // rcbmp->ff |= 0x0400; 
 
       rcbmp->flags.directColor = fTrue;
@@ -1691,6 +1702,8 @@ WriteTbmp(RCBITMAP * rcbmp,
   rcbmp->cbDst = rcbmp->cbRow * height;
   rcbmp->pbBits = malloc(rcbmp->cbDst);
   rcbmp->version = (depth >= 8) ? 2 : 1;
+  if (vfLE32)
+    rcbmp->version |= LE_BITMAP_VERSION_MASK;
 
   /*
    * The iterate-over-the-pixels code of these two ought to be unified

@@ -953,12 +953,12 @@ typedef struct _rcscrollbar
   /*
    * Short penPosInCar;
  *//*
- * * * * * * * * * zw 
+ * * * * * * * * * * zw 
  */
   /*
    * Short savePos;
  *//*
- * * * * * * * * * zw 
+ * * * * * * * * * * zw 
  */
 }
 RCSCROLLBAR;
@@ -1317,7 +1317,7 @@ typedef struct _rcBITMAP
   /*
    * ushort and_reserved_and_colorTable[3] 
  *//*
- * * * * * * * * * z1w 
+ * * * * * * * * * * z1w 
  */
   unsigned char *pbBits;
 
@@ -1521,7 +1521,138 @@ typedef union _RCCOUNTRY
 }
 RCCOUNTRY;
 
-/*-----------------------------------------------------------------------------
+/*----------------------------------------------------------------------------
+|	locs Locales
+-------------------------------------------------------------RMa------------*/
+#define kMaxCountryNameLen			19
+#define kMaxCurrencyNameLen		19
+#define kMaxCurrencySymbolLen		5
+
+typedef struct
+{
+  p_int language;                                // Language of locale
+  p_int country;                                 // Country of locale
+  p_int countryName[kMaxCountryNameLen + 1];     // Country name (localized)
+  p_int dateFormat;                              // Short format to display date in
+  p_int longDateFormat;                          // Long format to display date in
+  p_int timeFormat;                              // Format to display time in
+  p_int weekStartDay;                            // Weekday for first calendar column (sunday=0)
+  p_int timeZone;                                // Default GMT offset minutes, + for east of GMT, - for west
+  p_int numberFormat;                            // Format to display numbers in
+  //_int                          reserved;
+  p_int currencyName[kMaxCurrencyNameLen + 1];   // (e.g., "US Dollar")
+  p_int currencySymbol[kMaxCurrencySymbolLen + 1];      // (e.g., "$")
+  p_int uniqueCurrencySymbol[kMaxCurrencySymbolLen + 1];        // (e.g, "US$")
+  p_int currencyDecimalPlaces;                   // (e.g., 2 for $10.12)
+  p_int measurementSystem;                       // (e.g, Metric, English)
+}
+LmLocaleSettingsBA16Type;
+
+#define szRCLocaleSettingsBA16EmitStr "b,b,b20,b,b,b,b,w,b,zb,b20,b6,b6,b,b"
+
+typedef struct
+{
+  p_int version;                                 // Version of this structure
+  p_int numLocales;                              // Number of LmLocaleSettingsTypes that follow:
+  //      LmLocaleSettingsBA16Type        locales[0];     //      Settings for each locale
+  //or
+  // LmLocaleSettingsBA32Type     locales[0];     //      Settings for each locale
+}
+LmSettingsType;
+
+#define szRCSettingsEmitStr "w,w"
+
+typedef struct
+{
+  p_int language;                                // Language of locale
+  p_int country;                                 // Country of locale
+  p_int dateFormat;                              // Short format to display date in
+  p_int longDateFormat;                          // Long format to display date in
+  p_int timeFormat;                              // Format to display time in
+  p_int weekStartDay;                            // Weekday for first calendar column (sunday=0)
+  p_int timeZone;                                // Default GMT offset minutes, + for east of GMT, - for west
+  p_int numberFormat;                            // Format to display numbers in
+  //_int                          reserved;
+  p_int currencyDecimalPlaces;                   // (e.g., 2 for $10.12)
+  p_int measurementSystem;                       // (e.g, Metric, English)
+  p_int countryName[kMaxCountryNameLen + 1];     // Country name (localized)
+  p_int currencyName[kMaxCurrencyNameLen + 1];   // (e.g., "US Dollar")
+  p_int currencySymbol[kMaxCurrencySymbolLen + 1];      // (e.g., "$")
+  p_int uniqueCurrencySymbol[kMaxCurrencySymbolLen + 1];        // (e.g, "US$")
+}
+LmLocaleSettingsBA32Type;
+
+#define szRCLocaleSettingsBA32EmitStr "b,b,b,b,b,b,w,b,zb,b,b,b20,b20,b6,b6"
+
+#define szRCLOCALES (vfLE32?szRCSettingsBA32EmitStr:szRCSettingsBA16EmitStr)
+typedef union _RCLOCALES
+{
+  LmLocaleSettingsBA16Type s16;
+  LmLocaleSettingsBA32Type s32;
+}
+RCLOCALES;
+
+/*----------------------------------------------------------------------------
+|	hard/soft button default
+-------------------------------------------------------------RMa------------*/
+
+typedef struct ButtonDefaultAppBA16Type
+{
+  p_int keyCode;                                 // virtual key code of the hard/soft button
+  p_int creator;                                 // app creator code
+}
+ButtonDefaultAppBA16Type;
+
+#define ButtonDefaultAppBA16EmitStr "w,l"
+
+typedef struct ButtonDefaultListBA16Type
+{
+  p_int numButtons;                              // number of default button assignments
+  //      ButtonDefaultAppBA16Type button[1];     // array of button assignments
+}
+ButtonDefaultListBA16Type;
+
+#define ButtonDefaultListBA16EmitStr "w"
+
+typedef struct ButtonDefaultAppBA32Type
+{
+  p_int keyCode;                                 // virtual key code of the hard/soft button
+  //      p_int padding;                                          // explicit alignment padding
+  p_int creator;                                 // app creator code
+}
+ButtonDefaultAppBA32Type;
+
+#define ButtonDefaultAppBA32EmitStr "w,zw,l"
+
+typedef struct ButtonDefaultListBA32Type
+{
+  p_int numButtons;                              // number of default button assignments
+  //      p_int padding;                                          // explicit alignment padding
+  //      ButtonDefaultAppBA32Type button[1];     // array of button assignments
+}
+ButtonDefaultListBA32Type;
+
+#define ButtonDefaultListBA32EmitStr "w,zw"
+
+#define szHARDSOFTBUTTONLIST (vfLE32?ButtonDefaultListBA32EmitStr:ButtonDefaultListBA16EmitStr )
+
+typedef union _RCHARDSOFTBUTTONLIST
+{
+  ButtonDefaultListBA16Type s16;
+  ButtonDefaultListBA32Type s32;
+}
+RCHARDSOFTBUTTONLIST;
+
+#define szHARDSOFTBUTTONDEFAULTAPP (vfLE32?ButtonDefaultAppBA32EmitStr:ButtonDefaultAppBA16EmitStr )
+
+typedef union _RCHARDSOFTBUTTONDEFAULT
+{
+  ButtonDefaultAppBA16Type s16;
+  ButtonDefaultAppBA32Type s32;
+}
+RCHARDSOFTBUTTONDEFAULT;
+
+/*----------------------------------------------------------------------------
 |	feat feature
 -------------------------------------------------------------RMa------------*/
 typedef struct ROMFtrFeatureBA16Type
@@ -1607,7 +1738,7 @@ typedef union _RCFEATURE
 }
 RCFEATURE;
 
-/*-----------------------------------------------------------------------------
+/*----------------------------------------------------------------------------
 |	KEYBOARD
 -------------------------------------------------------------RMa------------*/
 #define keyboardRows		4
@@ -1650,6 +1781,39 @@ KeyboardLayoutType;
 #define szRCKeyboardLayoutBA32EmitStr "w4,b,b,w,b4,b,b,b,zb"
 
 #define szRCKEYBOARDLAYOUT (vfLE32?szRCKeyboardLayoutBA32EmitStr:szRCKeyboardLayoutBA16EmitStr)
+
+/*----------------------------------------------------------------------------
+|	SYSAPPPREFS
+-------------------------------------------------------------RMa------------*/
+
+typedef struct _SysAppPrefsBA16Type
+{
+  p_int priority;                                // task priority
+  p_int stackSize;                               // required stack space
+  p_int minHeapSpace;                            // minimum heap space required
+}
+RCSysAppPrefsBA16Type;
+
+#define szRCSysAppPrefsBA16EmitStr "w,l,l"
+
+typedef struct _SysAppPrefsBA32Type
+{
+  p_int priority;                                // task priority
+  //      p_int           reserved;
+  p_int stackSize;                               // required stack space
+  p_int minHeapSpace;                            // minimum heap space required
+}
+RCSysAppPrefsBA32Type;
+
+#define szRCSysAppPrefsBA32EmitStr "w,zw,l,l"
+
+#define szRCSYSAPPPREFS (vfLE32?szRCSysAppPrefsBA32EmitStr:szRCSysAppPrefsBA16EmitStr)
+typedef union _szRCSYSAPPPREFS
+{
+  RCSysAppPrefsBA16Type s16;
+  RCSysAppPrefsBA32Type s32;
+}
+RCSYSAPPPREFS;
 
 /*-----------------------------------------------------------------------------
 These macros are used to manipulate PalmOS Objects without the need of taking
@@ -1776,6 +1940,7 @@ RCPFILE;
        rwKeyDownChr,
        rwKeyDownKeyCode,
        rwKeyDownModifiers,
+
        rwCountryLocalisation,
        rwNumber,
        rwName,
@@ -1791,6 +1956,13 @@ RCPFILE;
        rwDaylightSavings,
        rwMinutesWestOfGmt,
        rwMeasurementSystem,
+
+       rwLocales,                                /* 'locs' */
+       rwLanguages,                              /* 'locs' */
+       rwCountrys,                               /* 'locs' */
+       rwCountryName,                            /* 'locs' */
+       rwTimeZone,                               /* 'locs' */
+
        rwFeature,
        rwEntry,
        rwKeyboard,
@@ -1820,7 +1992,6 @@ RCPFILE;
        rwAlert,
        rwMessage,
        rwButtons,
-       rwDefaultBtn,
 
        rwInformation,                            /* order assumed */
        rwConfirmation,
@@ -1850,6 +2021,15 @@ RCPFILE;
        rwNumRows,
        rwColumnWidths,
 
+       rwHardSoftButtonDefault,                  /* RMa add Hard/Soft button default */
+
+       rwSysAppPrefs,                            /* RMa system Application preferences */
+       rwPriority,
+       rwStackSize,
+       rwMinHeapSpace,
+
+       rwLocale,                                 /* RMa Locatisation management */
+
        rwInclude,
        rwDefine,
        rwEqu,
@@ -1877,8 +2057,6 @@ RCPFILE;
        rwIconSmallFamily,
 
        rwTrap,
-
-       rwFontId,
 
        rwHex,
        rwData,
@@ -1940,7 +2118,7 @@ RWT;
        {"savebehind", NULL, rwSaveBehind},
        {"nosavebehind", NULL, rwNoSaveBehind},
        {"helpid", NULL, rwHelpId},
-       {"defaultbtnid", NULL, rwDefaultBtnId},
+       {"defaultbtnid", "defaultbutton", rwDefaultBtnId},       /* RMa form & alert */
        {"menuid", NULL, rwMenuId},
 
        {"enabled", NULL, rwEnabled},
@@ -1950,7 +2128,7 @@ RWT;
        {"leftanchor", NULL, rwLeftAnchor},
        {"rightanchor", NULL, rwRightAnchor},
        {"group", NULL, rwGroup},
-       {"font", NULL, rwFont},
+       {"font", "fontid", rwFont},
 
        {"frame", NULL, rwFrame},
        {"noframe", NULL, rwNoFrame},
@@ -2026,6 +2204,12 @@ RWT;
        {"daylightsavings", NULL, rwDaylightSavings},
        {"minuteswestofgmt", NULL, rwMinutesWestOfGmt},
        {"measurementsystem", NULL, rwMeasurementSystem},
+       {"locales", NULL, rwLocales},             /* 'locs' */
+       {"languages", NULL, rwLanguages},         /* 'locs' */
+       {"countrys", NULL, rwCountrys},           /* 'locs' */
+       {"CountryName", NULL, rwCountryName},     /* 'locs' */
+       {"timezone", NULL, rwTimeZone},           /* 'locs' */
+
        {"feature", NULL, rwFeature},             /* 'feat' */
        {"entry", NULL, rwEntry},
        {"keyboard", NULL, rwKeyboard},           /* 'tkbd' */
@@ -2034,6 +2218,11 @@ RWT;
        {"defaultitem", NULL, rwDefaultItem},     /* 'DLST' & 'BLST' */
        {"midi", NULL, rwMidi},                   /* 'MIDI' */
        {"bootscreenfamily", NULL, rwBootScreenFamily},  /* 'tbsb' it look like as a bitmapfamily with an header (size & crc) */
+
+       {"SysApplicationPreferences", NULL, rwSysAppPrefs},      /* 'pref' */
+       {"priority", NULL, rwPriority},           /* 'pref' */
+       {"stacksize", NULL, rwStackSize},         /* 'pref' */
+       {"minheapspace", NULL, rwMinHeapSpace},   /* 'pref' */
 
        {"prevleft", NULL, rwPrevLeft},
        {"prevright", NULL, rwPrevRight},
@@ -2050,7 +2239,6 @@ RWT;
 
        {"alert", "tALT", rwAlert},
        {"message", NULL, rwMessage},
-       {"defaultbutton", NULL, rwDefaultBtn},
        {"buttons", NULL, rwButtons},
        {"information", NULL, rwInformation},
        {"confirmation", NULL, rwConfirmation},
@@ -2069,6 +2257,8 @@ RWT;
 
        {"translation", NULL, rwTranslation},
 
+       {"hardsoftbuttondefault", NULL, rwHardSoftButtonDefault},
+
        {"center", NULL, rwCenter},
        {"right", NULL, rwRight},
        {"bottom", NULL, rwBottom},
@@ -2081,6 +2271,8 @@ RWT;
        {"columns", "numcolumns", rwNumColumns},
        {"rows", "numrows", rwNumRows},
        {"columnwidths", "widths", rwColumnWidths},
+
+       {"locale", NULL, rwLocale},               /* RMa Locatisation management */
 
        {"define", NULL, rwDefine},
        {"equ", NULL, rwEqu},
@@ -2112,7 +2304,6 @@ RWT;
        {"smalliconfamily", NULL, rwIconSmallFamily},
 
        {"trap", NULL, rwTrap},
-       {"fontid", NULL, rwFontId},
 
        {"hex", NULL, rwHex},
        {"data", NULL, rwData},
@@ -2164,7 +2355,16 @@ extern const char *vfPrcName;
 extern const char *vfPrcCreator;
 extern const char *vfPrcType;
 
+#define DEFAULT_PRCNAME "PilRC resources"
+#define DEFAULT_PRCCR8R 0x70524553               // 'pRES'
+#define DEFAULT_PRCTYPE 0x64617461               // 'data'
+
+// Translations
 extern char *szLanguage;
+
+// Localisation management
+extern char *szLocaleP;
+extern BOOL vfStripNoLocRes;
 
 #define dxScreen 160
 #define dyScreen 160

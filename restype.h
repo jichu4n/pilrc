@@ -61,8 +61,11 @@
 #define kKeyboardType		27
 #define kLongWrdListRscType	28
 #define kByteListRscType		29
+#define kLocalesType			30
+#define kHardSoftButtonType	31
+#define kAppPrefsType		32
 
-#define kMaxNumberResType		30
+#define kMaxNumberResType		33
 
 extern char *kPalmResType[kMaxNumberResType];
 
