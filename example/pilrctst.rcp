@@ -125,3 +125,16 @@ STRINGTABLE stringTableType
 HEX "junk" ID 1000 0x20 32 "Hello World" 0x10 0x50
 
 BITMAP bitmapAbout "images/info1bpp.bmp" COMPRESS
+
+#define list_form 1000
+
+WORDLIST ID list_form
+BEGIN
+         1
+         1+1
+         1 + 1 + 1
+         list_form
+         4352
+         42 * 19
+END
+
