@@ -107,7 +107,7 @@ Usage(void)
      "        -noIFIH        Ignore includes files in header files\n"
 #endif
      "        -R <resfile>   Generate JUMP/PilA .res file\n"
-     "        -ro            Generate resource database file instead of .bins\n"
+     "        -ro            Generate resource database file (.ro) instead of .bins\n"
      "        -ts            put POSIX timestamp on .ro file generated\n"
      "        -o <filedir>   Equivalent to [outfiledir]\n"
      "        -H <incfile>   Autoassign IDs and write .h file with #defines\n"

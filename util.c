@@ -41,8 +41,6 @@
 #include <errno.h>
 #include <time.h>
 #include "pilrc.h"
-#include "util.h"
-#include "font.h"
 
 #ifdef WIN32
 #define DIRSEPARATOR  '\\'
@@ -57,7 +55,6 @@ FILE *vfhIn;
 char szInFile[256];
 char rgbZero[16];
 BOOL vfErr;
-extern int iline;
 
 /*
  * Globals for output file handling
@@ -74,7 +71,7 @@ static char szOutFileDir[FILENAME_MAX];          /* directory for *.bin files */
 static char szOutResDBFile[FILENAME_MAX];        /* filename for final .ro file */
 static char szTempFile[FILENAME_MAX];            /* temporary filename */
 
-static VOID WriteOutResourceDB();
+static VOID WriteOutResourceDB(void);
 
 DEFPL(PLEXRESOURCEDIR)
 typedef struct RESOURCEDIRENTRY
@@ -82,8 +79,7 @@ typedef struct RESOURCEDIRENTRY
   int type[4];
   int id;
   int offset;
-}
-RESOURCEDIRENTRY;
+} RESOURCEDIRENTRY;
 
 #define szRESOURCEDIRENTRY "b4,w,l"
 
@@ -133,7 +129,7 @@ void FreeAccessPathsList(void)
 |		Report error, exit
 ------------------------------------------------------------WESC------------*/
 VOID
-Error(char *sz)
+Error(const char *sz)
 {
 #ifdef WINGUI
   if (vfWinGUI)
@@ -160,13 +156,11 @@ Error(char *sz)
 |	Error2
 -------------------------------------------------------------WESC------------*/
 VOID
-Error2(char *sz1,
-       char *sz2)
+Error2(const char *sz1,
+       const char *sz2)
 {
   char szT[256];
-
-  strcpy(szT, sz1);
-  strcat(szT, sz2);
+  snprintf(szT, sizeof(szT), "%s%s", sz1, sz2);
   Error(szT);
 }
 
@@ -174,16 +168,12 @@ Error2(char *sz1,
 |	Error3
 -------------------------------------------------------------WESC------------*/
 VOID
-Error3(char *sz1,
-       char *sz2,
-       char *sz3)
+Error3(const char *sz1,
+       const char *sz2,
+       const char *sz3)
 {
   char szT[256];
-
-  strcpy(szT, sz1);
-  strcat(szT, sz2);
-  strcat(szT, " ");
-  strcat(szT, sz3);
+  snprintf(szT, sizeof(szT), "%s%s %s", sz1, sz2, sz3);
   Error(szT);
 }
 
@@ -193,8 +183,8 @@ Error3(char *sz1,
 |		Report error w/ current line #
 -------------------------------------------------------------WESC------------*/
 VOID
-ErrorLine2(char *sz,
-           char *sz2)
+ErrorLine2(const char *sz,
+           const char *sz2)
 {
 #ifdef CW_PLUGIN
   CWErrorLine2(sz, sz2, iline);
@@ -202,12 +192,12 @@ ErrorLine2(char *sz,
   char szErr[256];
 
   if (sz2 == NULL)
-    sprintf(szErr,
+    snprintf(szErr, sizeof(szErr),
             ((vfVSErrors)
              ? "%s(%d): error : %s"
              : "%s:%d: error : %s"), szInFile, iline, sz);
   else
-    sprintf(szErr,
+    snprintf(szErr, sizeof(szErr),
             ((vfVSErrors)
              ? "%s(%d): error : %s %s"
              : "%s:%d: error : %s %s"), szInFile, iline, sz, sz2);
@@ -221,7 +211,7 @@ ErrorLine2(char *sz,
 |		Report error w/ current line #
 -------------------------------------------------------------WESC------------*/
 VOID
-ErrorLine(char *sz)
+ErrorLine(const char *sz)
 {
   ErrorLine2(sz, NULL);
 }
@@ -232,14 +222,14 @@ ErrorLine(char *sz)
 |		Report error w/ current line #
 -------------------------------------------------------------WESC------------*/
 VOID
-WarningLine(char *sz)
+WarningLine(const char *sz)
 {
 #ifdef CW_PLUGIN
   CWWarningLine(sz, iline);
 #else
   char szErr[256];
 
-  sprintf(szErr,
+  snprintf(szErr, sizeof(szErr),
           ((vfVSErrors)
            ? "%s(%d): warning : %s\n"
            : "%s:%d: warning : %s\n"), szInFile, iline, sz);
@@ -320,7 +310,7 @@ EmitL(unsigned long l)
 |		Return current output file file offset
 -------------------------------------------------------------WESC------------*/
 int
-IbOut()
+IbOut(void)
 {
   return ibOut;
 }
@@ -417,7 +407,7 @@ DumpBytes(VOID * pv,
 |		Pads output to a word or a long boundary by emitting a 0 if necessary
 -------------------------------------------------------------WESC------------*/
 VOID
-PadBoundary()
+PadBoundary(void)
 {
   if (vfLE32)
   {
@@ -434,7 +424,7 @@ PadBoundary()
 |		Pads output to a word boundary by emitting a 0 if necessary
 -------------------------------------------------------------WESC------------*/
 VOID
-PadWordBoundary()
+PadWordBoundary(void)
 {
   if (ibOut & 1)
     DumpBytes(rgbZero, 1);
@@ -446,12 +436,12 @@ PadWordBoundary()
 |		Set output file path -- no trailing / or \ 
 -------------------------------------------------------------WESC------------*/
 VOID
-SetOutFileDir(char *sz)
+SetOutFileDir(const char *sz)
 {
   if (sz == NULL || strcmp(sz, ".") == 0)
     strcpy(szOutFileDir, "");
   else
-    sprintf(szOutFileDir, "%s%c", sz, DIRSEPARATOR);
+    snprintf(szOutFileDir, sizeof(szOutFileDir), "%s%c", sz, DIRSEPARATOR);
 }
 
 /*-----------------------------------------------------------------------------
@@ -471,7 +461,7 @@ RemoveTempFile(VOID)
 }
 
 VOID
-OpenResDBFile(char *sz)
+OpenResDBFile(const char *sz)
 {
   static BOOL registered = fFalse;
 
@@ -492,7 +482,7 @@ OpenResDBFile(char *sz)
 }
 
 VOID
-CloseResDBFile()
+CloseResDBFile(void)
 {
   if (!vfInhibitOutput)
   {
@@ -557,13 +547,13 @@ OpenOutput(char *szBase,
     entry.offset = ibTotalOut;
     PlexAddElement(&resdir, &entry);
 
-    sprintf(szPrettyName, "temporary %s%04x.bin", szBase, id);
+    snprintf(szPrettyName, sizeof(szPrettyName), "temporary %s%04x.bin", szBase, id);
     szFileName = szTempFile;
     szMode = "ab";
   }
   else
   {
-    sprintf(szPrettyName, "%s%s%04x.bin", szOutFileDir, szBase, id);
+    snprintf(szPrettyName, sizeof(szPrettyName), "%s%s%04x.bin", szOutFileDir, szBase, id);
     szFileName = szPrettyName;
     szMode = "w+b";
   }
@@ -591,7 +581,7 @@ OpenOutput(char *szBase,
 |	CloseOutput
 -------------------------------------------------------------WESC------------*/
 VOID
-CloseOutput()
+CloseOutput(void)
 {
 #ifdef CW_PLUGIN
   CWCloseOutput();
@@ -614,7 +604,7 @@ CloseOutput()
   if (!vfAllowLargeResources && ibOut > maxSafeResourceSize)
   {
     char buffer[120];
-  	sprintf(buffer,
+  	snprintf(buffer, sizeof(buffer),
   		"Resource '%s' %d, %d bytes, exceeds safe "
   		"HotSync size limit of %d bytes",
   		outputResStr, outputResID, ibOut, maxSafeResourceSize);
@@ -638,7 +628,7 @@ CloseOutput()
 |	getOpenedOutputFile
 -------------------------------------------------------------RMa-------------*/
 FILE *
-getOpenedOutputFile()
+getOpenedOutputFile(void)
 {
   if (vfhOut == NULL)
     Error("No output file opened");
@@ -646,7 +636,7 @@ getOpenedOutputFile()
 }
 
 VOID
-OpenResFile(char *sz)
+OpenResFile(const char *sz)
 {
   if (vfInhibitOutput || vfWinGUI)
     return;
@@ -663,7 +653,7 @@ OpenResFile(char *sz)
 }
 
 VOID
-CloseResFile()
+CloseResFile(void)
 {
   if (vfInhibitOutput || vfWinGUI)
     return;
@@ -678,9 +668,9 @@ CloseResFile()
 /*-----------------------------------------------------------------------------
 |	FindAndOpenFile
 -------------------------------------------------------------DAVE------------*/
-char *
-FindAndOpenFile(char *szIn,
-                char *mode,
+const char *
+FindAndOpenFile(const char *szIn,
+                const char *mode,
                 FILE ** returnFile)
 {
   FILE *file = fopen(szIn, mode);
@@ -692,7 +682,8 @@ FindAndOpenFile(char *szIn,
 
     for (i = 0; i < totalIncludePaths; i++)
     {
-      sprintf(szFullName, "%s%c%s", includePaths[i], DIRSEPARATOR, szIn);
+      snprintf(szFullName, sizeof(szFullName), 
+      	"%s%c%s", includePaths[i], DIRSEPARATOR, szIn);
 
       file = fopen(szFullName, mode);
       if (file != NULL)
@@ -799,13 +790,12 @@ typedef struct DBHEADER
   //p_int uidseed;     /* zl */
   //p_int nextlist;    /* zl */
   p_int nrecords;                                /* w */
-}
-DBHEADER;
+} DBHEADER;
 
 #define szDBHEADER "b32,w,w,l,l,zl4,b4,b4,zl2,w"
 
 static VOID
-WriteOutResourceDB()
+WriteOutResourceDB(void)
 {
   DBHEADER head;
   char buf[4096];

@@ -42,16 +42,23 @@
 #define		HEXOUT		1
 #endif
 
-VOID Error(char *sz);
-VOID Error2(char *sz1,
-            char *sz2);
-VOID Error3(char *sz1,
-            char *sz2,
-            char *sz3);
-VOID ErrorLine(char *sz);
-VOID WarningLine(char *sz);
-VOID ErrorLine2(char *sz,
-                char *sz2);
+VOID Error(const char *sz);
+VOID Error2(const char *sz1,
+            const char *sz2);
+VOID Error3(const char *sz1,
+            const char *sz2,
+            const char *sz3);
+VOID ErrorLine(const char *sz);
+VOID WarningLine(const char *sz);
+VOID ErrorLine2(const char *sz,
+                const char *sz2);
+
+/*lint -function(exit,Error) */
+/*lint -function(exit,Error2) */
+/*lint -function(exit,Error3) */
+/*lint -function(exit,ErrorLine) */
+/*lint -function(exit,ErrorLine2) */
+
 BOOL FSzEqI(const char *sz1,
             const char *sz2);
 int WMin(int w1,
@@ -80,25 +87,25 @@ VOID intstrncpy(p_int * dst,
  */
 VOID OpenOutput(char *szBase,
                 int id);
-VOID CloseOutput();
-FILE *getOpenedOutputFile();
+VOID CloseOutput(void);
+FILE *getOpenedOutputFile(void);
 
-VOID SetOutFileDir(char *sz);
+VOID SetOutFileDir(const char *sz);
 
-VOID OpenResDBFile(char *szFile);
-VOID CloseResDBFile();
+VOID OpenResDBFile(const char *szFile);
+VOID CloseResDBFile(void);
 
-VOID OpenResFile(char *szFile);
-VOID CloseResFile();
+VOID OpenResFile(const char *szFile);
+VOID CloseResFile(void);
 VOID DumpBytes(void *pv,
                int cb);
-VOID PadBoundary();
-VOID PadWordBoundary();
-int IbOut();
+VOID PadBoundary(void);
+VOID PadWordBoundary(void);
+int IbOut(void);
 void AddAccessPath(const char *path);
 void FreeAccessPathsList(void);
-char *FindAndOpenFile(char *szIn,
-                      char *mode,
+const char *FindAndOpenFile(const char *szIn,
+                      const char *mode,
                       FILE ** returnFile);
 
 void SetDependsTarget(const char *szIn);

@@ -1599,8 +1599,8 @@ Using these macros allows to avoid to test vfLE32 and write the code twice...
 -------------------------------------------------------------RNi-------------*/
 #define BAFIELD(obj, field) (vfLE32 ? obj.s32.field : obj.s16.field)
 #define PBAFIELD(pobj, field) (vfLE32 ? pobj->s32.field : pobj->s16.field)
-#define SETBAFIELD(obj, field, value) do { if (vfLE32) obj.s32.field = (value); else obj.s16.field = (value); } while (0)
-#define SETPBAFIELD(pobj, field, value) do { if (vfLE32) pobj->s32.field = (value); else pobj->s16.field = (value); } while (0)
+#define SETBAFIELD(obj, field, value)   /*lint -e{717}*/ do { if (vfLE32) obj.s32.field = (value); else obj.s16.field = (value); } while (0)
+#define SETPBAFIELD(pobj, field, value) /*lint -e{717}*/ do { if (vfLE32) pobj->s32.field = (value); else pobj->s16.field = (value); } while (0)
 #define BAFIELD16(obj, field) obj.s16.field
 #define BAFIELD32(obj, field) obj.s32.field
 #define PBAFIELD16(obj, field) obj->s16.field
@@ -1633,8 +1633,6 @@ FRMBA32Type;
        FRMBA32Type s32;
      }
 FRM;
-
-     void ErrorLine(char *sz);
 
 /*
  * Translation Entry -- used to map to foreign languages 
@@ -2745,15 +2743,14 @@ int CbEmitStruct(void *pv,
                  char **ppchText,
                  BOOL fEmit);
 int CbStruct(char *szPic);
-RCPFILE *ParseFile(char *szIn,
-                   char *szOutDir,
-                   char *szResFile,
-                   char *szIncFile,
-                   int fontType);
+RCPFILE *ParseFile(const char *szIn,
+          const char *szOutDir,
+          const char *szResFile,
+          const char *szIncFile,
+          int fontType);
 SYM *PsymLookupId(int id);
-VOID AddSym(char *sz,
-            int wVal);
-VOID AddSymString(char* sz, char* val);
+VOID AddSym(const char *sz, int wVal);
+VOID AddSymString(const char* sz, const char* val);
 VOID AddDefineSymbol(void);
 
 #endif                                           // _pilrc_h

@@ -65,8 +65,7 @@ typedef struct BITMAPFILEHEADER
   PILRC_USHORT bfReserved2;
   PILRC_USHORT bfOffBits1;
   PILRC_USHORT bfOffBits2;
-}
-BITMAPFILEHEADER;
+} BITMAPFILEHEADER;
 
 typedef struct BITMAPINFOHEADER
 {
@@ -81,8 +80,7 @@ typedef struct BITMAPINFOHEADER
   long biYPelsPerMeter;
   PILRC_ULONG biClrUsed;
   PILRC_ULONG biClrImportant;
-}
-BITMAPINFOHEADER;
+} BITMAPINFOHEADER;
 
 typedef struct RGBQUAD
 {
@@ -90,21 +88,19 @@ typedef struct RGBQUAD
   PILRC_BYTE rgbGreen;
   PILRC_BYTE rgbRed;
   PILRC_BYTE rgbReserved;
-}
-RGBQUAD;
+} RGBQUAD;
 
 typedef struct BITMAPINFO
 {
   BITMAPINFOHEADER bmiHeader;
-  RGBQUAD bmiColors[1];
-}
-BITMAPINFO;
+  RGBQUAD bmiColors[1]; /* size is indefinite */
+} BITMAPINFO;
 #endif
 
-#define BI_RGB					0
-#define BI_RLE4					1
-#define BI_RLE8					2
-#define BI_BITFIELDS		3
+#define BI_RGB         0
+#define BI_RLE4        1
+#define BI_RLE8        2
+#define BI_BITFIELDS   3
                                                                 // *INDENT-OFF*
 /*
  * The 1bit-2 color system palette for Palm Computing Devices.
@@ -267,7 +263,7 @@ static void BMP_ConvertX11Bitmap(RCBITMAP *, PILRC_BYTE *, int);
 static void BMP_ConvertPNMBitmap(RCBITMAP *, PILRC_BYTE *, int, int, BOOL, int *);
 static void BMP_CompressBitmap(RCBITMAP *, int, int, BOOL, BOOL);
 static void BMP_CompressDumpBitmap(RCBITMAP *, int, int, BOOL, BOOL, BOOL, BOOL, int, int *);
-static void BMP_InvalidExtension(char *);
+static void BMP_InvalidExtension(const char *);
 
 static void BMP_FillBitmapV3Header(RCBITMAP *, RCBITMAP_V3 *, int *, int);
                                                                 // *INDENT-ON*
@@ -1761,7 +1757,8 @@ WriteGreyTbmp(RCBITMAP * rcbmp,
   {
     char buffer[120];
 
-    sprintf(buffer, "%d input grey levels converted to only %ld",
+    snprintf(buffer, sizeof(buffer),
+    		"%d input grey levels converted to only %ld",
             ningreys, outmaxval + 1);
     WarningLine(buffer);
   }
@@ -1778,8 +1775,7 @@ WriteIndexedColorTbmp(RCBITMAP * rcbmp,
   {
     struct rgb key;
     unsigned char index;
-  }
-  table[N];
+  } table[N];
 
   unsigned char *outp = rcbmp->pbBits;
   int x, y, h, nentries, ninputcolors, noutputcolors;
@@ -1875,7 +1871,8 @@ WriteIndexedColorTbmp(RCBITMAP * rcbmp,
   {
     char buffer[120];
 
-    sprintf(buffer, "%d input colors converted to only 256", ninputcolors);
+    snprintf(buffer, sizeof(buffer),
+    	"%d input colors converted to only 256", ninputcolors);
     WarningLine(buffer);
     ninputcolors = 256;
   }
@@ -2541,7 +2538,8 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
           ((rcbmp->cx != stdIconSize_y) || (rcbmp->cy != stdIconSize_y)))
       {
 		  char buffer[128];
-		  sprintf(buffer, "Icon resource not %dx%d, %dx%d or %dx%d (preferred)",
+		  snprintf(buffer, sizeof(buffer),
+		  	"Icon resource not %dx%d, %dx%d or %dx%d (preferred)",
 		  	stdIconSize_x, stdIconSize_x, 
 		  	stdIconSize_x, stdIconSize_y,
 		  	stdIconSize_y, stdIconSize_y);
@@ -2555,7 +2553,8 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
           (rcbmp->cy != stdSmallIconSize_y))
       {
 		  char buffer[128];
-		  sprintf(buffer, "Small icon resource not %dx%d",
+		  snprintf(buffer, sizeof(buffer),
+		  	"Small icon resource not %dx%d",
 		  	stdSmallIconSize_x, stdSmallIconSize_y);
           WarningLine(buffer);
       }
@@ -2708,11 +2707,11 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
  * @param fileName the source file name
  */
 static void
-BMP_InvalidExtension(char *fileName)
+BMP_InvalidExtension(const char *fileName)
 {
-  char pchLine[300];
+  char pchLine[500];
 
-  sprintf(pchLine,
+  snprintf(pchLine, sizeof(pchLine),
           "Bitmap file extension not recognized for file %s\n"
           "\tSupported extensions: .BMP, .pbitm, .xbm and .pbm/.ppm/.pnm",
           fileName);
@@ -2732,8 +2731,7 @@ BMP_InvalidExtension(char *fileName)
  * @param bootscreen	should this bitmap be prepared for size & crc header add on ?
  * @param density    does this bitmap is a new version
  */
-extern void
-DumpBitmap(char *fileName,
+void DumpBitmap(const char *fileName,
            int isIcon,
            int compress,
            int bitmaptype,
@@ -2744,7 +2742,7 @@ DumpBitmap(char *fileName,
            int density)
 {
   PILRC_BYTE *pBMPData;
-  char *pchExt;
+  const char *pchExt;
   FILE *pFile;
   long size;
   RCBITMAP rcbmp;
@@ -2814,8 +2812,8 @@ DumpBitmap(char *fileName,
   if (pFile == NULL)
   {
     char pchLine[200];
-
-    sprintf(pchLine, "Could not find Resource %s.", fileName);
+    snprintf(pchLine, sizeof(pchLine),
+    	"Could not find Resource %s.", fileName);
     ErrorLine(pchLine);
   }
 
@@ -2828,8 +2826,8 @@ DumpBitmap(char *fileName,
   if (pBMPData == NULL)
   {
     char pchLine[200];
-
-    sprintf(pchLine, "Resource %s too big to fit in memory", fileName);
+    snprintf(pchLine, sizeof(pchLine),
+    	"Resource %s too big to fit in memory", fileName);
     ErrorLine(pchLine);
   }
   fread(pBMPData, 1, size, pFile);

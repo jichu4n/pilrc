@@ -106,14 +106,13 @@
 
 #ifndef strdup
 char *strdup(const char *s);
+/*lint -sem( strdup, @p == (1p ? malloc(1p) : 0) )*/
 #endif
 
 #define EMITRWT
 #include "pilrc.h"
 #undef EMITRWT
 #include "bitmap.h"
-#include "font.h"
-
 #include "restype.h"                             // RMa
 
 #ifdef PALM_INTERNAL
@@ -325,12 +324,13 @@ RCRECT rcPrev;
 |		Note! no check is made for previous existence
 -------------------------------------------------------------WESC------------*/
 VOID
-AddSym(char *sz,
+AddSym(const char *sz,
        int wVal)
 {
   SYM *psym;
 
   psym = calloc(1, sizeof(SYM));
+  if (psym == NULL) Error("out of memory");
   psym->sz = strdup(sz);
   psym->wVal = wVal;
   psym->sVal = NULL;
@@ -338,11 +338,12 @@ AddSym(char *sz,
   psymFirst = psym;
 }
 
-VOID AddSymString(char* sz, char* val)
+VOID AddSymString(const char* sz, const char* val)
 {
     auto     SYM*       psym;
     
     psym = calloc(1, sizeof(SYM));
+    if (psym == NULL) Error("out of memory");
     psym->sz = strdup(sz);
     psym->wVal = 0;
     psym->sVal = strdup(val);
@@ -356,7 +357,7 @@ VOID AddSymString(char* sz, char* val)
 |		Lookup symbol based on sz -- case sensitive
 -------------------------------------------------------------WESC------------*/
 static SYM *
-PsymLookup(char *sz)
+PsymLookup(const char *sz)
 {
   SYM *psym;
 
@@ -367,14 +368,15 @@ PsymLookup(char *sz)
 }
 
 static VOID
-CheckNumericSymbol(SYM* psym)
+CheckNumericSymbol(const SYM* psym)
 {
 	char msg[80];
 
     if (NULL != psym->sVal)
     {
-        sprintf(msg, "Symbol %s should be numeric ID but is defined as string %s",
-                psym->sz, psym->sVal);
+        snprintf(msg, sizeof(msg),
+        	"Symbol %s should be numeric ID but is defined as string %s",
+            psym->sz, psym->sVal);
         ErrorLine(msg);
     }
 }
@@ -387,7 +389,7 @@ IdGetAutoId()
 }
 
 static SYM *
-PsymAddSymAutoId(char *sz)
+PsymAddSymAutoId(const char *sz)
 {
   SYM *psym;
 
@@ -452,7 +454,7 @@ PchFromRw(RW rw,
 |		Looks up lex.id in reserved word table.  returns rwNil if not found
 -------------------------------------------------------------WESC------------*/
 static RW
-RwFromLex(LEX * plex)
+RwFromLex(const LEX * plex)
 {
   RWT *prwt;
 
@@ -476,7 +478,7 @@ RwFromLex(LEX * plex)
 |	potentially get translated
 -------------------------------------------------------------WESC------------*/
 static TE *
-PteFromSz(char *sz)
+PteFromSz(const char *sz)
 {
   TE *pte;
 
@@ -660,7 +662,7 @@ GetExpectLt(TOK * ptok,
     {
       char szT[128];
 
-      sprintf(szT, "expecting: %s, got", szErr);
+      snprintf(szT, sizeof(szT), "expecting: %s, got", szErr);
       ErrorLine2(szT, ptok->lex.szId);
     }
   }
@@ -682,7 +684,7 @@ GetExpectRw(RW rw)
   {
     char szErr[64];
 
-    sprintf(szErr, "%s expected, got", PchFromRw(rw, fTrue));
+    snprintf(szErr, sizeof(szErr), "%s expected, got", PchFromRw(rw, fTrue));
     ErrorLine2(szErr, tok.lex.szId);
   }
 }
@@ -700,13 +702,13 @@ PchCheckSymbol()
         SYM* psym = PsymLookup(tok.lex.szId);
         if (NULL == psym)
         {
-            sprintf(msg, "Symbol %s is not defined", tok.lex.szId);
+            snprintf(msg, sizeof(msg), "Symbol %s is not defined", tok.lex.szId);
             ErrorLine(msg);
         }
         
         if (NULL == psym->sVal)
         {
-            sprintf(msg, "Symbol %s is numeric, a string value is required", psym->sz);
+            snprintf(msg, sizeof(msg), "Symbol %s is numeric, a string value is required", psym->sz);
             ErrorLine(msg);
         }
         
@@ -774,7 +776,7 @@ PchGetSzMultiLine(char *szErr)
       GetExpectLt(&tok, ltStr, szErr);
       strcat(sz, tok.lex.szId);
     }
-    w return strdup(sz);
+    return strdup(sz);
   }
 }  
 #else
@@ -822,6 +824,7 @@ WGetConst(char *szErr)
 
   if (!FGetTok(&tok))
     ErrorLine("unexpected end of file");
+  /*lint -e{788}*/
   switch (tok.rw)
   {
     default:
@@ -838,7 +841,7 @@ WGetConst(char *szErr)
           }
           else
           {
-            sprintf(sz, "Expecting %s, got unknown symbol:", szErr);
+            snprintf(sz, sizeof(sz), "Expecting %s, got unknown symbol:", szErr);
             ErrorLine2(sz, tok.lex.szId);
           }
         }
@@ -846,7 +849,7 @@ WGetConst(char *szErr)
       }
       if (tok.lex.lt != ltConst)
       {
-        sprintf(sz, "%s expected, got", szErr);
+        snprintf(sz, sizeof(sz), "%s expected, got", szErr);
         ErrorLine2(sz, tok.lex.szId);
       }
       return tok.lex.val;
@@ -864,8 +867,6 @@ WGetConst(char *szErr)
       return rcPrev.extent.y;
   }
 }
-
-int WGetConstEx(char *szErr);
 
 /*-----------------------------------------------------------------------------
 | WGetConstExFactor
@@ -958,7 +959,6 @@ WGetConstEx(char *szErr)
         }
     }
   }
-  return wVal;
 }
 
 VOID
@@ -973,7 +973,7 @@ AddDefineSymbol(void)
     if (NULL != PsymLookup(szId))
     {
         char msg[80];
-        sprintf(msg, "Symbol %s is defined multiple times", szId);
+        snprintf(msg, sizeof(msg), "Symbol %s is defined multiple times", szId);
         ErrorLine(msg);
     }
     
@@ -1021,6 +1021,7 @@ KtGetK(K * pk,
 {
   if (!FGetTok(&tok))
     ErrorLine("Unexpected end of file");
+  /*lint -e{788}*/
   switch (tok.rw)
   {
     default:
@@ -1163,8 +1164,8 @@ ParsePaletteFile(char *pchFileName,
 |		Resolve a Konstant to it's real value, returning it.
 -------------------------------------------------------------WESC------------*/
 static int
-WResolveK(K * pk,
-          ITM * pitm,
+WResolveK(const K * pk,
+          const ITM * pitm,
           int dxyExtent,
           BOOL fHoriz)
 {
@@ -1325,10 +1326,10 @@ WGetId(char *szErr)
   return w;
 }
 
-#define CheckGrif(ifP) do {DoCheckGrif(pitm->grif, ifP); pitm->grifOut |= ifP;} while (0);
-#define CheckGrif2(ifP) do {DoCheckGrif(pitm->grif2, ifP); pitm->grif2Out |= ifP;} while (0);
-#define CheckGrif3(ifP) do {DoCheckGrif(pitm->grif3, ifP); pitm->grif3Out |= ifP;} while (0);
-#define CheckGrif4(ifP) do {DoCheckGrif(pitm->grif4, ifP); pitm->grif4Out |= ifP;} while (0);
+#define CheckGrif(ifP)   /*lint -e{717}*/ do {DoCheckGrif(pitm->grif, ifP); pitm->grifOut |= ifP;} while (0);  
+#define CheckGrif2(ifP)  /*lint -e{717}*/ do {DoCheckGrif(pitm->grif2, ifP); pitm->grif2Out |= ifP;} while (0);
+#define CheckGrif3(ifP)  /*lint -e{717}*/ do {DoCheckGrif(pitm->grif3, ifP); pitm->grif3Out |= ifP;} while (0);
+#define CheckGrif4(ifP)  /*lint -e{717}*/ do {DoCheckGrif(pitm->grif4, ifP); pitm->grif4Out |= ifP;} while (0);
 
 /*-----------------------------------------------------------------------------
 |	ParseItm
@@ -1451,6 +1452,7 @@ ParseItm(ITM * pitm,
 
   while (FGetTok(&tok))
   {
+    /*lint -e{788}*/
     switch (tok.rw)
     {
       default:
@@ -1968,9 +1970,9 @@ ObjectDesiredInOutputLocale(const ITM * itm)
     return vfStripNoLocRes;
 }
 
-#define CondEmitB(b) do {if (fEmit) EmitB(b);} while (0)
-#define CondEmitW(w) do {if (fEmit) EmitW(w);} while (0)
-#define CondEmitL(l) do {if (fEmit) EmitL(l);} while (0)
+#define CondEmitB(b)  /*lint -e{717}*/ do {if (fEmit) EmitB(b);} while (0)
+#define CondEmitW(w)  /*lint -e{717}*/ do {if (fEmit) EmitW(w);} while (0)
+#define CondEmitL(l)  /*lint -e{717}*/ do {if (fEmit) EmitL(l);} while (0)
 
 /*-----------------------------------------------------------------------------
 |	CbEmitStruct
@@ -2070,9 +2072,7 @@ CbEmitStruct(void *pv,
         if (!fZero)
           pi++;
         fZero = fTrue;
-        /*
-         * fall thru 
-         */
+        /*lint -fallthrough */
       case 'l':                                 /* long (32bit) */
         while (c--)
         {
@@ -2413,7 +2413,7 @@ FIdFormObject(FormObjectKind kind,
  * for all form objects 
  */
 static int
-IdFromObj(RCFORMOBJECT * pobj,
+IdFromObj(const RCFORMOBJECT * pobj,
           FormObjectKind kind)
 {
   switch (kind)
@@ -2515,7 +2515,7 @@ AddObject(RCFORMOBJECT * pobj,
 |		Frees stuff pointed to by lt (Doesn't free lt itself)
 -------------------------------------------------------------WESC------------*/
 static VOID
-FreeLt(RCFORMOBJLIST * plt)
+FreeLt(const RCFORMOBJLIST * plt)
 {
   char *pchText;
 
@@ -2602,6 +2602,7 @@ FParseObjects(RCPFILE * prcpfile)
       continue;
 
     // memset(&itm, 0, sizeof(ITM));                // Already done in ParseItm
+    /*lint -e{788}*/
     switch (rwSav = tok.rw)
     {
       case rwEnd:
@@ -2924,10 +2925,10 @@ FParseObjects(RCPFILE * prcpfile)
         break;
 
       default:
-	if (tok.lex.lt == ltPound)
-	  ParseDirectives(prcpfile);
-	else
-	  ErrorLine2("Unknown token:", tok.lex.szId);
+	    if (tok.lex.lt == ltPound)
+	      ParseDirectives(prcpfile);
+	    else
+	      ErrorLine2("Unknown token:", tok.lex.szId);
         break;
     }
     if (fok != (FormObjectKind) - 1)
@@ -3212,13 +3213,14 @@ FParsePullDown(RCPFILE * prcpfile)
     if (ifdefSkipping && tok.lex.lt != ltPound)
       continue;
 
+    /*lint -e{788}*/
     switch (tok.rw)
     {
       default:
-	if (tok.lex.lt == ltPound)
-	  ParseDirectives(prcpfile);
-	else
-	  ErrorLine("END or MENUITEM expected");
+        if (tok.lex.lt == ltPound)
+          ParseDirectives(prcpfile);
+        else
+          ErrorLine("END or MENUITEM expected");
         break;
       case rwMenuItem:
         memset(&mi, 0, sizeof(RCMENUITEM));
@@ -3374,6 +3376,7 @@ FParseMenu(RCPFILE * prcpfile)
   SETBAFIELD(menu, curItem, -1);                 /* all resource I've seen have this set */
   while (FGetTok(&tok))
   {
+    /*lint -e{788}*/
     switch (tok.rw)
     {
       default:
@@ -3469,6 +3472,7 @@ ParseDumpAlert(RCPFILE * prcpfile)
     if (ifdefSkipping && tok.lex.lt != ltPound)
       continue;
 
+    /*lint -e{788}*/
     switch (tok.rw)
     {
       default:
@@ -3578,6 +3582,7 @@ ParseDumpStringTable()
   ITM itm;
 
   buf = malloc(32768);
+  if (buf == NULL) Error("out of memory");
 
   ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
   /*
@@ -3598,6 +3603,7 @@ ParseDumpStringTable()
         break;
       }
     }
+    free(buf);
     return;
   }
 
@@ -3616,6 +3622,7 @@ ParseDumpStringTable()
 
   GetExpectLt(&tok, ltStr, "String Text");
   prefixString = strdup(tok.lex.szId);
+  if (prefixString == NULL) Error("out of memory");
 
   GetExpectLt(&tok, ltStr, "String Text");
   strcpy(buf, tok.lex.szId);
@@ -3904,8 +3911,7 @@ typedef struct BMPDEF
   int palette[256][3];
   BOOL haspalette;
   BOOL colortable;
-}
-BMPDEF;
+} BMPDEF;
 
 static void
 SetUserPalette(BMPDEF *bm)
@@ -4006,6 +4012,7 @@ nullify(char *s)
 static int
 DecodeDepthRW (RW rw)
 {
+  /*lint -e{788}*/
   switch (rw)
   {
     case rwDepth2:   return 2;
@@ -4019,6 +4026,7 @@ DecodeDepthRW (RW rw)
 static int
 DecodeBitmapType(RW type)
 {
+  /*lint -e{788}*/
   switch (type)
   {
     case rwBitmap:          return 1;
@@ -4055,6 +4063,7 @@ ParseBitmapAttrs(BMPDEF *attr, FamilyItemAttr *eachAttr)
   int ndx = -1;
 
   while (inattrs && FGetTok(&tok))
+    /*lint -e{788}*/
     switch (tok.rw)
     {
       case rwNoCompress:
@@ -4080,7 +4089,7 @@ ParseBitmapAttrs(BMPDEF *attr, FamilyItemAttr *eachAttr)
       case rwCompressRLE:
       case rwCompressPackBits:
 	WarningLine("RLE and PackBits compression methods not yet supported");
-	/* fall-through */
+	/*lint -fallthrough */
       case rwCompressScanLine:
       case rwCompressBest:
         attr->compressMethod = tok.rw;
@@ -4238,6 +4247,7 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
       resid = WGetId("Bitmap/Icon resource ID");
     }
     else
+      /*lint -e{788}*/
       switch (tok.rw)
       {
 	case rwLocale:
@@ -4289,6 +4299,7 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
     int maxfiles, ndx;
     const RW *bitmapTypes;
 
+    /*lint -e{788}*/
     switch (kind)
     {
       case rwBitmapGrey:
@@ -4437,7 +4448,7 @@ ParseDumpLauncherCategory(void)
     else if (tok.lex.lt == ltStr)
       {
         UngetTok();
-      pString = PchGetSz("taic");
+        pString = PchGetSz("taic");
         break;
       }
     else
@@ -4722,7 +4733,7 @@ ParseDumpHex()
           else
           {
             char msg[256];
-            sprintf(msg, "Symbol %s is not defined", tok.lex.szId);
+            snprintf(msg, sizeof(msg), "Symbol %s is not defined", tok.lex.szId);
             ErrorLine(msg);
           }
         }
@@ -4748,7 +4759,7 @@ ParseDumpHex()
          switch (tok.lex.size)
          {
            case lsLong:
-                if ((unsigned long) tok.lex.val > 0xfffffffful)
+                if ((unsigned long) tok.lex.val > 0xffffffffUL)
                   ErrorLine("HEX data must be LONG (0..4294967295)");
                 EmitL((unsigned long)tok.lex.val);
                 break;
@@ -4841,6 +4852,7 @@ ParseDumpData()
           ErrorLine2("Unable to open Data file ", pchFileName);
 
         data = malloc(4096);
+        if (data == NULL) Error("out of memory");
         cch = fread(data, 1, 4096, fh);
         while (cch != 0)
         {
@@ -4848,6 +4860,7 @@ ParseDumpData()
           cch = fread(data, 1, 4096, fh);
         }
         fclose(fh);
+        free(data);
       }
       CloseOutput();
     }
@@ -5274,6 +5287,7 @@ ParseTranslation()
   GetExpectRw(rwBegin);
   while (FGetTok(&tok))
   {
+    /*lint -e{788}*/
     switch (tok.rw)
     {
       case rwEnd:
@@ -5296,6 +5310,7 @@ ParseTranslation()
         }
         else
           free(pch);
+       	break;
 
       default:
         break;
@@ -5513,7 +5528,7 @@ ParseNavigation(void)
 |	OpenInputFile
 -------------------------------------------------------------WESC------------*/
 static VOID
-OpenInputFile(char *szIn)
+OpenInputFile(const char *szIn)
 {
   extern char szInFile[];
 
@@ -5583,6 +5598,7 @@ ParseCInclude(char *szIncludeFile,
         {
           if (!FGetTok(&tok))
             ErrorLine("preprocessor directive expected");
+          /*lint -e{788}*/
           switch (tok.rw)
           {
               /*
@@ -5836,6 +5852,7 @@ ParseJavaInclude(char *szIncludeFile)
 
   while (FGetTok(&tok))
   {
+    /*lint -e{788}*/
     switch (tok.rw)
     {
       case rwPublic:
@@ -5924,7 +5941,7 @@ WriteIncFile(char *szFile)
 	temp_file = fopen(temp_name, "w");
 	if (temp_file == NULL)
 	{
-		Error3("Unable to open include file for writing:", szFile, strerror(errno));
+		Error3("Error: Unable to open include file for writing: ", szFile, strerror(errno));
 		return;
 	}
 
@@ -5948,10 +5965,9 @@ WriteIncFile(char *szFile)
 
 		if ( ! vfQuiet )
 		    printf("writing include file: %s\n", szFile);
-		if ( remove( szFile ) != 0 )
-			Error3( "Cannot remove existing include file: ", szFile, strerror(errno) );
+		(void) remove( szFile );
 		if ( rename( temp_name, szFile ) != 0 )
-			Error3( "Cannot rename temporary include file: ", szFile, strerror(errno) );
+			Error3( "Error: Cannot rename temporary include file: ", szFile, strerror(errno) );
 	}
 	else
 	{
@@ -5959,10 +5975,7 @@ WriteIncFile(char *szFile)
 		{
 			printf( "No changes made to include file: %s\n", szFile );
 		}
-		if ( remove( temp_name ) != 0 )
-		{
-			Error3( "Cannot remove temporary include file: ", temp_name, strerror(errno) );
-		}
+		(void) remove( temp_name );
 	}
 }
 
@@ -5988,9 +6001,9 @@ InitRcpfile(RCPFILE * prcpfile,
 /   put in separate function to obtain recursive analyzis thru .rcp files
 -------------------------------------------------------------LDu--------------*/
 static void
-ParseRcpFile(char *szRcpIn,
+ParseRcpFile(const char *szRcpIn,
              RCPFILE * prcpfile,
-             char *prv_szInfile,
+             const char *prv_szInfile,
              int prv_ifdefSkipping,
              int prv_ifdefLevel,
              FILE * prv_vfhIn,
@@ -6036,6 +6049,7 @@ ParseRcpFile(char *szRcpIn,
       }
       continue;
     }
+    /*lint -e{788}*/
     switch (tok.rw)
     {
       case rwForm:
@@ -6220,7 +6234,8 @@ ParseRcpFile(char *szRcpIn,
         {                                        /* RMa add error string more explicit */
           char errorString[128];
 
-          sprintf(errorString, "Unknown token : '%s'\n", tok.lex.szId);
+          snprintf(errorString, sizeof(errorString),
+          	"Unknown token : '%s'\n", tok.lex.szId);
           ErrorLine2(errorString,
                      "FORM, MENU, ALERT, VERSION, STRINGTABLE, STRING, CATEGORIES, "
                      "APPLICATIONICONNAME, APPLICATION, BITMAP, PALETTE, "
@@ -6298,6 +6313,7 @@ ParseDirectives(RCPFILE * prcpfile)
   // LDu 31-8-2001 : end modification //
 
   FGetTok(&tok);
+  /*lint -e{788}*/
   switch (tok.rw)
   {
     case rwInclude:
@@ -6489,10 +6505,10 @@ static void ChangeOrAppendFilenameSuffix(
 |	ParseFile
 -------------------------------------------------------------WESC------------*/
 RCPFILE *
-ParseFile(char *szIn,
-          char *szOutDir,
-          char *szResFile,
-          char *szIncFile,
+ParseFile(const char *szIn,
+          const char *szOutDir,
+          const char *szResFile,
+          const char *szIncFile,
           int fontType)
 {
   RCPFILE *prcpfile;
@@ -6605,11 +6621,11 @@ ParseFile(char *szIn,
   if ((vfAutoAmdc) && (szDllNameP))
   {
     char *pchString;
-
-    pchString = malloc(strlen(szDllNameP) + 5);
+	int nameSize = strlen(szDllNameP) + 5;
+    pchString = malloc(nameSize);
     if (pchString)
     {
-      sprintf(pchString, "%s.dll", szDllNameP);
+      snprintf(pchString, nameSize, "%s.dll", szDllNameP);
       OpenOutput("amdc", 1);
       DumpBytes(pchString, strlen(pchString) + 1);
       CloseOutput();

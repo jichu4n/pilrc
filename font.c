@@ -34,7 +34,6 @@
 #include <string.h>
 #include <ctype.h>
 #include "pilrc.h"
-#include "util.h"
 
 /*
  * Header definitions and token types 
@@ -62,6 +61,9 @@
 #define g_width 22                               /* width token */
 #define g_bitmap 99                              /* bitmap data */
 
+
+#define kArraySize 258
+
 /*
  * some foreign font handing function 
  */
@@ -72,7 +74,7 @@ int (*pfnChkCode) (unsigned char *cp,
  * Some globals to keep track of things for error reporting 
  */
 
-static char *filename;
+static const char *filename;
 static unsigned int lineno;
 int vfontType;
 
@@ -84,8 +86,8 @@ typedef struct FontCharInfoType
 {
   char offset;
   char width;
-}
-FontCharInfoType;
+} FontCharInfoType;
+
 FontCharInfoType *fntOW[256];
 unsigned int fntH[256];
 
@@ -151,11 +153,10 @@ IsJapanese(unsigned char *cp,
     *pdxChar = 5;
     return 1;
   }
-  else
-    if ((((*cp >= 0x81) && (*cp <= 0x9f)) ||
-         ((*cp >= 0xe0) && (*cp <= 0xef))) &&
-        (((*(cp + 1) >= 0x40) && (*(cp + 1) <= 0x7e)) ||
-         ((*(cp + 1) >= 0x80) && (*(cp + 1) <= 0xfc))))
+  else if ((((*cp >= 0x81) && (*cp <= 0x9f)) ||
+            ((*cp >= 0xe0) && (*cp <= 0xef))) &&
+           (((*(cp + 1) >= 0x40) && (*(cp + 1) <= 0x7e)) ||
+            ((*(cp + 1) >= 0x80) && (*(cp + 1) <= 0xfc))))
   {
     *pdxChar = 9;                                /* not sure about this */
     return 2;
@@ -222,7 +223,7 @@ ErrorX(char *s)
 {
   char er[512];
 
-  sprintf(er, "ERROR: %s, line %u, %s", s, lineno, filename);
+  snprintf(er, sizeof(er), "ERROR: %s, line %u, %s", s, lineno, filename);
   Error(er);
 }
 
@@ -320,24 +321,24 @@ ParseLine(char *s,
 
 static void
 CloseGlyph(int *header,
-           int *width,
+           int width,
            int *row,
            int *col,
            int autoWidth,
            int autoRectWidth)
 {
-  if (*width > header[h_maxWidth])
+  if (width > header[h_maxWidth])
   {
     if (autoWidth)
-      header[h_maxWidth] = *width;
+      header[h_maxWidth] = width;
     else
       WarningX("Width exceeds maxWidth definition");
   }
 
-  if (*width > header[h_fRectWidth])
+  if (width > header[h_fRectWidth])
   {
     if (autoRectWidth)
-      header[h_fRectWidth] = *width;
+      header[h_fRectWidth] = width;
     else
       WarningX("Width exceeds fRectWidth definition");
   }
@@ -348,7 +349,7 @@ CloseGlyph(int *header,
     ErrorX("Invalid height on previous glyph");
 
   *row = 0;
-  *col += *width;
+  *col += width;
 }
 
 /*
@@ -372,15 +373,14 @@ CloseGlyph(int *header,
  */
 
 void
-DumpFont(char *pchFileName,
+DumpFont(const char *pchFileName,
          int fntNo)
 {
-#define		kArraySize		258
   FILE *in;
   char s[kArraySize], *s1, *bitmap[kArraySize];
   unsigned short int coltable[kArraySize];
   size_t x;
-  int token, value, header[13];
+  int token, value, header[14];
   int curChar = -1;
   int autoWidth = 1;
   int autoRectWidth = 1;
@@ -418,10 +418,10 @@ DumpFont(char *pchFileName,
         break;
     }
 
-    if (s1[0] && (s[0] != 47 || s[1] != 47))
+    if (s1[0] && (s[0] != '/' || s[1] != '/'))
     {                                            /* skip blank lines and comment lines */
       ParseLine(s1, &token, &value);
-      if (token < g_glyph)
+      if (token <= h_leading)
       {
         if (curChar >= 0)
           ErrorX("Header must precede glyphs");
@@ -442,7 +442,7 @@ DumpFont(char *pchFileName,
       if (token == g_glyph)
       {
         if (curChar >= 0)
-          CloseGlyph(header, &width, &row, &col, autoWidth, autoRectWidth);
+          CloseGlyph(header, width, &row, &col, autoWidth, autoRectWidth);
 
         if (value == -1)
         {
@@ -549,7 +549,7 @@ DumpFont(char *pchFileName,
    * Add the extra column info used to compute the last char width (even if it is the missing char) 
    */
   coltable[curChar + 1] = coltable[curChar] + fntOW[fntNo][curChar].width;
-  CloseGlyph(header, &width, &row, &col, autoWidth, autoRectWidth);
+  CloseGlyph(header, width, &row, &col, autoWidth, autoRectWidth);
   fntH[fntNo] = header[h_fRectHeight];
 
   header[h_rowWords] = (col + 15) / 16;
@@ -607,7 +607,6 @@ DumpFont(char *pchFileName,
 void
 DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * fontFamilyEntries)
 {
-#define kArraySize 258
   FILE *in;
   char s[kArraySize], *s1, *bitmap[kArraySize];
   unsigned short int coltable[kArraySize];
@@ -673,7 +672,7 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
       {
         /* skip blank lines and comment lines */
         ParseLine(s1, &token, &value);
-        if (token < g_glyph)
+        if (token <= h_leading)
         {
           if (curChar >= 0)
             ErrorX("Header must precede glyphs");
@@ -690,7 +689,7 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
         if (token == g_glyph)
         {
           if (curChar >= 0)
-            CloseGlyph(header, &width, &row, &col, autoWidth, autoRectWidth);
+            CloseGlyph(header, width, &row, &col, autoWidth, autoRectWidth);
 
           if (value == -1)
           {
@@ -801,7 +800,7 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
      */
 
     coltable[curChar + 1] = coltable[curChar] + fntOW[fntNo][curChar].width;
-    CloseGlyph(header, &width, &row, &col, autoWidth, autoRectWidth);
+    CloseGlyph(header, width, &row, &col, autoWidth, autoRectWidth);
     fntH[fntNo] = header[h_fRectHeight];
     if (singleOW &&
         fntH[fntNo]*firstEntry->density != singleH*fontFamilyEntries->density)
@@ -922,7 +921,11 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
     int *ip;
     strcpy(msg, "Glyph widths not in proportion across different densities:");
     for (ip = badGlyphs; ip < badGlyph; ip++)
-      sprintf(strchr(msg, '\0'), (isprint(*ip))? " '%c'" : " %d", *ip);
+    {
+	  int len = strlen(msg);
+      snprintf(msg + len, sizeof(msg) - len,
+      	(isprint(*ip))? " '%c'" : " %d", *ip);
+    }
     WarningLine(msg);
   }
 

@@ -120,52 +120,52 @@ static BOOL
 FParseHex(LEX * plex,
           int ch)
 {
-  ch = tolower(ch);
-  if ((ch == '0') && ((*(pchLex) == 'x') || (*(pchLex) == 'X')))
-  {
-    pchLex++;
-    ch = *pchLex++;
-  }
-  if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f'))
-  {
-	plex->lt = ltConst;
-	plex->val = 0;
-    while ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f'))
-    {
-      plex->val *= 16;
+	ch = tolower(ch);
+	if ((ch == '0') && ((*(pchLex) == 'x') || (*(pchLex) == 'X')))
+	{
+		pchLex++;
+		ch = *pchLex++;
+	}
+	if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f'))
+	{
+		plex->lt = ltConst;
+		plex->val = 0;
+		while ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f'))
+		{
+			plex->val *= 16;
 
-      if ((ch >= '0' && ch <= '9'))
-        plex->val += ch - '0';
-      else
-        plex->val += ch - 'a' + 10;
-      ch = *pchLex++;
-      ch = tolower(ch);
-    }
+			if ((ch >= '0' && ch <= '9'))
+				plex->val += ch - '0';
+			else
+				plex->val += ch - 'a' + 10;
+			ch = *pchLex++;
+			ch = tolower(ch);
+		}
 
-   plex->size = lsUnspecified;
-   if (ch == '.')
-   {
-    if (*pchLex == 'b' || *pchLex == 'B')
-    {
-     plex->size = lsByte;
-     pchLex += 2;
-    }
-    else if (*pchLex == 'w' || *pchLex == 'W')
-    {
-     plex->size = lsWord;
-     pchLex += 2;
-    }
-    else if (*pchLex == 'l' || *pchLex == 'L')
-    {
-     plex->size = lsLong;
-     pchLex += 2;
-    }
-   }
+		plex->size = lsUnspecified;
+		if (ch == '.')
+		{
+			if (*pchLex == 'b' || *pchLex == 'B')
+			{
+				plex->size = lsByte;
+				pchLex += 2;
+			}
+			else if (*pchLex == 'w' || *pchLex == 'W')
+			{
+				plex->size = lsWord;
+				pchLex += 2;
+			}
+			else if (*pchLex == 'l' || *pchLex == 'L')
+			{
+				plex->size = lsLong;
+				pchLex += 2;
+			}
+		}
 
-    AllowLUAtEndOfConstant(ch);
-    return fTrue;
-  }
-  return fFalse;
+		AllowLUAtEndOfConstant(ch);
+		return fTrue;
+	}
+	return fFalse;
 }
 
 static BOOL

@@ -44,7 +44,7 @@
  * @param multibit   should this bitmap be prepared for multibit? 
  * @param bootscreen	should this bitmap be prepared for size & crc header add on ?
  */
-extern void DumpBitmap(char *fileName,
+extern void DumpBitmap(const char *fileName,
                        int isIcon,
                        int compress,
                        int bitmaptype,

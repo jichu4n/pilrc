@@ -52,7 +52,7 @@ FNTFAMDEF;
 extern int (*pfnChkCode) (unsigned char *cp,
                           int *pdx);
 
-extern void DumpFont(char *,
+extern void DumpFont(const char *,
                      int);
 
 extern void DumpFontFamily(int fntNo,
@@ -61,7 +61,7 @@ extern void DumpFontFamily(int fntNo,
                            FNTFAMDEF * fontFamilyEntries);
 
 extern void InitFontMem(int);
-extern void FreeFontMem();
+extern void FreeFontMem(void);
 
 extern int DxCalcRgdx(unsigned char *,
                       int,
@@ -71,6 +71,6 @@ extern int DxCalcExtent(unsigned char *,
 extern int DxChar(int,
                   int);
 extern int DyFont(int);
-extern int GetFontType();
+extern int GetFontType(void);
 
 #endif
