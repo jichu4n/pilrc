@@ -21,7 +21,7 @@ BUILDPRC = $(PREFIX)build-prc
 PRC2BIN  = $(PREFIX)prc2bin
 
 # source / outputs
-OBJS     = palm.o device.o gccfix.o
+OBJS     = palm.o device.o
 EXEC     = pilrctst
 
 # compiler flags 

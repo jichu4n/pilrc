@@ -21,7 +21,6 @@
 // local includes
 #include "resource.h"
 #include "device.h"
-#include "gccfix.h"
 
 // functions
 extern UInt32  PilotMain(UInt16, MemPtr, UInt16);
