@@ -1869,7 +1869,7 @@ CbEmitStruct(void *pv,
           cb += 4;
         }
         break;
-      case 's':					/* skip */
+      case 's':                                        /* skip */
         pi += c;
         break;
       case 't':                                 /* 8 bits field to byte */
@@ -3944,7 +3944,7 @@ ParseDumpBitmapExFile(int bitmapType)
   int defaultCompress = 0;                       // ??? MJM: initialized to 0
   int defaultCompressionMethod = rwCompressScanLine;
   int id = 0, i = 0;
-  long flag = 0;	// must be at least 24 bits wide
+  long flag = 0;	// must be at least MAXDEPTH (24) bits wide
   int index = 0;
   int nbrOfBmpDensityOne = 0;
   int nbrOfBmpDensityTwoOrMore = 0;
@@ -4097,6 +4097,8 @@ ParseDumpBitmapExFile(int bitmapType)
         else if (tok.rw == rwBitmapDensity)
         {
           currentEntry.density = WGetConst("bitmap density");
+
+          // Legacy fix: treat 1 as single density, 2 as double density
           if (currentEntry.density == 1) currentEntry.density = kSingleDensity;
           if (currentEntry.density == 2) currentEntry.density = kDoubleDensity;
 
@@ -4211,10 +4213,13 @@ ParseDumpBitmapExFile(int bitmapType)
   // count number of bmp in each case
   for (i = 0; i < MAXDEPTH; i++)
   {
-    if (aBitmapEntries[i].density == kSingleDensity)
-      nbrOfBmpDensityOne++;
-    if (aBitmapEntries[i].density != kSingleDensity)
-      nbrOfBmpDensityTwoOrMore++;
+	if ((flag >> i) & 0x1 == 0x01)
+	{
+	    if (aBitmapEntries[i].density == kSingleDensity)
+	      nbrOfBmpDensityOne++;
+	    else if (aBitmapEntries[i].density != kSingleDensity)
+	      nbrOfBmpDensityTwoOrMore++;
+	}
   }
 
   // Dump BitmapFamilyEx resource

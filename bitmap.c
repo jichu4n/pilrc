@@ -2489,7 +2489,7 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
   }
   else
   {
-  	// ERROR SITUATION -- unknown density value
+	ErrorLine("Unsupported density value");
   }
 
   // anything specific with icons here?
@@ -2529,7 +2529,7 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
   // NOTE: compression of 16, 24 and 32bpp DONT work right now
   if ((compress == rwAutoCompress) || (compress == rwForceCompress))
   {
-    BMP_CompressBitmap(rcbmp, compress, (density != kSingleDensity) ? 3 : 2, colortable,
+    BMP_CompressBitmap(rcbmp, compress, (density == kSingleDensity) ? 2 : 3, colortable,
                        directColor);
   }
 
