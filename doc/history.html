@@ -18,8 +18,15 @@ PilRC
 <pre>
 What's new in 3.0
 -----------------
-o Now takes notice of #line directives and the GNU preprocessor's "linemarkers"
-o And much much more!
+o Support for more flexible bitmap families, including high-density support;
+  also supports the bitmap syntax used by Handspring's Palm-RC tool
+o Transparency implemented for PBM/PGM/PPM/PNM files
+o .pbitm files now generate type 1 bitmaps (suitable for use in families)
+  rather than type 0 bitmaps
+o Accepts #error, #line, and "linemarkers" as emitted by the GNU preprocessor
+o Predefines the preprocessor symbols __rcp__ and __PILRC__
+o Font family support added
+o Many miscellaneous bug fixes
 
 What's new in 2.9p4 
 -----------------
