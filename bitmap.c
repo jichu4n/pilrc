@@ -1775,6 +1775,7 @@ WriteGreyTbmp(RCBITMAP * rcbmp,
 static int
 WriteIndexedColorTbmp(RCBITMAP * rcbmp,
                       struct foreign_reader *reader,
+                      const int *transparencyData,
                       struct rgb *colortable)
 {
 #define N 937
@@ -1831,6 +1832,15 @@ WriteIndexedColorTbmp(RCBITMAP * rcbmp,
             index = BMP_RGBToColorIndex(cs.r, cs.g, cs.b,
                                         UserPalette8bpp, 256);
 
+	  if (transparencyData[0] == rwTransparency
+	      && cs.r == transparencyData[1]
+	      && cs.g == transparencyData[2]
+	      && cs.b == transparencyData[3])
+	  {
+	    rcbmp->flags.hasTransparency = fTrue;
+	    rcbmp->transparentIndex = index;
+	  }
+
           ninputcolors++;
 
           /*
@@ -1886,6 +1896,7 @@ WriteIndexedColorTbmp(RCBITMAP * rcbmp,
  * @param height     height of the bitmap
  * @param bitmaptype the type of bitmap (B+W, Grey, Grey16 or Color)?
  * @param colortable does a color table need to be generated?
+ * @param transparencyData anything we need to know about transparency
  * @param reader     callbacks and state variables to read the input file
  */
 static void
@@ -1894,6 +1905,7 @@ WriteTbmp(RCBITMAP * rcbmp,
           int height,
           int bitmaptype,
           BOOL colortable,
+          const int *transparencyData,
           struct foreign_reader *reader)
 {
   int depth = 0;
@@ -1941,6 +1953,12 @@ WriteTbmp(RCBITMAP * rcbmp,
   if (vfLE32)
     rcbmp->version |= LE_BITMAP_VERSION_MASK;
 
+  if (transparencyData[0] == rwTransparencyIndex)
+  {
+    rcbmp->flags.hasTransparency = fTrue;
+    rcbmp->transparentIndex = transparencyData[1];
+  }
+
   /*
    * The iterate-over-the-pixels code of these two ought to be unified
    * into one function, but because the color conversions inside the
@@ -1954,7 +1972,7 @@ WriteTbmp(RCBITMAP * rcbmp,
     if (colortable)
     {
       struct rgb table[256];
-      int nentries = WriteIndexedColorTbmp(rcbmp, reader, table);
+      int nentries = WriteIndexedColorTbmp(rcbmp, reader, transparencyData, table);
 
       /*
        * Now bolt the color table onto the front of the output bits. 
@@ -1989,7 +2007,7 @@ WriteTbmp(RCBITMAP * rcbmp,
       }
     }
     else
-      (void)WriteIndexedColorTbmp(rcbmp, reader, NULL);
+      (void)WriteIndexedColorTbmp(rcbmp, reader, transparencyData, NULL);
   }
 }
 
@@ -2175,20 +2193,10 @@ BMP_ConvertPNMBitmap(RCBITMAP * rcbmp,
   else
     pnm.start_row = default_start_row;
 
-  WriteTbmp(rcbmp, width, height, bitmaptype, colortable, &pnm);
+  WriteTbmp(rcbmp, width, height, bitmaptype, colortable, transparencyData, &pnm);
 
-  switch (transparencyData[0])
-  {
-    case 0:
-      break;
-    case rwTransparencyIndex:
-      rcbmp->flags.hasTransparency = fTrue;
-      rcbmp->transparentIndex = transparencyData[1];
-      break;
-    default:
-      WarningLine("Only TransparencyIndex is implemented for PBM/PNM/PGM/PPM files");
-      break;
-  }
+  if (transparencyData[0] && !rcbmp->flags.hasTransparency)
+    WarningLine("Transparency not detected in PBM/PNM/PGM/PPM file");
 }
 
 /**
