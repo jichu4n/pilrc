@@ -72,24 +72,33 @@
         there is a fix for this, you should ignore it and use another tool
         such as 'pilrcedit' to do resource editing.
  
-  > autoconf + automake installed:
+  > systems (mainly Unix) detectable via configure
 
-  If you  have autoconf  and automake installed,  building  and installing 
-  PilRC is as  simple as doing the following commands at your shell prompt.
+  If  you are using a system on which autoconf-style configure scripts are
+  usable, PilRC can be built and installed by typing the following at your
+  command prompt:
 
-     ./autogen.sh
+     unix/configure
      make
      make install
 
-  > NO autoconf + automake installed:
+  Use "unix/configure --help" to see what configure options are available;
+  the PilRC-specific options are --enable-pilrcui, which causes PilRCUI to
+  be built  (which requires GTK development headers and libraries,  and is
+  disabled by default),  and --enable-warnings, which turns on a number of
+  GCC warning options during the build.
 
-  If you do not have  autoconf and  automake installed (as with the cygnus 
-  distribution  for win32),  building and installing PilRC is as simple as 
-  doing the following commands at your shell prompt.
+  Not  all  of the files in the "unix" subdirectory are PilRC source files
+  which can usefully be edited.  They can be divided into three categories:
 
-     ./configure
-     make
-     make install
+     Genuine PilRC source files:
+        acinclude.m4, configure.ac, Makefile.am, pilrc.spec
+
+     Standard utility scripts copied from gnulib:
+        depcomp, install-sh, missing, mkinstalldirs
+
+     Generated files (regenerated with "aclocal && automake && autoconf"):
+        aclocal.m4, configure, Makefile.in
 
   > solaris
 
