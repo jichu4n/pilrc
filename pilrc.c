@@ -122,6 +122,9 @@ char *strdup(const char *s);
 #define idPalmOSReservedMin 10000
 #define idPalmOSReservedMinWithEditIDs 10008
 
+#define szMultipleLineMaxLength 65536
+
+
 static void ParseDirectives(RCPFILE * prcpfile);
 
 
@@ -735,7 +738,7 @@ PchGetSz(char *szErr)
 static char *
 PchGetSzMultiLine(char *szErr)
 {
-  char sz[16384];
+  char sz[szMultipleLineMaxLength];
   char* p = PchCheckSymbol();
   if (NULL != p)
       return(p);
@@ -1345,7 +1348,7 @@ ParseItm(ITM * pitm,
   if (grif & ifMultText)
   {
     char *pch;
-    char rgb[16384];
+    char rgb[szMultipleLineMaxLength];
 
     pitm->grifOut |= ifMultText;
 
@@ -2829,10 +2832,14 @@ FParseObjects(RCPFILE * prcpfile)
           /*
            * using default bitmaps for thumb abd background 
            */
-          if (itm.rc.extent.x != 114)
-            WarningLine("Slider width not the recommended 114");
+          if ((itm.rc.extent.x != 72) &&
+          	  (itm.rc.extent.x != 93) &&
+          	  (itm.rc.extent.x != 114) &&
+          	  (itm.rc.extent.x != 135) &&
+          	  (itm.rc.extent.x != 156))
+            WarningLine("Slider background bitmap looks best at width 72, 93, 114, 135, or 156");
           if (itm.rc.extent.y != 15)
-            WarningLine("Slider height not the recommended 15");
+            WarningLine("Slider background bitmap looks best at heigth 15");
         }
 
         if ((itm.minValue >= itm.maxValue) ||
@@ -3646,14 +3653,14 @@ ParseDumpString()
     FILE *fh;
     int cch;
 
-    pchString = malloc(16384);
+    pchString = malloc(szMultipleLineMaxLength);
     GetExpectLt(&tok, ltStr, "String filename");
     FindAndOpenFile(tok.lex.szId, "rt", &fh);
 
     if (fh == NULL)
       ErrorLine2("Unable to open String file ", tok.lex.szId);
-    cch = fread(pchString, 1, 16384, fh);
-    if (cch == 16384)
+    cch = fread(pchString, 1, szMultipleLineMaxLength, fh);
+    if (cch == szMultipleLineMaxLength)
       ErrorLine("String too long!");
     pchString[cch] = 0;
     fclose(fh);
@@ -4556,10 +4563,27 @@ ParseDumpHex()
       // we have a constant?
       if (tok.lex.lt == ltConst)
       {
-        if (tok.lex.val > 0xff)
-          ErrorLine("HEX data must be BYTE (0..255)");
-
-        EmitB((unsigned char)tok.lex.val);
+         switch (tok.lex.size)
+         {
+           case lsLong:
+                if (tok.lex.val > 0xffffffff)
+                  ErrorLine("HEX data must be BYTE (0..4294967295)");
+                EmitL((unsigned long)tok.lex.val);
+                break;
+ 
+           case lsWord:
+                if (tok.lex.val > 0xffff)
+                  ErrorLine("HEX data must be BYTE (0..65535)");
+                EmitW((unsigned short)tok.lex.val);
+                break;
+ 
+           case lsUnspecified:
+           case lsByte:
+                if (tok.lex.val > 0xff)
+                  ErrorLine("HEX data must be BYTE (0..255)");
+                EmitB((unsigned char)tok.lex.val);
+                break;
+         }
       }
 
       // we have a string?

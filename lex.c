@@ -120,8 +120,6 @@ static BOOL
 FParseHex(LEX * plex,
           int ch)
 {
-  LEX lex;
-
   ch = tolower(ch);
   if ((ch == '0') && ((*(pchLex) == 'x') || (*(pchLex) == 'X')))
   {
@@ -130,21 +128,41 @@ FParseHex(LEX * plex,
   }
   if ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f'))
   {
-    lex.lt = ltConst;
-    lex.val = 0;
+	plex->lt = ltConst;
+	plex->val = 0;
     while ((ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'f'))
     {
-      lex.val *= 16;
+      plex->val *= 16;
 
       if ((ch >= '0' && ch <= '9'))
-        lex.val += ch - '0';
+        plex->val += ch - '0';
       else
-        lex.val += ch - 'a' + 10;
+        plex->val += ch - 'a' + 10;
       ch = *pchLex++;
       ch = tolower(ch);
     }
+
+   plex->size = lsUnspecified;
+   if (ch == '.')
+   {
+    if (*pchLex == 'b' || *pchLex == 'B')
+    {
+     plex->size = lsByte;
+     pchLex += 2;
+    }
+    else if (*pchLex == 'w' || *pchLex == 'W')
+    {
+     plex->size = lsWord;
+     pchLex += 2;
+    }
+    else if (*pchLex == 'l' || *pchLex == 'L')
+    {
+     plex->size = lsLong;
+     pchLex += 2;
+    }
+   }
+
     AllowLUAtEndOfConstant(ch);
-    *plex = lex;
     return fTrue;
   }
   return fFalse;
@@ -176,6 +194,26 @@ FParseConst(LEX * plex,
       plex->val += ch - '0';
       *pchStore++ = (char)ch;
       ch = *pchLex++;
+    }
+
+    plex->size = lsUnspecified;
+    if (ch == '.')
+    {
+      if (*pchLex == 'b' || *pchLex == 'B')
+      {
+       plex->size = lsByte;
+       pchLex += 2;
+      }
+      else if (*pchLex == 'w' || *pchLex == 'W')
+      {
+       plex->size = lsWord;
+       pchLex += 2;
+      }
+      else if (*pchLex == 'l' || *pchLex == 'L')
+      {
+       plex->size = lsLong;
+       pchLex += 2;
+      }
     }
   }
   else if (ch == '\'')

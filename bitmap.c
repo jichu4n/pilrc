@@ -27,6 +27,8 @@
  *                 creation
  *     18-Jun-2000 Aaron Ardiri
  *                 GNU GPL documentation additions
+ *     18-Aug-2003 Ben Combee
+ *                 Applied Eric Clonniger's fix for 32-bit BMPs
  */
 
 #ifndef __GNUC__
@@ -854,7 +856,7 @@ BMP_GetBits15bpp(BITMAPINFO * pbmi,
   pb += cbRow * y + (x * 2);
 
   // get the pixel
-  w = (*(pb + 1) << 8) | *pb;                    // MAY BE BUGGY!!!!
+  w = (pb[1] << 8) | pb[0];
 
   // return the values we need
   *a = 0;
@@ -898,7 +900,7 @@ BMP_GetBits16bpp(BITMAPINFO * pbmi,
   pb += cbRow * y + (x * 2);
 
   // get the pixel
-  w = (*(pb + 1) << 8) | *pb;                    // MAY BE BUGGY!!!!
+  w = (pb[1] << 8) | pb[0];
 
   // return the values we need
   *a = 0;
@@ -945,10 +947,10 @@ BMP_GetBits24bpp(BITMAPINFO * pbmi,
   pb += cbRow * y + (x * 3);
 
   // return the values we need
+  *b = pb[0];
+  *g = pb[1];
+  *r = pb[2];
   *a = 0;
-  *r = *(pb + 2);
-  *g = *(pb + 1);
-  *b = *pb;
 
   return -1;                                     // no index, direct color
 }
@@ -986,10 +988,10 @@ BMP_GetBits32bpp(BITMAPINFO * pbmi,
   pb += cbRow * y + (x * 4);
 
   // return the values we need
-  *a = *(pb + 1);
-  *r = *pb;
-  *g = *(pb + 3);
-  *b = *(pb + 2);                                // MAY BE BUGGY!!!!
+  *b = pb[0];
+  *g = pb[1];
+  *r = pb[2];
+  *a = pb[3];
 
   return -1;                                     // no index, direct color
 }
