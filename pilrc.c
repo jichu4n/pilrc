@@ -2,7 +2,7 @@
  * @(#)pilrc.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2005, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -540,7 +540,7 @@ NextLine(void)
     int buflen = strlen(vIn.pch);
     memmove(vIn.buffer, vIn.pch, buflen + 1);
     vIn.pch = vIn.buffer;
-    fgets(&vIn.buffer[buflen], sizeof vIn.buffer - buflen, vIn.fh);
+    fgets(&vIn.buffer[buflen], sizeof vIn.buffer - buflen, vIn.file.fh);
 
     eoln = strpbrk(vIn.pch, "\n\x0a\x0d");
     if (eoln == NULL)
@@ -558,7 +558,7 @@ NextLine(void)
   *eoln = '\0';
 
   if (!fEof)
-    vIn.line++;
+    vIn.file.line++;
 
   FInitLexer(vIn.pch, fTrue);
   vIn.pch = pchNext;
@@ -993,12 +993,12 @@ AddDefineSymbol(void)
     
     // save current line and check to see if we parse into another
     // line for the value -- if so, reject token and define as 0
-    current_line = vIn.line;
+    current_line = vIn.file.line;
     
     if (!FGetTok(&tok))
         ErrorLine("unexpected end of file");
     
-    if (current_line != vIn.line)
+    if (current_line != vIn.file.line)
     {
     	UngetTok();
     	AddSym(szId, 0);
@@ -5556,8 +5556,8 @@ ParseNavigation(void)
 static VOID
 OpenInputFile(const char *szIn)
 {
-  vIn.szFilename = FindAndOpenFile(szIn, "rt", &vIn.fh);
-  vIn.line = 0;
+  vIn.file.szFilename = FindAndOpenFile(szIn, "rt", &vIn.file.fh);
+  vIn.file.line = 0;
   vIn.buffer[0] = '\0';
   vIn.pch = vIn.buffer;
 }
@@ -5784,8 +5784,8 @@ ParseCInclude(const char *szIncludeFile)
     }
   }
 
-  fclose(vIn.fh);
-  free(vIn.szFilename);
+  fclose(vIn.file.fh);
+  free(vIn.file.szFilename);
   vIn = inSav;
 
   ifdefSkipping = ifdefSkippingSav;
@@ -5865,8 +5865,8 @@ ParseJavaInclude(char *szIncludeFile)
   }
 
 endOfClass:
-  fclose(vIn.fh);
-  free(vIn.szFilename);
+  fclose(vIn.file.fh);
+  free(vIn.file.szFilename);
   vIn = inSav;
 }
 
@@ -6231,8 +6231,8 @@ ParseRcpFile(const char *szRcpIn, RCPFILE * prcpfile)
   }
   while (FGetTok(&tok));
 
-  fclose(vIn.fh);
-  free(vIn.szFilename);
+  fclose(vIn.file.fh);
+  free(vIn.file.szFilename);
   vIn = inSav;
 
   ifdefSkipping = ifdefSkippingSav;
@@ -6247,12 +6247,12 @@ static void
 ParseLineDirective(BOOL fnameRequired)
 {
   // The constant given is for the *following* line
-  vIn.line = WGetConst("Line number constant") - 1;
+  vIn.file.line = WGetConst("Line number constant") - 1;
 
   if (fnameRequired || FPeekTok()->lex.lt == ltStr)
   {
-    free(vIn.szFilename);
-    vIn.szFilename = PchGetSz("Input filename");
+    free(vIn.file.szFilename);
+    vIn.file.szFilename = PchGetSz("Input filename");
   }
 }
 
@@ -6515,7 +6515,7 @@ ParseFile(const char *szIn,
 
   OpenResFile(szResFile);
 
-  vIn.szFilename = NULL;
+  vIn.file.szFilename = NULL;
   FInitLexer(NULL, fTrue);
 
   ParseRcpFile(szIn, prcpfile);

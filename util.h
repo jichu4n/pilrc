@@ -2,7 +2,7 @@
  * @(#)util.h
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2005, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -60,9 +60,17 @@ VOID WarningLine(const char *szFormat, ...)  PRINTF_FORMATTING;
 /* The functions above are actually wrappers around this general purpose
    diagnostic function.  Generally there's no need to call this directly,
    but in any case: fError distinguishes between error/warning, and if
-   filename is NULL then it's a non-localised diagnostic, as for Error().  */
+   position is NULL then it's a non-localised diagnostic, as for Error().  */
 
-VOID Diagnostic(BOOL fError, const char *filename, int lineno,
+typedef struct FILELINE
+{
+  char *szFilename;
+  FILE *fh;
+  int line;
+}
+FILELINE;
+
+VOID Diagnostic(BOOL fError, const FILELINE *position,
                 const char *szFormat, va_list *args);
 
 /*lint -function(exit,Error) */

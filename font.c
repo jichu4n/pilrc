@@ -2,7 +2,7 @@
  * @(#)font.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2005, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -75,8 +75,7 @@ int (*pfnChkCode) (const unsigned char *cp,
  * Some globals to keep track of things for error reporting 
  */
 
-static char *filename;
-static unsigned int lineno;
+static FILELINE fl;
 int vfontType;
 
 /*
@@ -220,7 +219,7 @@ DiagnosticX(BOOL error, const char *szFormat, ...)
 {
   va_list args;
   va_start(args, szFormat);
-  Diagnostic(error, filename, lineno, szFormat, &args);
+  Diagnostic(error, &fl, szFormat, &args);
   va_end(args);
 }
 
@@ -383,7 +382,6 @@ void
 DumpFont(const char *pchFileName,
          int fntNo)
 {
-  FILE *in;
   char s[kArraySize], *s1, *bitmap[kArraySize];
   unsigned short int coltable[kArraySize];
   size_t x;
@@ -400,17 +398,18 @@ DumpFont(const char *pchFileName,
   memset(header, 0, sizeof(header));
   memset(bitmap, 0, sizeof(bitmap));
 
-  filename = FindAndOpenFile(pchFileName, "rt", &in);
-  lineno = 0;
+  fl.szFilename = FindAndOpenFile(pchFileName, "rt", &fl.fh);
+  fl.line = 0;
+
   if (fntOW[fntNo])
     free(fntOW[fntNo]);
   if (!(fntOW[fntNo] = malloc(kArraySize * sizeof(FontCharInfoType))))
     Error("Out of memory");
   memset(fntOW[fntNo], -1, kArraySize * sizeof(FontCharInfoType));
 
-  while (fgets(s, sizeof(s), in))
+  while (fgets(s, sizeof(s), fl.fh))
   {
-    lineno++;
+    fl.line++;
 
     /*
      * Remove leading and trailing whitespace 
@@ -530,10 +529,10 @@ DumpFont(const char *pchFileName,
     }
 
   }
-  if (!feof(in))
-    Error("Error reading file: %s", filename);
+  if (!feof(fl.fh))
+    Error("Error reading file: %s", fl.szFilename);
 
-  fclose(in);
+  fclose(fl.fh);
 
   /*
    * Write the data 
@@ -603,7 +602,7 @@ DumpFont(const char *pchFileName,
   DumpBytes(&fntOW[fntNo][header[h_firstChar]],
             (header[h_lastChar] - header[h_firstChar] + 1 + missingChar) * 2);
 
-  free(filename);
+  free(fl.szFilename);
 }
 
 
@@ -616,7 +615,6 @@ DumpFont(const char *pchFileName,
 void
 DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * fontFamilyEntries)
 {
-  FILE *in;
   char s[kArraySize], *s1, *bitmap[kArraySize];
   unsigned short int coltable[kArraySize];
   size_t x;
@@ -647,8 +645,9 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
     memset(header, 0, sizeof(header));
     memset(bitmap, 0, sizeof(bitmap));
 
-    filename = FindAndOpenFile(fontFamilyEntries->pchFileName, "rt", &in);
-    lineno = 0;
+    fl.szFilename = FindAndOpenFile(fontFamilyEntries->pchFileName, "rt",
+                                    &fl.fh);
+    fl.line = 0;
 
     if (fntOW[fntNo])
       free(fntOW[fntNo]);
@@ -657,9 +656,9 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
 
     memset(fntOW[fntNo], -1, kArraySize * sizeof(FontCharInfoType));
 
-    while (fgets(s, sizeof(s), in))
+    while (fgets(s, sizeof(s), fl.fh))
     {
-      lineno++;
+      fl.line++;
 
       /*
        * Remove leading and trailing whitespace 
@@ -777,10 +776,10 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
       }
     }
 
-    if (!feof(in))
-      Error("Error reading file: %s", filename);
+    if (!feof(fl.fh))
+      Error("Error reading file: %s", fl.szFilename);
 
-    fclose(in);
+    fclose(fl.fh);
 
     /*
      * Write the data 
@@ -909,7 +908,7 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
       free(bitmap[x]);
     }
 
-    free(filename);
+    free(fl.szFilename);
 
     // next entry
     fontFamilyEntries++;
