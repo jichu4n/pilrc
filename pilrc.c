@@ -6500,22 +6500,6 @@ ParseDirectives(RCPFILE * prcpfile)
 
 }
 
-static void ChangeOrAppendFilenameSuffix(
-    char *szIn,
-    const char *szCurrentSuffix,
-    const char *szNewSuffix)
-{
-    int cutPoint = strlen(szIn) - strlen(szCurrentSuffix);
-    if ((cutPoint >= 0) && (FSzEqI(szIn + cutPoint, szCurrentSuffix)))
-    {
-        strcpy(szIn + cutPoint, szNewSuffix);
-    }
-    else
-    {
-        strcat(szIn, szNewSuffix);
-    }
-}    
-
 /*-----------------------------------------------------------------------------
 |	ParseFile
 -------------------------------------------------------------WESC------------*/
@@ -6538,7 +6522,7 @@ ParseFile(const char *szIn,
 
   if (vfPrc)
   {
-    char szFile[FILENAME_MAX];
+    char *szMainOutput;
 
     if (strcmp(szOutDir, ".") == 0)
     {
@@ -6546,27 +6530,23 @@ ParseFile(const char *szIn,
        * PRC file format was selected, but no output filename was given.
        * Deduce one from the input filename.  
        */
-      strcpy(szFile, szIn);
-      ChangeOrAppendFilenameSuffix(szFile, ".rcp", ".ro");
+      szMainOutput = MakeFilename("%s%e.ro", szIn, ".rcp");
     }
     else
     {
       /*
        * A filename was given.  Append an extension if it doesn't have one.  
        */
-      char *dot;
-
-      strcpy(szFile, szOutDir);
-      dot = strrchr(szFile, '.');
+      char *dot = strrchr(szOutDir, '.');
       if (dot && (strchr(dot, '/') != NULL || strchr(dot, '\\') != NULL))
         dot = NULL;                              /* The dot was in a directory name, not the basename.  */
 
-      if (dot == NULL)
-        strcat(szFile, ".ro");
+      szMainOutput = MakeFilename((dot)? "%s" : "%s.ro", szOutDir);
     }
 
-    OpenResDBFile(szFile);
-    SetDependsTarget(szFile);
+    OpenResDBFile(szMainOutput);
+    SetDependsTarget(szMainOutput);
+    free(szMainOutput);
   }
   else
     SetOutFileDir(szOutDir);
