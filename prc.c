@@ -246,6 +246,9 @@ PrcCloseFile(FILE * pF)
     hdr.attributes = dmHdrAttrResDB;
   else
     hdr.attributes = SwapW(dmHdrAttrResDB);
+  strcpy(hdr.name, "PilRC resources");
+  hdr.type = 0x64617461;                         // 'data';
+  hdr.creator = 0x70524553;                      // 'pRES';
   if (fwrite(&hdr, sizeof(hdr) - sizeof(RecordListType), 1, prcF) != 1)
     Error3("Error writing to output file: ", prcName, strerror(errno));
 

@@ -941,12 +941,12 @@ typedef struct _rcscrollbar
   /*
    * Short penPosInCar;
  *//*
- * * * * zw 
+ * * * * * zw 
  */
   /*
    * Short savePos;
  *//*
- * * * * zw 
+ * * * * * zw 
  */
 }
 RCSCROLLBAR;
@@ -1305,7 +1305,7 @@ typedef struct _rcBITMAP
   /*
    * ushort and_reserved_and_colorTable[3] 
  *//*
- * * * * z1w 
+ * * * * * z1w 
  */
   unsigned char *pbBits;
 
