@@ -497,8 +497,14 @@ OpenResDBFile(const char *sz)
 {
   static BOOL registered = fFalse;
 
+  FILE *f;
+
   szOutResDBFile = MakeFilename("%s", sz);
   szTempFile = MakeTempFilename();
+
+  f = fopen(szTempFile, "wb");
+  if (f)
+    fclose(f);
 
   if (!registered)
   {
