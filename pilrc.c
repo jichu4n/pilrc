@@ -4602,13 +4602,7 @@ ParseDumpFont()
     ErrorLine("FontID invalid.  valid values: 128<=FontID<=255");
   pchFileName = PchGetSz("Font Filename");
 
-  /*
-   * RMa localisation 
-   */
-  if (ObjectDesiredInOutputLocale(&itm))
-  {
-  }
-  else
+  if (DesirableLocale(itm.Locale))
   {
     OpenOutput(kPalmResType[kFontRscType], id);  /* RMa "NFNT" */
     DumpFont(pchFileName, fontid);
@@ -4632,8 +4626,11 @@ ParseDumpFontFamily()
 #define MAXDENSITY 2
   FNTFAMDEF aFontFamilyEntries[MAXDENSITY];
 
-  ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
+  ParseItm(&itm, ifId | ifFont, if2Null, if3Locale, if4Null);
   id = itm.id;
+
+  if (itm.font < 128 || itm.font > 255)
+    ErrorLine("FontID invalid.  valid values: 128<=FontID<=255");
 
   GetExpectRw(rwBegin);
 
@@ -4664,7 +4661,7 @@ ParseDumpFontFamily()
   if (DesirableLocale(itm.Locale))
   {
     OpenOutput(kPalmResType[kFontFamilyRscType], id);    /* RMa "nfnt" */
-    DumpFontFamily( 128, 1, densityCount, aFontFamilyEntries);
+    DumpFontFamily(itm.font, 1, densityCount, aFontFamilyEntries);
     CloseOutput();
   }
 

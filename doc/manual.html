@@ -2104,7 +2104,7 @@ FONT support in PilRC is not complete, and has been reverse engineered.
 <b>FONTFAMILY (nfnt)</b><p>
 
 <pre class=syntax>
-FONTFAMILY ID <var>&lt;ResId.n&gt;</var> [LOCALE <var>&lt;LocaleName.s&gt;</var>]
+FONTFAMILY ID <var>&lt;ResId.n&gt;</var> FONTID <var>&lt;FontId.n&gt;</var> [LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
     FONT <var>&lt;FontFileName.s&gt;</var> DENSITY <var>&lt;Density.n&gt;</var>
     ...
@@ -2125,7 +2125,7 @@ For compatibility with an earlier version of PilRC, the syntax
 
 <u>Example:</u>
 <ul><pre>
-FONTFAMILY ID 1000 LOCALE "enUS"
+FONTFAMILY ID 1000 FONTID 128 LOCALE "enUS"
 BEGIN
     FONT "font_100.txt" DENSITY 72
     FONT "font_101.txt" DENSITY 144
