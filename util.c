@@ -538,22 +538,19 @@ OpenOutput(char *szBase,
   CWOpenOutput(szBase, id);
   ibOut = 0;
 #else
-  char szPrettyName[FILENAME_MAX];
-  char *szFileName;
-  char *szMode;
+  char szBinFileName[4 + 4 + 4 + 1];
 
   // save for possible errors
   memset(outputResStr, 0, 5);
   strncpy(outputResStr, szBase, 4);
   outputResID = id;
 
-  /*
-   * #ifdef BINOUT 
-   */
   if (vfInhibitOutput || vfWinGUI)
     return;
 
   Assert(vfhOut == NULL);
+
+  sprintf(szBinFileName, "%.4s%04x.bin", szBase, id);
 
   if (vfPrc)
   {
@@ -564,33 +561,36 @@ OpenOutput(char *szBase,
     entry.offset = ibTotalOut;
     PlexAddElement(&resdir, &entry);
 
-    snprintf(szPrettyName, sizeof(szPrettyName), "temporary %s%04x.bin", szBase, id);
-    szFileName = szTempFile;
-    szMode = "ab";
+    vfhOut = fopen(szTempFile, "ab");
+    if (vfhOut == NULL)
+      Error("Unable to open binary file %s: %s", szTempFile, strerror(errno));
+
+    if (!vfQuiet)
+      printf("Writing temporary %s ", szBinFileName);
+
+    if (vfhRes)
+      fprintf(vfhRes, "\tres '%s', %d, \"%s(%s)\"\n", szBase, id,
+              szOutResDBFile, szBinFileName);
   }
   else
   {
-    snprintf(szPrettyName, sizeof(szPrettyName), "%s%s%04x.bin", szOutFileDir, szBase, id);
-    szFileName = szPrettyName;
-    szMode = "w+b";
+    char *szBinPath;
+    szBinPath = MakeFilename("%s/%s", szOutFileDir, szBinFileName);
+
+    vfhOut = fopen(szBinPath, "w+b");
+    if (vfhOut == NULL)
+      Error("Unable to open binary file %s: %s", szBinPath, strerror(errno));
+
+    if (!vfQuiet)
+      printf("Writing %s ", szBinPath);
+
+    if (vfhRes)
+      fprintf(vfhRes, "\tres '%s', %d, \"%s\"\n", szBase, id, szBinPath);
+
+    free(szBinPath);
   }
 
-  vfhOut = fopen(szFileName, szMode);
-  if (vfhOut == NULL)
-    Error("Unable to open binary file %s: %s", szFileName, strerror(errno));
-
-  if (!vfQuiet)
-    printf("Writing %s ", szPrettyName);
   ibOut = 0;
-
-  /*
-   * #endif 
-   */
-
-  if (vfhRes)
-  {
-    fprintf(vfhRes, "\tres '%s', %d, \"%s\"\n", szBase, id, szPrettyName);
-  }
 #endif
 }
 
