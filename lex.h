@@ -76,12 +76,16 @@ typedef int LT;
 #define ltPoint    54
 
 typedef int VAL;
-typedef int SIZE;
 
-#define lsUnspecified 0
-#define lsByte   1
-#define lsWord   2
-#define lsLong   3
+typedef enum LEXSIZE
+{
+  lsUnspecified,
+  lsByte,
+  lsWord,
+  lsLong
+}
+LEXSIZE;
+
 
 #define cchIdMax 4096
 
@@ -93,7 +97,7 @@ typedef struct _lex
   LT lt;
   char szId[cchIdMax];
   VAL val;
-  SIZE size;
+  LEXSIZE size;
 }
 LEX;
 
