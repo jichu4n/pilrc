@@ -511,7 +511,7 @@ DumpFont(char *pchFileName,
     header[h_rowWords] * header[h_fRectHeight] + 8 + header[h_lastChar] -
     header[h_firstChar];
 
-  CbEmitStruct(header, szRCFONT, NULL, fTrue);
+  CbEmitStruct(header, "wwwwwwwwwwwww", NULL, fTrue);
 
   for (x = 0; x < (size_t) header[h_fRectHeight]; x++)
   {

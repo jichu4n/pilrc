@@ -1082,11 +1082,43 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
     case rwBitmap:
     case rwBitmapGrey:
     case rwBitmapGrey16:
-    case rwBitmapColor16:
       rcbmp->pixelsize = cbitsPel;
       rcbmp->version = 1;
       if (vfLE32)
         rcbmp->version |= LE_BITMAP_VERSION_MASK;
+      break;
+
+    case rwBitmapColor16:
+
+      rcbmp->pixelsize = cbitsPel;
+      rcbmp->version = 1;
+      if (vfLE32)
+        rcbmp->version |= LE_BITMAP_VERSION_MASK;
+
+      // do we need to consider transparency?
+      switch (transparencyData[0])
+      {
+        case rwTransparency:
+          // rcbmp->ff |= 0x2000;
+          rcbmp->flags.hasTransparency = fTrue;
+
+          rcbmp->transparentIndex =
+            BMP_RGBToColorIndex(transparencyData[1],
+                                transparencyData[2],
+                                transparencyData[3],
+                                dstPalette, dstPaletteSize);
+          break;
+
+        case rwTransparencyIndex:
+          // rcbmp->ff |= 0x2000;
+          rcbmp->flags.hasTransparency = fTrue;
+
+          rcbmp->transparentIndex = transparencyData[1];
+          break;
+
+        default:
+          break;
+      }
       break;
 
     case rwBitmapColor256:
@@ -1127,6 +1159,7 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
           *tmpPtr++ = 0;
         }
       }
+
       // do we need to consider transparency?
       switch (transparencyData[0])
       {
@@ -2054,6 +2087,10 @@ BMP_CompressBitmap(RCBITMAP * rcbmp,
   bits = (unsigned char *)malloc(msize * sizeof(unsigned char));
   memset(bits, 0, msize * sizeof(unsigned char));
 
+  // prevent transparency data from being compressed in 16bpp
+  if (directColor) 
+    rcbmp->pbBits += 8;  
+
   // do the compression (at least, attempt it)
   for (i = 0; i < rcbmp->cy; i++)
   {
@@ -2078,6 +2115,10 @@ BMP_CompressBitmap(RCBITMAP * rcbmp,
       }
     }
   }
+
+  // fix pointer back for 16bpp (we offset it previously)
+  if (directColor) 
+    rcbmp->pbBits -= 8;  
 
   // if we must compress, or if it was worth it, save!
   if (compress == rwForceCompress || size < rcbmp->cbDst)
@@ -2292,13 +2333,8 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
     int dataSize;
     int bootScreenHeaderSize = (vfLE32) ? 8 : 6;
     unsigned short crc;
-	int	test;
 
-	EmitL(0);                             
-	EmitW(0);
-	if (vfLE32)
-		EmitW(0);
-
+    fseek(outputFile, currentPosInFile + bootScreenHeaderSize, SEEK_SET);       /* jump after the header */
     structureSize = CbEmitStruct(rcbmp, szRCBITMAP, NULL, fTrue);       /* write structure tbmp */
     DumpBytes(rcbmp->pbBits, rcbmp->cbDst);      /* write data tbmp */
     PadBoundary();
@@ -2307,18 +2343,18 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
     dataSize = newPosInFile - (currentPosInFile + bootScreenHeaderSize);
     pData = malloc(dataSize);
     fseek(outputFile, currentPosInFile + bootScreenHeaderSize, SEEK_SET);       /* jump after the header */
-    if ((test = fread(pData, 1, dataSize, outputFile)) != dataSize)
-	{
-		fprintf(stderr, "Read: %lu\n", test);
-		abort();
-	}
+    fread(pData, 1, dataSize, outputFile);
     crc = Crc16CalcBlock(pData, (unsigned short)dataSize, 0);
 
     fseek(outputFile, currentPosInFile, SEEK_SET);      /* jump before the header */
     EmitL(dataSize);                             /* write header size of data */
+    if (vfLE32)                                  /* write header crc of data */
+      EmitL((unsigned int)crc);
+    else
       EmitW(crc);
 
     fseek(outputFile, newPosInFile, SEEK_SET);   /* jump afer header + bmp */
+    if (pData)
       free(pData);
   }
   else
@@ -2328,7 +2364,6 @@ BMP_CompressDumpBitmap(RCBITMAP * rcbmp,
     DumpBytes(rcbmp->pbBits, rcbmp->cbDst);
     PadBoundary();                               /* RMa add: BUG correction */
   }
-
   // clean up
   free(rcbmp->pbBits);
 }

@@ -120,7 +120,7 @@ Error(char *sz)
 #endif
   {
     fprintf(stderr, "\n");
-    fprintf(stderr, sz);
+    fprintf(stderr, "%s", sz);  // added "%s", AA
     fprintf(stderr, "\n");
     exit(1);
   }
@@ -213,7 +213,7 @@ WarningLine(char *sz)
            ? "%s(%d): warning : %s"
            : "%s:%d: warning : %s"), szInFile, iline, sz);
   fprintf(stderr, "\n");
-  fprintf(stderr, szErr);
+  fprintf(stderr, "%s", szErr);  // added "%s", AA
   fprintf(stderr, "\n");
 #endif
 }
@@ -527,7 +527,7 @@ OpenOutput(char *szBase,
   {
     sprintf(szPrettyName, "%s%s%04x.bin", szOutFileDir, szBase, id);
     szFileName = szPrettyName;
-    szMode = "w+b";
+    szMode = "wb";
   }
 
   vfhOut = fopen(szFileName, szMode);

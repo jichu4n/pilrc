@@ -7,10 +7,6 @@ Project: "pilrc"=.\pilrc.dsp - Package Owner=<4>
 
 Package=<5>
 {{{
-    begin source code control
-    pilrc
-    .
-    end source code control
 }}}
 
 Package=<4>

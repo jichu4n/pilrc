@@ -51,7 +51,6 @@ ResTypeInit(void)
   kPalmResType[21] = "TRAP";
   kPalmResType[22] = "tTTL";
   kPalmResType[23] = "tLBL";
-  kPalmResType[37] = "tSCH";
   if (vfLE32)
   {
     kPalmResType[6] = "aaib";
@@ -76,10 +75,6 @@ ResTypeInit(void)
     kPalmResType[30] = "alcs";
     kPalmResType[31] = "abda";
     kPalmResType[32] = "aprf";
-	 kPalmResType[33] = "aftm";
-	 kPalmResType[34] = "attl";
-	 kPalmResType[35] = "acsl";
-	 kPalmResType[36] = "attb";
   }
   else
   {
@@ -105,9 +100,5 @@ ResTypeInit(void)
     kPalmResType[30] = "locs";
     kPalmResType[31] = "hsbd";
     kPalmResType[32] = "pref";
-	 kPalmResType[33] = "fntm";
-	 kPalmResType[34] = "ttli";
-	 kPalmResType[35] = "csli";
-	 kPalmResType[36] = "ttbl";
   }
 }
