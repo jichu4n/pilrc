@@ -2,6 +2,7 @@
 <head>
 <title>PilRC</title>
 <style>
+BODY { font-family: arial, helvetica, sans-serif }
 PRE.syntax { margin-left: 3em }
 PRE.syntax VAR, TT.syntax VAR { font-style: normal; color: #00ff00 }
 PRE.syntax STRONG, TT.syntax STRONG { font-weight: normal; color: #0000ff }
@@ -21,23 +22,17 @@ PRE.syntax STRONG, TT.syntax STRONG { font-weight: normal; color: #0000ff }
 </tt>
 </center> <p>
 
-<font face="Arial,Helvetica">
-
 <table BORDER=0 WIDTH="100%" >
 <tr>
 <td>
-<font face="Arial,Helvetica">
 <h2>PilRC v3.0<br>
     User Manual <div class="palmInternal">PALM internal</div></h2>
-</font>
 </td>
 <td valign=top align=right>
-<font face="Arial,Helvetica">
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
   <a href="mailto:combee@techwood.org">Ben Combee</a> (combee@techwood.org)<br>
   <a href="mailto:johnm@falch.net">John Marshall</a> (johnm@falch.net)<br>
   2 March 2003
-</font>
 </td>
 </tr>
 </table>
@@ -49,14 +44,10 @@ Check the <a href="http://www.ardiri.com/index.php?redir=palm&cat=pilrc">PilRC H
   <table border=0>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     PilRC
-    </font>
     </td>
     <td>
-    <font face="Arial,Helvetica">
     A resource compiler for the Palm Computing Platform
-    </font>
     </td>
   </tr>
 </table>
@@ -67,44 +58,32 @@ Check the <a href="http://www.ardiri.com/index.php?redir=palm&cat=pilrc">PilRC H
   <table border=0>
   <tr>
     <td>
-    <font face="Arial,Helvetica">
     <a href="#usage">Usage</a>
-    </font>
     </td>
   </tr>
   <tr>
     <td>
-    <font face="Arial,Helvetica">
     <a href="#understanding">Understanding the Manual</a>
-    </font>
     </td>
   </tr>
   <tr>
     <td>
-    <font face="Arial,Helvetica">
     <a href="#language">Resource Language Reference</a>
-    </font>
     </td>
   </tr>
   <tr>
     <td>
-    <font face="Arial,Helvetica">
     <a href="#international">International Support</a>
-    </font>
     </td>
   </tr>
   <tr>
     <td>
-    <font face="Arial,Helvetica">
     <a href="#knownbugs">Known Bugs</a>
-    </font>
     </td>
   </tr>
   <tr>
     <td>
-    <font face="Arial,Helvetica">
     <a href="#reading">Further Reading</a>
-    </font>
     </td>
   </tr>
   </table>
@@ -112,7 +91,6 @@ Check the <a href="http://www.ardiri.com/index.php?redir=palm&cat=pilrc">PilRC H
 
 <a name="usage"></a>
 <b><u>Usage</u></b>
-</font>
 <ul>
 <table border=0 cellspacing=0 cellpadding=0>
 <tr>
@@ -135,331 +113,226 @@ Check the <a href="http://www.ardiri.com/index.php?redir=palm&cat=pilrc">PilRC H
 </table>
 <p>
 
-<font face="Arial,Helvetica">
-
 <table border=0>
 <tr>
   <a name="switch_L"></a>
   <td valign=top width="150">
-  <font face="Arial,Helvetica">
   -L LANGUAGE
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Generate resource files translated to the target language LANGUAGE -- see
   the <a href="#international">International Support</a> section for details.
   This option may be given more than once if so desired.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -I INCLUDE PATH
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Search INCLUDE PATH when looking for include or bitmap files. <br>
   <b>NOTE</b>: multiple paths be repeating the -I option.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -D MACRO[=VAL]
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Define a pre-processor symbol with an optional value. <br>
   The macros defined with the -D option can be referenced in #ifdef
   statements in the resource file for conditional compilation. <br>
   <b>NOTE</b>: if no value is specified, the symbol will given the value of 1.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -R RESFILE
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Output a <tt>.res</tt> file specifying all the resources emitted by 
   <tt>PilRC</tt>.
-  </font>
   </td>
 </tr>
 <tr>
   <a name="switch_H"></a>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -H INCFILE
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Output a <tt>.h</tt> file containing auto-generated resource item IDs for
   resource items that were defined without an ID previously. <br>
   <b>NOTE</b>: If -H is not specified then undefined IDs are considered 
   errors.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -ro
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Output a single .ro file in PRC format containing all the generated
   resources, instead of a collection of .bin files.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -ts
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Put POSIX timestamp on .ro file generated.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -q
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Less noisy output, for you minimalists.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -V
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Generate M$ (VS-style) warning/error output (default is GNU-style).
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -Fh
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Use Hebrew font widths for AUTO width calculations.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -Fj
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Use Japanese font widths for AUTO width calculations.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -F5
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Use Chinese (Big5) font widths for AUTO width calculations.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -Fg
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Use Chinese (GB) font widths for AUTO width calculations.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -Fkm
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Use Korean font widths for AUTO width calculations (Hanme font)
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -Fkt
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Use Korean font widths for AUTO width calculations (Hantip font)
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -Fc
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Use Cyrillic font widths for AUTO width calculations.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -allowEditID
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Allow the use of "edit menu" ID values (10000-10007 inclusive) which are usually reserved to Palm.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -noEllipsis
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Disable special handling of "..." and ellipsis character.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -palmRez
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Uses the same default values than palmRez uses.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -noIFIH
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Ignore includes files in header files.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -LE32
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Generate Little Endian 32 bits compatible resources (ARM, NT)
-  </font>
   </td>
 </tr>
 <tr class="palmInternal">
   <td valign=top>
-  <font face="Arial,Helvetica">
   -AppIcon68K
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Force AppIcon resources generation in 68K format.
-  </font>
   </td>
 </tr>
 <tr class="palmInternal">
   <td valign=top>
-  <font face="Arial,Helvetica">
   -amdc NAME
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Generate resource 'amdc' id=1 with NAME.dll as content.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   file.rcp
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Input file describing the resources to be emitted. 
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -Loc CODE
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Compile only the resources with the attribute LOCALE "code" set.<BR>
   Supported LOCALEs: deDE, esES, enUS, frFR, itIT, jpJP.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -StripLoc
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Don't compile "non localized resources".<BR>
   <b>NOTE</b>:
   <ul>
@@ -478,92 +351,63 @@ Check the <a href="http://www.ardiri.com/index.php?redir=palm&cat=pilrc">PilRC H
   </ul>
   This is a different approach than the one provided by the <a href="#switch_L">-L</a> flag.
   </ul>
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -type type
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Specify the type to use when generating a prc directly (-ro). The type parameter MUST NOT be single quoted. Use abcd, not 'abcd'.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -creator crea
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Specify the creator to use when generating a prc directly (-ro). The creator parameter MUST NOT be single quoted. Use abcd, not 'abcd'.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -name Name
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Specify the database name to use when generating a prc directly (-ro).
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -o OUTPUTPATH
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Alternative way of specifying an output path (below).
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -M
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Generate dependency list only; suppress all other output.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   -MD
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Generate dependency list.
-  </font>
   </td>
 </tr>
 <tr>
   <td valign=top>
-  <font face="Arial,Helvetica">
   output path
-  </font>
   </td>
   <td valign=top>
-  <font face="Arial,Helvetica">
   Directory where .bin files should be generated, or name of the file
   to generate containing all the generated resources.
-  </font>
   </td>
 </tr>
 </table>
@@ -587,7 +431,6 @@ resources within a PRC file, depending on whether <code>-ro</code> is given:
 </ul>
 
 <b><u>Example:</u></b>
-</font>
 <ul>
 <pre>
 pilrc myprogram.rcp
@@ -596,7 +439,6 @@ pilrc -I c:\resources -L BIG5 -F5 -R myprogram.res myprogram.rcp c:\output
 pilrc -ro -o myresoures.ro myprogram.rcp
 pilrc -ro myprogram.rcp</pre>
 </ul>
-<font face="Arial,Helvetica">
 
 <a name="understanding"></a>
 <b><u>Understanding the Manual</u></b> <p>
@@ -619,10 +461,8 @@ Each field's required type is indicated by a suffix after the field name
     <tt>.i</tt>
     </td>
     <td valign=top>
-    <font face="Arial,Helvetica">
     identifier <br>
     example: <tt>kFoo</tt>
-    </font>
     </td>
   </tr>
   <tr>
@@ -630,11 +470,9 @@ Each field's required type is indicated by a suffix after the field name
     <tt>.c</tt>
     </td>
     <td valign=top>
-    <font face="Arial,Helvetica">
     character <br>
     (may contain normal C style character escapes) <br>
     example: <tt>"O"</tt> 
-    </font>
     </td>
   </tr>
   <tr>
@@ -642,11 +480,9 @@ Each field's required type is indicated by a suffix after the field name
     <tt>.s</tt>
     </td>
     <td valign=top>
-    <font face="Arial,Helvetica">
     string <br>
     (may contain normal C style character escapes) <br>
     example: <tt>"Click Me"</tt> 
-    </font>
     </td>
   </tr>
   <tr>
@@ -654,14 +490,12 @@ Each field's required type is indicated by a suffix after the field name
     <tt>.ss</tt>
     </td>
     <td valign=top>
-    <font face="Arial,Helvetica">
     multi line string <br>
     <tt>PilRC</tt> will concatenate strings on separate lines <br>
     example: <tt>"Now is the time for all good " \</tt> <br>
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <tt>"men to come and aid of their country"</tt>
-    </font>
     </td>
   </tr>
   <tr>
@@ -669,7 +503,6 @@ Each field's required type is indicated by a suffix after the field name
     <tt>.n</tt>
     </td>
     <td valign=top>
-    <font face="Arial,Helvetica">
     number <br>
     defined constant or simple arithmetic expression. Valid operators are
     "+", "-", "*" and "/". Precedence is left to right, unless changed with
@@ -685,7 +518,6 @@ Each field's required type is indicated by a suffix after the field name
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <tt>'PALM'</tt> <br>
-    </font>
     </td>
   </tr>
   <tr>
@@ -693,7 +525,6 @@ Each field's required type is indicated by a suffix after the field name
     <tt>.p</tt>
     </td>
     <td valign=top>
-    <font face="Arial,Helvetica">
     position co-ordinate <br>
     may be a number, expression or one of the following keywords. <br>
     <ul>
@@ -703,10 +534,8 @@ Each field's required type is indicated by a suffix after the field name
 	<tt>AUTO</tt>
 	</td>
 	<td valign=top>
-        <font face="Arial,Helvetica">
         Automatic width or height. <br>
         Value is computed based on the text in the item.
-	</font>
         </td>
       </tr>
       <tr>
@@ -714,14 +543,12 @@ Each field's required type is indicated by a suffix after the field name
 	<tt>AUTO&gt; &lt;size.n&gt;</tt>
 	</td>
 	<td valign=top>
-        <font face="Arial,Helvetica">
         Constrained automatic width or height. <br>
         Value is computed based on the text in the item,
         but if less than the number specified, is replaced
         by that number.  For example, if you wanted a button
         that was at least 32 pixels wide, you could use this
         knowing that it would expand if the text got bigger.
-	</font>
         </td>
       </tr>
       <tr>
@@ -729,9 +556,7 @@ Each field's required type is indicated by a suffix after the field name
 	<tt>CENTER</tt>
 	</td>
 	<td valign=top>
-        <font face="Arial,Helvetica">
         Centers the item either horizontally or vertically. 
-	</font>
         </td>
       </tr>
       <tr>
@@ -739,9 +564,7 @@ Each field's required type is indicated by a suffix after the field name
 	<tt>CENTER@&lt;coord.n&gt;</tt>
 	</td>
 	<td valign=top>
-        <font face="Arial,Helvetica">
         Centers the item at the co-ordinate following.
-	</font>
         </td>
       </tr>
       <tr>
@@ -749,9 +572,7 @@ Each field's required type is indicated by a suffix after the field name
 	<tt>RIGHT@&lt;coord.n&gt;</tt>
 	</td>
 	<td valign=top>
-        <font face="Arial,Helvetica">
         Aligns the item at the right co-ordinate following.
-	</font>
         </td>
       </tr>
       <tr>
@@ -759,9 +580,7 @@ Each field's required type is indicated by a suffix after the field name
 	<tt>BOTTOM@&lt;coord.n&gt;</tt>
 	</td>
 	<td valign=top>
-        <font face="Arial,Helvetica">
         Aligns the item at the bottom co-ordinate following.
-	</font>
         </td>
       </tr>
       <tr>
@@ -769,9 +588,7 @@ Each field's required type is indicated by a suffix after the field name
 	<tt>PREVLEFT</tt>
 	</td>
 	<td valign=top>
-        <font face="Arial,Helvetica">
         Previous items left co-ordinate. 
-	</font>
         </td>
       </tr>
       <tr>
@@ -779,9 +596,7 @@ Each field's required type is indicated by a suffix after the field name
 	<tt>PREVRIGHT</tt>
 	</td>
 	<td valign=top>
-        <font face="Arial,Helvetica">
         Previous items right co-ordinate. 
-	</font>
         </td>
       </tr>
       <tr>
@@ -789,9 +604,7 @@ Each field's required type is indicated by a suffix after the field name
 	<tt>PREVTOP</tt>
 	</td>
 	<td valign=top>
-        <font face="Arial,Helvetica">
         Previous items top co-ordinate. 
-	</font>
         </td>
       </tr>
       <tr>
@@ -799,9 +612,7 @@ Each field's required type is indicated by a suffix after the field name
 	<tt>PREVBOTTOM</tt>
 	</td>
 	<td valign=top>
-        <font face="Arial,Helvetica">
         Previous items bottom co-ordinate. 
-	</font>
         </td>
       </tr>
       <tr>
@@ -809,9 +620,7 @@ Each field's required type is indicated by a suffix after the field name
 	<tt>PREVWIDTH</tt>
 	</td>
 	<td valign=top>
-        <font face="Arial,Helvetica">
         Previous items width. 
-	</font>
         </td>
       </tr>
       <tr>
@@ -819,9 +628,7 @@ Each field's required type is indicated by a suffix after the field name
 	<tt>PREVHEIGHT</tt>
 	</td>
 	<td valign=top>
-        <font face="Arial,Helvetica">
         Previous items height. 
-	</font>
         </td>
       </tr>
       </table>
@@ -833,7 +640,6 @@ Each field's required type is indicated by a suffix after the field name
 
     <b>NOTE</b>: <tt>AUTO</tt> and <tt>CENTER</tt> are not valid in 
     arithmetic expressions. 
-    </font>
     </td>
   </tr>
   </table>
@@ -923,177 +729,120 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
   <table border=0>
   <tr>
     <td valign=top width=300>
-    <font face="Arial,Helvetica">
     <a href="#lang_form">FORM</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Form Resource
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_menu">MENU</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Form Menu Bar
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_alert">ALERT</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Alert Dialog Resource
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_version">VERSION</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Version String
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_string">STRING</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     String Resource
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_stringtable">STRINGTABLE</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     String List Resource
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_categories">CATEGORIES</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Default Category Names 
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_appiconname">APPLICATIONICONNAME</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Application Icon Name
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_appid">APPLICATION</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Application Creator Identification
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_launchcat">LAUNCHERCATEGORY</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Default launcher Category Name
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_icon">ICON</a> <br>
     <a href="#lang_icon">ICONFAMILY</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Icon Bitmap Resource
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_smicon">SMALLICON</a> <br>
     <a href="#lang_smicon">SMALLICONFAMILY</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Small Icon Bitmap Resource
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_icon2">ICONFAMILYEX</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     New icon family Resource (density support)
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_smallicon2">SMALLICONFAMILYEX</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     New small icon family Resource (density support)
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_bitmap">BITMAP</a> <br>
     <a href="#lang_bitmap">BITMAPGREY</a> <br>
     <a href="#lang_bitmap">BITMAPGREY16</a> <br>
@@ -1105,300 +854,201 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     <a href="#lang_bitmap">BITMAPFAMILY</a> <br>
     <a href="#lang_bitmap">BITMAPFAMILYSPECIAL</a> <br>
     <a href="#lang_bitmap">BOOTSCREENFAMILY</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Bitmap Resource
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_bitmap2">BITMAPFAMILYEX</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     New Bitmap Resource (density support)
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_trap">TRAP</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     HackMaster Trap Resource
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_font">FONT</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     User Defined Font Resource
-    </font>
     </td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_fontindex">FONTINDEX</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Font Index table for Font Resource
-    </font>
     </td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_fontmap">FONTMAP</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Font Map extension for Font Resource (i.e. japan)
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_hex">HEX</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Binary Resource (Hex/String based)
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_data">DATA</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Binary Resource (Data File based)
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_integer">INTEGER</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     2-byte Integer Value
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_bytelist">BYTELIST</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     1-byte Integer Value List
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_wordlist">WORDLIST</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     2-byte Integer Value List
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_longwordlist">LONGWORDLIST</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     4-byte Integer Value List
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_palettetable">PALETTETABLE</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Color List Resource
-    </font>
     </td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_feature">FEATURE</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     System reserved
-    </font>
     </td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_graffitiinputarea">GRAFFITIINPUTAREA</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     System reserved
-    </font>
     </td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_countrylocalisation">COUNTRYLOCALISATION</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     System reserved
-    </font>
     </td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_locales">LOCALES</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     System reserved
-    </font>
     </td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_keyboard">KEYBOARD</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     System reserved 
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_midi">MIDI</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Copy .aif or .mid to a Palm midi Resource
-    </font>
     </td>
   </tr>
   <tr  class="palmInternal">
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_Hardsoftbutton">HARDSOFTBUTTONDEFAULT</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     System reserved
-    </font>
     </td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_SysAppPrefs">SYSAPPLICATIONPREFERENCES</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     System reserved
-    </font>
     </td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_SearchTable">SEARCHTABLE</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     System reserved
-    </font>
     </td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_TextTable">TEXTTABLE</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     System reserved
-    </font>
     </td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_TableList">TABLELIST</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     System reserved
-    </font>
     </td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_CharSetList">CHARSETLIST</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     System reserved
-    </font>
     </td>
   </tr>
   </table>
@@ -1413,38 +1063,26 @@ The <tt>.rcp</tt> file may also contain the following directives: <p>
   <table border=0>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_translation">TRANSLATION</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Language Translation Strings
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_generateheader">GENERATEHEADER</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Generate a header file from IDs defined in the file
-    </font>
     </td>
   </tr>
   <tr>
     <td valign=top>
-    <font face="Arial,Helvetica">
     <a href="#lang_resetautoid">RESETAUTOID</a>
-    </font>
     </td>
     <td valign=center>
-    <font face="Arial,Helvetica">
     Reset AutoID sequence number
-    </font>
     </td>
   </tr>
   </table>
@@ -1454,7 +1092,6 @@ The <tt>.rcp</tt> file may also contain the following directives: <p>
 
 <a name="lang_form"></a>
 <b>FORM (tFRM)</b> <p>
-</font>
 
 <pre class=syntax>
 FORM ID <var>&lt;FormResourceId.n&gt;</var> AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>)
@@ -1470,12 +1107,9 @@ BEGIN
   <var>&lt;OBJECTS&gt;</var>
 END </pre>
 
-<font face="Arial,Helvetica">
-Where 
-</font><tt class=syntax><var>&lt;OBJECTS&gt;</var></tt>
-<font face="Arial,Helvetica">
-is one or more of: <p>
+Where <tt class=syntax><var>&lt;OBJECTS&gt;</var></tt> is one or more of:
 
+<p>
 <ul>
 <table>
   <tr>
@@ -1771,7 +1405,6 @@ using the
 </ul>
 
 <u>Example:</u><p>
-</font>
 <pre>
 FORM ID 1 AT (2 2 156 156)
   USABLE MODAL 
@@ -1802,10 +1435,8 @@ BEGIN
 END</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_menu"></a>
 <b>MENU (MBAR)</b> <p>
-</font>
 
 <pre class=syntax>
 MENU ID <var>&lt;MenuResourceId.n&gt;</var>
@@ -1814,33 +1445,23 @@ BEGIN
   <var>&lt;PULLDOWNS&gt;</var>
 END</pre>
 
-<font face="Arial,Helvetica">
-Where 
-</font><tt class=syntax><var>&lt;PULLDOWNS&gt;</var></tt>
-<font face="Arial,Helvetica">
-is one or more of: <p>
-</font>
+Where <tt class=syntax><var>&lt;PULLDOWNS&gt;</var></tt> is one or more of:
 
+<p>
 <pre class=syntax>
 PULLDOWN <var>&lt;PullDownTitle.s&gt;</var>
 BEGIN
   <var>&lt;MENUITEMS&gt;</var>
 END</pre>
 
-<font face="Arial,Helvetica">
-Where 
-</font><tt class=syntax><var>&lt;MENUITEMS&gt;</var></tt>
-<font face="Arial,Helvetica">
-is one or more of: <p>
-</font>
+Where <tt class=syntax><var>&lt;MENUITEMS&gt;</var></tt> is one or more of:
 
+<p>
 <pre class=syntax>
 MENUITEM <var>&lt;MenuItem.s&gt;</var> ID <var>&lt;MenuItemId.n&gt;</var> [AccelChar.c]
 MENUITEM SEPARATOR [ID <var>&lt;MenuItemId.n&gt;</var>]</pre>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font>
 
 <ul>
 <pre>
@@ -1860,10 +1481,8 @@ BEGIN
 END</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_alert"></a>
 <b>ALERT (Talt)</b><p>
-</font>
 
 <pre class=syntax>
 ALERT ID <var>&lt;AlertResrouceId.n&gt;</var>
@@ -1877,7 +1496,6 @@ BEGIN
   BUTTONS <var>&lt;Button.s&gt;</var> ... <var>&lt;Button.s&gt;</var>
 END</pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u> <p>
 <ul>
 <li>
@@ -1888,7 +1506,6 @@ the left-most button is at index '0'. <p>
 </ul> 
 
 <u>Example:</u> <p>
-</font>
 <pre>
 ALERT ID 1000
   HELPID 100
@@ -1902,16 +1519,13 @@ BEGIN
   BUTTONS "Ok" "Cancel"
 END</pre>
 
-<font face="Arial,Helvetica">
 <a name="lang_version"></a>
 <b>VERSION (tver)</b><p>
-</font>
 
 <pre class=syntax>
 VERSION ID <var>&lt;VersionResourceId.n&gt; &lt;Version.s&gt;</var>
 VERSION <var>&lt;Version.s&gt;</var></pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u>
 <ul>
 <li>
@@ -1920,16 +1534,13 @@ The ID can be 1 or 1000 - either will be accepted by the default launcher.
 
 <u>Example:</u>
 <ul>
-</font>
 <pre>
 VERSION ID 1 "1.0 beta"
 VERSION "1.0 beta"</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_string"></a>
 <b>STRING (tSTR)</b><p>
-</font>
 
 <pre class=syntax>
 STRING ID <var>&lt;StringResourceId.n&gt;</var>&nbsp;
@@ -1937,7 +1548,6 @@ STRING ID <var>&lt;StringResourceId.n&gt;</var>&nbsp;
 STRING ID <var>&lt;StringResourceId.n&gt;</var>&nbsp;
 [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;FILE <var>&lt;StringFile.s&gt;</var></pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u> <p>
 <ul>
 <li> 
@@ -1947,30 +1557,25 @@ Character '\r' = 0x0D is replaced by '\n' = 0x0A.
 </ul>
 <u>Example:</u>
 <ul>
-</font>
 <pre>
 STRING ID 100 "This is a very long string that shows escape characters \n" \
               "as well as continued .ss syntax strings"
 STRING ID 101 FILE "string.txt"</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_stringtable"></a>
 <b>STRINGTABLE (tSTL)</b><p>
-</font>
 
 <pre class=syntax>
 STRINGTABLE ID <var>&lt;StringTableResourceId.n&gt;</var>&nbsp;
 [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;PrefixString.ss&gt; </var> ... <var>&lt;String.ss&gt;</var></pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u>
 <ul>
 <li>
 Using the <tt>tSTL</tt> resource: <p>
 
 <b>.. in a LIST</b> <br>
-</font>
 <ul>
 <pre>
 [source.rcp]
@@ -2001,9 +1606,7 @@ MemHandleUnlock(memHandle);
 DmReleaseResource(memHandle); </pre>
 
 </ul>
-<font face="Arial,Helvetica">
 <b>.. to get a single STRING</b> <br>
-</font>
 <ul>
 
 <pre>
@@ -2015,7 +1618,6 @@ STRINGTABLE stringTableTypes
 Char string[32];
 SysStringByIndex(stringTableTypes, 0, string, 32);</pre>
 </ul>
-<font face="Arial,Helvetica">
 </ul>
 <li>
 a limitation of 384 strings apply<p>
@@ -2023,22 +1625,18 @@ a limitation of 384 strings apply<p>
 
 <u>Example:</u>
 <ul>
-</font>
 <pre>
 STRINGTABLE ID 100 "" "One" "Two" "Three" "Four" 
 STRINGTABLE ID 100 "-" "One" "Two" "Three" "Four"</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_categories"></a>
 <b>CATEGORIES (tAIS)</b><p>
-</font>
 
 <pre class=syntax>
 CATEGORIES ID <var>&lt;CategoryResourceId.n&gt;</var>&nbsp;
 [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;Category1.s&gt; ... &lt;Category2.s&gt;</var></pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u>
 <ul>
 <li>The CATEGORIES tag can be used to specify the default category names 
@@ -2049,41 +1647,33 @@ block. <p>
 </ul>
 
 <u>Example:</u>
-</font>
 
 <ul>
 <pre>
 CATEGORIES ID 100 "Unfiled" "Business" "Personal"</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_appiconname"></a>
 <b>APPLICATIONICONNAME (tAIN)</b><p>
-</font>
 
 <pre class=syntax>
 APPLICATIONICONNAME ID <var>&lt;AINResourceId.n&gt;</var>&nbsp;
 [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;ApplicationName.s&gt;</var> </pre>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font>
 
 <ul>
 <pre>
 APPLICATIONICONNAME ID 100 "AlarmHack"</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_appid"></a>
 <b>APPLICATION (APPL)</b><p>
-</font>
 
 <pre class=syntax>
 APPLICATION ID <var>&lt;ApplResourceId.n&gt;</var>&nbsp;
 [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;APPL.s&gt;</var></pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u>
 <ul>
 <li>
@@ -2095,35 +1685,28 @@ which can be registered at
 </ul><p>
 
 <u>Example:</u>
-</font>
 <ul>
 <pre>
 APPLICATION ID 1 "PALM"</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_launchcat"></a>
 <b>LAUNCHERCATEGORY (taic)</b><p>
-</font>
 
 <pre class=syntax>
 LAUNCHERCATEGORY [ID <var>&lt;LaunchCatResourceId.n&gt;</var>]&nbsp;
 [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;APPL.s&gt;</var></pre>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font>
 <ul>
 <pre>
 LAUNCHERCATEGORY "Games"
 LAUNCHERCATEGORY ID 1000 "Games"</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_icon"></a>
 <b>ICON (tAIB)</b><p>
 
-</font>
 <pre class=syntax>
 ICON [ID <var>&lt;IconResourceId.n&gt;</var>]&nbsp;
 [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;IconFileName.s&gt;</var>
@@ -2132,7 +1715,6 @@ ICONFAMILY [ID <var>&lt;IconResourceId.n&gt;</var>]
            [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
            [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]</pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u> <p>
 <ul>
 <li> 
@@ -2156,7 +1738,6 @@ When an alternate ID is used for the ICON resource, bitmap size is not checked.
 </ul>
 
 <u>Example:</u><p>
-</font>
 
 <ul>
 <pre>
@@ -2166,11 +1747,9 @@ ICONFAMILY "icon1bpp.bmp" "icon2bpp.bmp" "icon4bpp.bmp" "icon8bpp.bmp"
 ICONFAMILY "icon1bpp.bmp" "" "" "icon8bpp.bmp" TRANSPARENTINDEX 255</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_smicon"></a>
 <b>SMALLICON (tAIB)</b><p>
 
-</font>
 <pre class=syntax>
 SMALLICON [ID <var>&lt;IconResourceId.n&gt;</var>]&nbsp;
 [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;IconFileName.s&gt;</var>
@@ -2179,7 +1758,6 @@ SMALLICONFAMILY [ID <var>&lt;IconResourceId.n&gt;</var>]
                 [<strong>NOCOLORTABLE</strong>] [COLORTABLE]
                 [TRANSPARENT <var>&lt;r.n&gt;</var> <var>&lt;g.n&gt;</var> <var>&lt;b.n&gt;</var>]&nbsp;[TRANSPARENTINDEX <var>&lt;index.n&gt;</var>]</pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u> <p>
 <ul>
 <li> 
@@ -2203,7 +1781,6 @@ When an alternate ID is used for the SMALLICON resource, bitmap size is not chec
 </ul>
 
 <u>Example:</u><p>
-</font>
 
 <ul>
 <pre>
@@ -2213,10 +1790,8 @@ SMALLICONFAMILY "smic1bpp.bmp" "smic2bpp.bmp" "smic4bpp.bmp" "smic8bpp.bmp"
 SMALLICONFAMILY "smic1bpp.bmp" "" "" "smic8bpp.bmp" TRANSPARENTINDEX 255</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_icon2"></a>
 <b>ICONFAMILYEX (tAIB)</b><p>
-</font>
 
 <pre class=syntax>
 ICONFAMILYEX [ID <var>&lt;BitmapResourceId.n&gt;</var>]
@@ -2234,7 +1809,6 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u> <p>
 <ul>
 <li> 
@@ -2256,7 +1830,6 @@ A <tt>TRANSPARENTINDEX</tt> is not compatible with BPP > 8bpp.
 
 
 <u>Example:</u><p>
-</font>
 
 <ul><pre>
 ICONFAMILYEX
@@ -2269,10 +1842,8 @@ BEGIN
 END
 </pre></ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_smallicon2"></a>
 <b>SMALLICONFAMILYEX (tAIB)</b><p>
-</font>
 
 <pre class=syntax>
 SMALLICONFAMILYEX [ID <var>&lt;BitmapResourceId.n&gt;</var>]
@@ -2290,7 +1861,6 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u> <p>
 <ul>
 <li> 
@@ -2311,7 +1881,6 @@ A <tt>TRANSPARENTINDEX</tt> is not compatible with BPP > 8bpp.
 
 
 <u>Example:</u><p>
-</font>
 
 <ul><pre>
 SMALLICONFAMILYEX
@@ -2324,10 +1893,8 @@ BEGIN
 END
 </pre></ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_bitmap"></a>
 <b>BITMAP (Tbmp) (Tbsb) (Sbmp)</b><p>
-</font>
 
 <pre class=syntax>
 BITMAP       [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var>&nbsp;
@@ -2367,7 +1934,6 @@ BOOTSCREENFAMILY [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&g
              [<strong>NOCOMPRESS</strong>] [COMPRESS] [FORCECOMPRESS]
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u> <p>
 <ul>
 <li>
@@ -2399,7 +1965,6 @@ to use only a standard 16 color palette (running at 4bpp means half as much
 memory to copy). BITMAPCOLOR16 and BITMAPFAMILYSPECIAL can be used with the
 following code: <p>
 
-</font>
 <pre>
 {
   UInt32       depth;
@@ -2432,7 +1997,6 @@ following code: <p>
 </ul>
 
 <u>Example:</u><p>
-</font>
 
 <ul>
 <pre>
@@ -2448,10 +2012,8 @@ BITMAPFAMILY  ID 8 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENT 255 25
 BITMAPFAMILY  ID 9 "bmp1bpp.bmp" "" "" "bmp8bpp.bmp" COMPRESS TRANSPARENTINDEX 255</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_bitmap2"></a>
 <b>BITMAPFAMILYEX (Tbmp) (Sbmp) (Tbsb)</b><p>
-</font>
 
 <pre class=syntax>
 BITMAPFAMILYEX [<var>&lt;ResType.s&gt;</var>] ID <var>&lt;BitmapResourceId.n&gt;</var> 
@@ -2469,7 +2031,6 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u> <p>
 <ul>
 <li>
@@ -2489,7 +2050,6 @@ A <tt>TRANSPARENTINDEX</tt> is not compatible with BPP > 8bpp.
 
 
 <u>Example:</u><p>
-</font>
 
 <ul><pre>
 BITMAPFAMILYEX ID 1000 
@@ -2505,15 +2065,12 @@ BEGIN
 END
 </pre></ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_trap"></a>
 <b>TRAP (TRAP)</b><p>
-</font>
 
 <pre class=syntax>
 TRAP ID <var>&lt;TrapId.n&gt;</var> [VALUE] <var>&lt;TrapNumber.n&gt;</var></pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u>
 <ul>
 <li>
@@ -2527,22 +2084,18 @@ separately with PilRC.
 </ul>
 
 <u>Example:</u>
-</font>
 <ul>
 <pre>
 TRAP ID 1000 VALUE 367</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_font"></a>
 <b>FONT (NFNT)</b><p>
-</font>
 
 <pre class=syntax>
 FONT ID <var>&lt;FontResourceId.n&gt;</var>&nbsp;
 [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;FONTID <var>&lt;FontId.n&gt; &lt;FontFileName.s&gt;</var></pre>
 
-<font face="Arial,Helvetica">
 <u>FONT file format</u><p>
 
 The file containing the font information is plain ASCII. To understand
@@ -2563,10 +2116,8 @@ The FONT header has the following fields: <p>
   <tt>fontType</tt>
   </td>
   <td>
-  <font face="Arial,Helvetica">
   The purpose of this field is unknown. <br>
   The ROM fonts define this value to be 36864.
-  </font>
   </td>
 </tr>
 <tr>
@@ -2574,10 +2125,8 @@ The FONT header has the following fields: <p>
   <tt>maxWidth</tt>
   </td>
   <td>
-  <font face="Arial,Helvetica">
   Defined as "maximum character width". <br>
   If not set it is automatically set to the width of the widest character.
-  </font>
   </td>
 </tr>
 <tr>
@@ -2585,10 +2134,8 @@ The FONT header has the following fields: <p>
   <tt>kernMax</tt>
   </td>
   <td>
-  <font face="Arial,Helvetica">
   Defined as "negative of maximum kern value". <br>
   The purpose of this field is unknown. <br>
-  </font>
   </td>
 </tr>
 <tr>
@@ -2596,10 +2143,8 @@ The FONT header has the following fields: <p>
   <tt>nDescent</tt>
   </td>
   <td>
-  <font face="Arial,Helvetica">
   Defined as "negative of descent". <br>
   The purpose of this field is unknown, and is not used in the ROM fonts.
-  </font>
   </td>
 </tr>
 <tr>
@@ -2607,10 +2152,8 @@ The FONT header has the following fields: <p>
   <tt>fRectWidth</tt>
   </td>
   <td>
-  <font face="Arial,Helvetica">
   Defined as "width of font rectangle". <br>
   If not set it is automatically set to the width of the widest character.
-  </font>
   </td>
 </tr>
 <tr>
@@ -2618,11 +2161,9 @@ The FONT header has the following fields: <p>
   <tt>fRectHeight</tt>
   </td>
   <td>
-  <font face="Arial,Helvetica">
   Defined as "height of font rectangle". <br>
   If not set it is automatically set when the first glyph is defined. <br>
   All characters must be exactly this height.
-  </font>
   </td>
 </tr>
 <tr>
@@ -2630,10 +2171,8 @@ The FONT header has the following fields: <p>
   <tt>ascent</tt>
   </td>
   <td>
-  <font face="Arial,Helvetica">
   The number of rows that make up the ascending part of the glyphs. <br>
   Ascent plus descent equals fRectHeight. This value should be set.
-  </font>
   </td>
 </tr>
 <tr>
@@ -2641,10 +2180,8 @@ The FONT header has the following fields: <p>
   <tt>descent</tt>
   </td>
   <td>
-  <font face="Arial,Helvetica">
   The number of rows that make up the descending part of the glyphs. <br>
   Descent plus ascent equals fRectHeight. This value should be set.
-  </font>
   </td>
 </tr>
 <tr>
@@ -2652,9 +2189,7 @@ The FONT header has the following fields: <p>
   <tt>leading</tt>
   </td>
   <td>
-  <font face="Arial,Helvetica">
   The purpose of this field is unknown.
-  </font>
   </td>
 </tr>
 </table>
@@ -2694,7 +2229,6 @@ GLYPH -1
 Custom <tt>FONT</tt> declarations can only be used on Palm Operating System 3.0 and later.
 <li>
 Palm Operating System 2.0 and before<br>
-</font>
 <ul>
 <pre>
 [source.rcp]
@@ -2705,11 +2239,9 @@ void *font128;
 font128=MemHandleLock(DmGetResource('NFNT', 1000));
 UICurrentFontPtr = font128;</pre>
 </ul>
-<font face="Arial,Helvetica">
 <li>
 Palm Operating System 3.0+<br>
 <ul>
-</font>
 <pre>
 [source.rcp]
 FONT ID 1000 FONTID 128 "font.txt"
@@ -2719,14 +2251,12 @@ FontPtr font128;
 font128=MemHandleLock(DmGetResource('NFNT', 1000));
 FntDefineFont(128, font128);</pre>
 </ul>
-<font face="Arial,Helvetica">
 <li>
 FONT support in PilRC is not complete, and has been reverse engineered.
 </ul>
 <div class="palmInternal">
 <a name="lang_fontindex"></a>
 <b>FONTINDEX (fnti)</b><p>
-</font>
 
 <pre class=syntax>
 FONTINDEX ID <var>&lt;ResId.n&gt;</var>&nbsp;
@@ -2741,14 +2271,12 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
 <li>This resource is system reserved.
 </ul>
 
 <u>Example:</u>
-</font>
 <ul><pre>
 FONTINDEX ID 1000 LOCALE "enUS"
 BEGIN
@@ -2766,7 +2294,6 @@ END
 
 <a name="lang_fontmap"></a>
 <b>FONTMAP (fntm)</b><p>
-</font>
 
 <pre class=syntax>
 FONTMAP ID <var>&lt;ResId.n&gt;</var>&nbsp;[LOCALE <var>&lt;LocaleName.s&gt;</var>]
@@ -2776,14 +2303,12 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
 <li>This resource is system reserved.
 </ul>
 
 <u>Example:</u>
-</font>
 <ul><pre>
 FONTMAP ID 1000 LOCALE "enUS"
 BEGIN
@@ -2796,14 +2321,12 @@ END
 </div>
 <a name="lang_hex"></a>
 <b>HEX</b><p>
-</font>
 
 <pre class=syntax>
 HEX <var>&lt;ResType.s&gt;</var> ID <var>&lt;ResId.n&gt;</var>&nbsp;
 [LOCALE <var>&lt;LocaleName.s&gt;</var>]
     <var>&lt;Byte.n&gt; | &lt;String.s&gt;</var></pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
 <li>
@@ -2812,7 +2335,6 @@ add a 0x00 hex value after the string if needed.
 </ul>
 
 <u>Example:</u>
-</font>
 <ul>
 <pre>
 HEX "junk" ID 1000 
@@ -2820,33 +2342,26 @@ HEX "junk" ID 1000
   0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_data"></a>
 <b>DATA</b><p>
-</font>
 
 <pre class=syntax>
 DATA <var>&lt;ResType.s&gt;</var> ID <var>&lt;ResId.n&gt;</var>&nbsp;
 [LOCALE <var>&lt;LocaleName.s&gt;</var>] <var>&lt;FileName.s&gt;</var></pre>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font>
 <ul>
 <pre>
 DATA "junk" ID 1000 "binary.bin"</pre>
 </ul>
 
 
-<font face="Arial,Helvetica">
 <a name="lang_integer"></a>
 <b>INTEGER (tint)</b><p>
-</font>
 
 <pre class=syntax>
 INTEGER ID <var>&lt;ResId.n&gt;</var>&nbsp;
 [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;[VALUE] <var>&lt;Value.n&gt;</var></pre>
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
 <li>
@@ -2854,17 +2369,14 @@ INTEGER ID <var>&lt;ResId.n&gt;</var>&nbsp;
 </ul>
 
 <u>Example:</u>
-</font>
 <ul>
 <pre>
 INTEGER ID 1000 VALUE 1966 </pre>
 </ul>
 
 
-<font face="Arial,Helvetica">
 <a name="lang_bytelist"></a>
 <b>BYTELIST (BLST)</b><p>
-</font>
 
 <pre class=syntax>
 BYTELIST ID <var>&lt;ResId.n&gt;</var>&nbsp;
@@ -2875,9 +2387,8 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font><pre>
+<pre>
 BYTELIST ID 1000
 BEGIN
 	23
@@ -2888,10 +2399,8 @@ END
 </pre>
 
 
-<font face="Arial,Helvetica">
 <a name="lang_wordlist"></a>
 <b>WORDLIST (wrdl)</b><p>
-</font>
 
 <pre class=syntax>
 WORDLIST ID <var>&lt;ResId.n&gt;</var>&nbsp;
@@ -2902,9 +2411,8 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font><pre>
+<pre>
 WORDLIST ID 1000
 BEGIN
 	23
@@ -2914,10 +2422,8 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <a name="lang_longwordlist"></a>
 <b>LONGWORDLIST (DLST)</b><p>
-</font>
 
 <pre class=syntax>
 LONGWORDLIST ID <var>&lt;ResId.n&gt;</var>&nbsp;
@@ -2928,9 +2434,8 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font><pre>
+<pre>
 LONGWORDLIST ID 1000
 BEGIN
 	123456789
@@ -2941,10 +2446,8 @@ END
 </pre>
 
 
-<font face="Arial,Helvetica">
 <a name="lang_palettetable"></a>
 <b>PALETTETABLE (tclt)</b><p>
-</font>
 
 <pre class=syntax>
 PALETTETABLE ID <var>&lt;ResId.n&gt;</var>
@@ -2954,9 +2457,8 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font><pre>
+<pre>
 PALETTETABLE ID 1000
 BEGIN
 	0x00 0xFF 0xFF 0xFF
@@ -2964,10 +2466,8 @@ BEGIN
 END </pre>
 
 <div class="palmInternal">
-<font face="Arial,Helvetica">
 <a name="lang_feature"></a>
 <b>FEATURE (feat)</b><p>
-</font>
 
 <pre class=syntax>
 FEATURE ID <var>&lt;ResId.n&gt;</var>&nbsp;
@@ -2981,9 +2481,8 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font><pre>
+<pre>
 FEATURE ID 1000
 BEGIN
 	CREATOR "psys"
@@ -2994,10 +2493,8 @@ BEGIN
 END</pre>
 
 
-<font face="Arial,Helvetica">
 <a name="lang_graffitiinputarea"></a>
 <b>GRAFFITIINPUTAREA (silk)</b><p>
-</font>
 
 <pre class=syntax>
 GRAFFITIINPUTAREA ID <var>&lt;GraffitiInputAreaId.n&gt;</var>
@@ -3010,12 +2507,9 @@ BEGIN
   <var>&lt;OBJECTS&gt;</var>
 END </pre>
 
-<font face="Arial,Helvetica">
-Where 
-</font><tt class=syntax><var>&lt;OBJECTS&gt;</var></tt>
-<font face="Arial,Helvetica">
-is one or more of: <p>
+Where <tt class=syntax><var>&lt;OBJECTS&gt;</var></tt> is one or more of:
 
+<p>
 <ul>
 <table>
   <tr>
@@ -3061,7 +2555,6 @@ is one or more of: <p>
 </ul>
 
 <u>Example:</u><p>
-</font>
 <pre>
 GRAFFITIINPUTAREA ID 10000
   VERSION 1
@@ -3083,10 +2576,8 @@ END
 
 
 
-<font face="Arial,Helvetica">
 <a name="lang_countrylocalisation"></a>
 <b>COUNTRYLOCALISATION (cnty)</b><p>
-</font>
 
 <pre class=syntax>
 COUNTRYLOCALISATION ID <var>&lt;ResId.n&gt;</var>&nbsp;
@@ -3114,14 +2605,12 @@ BEGIN
   ...
 END</pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
 <li>This resource is system reserved.
 </ul>
 
 <u>Example:</u>
-</font>
 <pre>
 COUNTRYLOCALISATION ID 10000
 BEGIN
@@ -3160,10 +2649,8 @@ BEGIN
 END</pre>
 
 
-<font face="Arial,Helvetica">
 <a name="lang_locales"></a>
 <b>LOCALES (locs)</b><p>
-</font>
 
 <pre class=syntax>
 LOCALES ID <var>&lt;ResId.n&gt;</var>&nbsp;
@@ -3192,14 +2679,12 @@ BEGIN
   ...
 END</pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
 <li>This resource is system reserved (only after version 4.0).
 </ul>
 
 <u>Example:</u>
-</font>
 <pre>
 LOCALES ID 10000
 BEGIN
@@ -3239,15 +2724,12 @@ BEGIN
 END</pre>
 
 
-<font face="Arial,Helvetica">
 <a name="lang_keyboard"></a>
 <b>KEYBOARD (tkbd)</b><p>
-</font>
 
 <pre class=syntax>
 KEYBOARD ID <var>&lt;ResId.n&gt;</var>
 [LOCALE <var>&lt;LocaleName.s&gt;</var>] VALUE <var>&lt;Value.n&gt;</var></pre>
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul><li>
 Supported Value are:<br>
@@ -3262,19 +2744,15 @@ Supported Value are:<br>
 </ul>
 
 <u>Example:</u>
-</font>
 <ul><pre>
 KEYBOARD ID 1000 VALUE 0
 </pre></ul>
 </div>
-<font face="Arial,Helvetica">
 <a name="lang_midi"></a>
 <b>MIDI (MIDI)</b><p>
-</font>
 
 <pre class=syntax>
 MIDI ID <var>&lt;ResId.n&gt; &lt;string.s&gt;</var></pre>
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul><li>
 This does not convert the file to midi resource. The .aif or .mid file must be 
@@ -3282,16 +2760,13 @@ Palm Midi compliant (see palm documentation for more information).
 </ul>
 
 <u>Example:</u>
-</font>
 <ul><pre>
 MIDI ID 1000 "trompette.mid"
 </pre></ul>
 
 <div class="palmInternal">
-<font face="Arial,Helvetica">
 <a name="lang_Hardsoftbutton"></a>
 <b>HARDSOFTBUTTONDEFAULT (hsbd)</b><p>
-</font>
 
 <pre class=syntax>
 HARDSOFTBUTTONDEFAULT ID <var>&lt;ResId.n&gt;</var>
@@ -3305,16 +2780,14 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
 <li>The number parameter is keyCode.
 <li>This resource is system reserved (only after version 4.0).
 </ul>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font><pre>
+<pre>
 HARDSOFTBUTTONDEFAULT ID 10000
 BEGIN
 	BEGIN
@@ -3349,10 +2822,8 @@ BEGIN
 END</pre>
 </div>
 <div class="palmInternal">
-<font face="Arial,Helvetica">
 <a name="lang_SysAppPrefs"></a>
 <b>SYSAPPLICATIONPREFERENCES (pref)</b><p>
-</font>
 
 <pre class=syntax>
 SYSAPPLICATIONPREFERENCES ID <var>&lt;ResId.n&gt;</var>
@@ -3362,23 +2833,19 @@ SYSAPPLICATIONPREFERENCES ID <var>&lt;ResId.n&gt;</var>
 		MINHEAPSPACE <var>&lt;MinHeapSpace.n&gt;</var>
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
 <li>This resource is system reserved.
 </ul>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font><pre>
+<pre>
 SYSAPPLICATIONPREFERENCES ID 1000 PRIORITY 30 STACKSIZE 0x1000 MINHEAPSPACE 0x1000
 </pre>
 </div>
 <div class="palmInternal">
-<font face="Arial,Helvetica">
 <a name="lang_SearchTable"></a>
 <b>SEARCHTABLE (tSCH)</b><p>
-</font>
 
 <pre class=syntax>
 SEARCHTABLE ID <var>&lt;ResId.n&gt;</var> [LOCALE <var>&lt;LocaleName.s&gt;</var>]
@@ -3431,15 +2898,13 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
 <li>This resource is system reserved.
 </ul>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font><pre>
+<pre>
 SEARCHTABLE ID 32001 LOCALE "jpJP" 
 BEGIN
 	OFFSET_s0 18
@@ -3461,10 +2926,8 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <a name="lang_TextTable"></a>
 <b>TEXTTABLE (ttbl)</b><p>
-</font>
 
 <pre class=syntax>
 TEXTTABLE ID <var>&lt;ResId.n&gt;</var> [LOCALE <var>&lt;LocaleName.s&gt;</var>] [COMPRESS]
@@ -3483,15 +2946,13 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
 <li>This resource is system reserved.
 </ul>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font><pre>
+<pre>
 TEXTTABLE ID 1000 LOCALE "jpJP" COMPRESS
 VERSION 9
 TABLETYPE 2
@@ -3508,10 +2969,8 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <a name="lang_TableList"></a>
 <b>TABLELIST (ttli)</b><p>
-</font>
 
 <pre class=syntax>
 TABLELIST ID <var>&lt;ResId.n&gt;</var> [LOCALE <var>&lt;LocaleName.s&gt;</var>]
@@ -3521,15 +2980,13 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
 <li>This resource is system reserved.
 </ul>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font><pre>
+<pre>
 TABLELIST ID 1000
 BEGIN
 	TYPE "ttbl" ID 32034 INDEX 40
@@ -3548,10 +3005,8 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <a name="lang_CharSetList"></a>
 <b>CHARSETLIST (csli)</b><p>
-</font>
 
 <pre class=syntax>
 CHARSETLIST ID <var>&lt;ResId.n&gt;</var> [LOCALE <var>&lt;LocaleName.s&gt;</var>]
@@ -3561,15 +3016,13 @@ BEGIN
 END
 </pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u><p>
 <ul>
 <li>This resource is system reserved.
 </ul>
 
-<font face="Arial,Helvetica">
 <u>Example:</u>
-</font><pre>
+<pre>
 CHARSETLIST ID 1000
 BEGIN
 	NAME "us-ascii" ID 1
@@ -3586,7 +3039,6 @@ END
 </pre>
 </div>
 <BR>
-<font face="Arial,Helvetica">
 <a name="international"></a>
 <b><u>ID Generation Support</u></b><p>
 
@@ -3603,37 +3055,30 @@ file.  To emulate Constructor's numbering behavior, you could reset the auto ID
 number before each form to the next multiple of 100.<p>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_generateheader"></a>
 <b>GENERATEHEADER</b><p>
-</font>
 
 <pre class=syntax>
 GENERATEHEADER <var>&lt;HeaderFile.s&gt;</var></pre>
 <u>Example:</u>
-</font>
 
 <ul>
 <pre>
 GENERATEHEADER "ApplicationRsc.h"</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_resetautoid"></a>
 <b>RESETAUTOID</b><p>
-</font>
 
 <pre class=syntax>
 RESETAUTOID <var>&lt;IDBase.n&gt;</var></pre>
 <u>Example:</u>
-</font>
 
 <ul>
 <pre>
 RESETAUTOID 1000</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="international"></a>
 <b><u>International Support</u></b><p>
 
@@ -3656,16 +3101,13 @@ defining the contents of your forms. <p>
 </ul>
 
 <u>Example:</u>
-</font>
 <ul>
 <pre>
 pilrc -L FRENCH myscript.rcp res</pre>
 </ul>
 
-<font face="Arial,Helvetica">
 <a name="lang_translation"></a>
 <b>TRANSLATION</b><p>
-</font>
 
 <pre class=syntax>
 TRANSLATION <var>&lt;Language.s&gt;</var>
@@ -3673,17 +3115,13 @@ BEGIN
   <var>&lt;STRINGTRANSLATIONS&gt;</var>
 END</pre>
 
-<font face="Arial,Helvetica">
-Where 
-</font><tt class=syntax><var>&lt;STRINGTRANSLATIONS&gt;</var></tt>
-<font face="Arial,Helvetica">
-is one or more of: <p>
-</font>
+Where <tt class=syntax><var>&lt;STRINGTRANSLATIONS&gt;</var></tt> is one or
+more of:
 
+<p>
 <pre class=syntax>
 <var>&lt;Original.s&gt;</var> = <var>&lt;Translated.ss&gt;</var></pre>
 
-<font face="Arial,Helvetica">
 <u>Notes:</u> <p>
 <ul>
 <li>
@@ -3692,7 +3130,6 @@ translations for it.
 </ul> <p>
 
 <u>Example:</u>
-</font>
 
 <ul>
 <pre>
@@ -3702,7 +3139,6 @@ BEGIN
   "Ring again every" = "Rappel tous les"
 END</pre>
 </ul>
-<font face="Arial,Helvetica">
 
 <a name="knownbugs"></a>
 <b><u>Known Bugs</u></b><p>
@@ -3758,8 +3194,6 @@ following websites: <p>
      A great source of low level Palm Computing Platform information. <br>
      Provided by Darrin Massena. <p>
 </ul>
-
-</font>
 
 </body>
 </html>
