@@ -981,7 +981,12 @@ AddDefineSymbol(void)
     
     if (ltStr == tok.lex.lt)
     {
-        AddSymString(szId, tok.lex.szId);
+		// support a string define that spans multiple lines
+		char *szText;
+		UngetTok();
+		szText = PchGetSzMultiLine("#define string");
+        AddSymString(szId, szText);
+        free(szText);
     }
     else
     {
@@ -1457,14 +1462,17 @@ ParseItm(ITM * pitm,
         CheckGrif(ifGroup);
         pitm->group = WGetConstEx("GroupId");
         break;
-      case rwFont:                              /* Add rwBoldFont, rwLargeFont? */
+      case rwFont:
         CheckGrif(ifFont);
         pitm->font = WGetConstEx("FontId");
         break;
-      case rwFrame:                             /* BUG! other frame types */
+      case rwFrame:
+        CheckGrif(ifFrame);
+        pitm->frame = standardButtonFrame;
+        break;
       case rwNoFrame:
         CheckGrif(ifFrame);
-        pitm->frame = tok.rw == rwFrame;
+        pitm->frame = noButtonFrame;
         break;
       case rwBoldFrame:
         CheckGrif(ifFrame);
@@ -2566,6 +2574,8 @@ FParseObjects(RCPFILE * prcpfile)
   ITM itm;
   int icol;
   FormObjectKind fok;
+  BOOL bSeenEditableField = fFalse;
+  BOOL bSeenGSI = fFalse;
 
   /*
    * add objects to object table until we see a rwEnd 
@@ -2581,7 +2591,10 @@ FParseObjects(RCPFILE * prcpfile)
     switch (rwSav = tok.rw)
     {
       case rwEnd:
+        if (bSeenEditableField && !bSeenGSI)
+          WarningLine("Form has editable field(s) without Graffiti State Indicator");
         return fTrue;
+
       case rwTTL:                               /* Yuck, should just do this in FORM line! */
         obj.title = calloc(1, sizeof(RCFORMTITLE));
         ParseItm(&itm, ifText, if2Null, if3Null, if4Null);
@@ -2590,45 +2603,43 @@ FParseObjects(RCPFILE * prcpfile)
         break;
 
       case rwBTN:                               /* button */
+      case rwREP:                               /* repeating control */
         ParseItm(&itm,
                  ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont |
-                 ifAnchor | ifFrame | ifBigMargin,
-                 if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null,
-                 if4Null);
+                 ifAnchor | ifFrame | ifSmallMargin | ifBigMargin,
+                 if2Graphical | if2BitmapID | if2SelectedBitmapID, 
+                 if3Null, if4Null);
         goto Control;
       case rwPBN:                               /* pushbutton */
         ParseItm(&itm,
                  ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont |
-                 ifAnchor | ifGroup | ifSmallMargin,
-                 if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null,
-                 if4Null);
+                 ifAnchor | ifGroup | ifSmallMargin | ifBigMargin,
+                 if2Graphical | if2BitmapID | if2SelectedBitmapID, 
+                 if3Null, if4Null);
+        itm.frame = noButtonFrame; 
         goto Control;
       case rwCBX:                               /* check box */
         ParseItm(&itm, ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont | 
-            ifAnchor | ifGroup | ifOn | ifBigMargin | ifSmallMargin, 
-            if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null, if4Null);     /* BUG! need to add checkbox extra! */
-        itm.frame = 0;
-        if (itm.graphical)                       /* RMa add some compilation test */
-          ErrorLine("PalmOS 3.5 Graphic control can be a check box control");
+            ifAnchor | ifGroup | ifOn | ifSmallMargin | ifBigMargin, 
+            if2Null, if3Null, if4Null);
+        itm.frame = noButtonFrame;
         goto Control;
       case rwPUT:                               /* popuptrigger */
         ParseItm(&itm, ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont | 
-            ifAnchor | ifBigMargin | ifSmallMargin | ifFrame, 
-            if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null, if4Null);    /* SAME! */
+            ifAnchor | ifSmallMargin | ifBigMargin, 
+            if2Graphical | if2BitmapID | if2SelectedBitmapID, 
+            if3Null, if4Null);
+        itm.frame = noButtonFrame;
         goto Control;
       case rwSLT:                               /* selectortrigger */
         ParseItm(&itm,
                  ifText | ifId | ifRc | ifUsable | ifEnabled | ifFont |
-                 ifAnchor | ifSmallMargin,
-                 if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null,
-                 if4Null);
+                 ifAnchor | ifSmallMargin | ifBigMargin,
+                 if2Graphical | if2BitmapID | if2SelectedBitmapID, 
+                 if3Null, if4Null);
+        itm.frame = noButtonFrame;
         goto Control;
-      case rwREP:                               /* repeating control */
-        ParseItm(&itm,
-                 ifText | ifId | ifRc | ifUsable | ifEnabled | ifFrame |
-                 ifFont | ifAnchor | ifBigMargin,
-                 if2Graphical | if2BitmapID | if2SelectedBitmapID, if3Null,
-                 if4Null);
+
       Control:
         obj.control = calloc(1, sizeof(RCControlType));
         SETPBAFIELD(obj.control, style, rwSav - rwBTN);
@@ -2640,10 +2651,7 @@ FParseObjects(RCPFILE * prcpfile)
         SETPBAFIELD(obj.control, attr.visible, fFalse);
         SETPBAFIELD(obj.control, attr.on, itm.on);
         SETPBAFIELD(obj.control, attr.leftAnchor, itm.leftAnchor);
-        if (rwSav == rwPUT)                      // RMa popup doesn't need frame (PalmRez compliant)
-          SETPBAFIELD(obj.control, attr.frame, fFalse);
-        else
-          SETPBAFIELD(obj.control, attr.frame, itm.frame);
+        SETPBAFIELD(obj.control, attr.frame, itm.frame);
         SETPBAFIELD(obj.control, group, itm.group);
         SETPBAFIELD(obj.control, font, itm.font);
         if (itm.graphical)
@@ -2652,24 +2660,10 @@ FParseObjects(RCPFILE * prcpfile)
           SETPBAFIELD(obj.control, bitmapid, itm.bitmapid);
           SETPBAFIELD(obj.control, selectedbitmapid, itm.selectedbitmapid);
           fok = frmGraphicalControlObj;
-          if ((rwSav != rwBTN) && (itm.frame != noButtonFrame))
-            WarningLine("graphic control doesn't need a frame!!!");
-          if (((itm.bitmapid + itm.selectedbitmapid) == 0) ||   /* RMa add some compilation test */
-              ((itm.bitmapid == itm.selectedbitmapid) && (itm.bitmapid != 0))
-              || ((itm.bitmapid + itm.selectedbitmapid) == itm.bitmapid)
-              || ((itm.bitmapid + itm.selectedbitmapid) ==
-                  itm.selectedbitmapid))
-          {                                      /* one of the param is missing or no bitmaps or are the same */
-            if (itm.bitmapid == 0)
-              WarningLine
-                ("graphic control custom bitmapid is missing");
-            if (itm.selectedbitmapid == 0)
-              WarningLine
-                ("graphic control custom selectedbitmapid is missing");
-            if (itm.bitmapid == itm.selectedbitmapid)
-              WarningLine
-                ("graphic control custom selectedbitmapid & bitmapid are the same");
-            //                                              ErrorLine("fatal error see warning");           // RMa remove fatal error then one bitmap is missing
+          if (itm.bitmapid == 0)
+          {
+             ErrorLine
+                ("Graphic control BITMAPID is missing or zero");
           }
         }
         else
@@ -2713,6 +2707,7 @@ FParseObjects(RCPFILE * prcpfile)
         SETPBAFIELD(obj.field, maxChars, itm.maxChars);
         SETPBAFIELD(obj.field, fontID, itm.font);
         fok = frmFieldObj;
+		if (itm.editable) bSeenEditableField = fTrue;
         break;
 
       case rwPUL:                               /* popuplist */
@@ -2779,9 +2774,12 @@ FParseObjects(RCPFILE * prcpfile)
 
       case rwGSI:                               /* graffitistateindicator */
         ParseItm(&itm, ifPt, if2Null, if3Null, if4Null);
+		if (bSeenGSI)
+		  WarningLine("Form contains multiple Graffiti State Indicators");
         obj.grfState = calloc(1, sizeof(RCFORMGRAFFITISTATE));
         obj.grfState->pos = itm.pt;
         fok = frmGraffitiStateObj;
+		bSeenGSI = fTrue;
         break;
 
       case rwGDT:                               /* gadget */
@@ -2917,6 +2915,7 @@ FParseObjects(RCPFILE * prcpfile)
     if (fok != (FormObjectKind) - 1)
       AddObject(&obj, fok);
   }
+
   return fFalse;
 }
 
