@@ -6462,6 +6462,13 @@ ParseFile(char *szIn,
   else
     SetOutFileDir(szOutDir);
 
+  /*
+   * Predefined symbols: this is the .rcp language, and in particular
+   * it's being read by PilRC.
+   */
+  AddSym("__rcp__", 1);
+  AddSym("__PILRC__", 1);
+
   if (vfTrackDepends)
   {
     strcpy(szDependsFile, szIn);
