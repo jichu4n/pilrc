@@ -365,7 +365,29 @@ FParseId(LEX * plex,
     while ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
            || (ch >= '0' && ch <= '9') || ch == '_');
     lex.szId[cch] = '\000';
+
     *plex = lex;
+
+    plex->size = lsUnspecified;
+    if (ch == '.')
+    {
+      if (*pchLex == 'b' || *pchLex == 'B')
+      {
+       plex->size = lsByte;
+       pchLex += 2;
+      }
+      else if (*pchLex == 'w' || *pchLex == 'W')
+      {
+       plex->size = lsWord;
+       pchLex += 2;
+      }
+      else if (*pchLex == 'l' || *pchLex == 'L')
+      {
+       plex->size = lsLong;
+       pchLex += 2;
+      }
+    }
+
     return fTrue;
   }
   return fFalse;

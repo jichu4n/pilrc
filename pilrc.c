@@ -2404,11 +2404,13 @@ AddObject(RCFORMOBJECT * pobj,
         plt = PlexGetElementAt(&PBAFIELD32(vpfrm, pllt), iobj);
       else
         plt = PlexGetElementAt(&PBAFIELD16(vpfrm, pllt), iobj);
-      if (FIdFormObject(PBAFIELD(plt, objectType), fTrue) &&
+      if (FIdFormObject((FormObjectKind)PBAFIELD(plt, objectType), fTrue) &&
           IdFromObj(pobj,
                     kind) ==
-          IdFromObj((vfLE32 ? &PBAFIELD32(plt, u.object) :
-                     &PBAFIELD16(plt, u.object)), PBAFIELD(plt, objectType)))
+          IdFromObj((vfLE32 ? 
+          	&PBAFIELD32(plt, u.object) :
+            &PBAFIELD16(plt, u.object)),
+            (FormObjectKind)PBAFIELD(plt, objectType)))
       {
         /*
          * dupe labels are ok 
@@ -4560,6 +4562,41 @@ ParseDumpHex()
     OpenOutput(pchResType, id);
     while (FGetTok(&tok))
     {
+      // turn IDs into values
+      if (tok.lex.lt == ltId)
+      {
+        SYM *psym;
+
+        psym = PsymLookup(tok.lex.szId);
+        if (psym == NULL)
+        {
+          if (vfAutoId)
+          {
+            psym = PsymAddSymAutoId(tok.lex.szId);
+          }
+          else
+          {
+            char msg[256];
+            sprintf(msg, "Symbol %s is not defined", tok.lex.szId);
+            ErrorLine(msg);
+          }
+        }
+        
+		if (psym->sVal != NULL)
+		{
+			// treat it like a string of bytes
+	        DumpBytes(psym->sVal, strlen(psym->sVal));
+	        continue;
+		}
+		else
+		{
+	        // make this look like a constant and continue
+	        // into next if statement
+	        tok.lex.lt = ltConst;
+	        tok.lex.val = psym->wVal;
+		}
+      }
+      
       // we have a constant?
       if (tok.lex.lt == ltConst)
       {
@@ -5413,6 +5450,13 @@ ParseCInclude(char *szIncludeFile,
                 break;
               }
 
+            case rwError:
+              {
+                if (!ifdefSkipping)
+                  ErrorLine(szLine);
+                break;
+              }
+
             default:
               {
                 NextLine();
@@ -6043,6 +6087,13 @@ ParseDirectives(RCPFILE * prcpfile)
       /*
        * Add new directives here      
        */
+
+    case rwError:
+      {
+        if (!ifdefSkipping)
+          ErrorLine(szLine);
+        break;
+      }
 
     default:
       if (tok.lex.lt == ltConst)
