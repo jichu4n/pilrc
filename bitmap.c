@@ -775,9 +775,9 @@ BMP_SetBits24bpp(int cx,
 
   cbRow = BMP_CbRow(cx, 24, cBitsAlign);
   pb += cbRow * y + (x * 3);
-  *pb = (PILRC_BYTE) ((bits & 0xFF0000) >> 16);  // red
-  *pb++ = (PILRC_BYTE) ((bits & 0x00FF00) >> 8); // green
-  *pb++ = (PILRC_BYTE) (bits & 0xFF);            // blue
+  pb[0] = (PILRC_BYTE) ((bits & 0xFF0000) >> 16); // red
+  pb[1] = (PILRC_BYTE) ((bits & 0x00FF00) >> 8);  // green
+  pb[2] = (PILRC_BYTE) (bits & 0xFF);             // blue
 }
 
 /**
@@ -802,10 +802,10 @@ BMP_SetBits32bpp(int cx,
 
   cbRow = BMP_CbRow(cx, 32, cBitsAlign);
   pb += cbRow * y + (x * 4);
-  *pb = (PILRC_BYTE) ((bits & 0xFF000000) >> 24);       // alpha
-  *pb++ = (PILRC_BYTE) ((bits & 0x00FF0000) >> 16);     // red
-  *pb++ = (PILRC_BYTE) ((bits & 0x0000FF00) >> 8);      // green
-  *pb++ = (PILRC_BYTE) (bits & 0xFF);            // blue
+  pb[0] = (PILRC_BYTE) ((bits & 0xFF000000) >> 24); // alpha
+  pb[1] = (PILRC_BYTE) ((bits & 0x00FF0000) >> 16); // red
+  pb[2] = (PILRC_BYTE) ((bits & 0x0000FF00) >> 8);  // green
+  pb[3] = (PILRC_BYTE) (bits & 0xFF);               // blue
 }
 
 /**
