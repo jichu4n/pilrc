@@ -1,9 +1,8 @@
-
 /*
  * @(#)lex.h
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2003, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -108,8 +107,5 @@ char *PchLexerPrev(void);
 BOOL FGetLex(LEX * plex,
              BOOL fInComment);
 VOID PrintLex(LEX * plex);
-char *PchParseError();
-VOID ParseError(char *,
-                char *);
 
 #endif                                           /* __lex__ */

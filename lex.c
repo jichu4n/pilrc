@@ -1,9 +1,8 @@
-
 /*
  * @(#)lex.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2003, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -44,9 +43,6 @@ static char *pchLexBuf;
 static char *pchLexPrev;
 static char *pchLex;
 
-static char *_pchParseError;
-static BOOL _fReportErrors;
-
 static int commentDepth;
 
 BOOL
@@ -56,8 +52,6 @@ FInitLexer(char *pch,
   pchLexBuf = pch;
   pchLex = pch;
   pchLexPrev = pch;
-  _pchParseError = NULL;
-  _fReportErrors = fMarkErrors;
   return fTrue;
 }
 
@@ -74,26 +68,6 @@ PchLexerPrev(void)
 {
   return pchLexPrev;
 }
-
-VOID
-ParseError(char *sz1,
-           char *sz2)
-{
-  _pchParseError = PchLexerPrev();
-
-  /*
-   * if (_fReportErrors) 
-   */
-  ErrorLine2(sz1, sz2);
-}
-
-#if 0
-static char *
-PchParseError(void)
-{
-  return _pchParseError;
-}
-#endif
 
 static BOOL
 FSkipWhite(void)
@@ -218,7 +192,6 @@ FParseConst(LEX * plex,
   }
   else if (ch == '\'')
   {
-    char szT[2];
     int cc;
 
     plex->lt = ltConst;
@@ -234,11 +207,7 @@ FParseConst(LEX * plex,
         break;
 
       if (ch < ' ')
-      {
-        szT[0] = (char)ch;
-        szT[1] = '\000';
-        ParseError("Unknown character in '' constant: ", szT);
-      }
+        ErrorLine("Unknown character in '' constant: %c", ch);
 
       plex->val *= 256;
       plex->val += ch;                           /* high-byte first as a guess */
@@ -250,11 +219,7 @@ FParseConst(LEX * plex,
 
     ++pchLex;                                    /* compensate for later -- by caller */
     if (ch != '\'')
-    {
-      szT[0] = (char)ch;
-      szT[1] = '\000';
-      ParseError("Unknown '' constant terminator: ", szT);
-    }
+      ErrorLine("Unknown '' constant terminator: %c", ch);
   }
   else
   {
@@ -358,7 +323,7 @@ FParseId(LEX * plex,
       ch = *pchLex++;
       if (cch == cchIdMax - 1)
       {
-        ParseError("Identifier too long", NULL);
+        ErrorLine("Identifier too long");
         break;
       }
     }
@@ -429,7 +394,6 @@ FGetLex(LEX * plex,
         BOOL fInComment)
 {
   int ch;
-  char szT[4];
   LEX lex;
   char *pchStore;
 
@@ -605,12 +569,12 @@ FGetLex(LEX * plex,
             *pchStore++ = *pchLex++;
           if (pchStore - lex.szId == cchIdMax - 1)
           {
-            ParseError("String too long", NULL);
+            ErrorLine("String too long");
             break;
           }
           if (*pchLex == 0)
           {
-            ParseError("Unterminated string", NULL);
+            ErrorLine("Unterminated string");
             break;
           }
         }
@@ -626,11 +590,7 @@ FGetLex(LEX * plex,
         }
         else
         {
-          szT[0] = '\'';
-          szT[1] = (char)ch;
-          szT[2] = '\'';
-          szT[3] = '\000';
-          ParseError("Unknown character: ", szT);
+          ErrorLine("Unknown character: '%c'", ch);
         }
         pchLex--;
         break;
