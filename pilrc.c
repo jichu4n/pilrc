@@ -5878,25 +5878,94 @@ endOfClass:
   vfhIn = fhInSav;
 }
 
+static BOOL
+OverwriteIncFile( const char *inc_fn, const char *tmp_fn )
+{
+	FILE *inc_file, *tmp_file;
+	int inc_char, tmp_char;
+	BOOL overwrite = 1;
+
+	if ( ! inc_fn || ! tmp_fn )
+		return 1;
+
+	inc_file = fopen( inc_fn, "r" );
+	tmp_file = fopen( tmp_fn, "r" );
+	if ( inc_file && tmp_file )
+	{
+		do
+		{
+			inc_char = getc( inc_file );
+			tmp_char = getc( tmp_file );
+			if ( inc_char == EOF || tmp_char == EOF )
+			{
+				overwrite = inc_char != tmp_char;
+				break;
+			}
+		} while ( inc_char == tmp_char );
+	}
+	if ( inc_file )
+		fclose( inc_file );
+	if ( tmp_file )
+		fclose( tmp_file );
+
+	return overwrite;
+}
+
 static void
 WriteIncFile(char *szFile)
 {
-  FILE *fh;
-  SYM *psym;
+	FILE *temp_file;
+	SYM *psym;
+	char temp_name[FILENAME_MAX] = { 0 };
 
-  fh = fopen(szFile, "wt");
-  if (fh == NULL)
-    Error3("Unable to open include file:", szFile, strerror(errno));
-  if (!vfQuiet)
-    printf("writing include file: %s\n", szFile);
-  fprintf(fh, "/* pilrc generated file.  Do not edit!*/\n");
-  for (psym = psymFirst; psym != NULL; psym = psym->psymNext)
-  {
-    if (psym->fAutoId)
-      fprintf(fh, "#define %s %d\n", psym->sz, psym->wVal);
-  }
-  fclose(fh);
+	strncpy( temp_name, szFile, sizeof(temp_name) );
+	strcat( temp_name, ".tmp" );
+
+	temp_file = fopen(temp_name, "w");
+	if (temp_file == NULL)
+	{
+		Error3("Unable to open include file for writing:", szFile, strerror(errno));
+		return;
+	}
+
+	fprintf(temp_file, "/* pilrc generated file.  Do not edit!*/\n");
+
+	for (psym = psymFirst; psym != NULL; psym = psym->psymNext)
+	{
+		if (psym->fAutoId)
+		{
+			fprintf(temp_file, "#define %s %d\n", psym->sz, psym->wVal);
+		}
+	}
+	fclose( temp_file );
+
+	if ( OverwriteIncFile( szFile, temp_name ) )
+	{
+		/* note: CodeWarrior PilRC command line adapter depends on 
+		 * the next phrase's exact wording to detect that an include 
+		 * file was written, so don't remove this message or change 
+		 * it without informing Metrowerks - BLC */
+
+		if ( ! vfQuiet )
+		    printf("writing include file: %s\n", szFile);
+		if ( remove( szFile ) != 0 )
+			Error3( "Cannot remove existing include file: ", szFile, strerror(errno) );
+		if ( rename( temp_name, szFile ) != 0 )
+			Error3( "Cannot rename temporary include file: ", szFile, strerror(errno) );
+	}
+	else
+	{
+		if ( ! vfQuiet )
+		{
+			printf( "No changes made to include file: %s\n", szFile );
+		}
+		if ( remove( temp_name ) != 0 )
+		{
+			Error3( "Cannot remove temporary include file: ", temp_name, strerror(errno) );
+		}
+	}
 }
+
 
 static VOID
 InitRcpfile(RCPFILE * prcpfile,
