@@ -1,3 +1,5 @@
+/* Test bitmap density code.  */
+
 ICONFAMILYEX
 BEGIN
     BITMAP "images/icon-lg-1.bmp" BPP 1 
