@@ -2718,6 +2718,7 @@ void DumpBitmap(const char *fileName,
 {
   PILRC_BYTE *pBMPData;
   const char *pchExt;
+  char *pathName;
   FILE *pFile;
   long size;
   RCBITMAP rcbmp;
@@ -2783,7 +2784,7 @@ void DumpBitmap(const char *fileName,
                  (bitmaptype == rwBitmapColor32k));
 
   // determine the size of the resource to load
-  fileName = FindAndOpenFile(fileName, "rb", &pFile);
+  pathName = FindAndOpenFile(fileName, "rb", &pFile);
   if (pFile == NULL)
     ErrorLine("Could not find Resource %s.", fileName);
 
@@ -2794,15 +2795,15 @@ void DumpBitmap(const char *fileName,
   // alocate memory and load the resource in
   pBMPData = malloc(size);
   if (pBMPData == NULL)
-    ErrorLine("Resource %s too big to fit in memory", fileName);
+    ErrorLine("Resource %s too big to fit in memory", pathName);
   fread(pBMPData, 1, size, pFile);
   fclose(pFile);
 
   // obtain the file extension
-  pchExt = strrchr(fileName, '.');
-  if ((strlen(fileName) < 5) || (pchExt == NULL))
+  pchExt = strrchr(pathName, '.');
+  if ((strlen(pathName) < 5) || (pchExt == NULL))
   {
-    BMP_InvalidExtension(fileName);
+    BMP_InvalidExtension(pathName);
   }
   pchExt++;
 
@@ -2841,9 +2842,10 @@ void DumpBitmap(const char *fileName,
   }
   else
   {
-    BMP_InvalidExtension(fileName);
+    BMP_InvalidExtension(pathName);
   }
 
   // clean up
   free(pBMPData);
+  free(pathName);
 }

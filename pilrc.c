@@ -1108,7 +1108,7 @@ ParsePaletteFile(char *pchFileName,
   int i = 0;
   int r, g, b;
 
-  FindAndOpenFile(pchFileName, "rb", &fh);
+  free(FindAndOpenFile(pchFileName, "rb", &fh));
   if (fh == NULL)
     ErrorLine("Unable to open palette file %s", pchFileName);
 
@@ -3723,7 +3723,7 @@ ParseDumpString()
 
     pchString = malloc(szMultipleLineMaxLength);
     GetExpectLt(&tok, ltStr, "String filename");
-    FindAndOpenFile(tok.lex.szId, "rt", &fh);
+    free(FindAndOpenFile(tok.lex.szId, "rt", &fh));
 
     if (fh == NULL)
       ErrorLine("Unable to open String file %s", tok.lex.szId);
@@ -4837,7 +4837,7 @@ ParseDumpData()
         char *data;
         FILE *fh;
 
-        FindAndOpenFile(pchFileName, "rb", &fh);
+        free(FindAndOpenFile(pchFileName, "rb", &fh));
         if (fh == NULL)
           ErrorLine("Unable to open Data file %s", pchFileName);
 
@@ -5180,7 +5180,7 @@ ParseDumpMidi(void)
     char *pData;
     int fileSize;
 
-    FindAndOpenFile(pFileName, "rb", &pFh);      /* open file in read and binary */
+    free(FindAndOpenFile(pFileName, "rb", &pFh));      /* open file in read and binary */
     if (pFh == NULL)
       ErrorLine("Unable to open midi file %s", pFileName);
 
@@ -5523,7 +5523,9 @@ OpenInputFile(const char *szIn)
 {
   extern char szInFile[];
 
-  strcpy(szInFile, FindAndOpenFile(szIn, "rt", &vfhIn));
+  char *szFullIn = FindAndOpenFile(szIn, "rt", &vfhIn);
+  strcpy(szInFile, szFullIn);
+  free(szFullIn);
   iline = 0;
 }
 

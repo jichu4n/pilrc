@@ -75,7 +75,7 @@ int (*pfnChkCode) (unsigned char *cp,
  * Some globals to keep track of things for error reporting 
  */
 
-static const char *filename;
+static char *filename;
 static unsigned int lineno;
 int vfontType;
 
@@ -602,6 +602,8 @@ DumpFont(const char *pchFileName,
   // dump CharInfoTag
   DumpBytes(&fntOW[fntNo][header[h_firstChar]],
             (header[h_lastChar] - header[h_firstChar] + 1 + missingChar) * 2);
+
+  free(filename);
 }
 
 
@@ -906,6 +908,8 @@ DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * f
         EmitW(0x0000);
       free(bitmap[x]);
     }
+
+    free(filename);
 
     // next entry
     fontFamilyEntries++;
