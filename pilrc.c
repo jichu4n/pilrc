@@ -5937,10 +5937,7 @@ WriteIncFile(char *szFile)
 {
 	FILE *temp_file;
 	SYM *psym;
-	char temp_name[FILENAME_MAX] = { 0 };
-
-	strncpy( temp_name, szFile, sizeof(temp_name) );
-	strcat( temp_name, ".tmp" );
+	char *temp_name = MakeFilename("%s.tmp", szFile);
 
 	temp_file = fopen(temp_name, "w");
 	if (temp_file == NULL)
@@ -5981,6 +5978,8 @@ WriteIncFile(char *szFile)
 		}
 		(void) remove( temp_name );
 	}
+
+	free(temp_name);
 }
 
 
