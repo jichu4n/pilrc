@@ -1511,7 +1511,7 @@ RCPFILE;
        rwEnabled, rwDisabled, rwUsable, rwNonUsable, rwLeftAnchor,
        rwExtended, rwNonExtended,                /* MBr add: gadget */
        rwRightAnchor, rwGroup, rwFont,
-       rwFrame, rwNoFrame, rwBoldFrame, rwVertical, rwGraphical,
+       rwFrame, rwNoFrame, rwBoldFrame, rwRectFrame, rwVertical, rwGraphical,
 
        rwEditable, rwNonEditable, rwUnderlined, rwSingleLine,
        rwMultipleLines, rwDynamicSize, rwLeftAlign, rwHasScrollBar,
@@ -1813,6 +1813,7 @@ RWT;
        {"frame", NULL, rwFrame},
        {"noframe", NULL, rwNoFrame},
        {"boldframe", NULL, rwBoldFrame},
+       {"rectframe", NULL, rwRectFrame},
 
        {"vertical", NULL, rwVertical},
        {"graphical", NULL, rwGraphical},

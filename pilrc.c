@@ -1330,6 +1330,10 @@ ParseItm(ITM * pitm,
         CheckGrif(ifFrame);
         pitm->frame = boldButtonFrame;
         break;
+      case rwRectFrame:
+        CheckGrif(ifFrame);
+        pitm->frame = rectangleButtonFrame;
+        break;
       case rwDisabled:
       case rwEnabled:
         CheckGrif(ifEnabled);
