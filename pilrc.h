@@ -119,7 +119,7 @@ EndEnum AlertType;
 
 Enum(FormObjectKind)
 {
-  frmFieldObj, frmControlObj, frmListObj, frmTableObj, frmBitmapObj, frmLineObj, frmFrameObj, frmRectangleObj, frmLabelObj, frmTitleObj, frmPopupObj, frmGraffitiStateObj, frmGadgetObj, frmScrollbarObj, frmSliderObj, /* RMa add support sliders */
+  frmFieldObj, frmControlObj, frmListObj, frmTableObj, frmBitmapObj, frmLineObj, frmFrameObj, frmRectangleObj, frmLabelObj, frmTitleObj, frmPopupObj, frmGraffitiStateObj, frmGadgetObj, frmScrollBarObj, frmSliderObj, /* RMa add support sliders */
     frmGraphicalControlObj                       /* RMa add support graphical control */
 }
 
@@ -2562,7 +2562,7 @@ ITM;
 #define if2AutoShift			0x00000080
 #define if2Scrollbar			0x00000100
 #define if2Numeric				0x00000200
-/* unused                       0x00000400 */
+#define if2GSI                  0x00000400 /* used with ifPt for GSI size calculation */
 #define if2Type 				0x00000800
 #define if2File 				0x00001000
 #define if2CreatorID			0x00002000
@@ -2732,6 +2732,8 @@ extern BOOL vfStripNoLocRes;
 #define maxCategories  16
 #define categoryLength 16
 #define maxSafeResourceSize 65000
+#define	kGsiWidth      9
+#define kGsiHeight     10
 
 void ParseToFinalEnd(void);
 BOOL ObjectDesiredInOutputLocale(const ITM * itm);

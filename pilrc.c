@@ -1176,10 +1176,14 @@ WResolveK(const K * pk,
       
       if (fHoriz)
       {
+        if (pitm->grif2 & if2GSI)
+        {
+        	wVal = kGsiWidth;
+        }
         /*
          * added 2.8p8 - "auto" should give longest width, not first 
          */
-        if (pitm->grif & ifMultText)
+        else if (pitm->grif & ifMultText)
         {
           char *text = pitm->text;
 
@@ -1204,7 +1208,13 @@ WResolveK(const K * pk,
           wVal += 2 * dxObjBigMargin;
       }
       else
-        wVal = DyFont(pitm->font) + 1;
+      {
+        if (pitm->grif2 & if2GSI)
+          wVal = kGsiHeight;
+        else
+          wVal = DyFont(pitm->font) + 1;
+      }
+      
       if (pk->kt == ktAuto)
         return wVal;
       else /* pk->kt == ktAutoGreaterThan */
@@ -2381,7 +2391,7 @@ FIdFormObject(FormObjectKind kind,
     case frmListObj:
     case frmTableObj:
 
-    case frmScrollbarObj:
+    case frmScrollBarObj:
     case frmSliderObj:
     case frmGadgetObj:
       return fTrue;
@@ -2421,7 +2431,7 @@ IdFromObj(const RCFORMOBJECT * pobj,
       return PBAFIELD(pobj->list, id);
     case frmTableObj:
       return PBAFIELD(pobj->table, id);
-    case frmScrollbarObj:
+    case frmScrollBarObj:
       return pobj->scrollbar->id;
     case frmGadgetObj:
       return pobj->gadget->id;
@@ -2780,7 +2790,7 @@ FParseObjects(RCPFILE * prcpfile)
         break;
 
       case rwGSI:                               /* graffitistateindicator */
-        ParseItm(&itm, ifPt, if2Null, if3Null, if4Null);
+        ParseItm(&itm, ifPt, if2GSI, if3Null, if4Null);
 		if (bSeenGSI)
 		  WarningLine("Form contains multiple Graffiti State Indicators");
         obj.grfState = calloc(1, sizeof(RCFORMGRAFFITISTATE));
@@ -2850,7 +2860,7 @@ FParseObjects(RCPFILE * prcpfile)
         obj.scrollbar->minValue = itm.minValue;
         obj.scrollbar->maxValue = itm.maxValue;
         obj.scrollbar->pageSize = itm.pageSize;
-        fok = frmScrollbarObj;
+        fok = frmScrollBarObj;
         break;
 
       case rwSLD:                               /* Slider or Slider feedback */
@@ -4906,15 +4916,15 @@ ParseNumbers(unsigned long **bufferp)
 
   while (FGetTok(&tok) && tok.rw != rwEnd)
     if (tok.lex.lt == ltConst)
+  {
+    if (n >= bufsize)
     {
-      if (n >= bufsize)
-      {
-	bufsize = (bufsize == 0)? 64 : 2 * bufsize;
-	buffer = realloc (buffer, bufsize * sizeof (unsigned long));
-      }
+      bufsize = (bufsize == 0)? 64 : 2 * bufsize;
+      buffer = realloc (buffer, bufsize * sizeof (unsigned long));
+    }
 
       buffer[n++] = tok.lex.val;
-    }
+  }
 
   *bufferp = buffer;
   return n;
