@@ -5834,6 +5834,25 @@ ParseRcpFile(char *szRcpIn,
 }
 
 /*-----------------------------------------------------------------------------
+|	ParseLineDirective
+-------------------------------------------------------------JohnM-----------*/
+static void
+ParseLineDirective(BOOL fnameRequired)
+{
+  // The constant given is for the *following* line
+  iline = WGetConst("Line number constant") - 1;
+
+  if (fnameRequired || FPeekTok()->lex.lt == ltStr)
+  {
+    extern char szInFile[];
+
+    char *fname = PchGetSz("Input filename");
+    strcpy(szInFile, fname);
+    free(fname);
+  }
+}
+
+/*-----------------------------------------------------------------------------
 |	ParseDirectives
 -------------------------------------------------------------DAVE------------*/
 static void
@@ -5988,12 +6007,28 @@ ParseDirectives(RCPFILE * prcpfile)
         break;
       }
 
+    case rwLine:
+      {
+	// #line LINENO [FNAME]
+        ParseLineDirective(fFalse);
+        break;
+      }
+
       /*
        * Add new directives here      
        */
 
     default:
-      ErrorLine2("directive not supported (try #include):", tok.lex.szId);
+      if (tok.lex.lt == ltConst)
+      {
+	// # LINENO FNAME [FLAG...]
+        UngetTok();
+        ParseLineDirective(fTrue);
+        // Skip any flags at the end of the linemarker
+        NextLine();
+      }
+      else
+        ErrorLine2("directive not supported (try #include):", tok.lex.szId);
       break;
   }
 

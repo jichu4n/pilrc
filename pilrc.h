@@ -1845,6 +1845,7 @@ RCPFILE;
        rwIfndef,
        rwElse,
        rwEndif,
+       rwLine,
        rwExtern,
        rwIcon,
        //      rwIconGrey,
@@ -2165,6 +2166,7 @@ RWT;
        {"ifndef", NULL, rwIfndef},
        {"else", NULL, rwElse},
        {"endif", NULL, rwEndif},
+       {"line", NULL, rwLine},
        {"extern", NULL, rwExtern},
 
        {"icon", NULL, rwIcon},
