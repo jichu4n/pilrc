@@ -2,7 +2,7 @@
  * @(#)lex.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2005, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
