@@ -16,7 +16,7 @@ PilRC
 </center> <p>
 
 <pre>
-What's new in 3.2 (Monday, 9 February 2004)
+What's new in 3.2 (Friday, 9 July 2004)
 -----------------
 o Fixed bug introduced in 3.0 with frame values for popup triggers that
   caused repainting problems.
@@ -29,6 +29,11 @@ o Added NOGRAFFITISTATEINDICATOR keyword that is used to tell PilRC
 o Added "#undef FOO".
 o Regardless of the native line termination, accepts text files with either
   native, DOS (CR-LF), Unix (LF), or Macintosh (CR) line termination.
+o Changed parsing of WORDLIST, LONGWORDLIST, and BYTELIST to allow
+  expressions.  If you need to specify a negative number, you can use
+  parenthesis around the number to prevent the minus sign from being
+  interpreted incorrectly.
+o Fixed relative positioning based on the size of a Graffiti State Indicator
 
 What's new in 3.1 (Wednesday, 31 December 2003)
 -----------------
