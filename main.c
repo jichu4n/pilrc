@@ -475,6 +475,13 @@ main(int cArg,
         continue;
     }
 
+    if (FSzEqI(rgszArg[i], "--version"))
+    {
+        // Don't parse any more options after this one,
+	// and, in particular, don't try to do any work
+        return 0;
+    }
+
     // unknown argument?
     Usage();
   }
