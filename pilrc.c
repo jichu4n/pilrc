@@ -5521,11 +5521,7 @@ ParseNavigation(void)
 static VOID
 OpenInputFile(const char *szIn)
 {
-  extern char szInFile[];
-
-  char *szFullIn = FindAndOpenFile(szIn, "rt", &vfhIn);
-  strcpy(szInFile, szFullIn);
-  free(szFullIn);
+  szInFile = FindAndOpenFile(szIn, "rt", &vfhIn);
   iline = 0;
 }
 
@@ -5553,10 +5549,9 @@ ParseCInclude(char *szIncludeFile,
 {
   // LDu 31-8-2001 : deleted// FILE *fhInSav;
   // LDu 31-8-2001 : deleted// int ilineSav;
-  char szInFileSav[256];
+  char *szInFileSav;
   char szId[256];
   int wIdVal;
-  extern char szInFile[];
 
   /*
    * Variables to support #ifdef/#else/#endif 
@@ -5579,7 +5574,7 @@ ParseCInclude(char *szIncludeFile,
 
   // LDu 31-8-2001 : deleted// fhInSav = vfhIn;
   // LDu 31-8-2001 : deleted// ilineSav = iline;
-  strcpy(szInFileSav, szInFile);
+  szInFileSav = szInFile;
 
   OpenInputFile(szIncludeFile);
 
@@ -5800,7 +5795,8 @@ ParseCInclude(char *szIncludeFile,
     }
   }
   fclose(vfhIn);
-  strcpy(szInFile, szInFileSav);
+  free(szInFile);
+  szInFile = szInFileSav;
   // LDu 31-8-2001 : deleted//iline = ilineSav;
   // LDu 31-8-2001 : deleted//vfhIn = fhInSav;
 
@@ -5830,10 +5826,9 @@ ParseJavaInclude(char *szIncludeFile)
 {
   FILE *fhInSav;
   int ilineSav;
-  char szInFileSav[256];
+  char *szInFileSav;
   char szId[256];
   int wIdVal;
-  extern char szInFile[];
 
   /*
    * tok contains filename 
@@ -5841,7 +5836,7 @@ ParseJavaInclude(char *szIncludeFile)
 
   fhInSav = vfhIn;
   ilineSav = iline;
-  strcpy(szInFileSav, szInFile);
+  szInFileSav = szInFile;
 
   OpenInputFile(szIncludeFile);
 
@@ -5897,7 +5892,8 @@ ParseJavaInclude(char *szIncludeFile)
 endOfClass:
 
   fclose(vfhIn);
-  strcpy(szInFile, szInFileSav);
+  free(szInFile);
+  szInFile = szInFileSav;
   iline = ilineSav;
   vfhIn = fhInSav;
 }
@@ -6018,7 +6014,6 @@ ParseRcpFile(const char *szRcpIn,
 
   // LDu 31-8-2001 : start modification
   //declare a static variable to limit the depth
-  extern char szInFile[];
   static int depth = 0;
 
   depth++;
@@ -6268,7 +6263,10 @@ ParseRcpFile(const char *szRcpIn,
   // LDu 31-8-2001 : start modification
   // restore the previous global values 
   if (prv_szInfile)
-    strcpy(szInFile, prv_szInfile);
+  {
+    free(szInFile);
+    szInFile = prv_szInfile;
+  }
   iline = prv_iline;
   if (prv_vfhIn)
     vfhIn = prv_vfhIn;
@@ -6290,11 +6288,8 @@ ParseLineDirective(BOOL fnameRequired)
 
   if (fnameRequired || FPeekTok()->lex.lt == ltStr)
   {
-    extern char szInFile[];
-
-    char *fname = PchGetSz("Input filename");
-    strcpy(szInFile, fname);
-    free(fname);
+    free(szInFile);
+    szInFile = PchGetSz("Input filename");
   }
 }
 
@@ -6309,11 +6304,6 @@ ParseDirectives(RCPFILE * prcpfile)
 {
   TOK tok;
   char szId[256];
-
-  // LDu 31-8-2001 : start modification //
-  extern char szInFile[];
-
-  // LDu 31-8-2001 : end modification //
 
   FGetTok(&tok);
   /*lint -e{788}*/

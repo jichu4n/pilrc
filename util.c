@@ -51,7 +51,7 @@
  * Globals 
  */
 FILE *vfhIn;
-char szInFile[256];
+char *szInFile = NULL;
 char rgbZero[16];
 BOOL vfErr;
 

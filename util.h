@@ -127,6 +127,7 @@ void FreeDependsList(void);
 
 extern char rgbZero[];
 extern FILE *vfhIn;
+extern char *szInFile;
 
 #ifdef CW_PLUGIN
 // XXX ncr
