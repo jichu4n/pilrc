@@ -2750,7 +2750,7 @@ DumpBitmap(char *fileName,
   {
     printf("DumpBitmap(\"%s\", ", fileName);
     if (isIcon)
-      printf ("icon #?, "); //printf("icon #%d, ", isIcon);
+      printf("icon #%d, ", isIcon);
     else
       printf("not-icon, ");
     switch (compress)
@@ -2865,7 +2865,7 @@ DumpBitmap(char *fileName,
   else if (FSzEqI(pchExt, "pbm") || FSzEqI(pchExt, "pgm")
            || FSzEqI(pchExt, "ppm") || FSzEqI(pchExt, "pnm"))
   {
-	BMP_ConvertPNMBitmap(&rcbmp, pBMPData, size, bitmaptype, colortable,
+    BMP_ConvertPNMBitmap(&rcbmp, pBMPData, size, bitmaptype, colortable,
                          transparencyData);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse,
                            directColor, multibit, bootScreen, density,
