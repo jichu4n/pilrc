@@ -7,7 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include <windows.h>
+#include "afxres.h"
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -80,14 +80,17 @@ END
 // Dialog
 //
 
-IDD_ABOUT DIALOG DISCARDABLE  0, 0, 186, 95
+IDD_ABOUT DIALOG DISCARDABLE  0, 0, 192, 95
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About"
 FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,64,66,50,14
-    LTEXT           "PilrcUI by Wes Cherry (wesc@ricochet.net)",-1,
-                    25,16,137,8
+    DEFPUSHBUTTON   "OK",IDOK,71,66,50,14
+    LTEXT           "PilRCUI v2.5b5",-1,71,16,50,8
+    LTEXT           "Copyright 1997-1999 Wes Cherry (wesc@ricochet.net)",-1,
+                    10,27,172,8
+    LTEXT           "Copyright 2000 Aaron Ardiri (ardiri@palmgear.com)",-1,
+                    17,39,158,8
 END
 
 
@@ -102,19 +105,12 @@ BEGIN
     IDD_ABOUT, DIALOG
     BEGIN
         LEFTMARGIN, 7
-        RIGHTMARGIN, 179
+        RIGHTMARGIN, 185
         TOPMARGIN, 7
         BOTTOMMARGIN, 88
     END
 END
 #endif    // APSTUDIO_INVOKED
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Bitmap
-//
-
 
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////

@@ -839,6 +839,7 @@ typedef struct _tok
 extern BOOL vfWinGUI;
 extern BOOL vfAutoId;
 extern BOOL vfQuiet;
+extern BOOL vfVSErrors;
 extern BOOL vfCheckDupes;
 extern BOOL vfRTL;
 extern char *szLanguage;

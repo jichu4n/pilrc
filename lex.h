@@ -42,6 +42,7 @@ typedef int LT;
 #define ltStr      51
 #define ltCComment 52
 #define ltEndCComment 53
+#define ltPoint    54
 
 
 typedef int VAL;

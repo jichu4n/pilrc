@@ -1,5 +1,5 @@
 AC_INIT(pilrc.c)
-AM_INIT_AUTOMAKE(pilrc, 2.5b4)
+AM_INIT_AUTOMAKE(pilrc, 2.5b5)
 
 AC_PROG_CC
 AC_PROG_RANLIB

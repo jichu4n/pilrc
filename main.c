@@ -58,6 +58,7 @@ Usage(void)
         "        -Fh          Use Hebrew font widths\n"
         "        -rtl         Right to left support\n"
         "        -q           Less noisy output\n"
+        "        -V           Generate M$ (VS-type) error/warning output\n"
   );
 
   exit(1);
@@ -82,7 +83,7 @@ main(int  cArg,
   int  fontType;
 	
   // display the (c) string
-  printf("PilRC release v2.5b4\n");
+  printf("PilRC v2.5b5\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000      Aaron Ardiri (ardiri@palmgear.com)\n");
 
@@ -139,6 +140,12 @@ main(int  cArg,
     // be quiet?
     if (FSzEqI(rgszArg[i], "-q")) {
       vfQuiet = fTrue;
+      continue;
+    }
+
+    // M$ (VS-type) error/warning ouput (regis_nicolas@palm.com)
+    if (FSzEqI(rgszArg[i], "-V")) {
+      vfVSErrors = fTrue;
       continue;
     }
 			

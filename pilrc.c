@@ -52,8 +52,10 @@
 -------------------------------------------------------------WESC------------*/
 /* Are we PilRCUI -- this was an attempt to merge pilrc and pilrcui */
 BOOL vfWinGUI;
-/* Quiet ouptput */
+/* Quiet output */
 BOOL vfQuiet;
+/* M$ (VS-type) error/warning output */
+BOOL vfVSErrors;
 /* Translations */
 char *szLanguage;
 TE *pteFirst;
@@ -2339,7 +2341,14 @@ void ParseDumpVersion()
 	int id;
 	char *pchVersion;
 
-	id = WGetId("Version ResourceId", fFalse);
+	// default version ID is 1 (it dont work otherwise) :P
+	id = 1;
+	if (FGetTok(&tok)) {
+		UngetTok();
+		if (tok.rw == rwId) 
+			id = WGetId("Version ResourceId", fFalse);
+	}
+
 	pchVersion = PchGetSz("Version Text");
 	OpenOutput("tver", id);
 	DumpBytes(pchVersion, strlen(pchVersion)+1);

@@ -21,6 +21,7 @@
  * 08-Mar-97  Wes Cherry       removed windows dependancies
  * 07-Feb-00  Aaron Ardiri     color bitmap resources integrated
  * 13-Feb-00  Aaron Ardiri     fixed RGB -> Index for MASK images
+ * 07-Jun-00  Holger Klawitter added PNM support
  *
  * PilRC is open-source,  that means that as a  developer can take 
  * part in the development of the software. Any modifications (bug
@@ -138,7 +139,7 @@ typedef struct tagBITMAPINFO
  */
 int PalmPalette1bpp[2][3] = 
 {
-  {   0,   0,   0}, { 255, 255, 255 }
+  { 255, 255, 255}, {   0,   0,   0 }
 };
 
 /*
@@ -146,7 +147,7 @@ int PalmPalette1bpp[2][3] =
  */
 int PalmPalette2bpp[4][3] = 
 {
-  { 255, 255, 255}, { 192, 192, 192}, { 128, 128, 128 }, { 0, 0, 0 }
+  { 255, 255, 255}, { 192, 192, 192}, { 128, 128, 128 }, {   0,   0,   0 }
 };
 
 /*
@@ -585,7 +586,7 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
          if (BMP_RGBToColorIndex(pbmi->bmiColors[0].rgbRed,
                                  pbmi->bmiColors[0].rgbGreen,
                                  pbmi->bmiColors[0].rgbBlue,
-                                 PalmPalette1bpp, 2) != 0) {
+                                 PalmPalette1bpp, 2) != 1) {
  
            // 0 and 1 are wrong way around, invert them
            for (i=0; i<LLoadX86(bmi.biSizeImage); i++) {
@@ -1347,7 +1348,7 @@ BMP_ConvertPNMBitmap(RCBITMAP   *rcbmp,
   type = (cb >= 2 && pb[0] == 'P')? pb[1] - '0' : -1;
 
   if (type < 1 || type > 6)
-    ErrorLine ("Not a PBM/PGM/PPM file.");
+    ErrorLine ("Not a PBM/PNM/PGM/PPM file.");
 
   pnm.pb = pb;
   pnm.pblim = pb + cb;
@@ -1532,7 +1533,7 @@ BMP_InvalidExtension(char *fileName)
   char pchLine[300];
   sprintf(pchLine, 
           "Bitmap file extension not recognized for file %s\n"
-          "\tSupported extensions: .BMP, .pbitm, .xbm and .pbm",
+          "\tSupported extensions: .BMP, .pbitm, .xbm and .pbm/.ppm/.pnm",
           fileName);
   ErrorLine(pchLine);
 }
@@ -1608,7 +1609,7 @@ extern void DumpBitmap(char *fileName,
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse, multibit);
   }
   else 
-  if (FSzEqI(pchExt, "pbm") || FSzEqI(pchExt, "pgm") || FSzEqI(pchExt, "ppm")) {
+  if (FSzEqI(pchExt, "pbm") || FSzEqI(pchExt, "pgm") || FSzEqI(pchExt, "ppm") || FSzEqI(pchExt, "pnm")) {
     BMP_ConvertPNMBitmap(&rcbmp, pBMPData, size, bitmaptype, colortable);
     BMP_CompressDumpBitmap(&rcbmp, isIcon, compress, fFalse, multibit);
   }

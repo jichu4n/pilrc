@@ -362,6 +362,7 @@ BOOL FGetLex(LEX *plex, BOOL fInComment)
 			{
 			/* BUG! could use a lookup table... */
 			/*TODO logical operators */
+			SLT('.', ltPoint)
 			SLT('+', ltPlus)
 			SLT('-', ltMinus)
 			SLT('*',    ltMult)
@@ -568,6 +569,7 @@ VOID PrintLex(LEX *plex)
 		case ltId:
 			printf("%s ", plex->szId);
 			break;
+			SPLT(ltPoint, ".");
 			SPLT(ltPlus, "+");
 			SPLT(ltMinus, "-");
 			SPLT(ltMult, "*");

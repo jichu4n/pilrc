@@ -1,2 +1,0 @@
-This is a very long string that is included via FILE
-it has a carriage return

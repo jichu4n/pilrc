@@ -37,10 +37,4 @@ extern FILE *vfhIn;
 extern char *includePaths[];
 extern int   totalIncludePaths;
 
-
-
-
-	
-
-
 #endif /*__UTIL_H__*/
