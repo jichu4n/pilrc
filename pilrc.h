@@ -1356,6 +1356,82 @@ RCBITMAP_V3;
 /*-----------------------------------------------------------------------------
 |	FONT
 -------------------------------------------------------------RMa------------*/
+
+/*
+Font Format:
+Single density fonts:
+---------------------
+Header:
+ Int16 fontType;    // font type
+ Int16 firstChar;   // ASCII code of first character
+ Int16 lastChar;    // ASCII code of last character
+ Int16 maxWidth;    // maximum character width
+ Int16 kernMax;     // negative of maximum character kern
+ Int16 nDescent;    // negative of descent
+ Int16 fRectWidth;  // width of font rectangle
+ Int16 fRectHeight; // height of font rectangle
+ Int16 owTLoc;      // offset to offset/width table
+ Int16 ascent;      // ascent
+ Int16 descent;     // descent
+ Int16 leading;     // leading
+ Int16 rowWords;    // row width of bit image / 2
+ 
+Glyph:
+ rowWords * 2 * font->header.fRectHeight bytes
+ 
+Columns:
+ array of Int16 containing the start column in the glyph bitmap
+ for each char.  The start of this array is located at
+ the end of the header + rowWords * 2 * font->header.fRectHeight bytes
+ 
+CharInfoTag:
+ array of FontCharInfoTag (Int8 offset, Int8 width). This is redundant with
+ the width found using cols.  offset does not seem to be used. Both bytes are
+ set to 0xFF if the char is missing.  The start of this array is located at
+ tloc * 2 bytes after the offset of owTLoc in the header.
+ 
+
+New format for high density fonts:
+----------------------------------
+Header:
+ // first part is basically the same as NFNT FontRec
+ Int16 fontType;
+ Int16 firstChar;   // character code of first character
+ Int16 lastChar;    // character code of last character
+ Int16 maxWidth;    // widMax = maximum character width
+ Int16 kernMax;     // negative of maximum character kern
+ Int16 nDescent;    // negative of descent
+ Int16 fRectWidth;  // width of font rectangle
+ Int16 fRectHeight; // height of font rectangle
+ Int16 owTLoc;      // offset to offset/width table
+ Int16 ascent;      // ascent
+ Int16 descent;     // descent
+ Int16 leading;     // leading
+ Int16 rowWords;    // row width of bit image / 2
+ 
+ // New fields (if fntExtendedFormatMask is set)
+ Int16 version;     // 1 = PalmNewFontVersion
+ Int16 densityCount;// num of glygh density present 
+ 
+ // array of 1 or more records of (Int16 density, UInt32 glyphBitsOffset)
+ FontDensityType densities[0];
+ 
+Columns:
+ array of Int16 containing the start column in the glyph bitmap
+ for each char.  The start of this array is located at
+ the end of the header + rowWords * 2 * font->header.fRectHeight bytes
+ 
+CharInfoTag:
+ array of FontCharInfoTag (Int8 offset, Int8 width). This is redundant with
+ the width found using cols.  offset does not seem to be used. Both bytes are
+ set to 0xFF if the char is missing.  The start of this array is located at
+ tloc * 2 bytes after the offset of owTLoc in the header.
+
+Glyphs:
+ Found using the densities array glyphBitsOffset members. Offset from the
+ beginning of the font
+*/
+
 typedef struct RCFONTCHARINFOTYPE
 {
   p_int offset;                                  /* b */
@@ -1381,10 +1457,72 @@ typedef struct RCFONTTYPE
   p_int descent;                                 /* w */// descent
   p_int leading;                                 /* w */// leading
   p_int rowWords;                                /* w */// row width of bit image / 2
+  // Glyph
+  // Columns
+  // CharInfoTag
 }
 RCFONTTYPE;
 
 #define szRCFONT "w,w,w,w,w,w,w,w,w,w,w,w,w"
+
+
+typedef struct RCFONTDENSITYBA16TYPE
+{
+  p_int density;                                 /* w */
+  p_int glyphBitsOffset;                         /* l */
+}
+RCFONTDENSITYBA16TYPE;
+
+#define szRCFONTDENSITYBA16TYPE "w,l"
+
+
+typedef struct RCFONTDENSITYBA32TYPE
+{
+  p_int density;                                 /* w */
+//p_int reserved;                                /* zw */
+  p_int glyphBitsOffset;                         /* l */
+}
+RCFONTDENSITYBA32TYPE;
+
+#define szRCFONTDENSITYBA32TYPE "w,zw,l"
+
+
+#define szRCFONTDENSITYTYPE (vfLE32?szRCFONTDENSITYBA32TYPE:szRCFONTDENSITYBA16TYPE)
+typedef union RCFONTDENSITYTYPE
+{
+  RCFONTDENSITYBA16TYPE s16;
+  RCFONTDENSITYBA32TYPE s32;
+}
+RCFONTDENSITYTYPE;
+
+typedef struct RCFONT2TYPE
+{
+  p_int fontType;                                /* w */// font type
+  p_int firstChar;                               /* w */// ASCII code of first character
+  p_int lastChar;                                /* w */// ASCII code of last character
+  p_int maxWidth;                                /* w */// maximum character width
+  p_int kernMax;                                 /* w */// negative of maximum character kern
+  p_int nDescent;                                /* w */// negative of descent
+  p_int fRectWidth;                              /* w */// width of font rectangle
+  p_int fRectHeight;                             /* w */// height of font rectangle
+  p_int owTLoc;                                  /* w */// offset to offset/width table
+  p_int ascent;                                  /* w */// ascent
+  p_int descent;                                 /* w */// descent
+  p_int leading;                                 /* w */// leading
+  p_int rowWords;                                /* w */// row width of bit image / 2
+  // New fields (if fntExtendedFormatMask is set)
+  p_int version;                                 /* w */// 1 = PalmNewFontVersion
+  p_int densityCount;                            /* w */
+
+// FontDensityType densities[0];                 // array of 1 or more records of (Int16 density, UInt32 glyphBitsOffset)
+// Columns
+// CharInfoTag
+// Glyphs
+}
+RCFONT2TYPE;
+
+#define szRCFONT2 "w,w,w,w,w,w,w,w,w,w,w,w,w,w,w"
+
 
 /*----------------------------------------------------------------------------
 |	SYSAPPPREFS
@@ -1613,6 +1751,7 @@ RCPFILE;
 
        rwFontIndex,
        rwFontMap,
+#endif
 
        rwFontType,                               /* 'NFNT' & 'fntm' */
        rwFirstChar,
@@ -1629,7 +1768,9 @@ RCPFILE;
        rwRowWords,
        rwFlag,
        rwState,
+       rwFontFamily,                             /* nfnt */
 
+#ifdef PALM_INTERNAL
        rwGraffitiInputArea,
        rwCreator,
        rwLanguage,
@@ -1901,6 +2042,7 @@ RWT;
 
        {"translation", NULL, rwTranslation},
        {"launchercategory", "taic", rwLauncherCategory},
+       {"fontfamily", NULL, rwFontFamily},       /* nfnt */
 
 #ifdef PALM_INTERNAL
        {"fontindex", NULL, rwFontIndex},
@@ -2243,6 +2385,7 @@ typedef struct ITM
   int MinHeapSpace;                              /* RMa add: 'pref' */
   char *Locale;                                  /* RMa localisation management */
   int AlertType;                                 /* RMA alert */
+  int density;                                   /* RMA add: 'bmpf' v3 & 'nfnt' */
   int FontType;                                  /* RMa add: font 'NFNT' & 'fntm' */
   int FirstChar;                                 /* RMa add: font 'NFNT' & 'fntm' */
   int LastChar;                                  /* RMa add: font 'NFNT' & 'fntm' */

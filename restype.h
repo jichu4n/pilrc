@@ -69,8 +69,9 @@
 #define kCharListType			35
 #define kTextTableType			36
 #define kSearchTable				37
-
-#define kMaxNumberResType		38
+#define kFontFamilyRscType		38
+ 
+#define kMaxNumberResType		39
 
 extern char *kPalmResType[kMaxNumberResType];
 

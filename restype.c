@@ -80,6 +80,7 @@ ResTypeInit(void)
     kPalmResType[34] = "attl";
     kPalmResType[35] = "acsl";
     kPalmResType[36] = "attb";
+    kPalmResType[38] = "afnx";
   }
   else
   {
@@ -109,5 +110,6 @@ ResTypeInit(void)
     kPalmResType[34] = "ttli";
     kPalmResType[35] = "csli";
     kPalmResType[36] = "ttbl";
+    kPalmResType[38] = "nfnt";
   }
 }

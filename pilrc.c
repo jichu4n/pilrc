@@ -77,6 +77,8 @@
  *                 Added 'tSCH' resource support
  *     04-Aug-2002 Michael McLagen
  *                 Fixed BITMAPID/SELECTEDBITMAPID warnings
+ *     06-Aug-2002 Renaud Malaval
+ *                 Added 'nfnt' resource support
  *     22-Sep-2002 Ben Combee
  *                 Allow zero-item lists in forms
  *                 Fix transparency handling for high density bitmaps
@@ -1503,6 +1505,10 @@ ParseItm(ITM * pitm,
       case rwWarning:
       case rwError:
         pitm->AlertType = tok.rw - rwInformation;
+        break;
+      case rwBitmapDensity:                     /* RMa addition */
+        CheckGrif4(if4BitmapExtDensity);
+        pitm->density = WGetConstEx("density");
         break;
 
 #ifdef PALM_INTERNAL
@@ -4347,6 +4353,62 @@ ParseDumpFont()
 }
 
 /*-----------------------------------------------------------------------------
+|     ParseDumpFontFamily
+-------------------------------------------------------------RMa-------------*/
+static void
+ParseDumpFontFamily()
+{
+  ITM itm;
+  int id;
+  int densityCount = 0;
+  int i;
+
+#define MAXDENSITY 2
+  FNTFAMDEF aFontFamilyEntries[MAXDENSITY];
+
+  ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
+  id = itm.id;
+
+  GetExpectRw(rwBegin);
+
+  while (FGetTok(&tok) && (tok.rw != rwEnd))
+  {
+    UngetTok();
+    if ((tok.lex.lt == ltConst) || (tok.lex.lt == ltId))
+    {
+      GetExpectRw(rwBitmapDensity);
+      aFontFamilyEntries[densityCount].density = WGetConstEx("Density");
+      aFontFamilyEntries[densityCount].pchFileName = PchGetSz("Font Filename");
+    }
+    else if (tok.lex.lt == ltStr)
+    {
+      aFontFamilyEntries[densityCount].pchFileName = PchGetSz("Font Filename");
+      GetExpectRw(rwBitmapDensity);
+      aFontFamilyEntries[densityCount].density = WGetConstEx("Density");
+    }
+    else
+      ErrorLine("Unknown token in Font Family.");
+
+    densityCount++;
+    if (densityCount > MAXDENSITY)
+    {
+      ErrorLine("Font Family can have only have 2 density (72, 144).");
+      break;
+    }
+  }
+
+  if (DesirableLocale(itm.Locale))
+  {
+    OpenOutput(kPalmResType[kFontFamilyRscType], id);    /* RMa "nfnt" */
+    DumpFontFamily( 128, 1, densityCount, aFontFamilyEntries);
+    CloseOutput();
+  }
+
+  for (i = 0; i < densityCount; i++)                 /* RMa dump each value */
+    free(aFontFamilyEntries[i].pchFileName);
+}
+
+/*-----------------------------------------------------------------------------
 |     ParseDumpHex
 --------------------------------------------------------------AA-------------*/
 static void
@@ -5533,6 +5595,9 @@ ParseRcpFile(char *szRcpIn,
       case rwFont:
         ParseDumpFont();
         break;
+      case rwFontFamily:
+        ParseDumpFontFamily();
+        break;
       case rwPaletteTable:
         ParseDumpPaletteTable();
         break;
@@ -5630,7 +5695,7 @@ ParseRcpFile(char *szRcpIn,
 #endif
                      "ICON, ICONFAMILY, SMALLICON, SMALLICONFAMILY, ICONFAMILYEX, SMALLICONFAMILYEX, "
                      "LAUNCHERCATEGORY, BYTELIST, WORDLIST, LONGWORDLIST, MIDI, "
-                     "SYSAPPLICATIONPREFERENCES, PALETTETABLE, TRAP, FONT, HEX, DATA, INTEGER, "
+                     "SYSAPPLICATIONPREFERENCES, PALETTETABLE, TRAP, FONT, FONTFAMILY, HEX, DATA, INTEGER, "
 #ifdef PALM_INTERNAL
                      "FONTINDEX, FONTMAP, GRAFFITIINPUTAREA, COUNTRYLOCALISATION, "
                      "LOCALES, FEATURE, KEYBOARD, HARDSOFTBUTTONDEFAULT, "

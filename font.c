@@ -55,6 +55,9 @@
 #define h_leading 11                             /* leading */
 #define h_rowWords 12                            /* row width of bit image in words (16bits) */
 
+#define h_version 13                             /* 1 = PalmNewFontVersion */
+#define h_densityCount 14                        /* num of glygh density present */
+
 #define g_glyph 20                               /* new glyph token */
 #define g_offset 21                              /* offset token */
 #define g_width 22                               /* width token */
@@ -547,21 +550,346 @@ DumpFont(char *pchFileName,
     header[h_rowWords] * header[h_fRectHeight] + 7 + header[h_lastChar] -
     header[h_firstChar] + missingChar;
 
+#ifdef DEBUG_FONT
+  fprintf(stderr, "\nfontType    = %04X (%d)\n" \
+                  "firstChar   = %d\n" \
+                  "lastChar    = %d\n" \
+                  "maxWidth    = %d\n" \
+                  "kernMax     = %d\n" \
+                  "nDescent    = %d\n" \
+                  "fRectWidth  = %d\n" \
+                  "fRectHeight = %d\n" \
+                  "owTLoc      = %d\n" \
+                  "ascent      = %d\n" \
+                  "descent     = %d\n" \
+                  "leading     = %d\n" \
+                  "rowWords    = %d\n\n", \
+      header[h_fontType], header[h_fontType], header[h_firstChar], header[h_lastChar],
+      header[h_maxWidth], header[h_kernMax], header[h_nDescent], header[h_fRectWidth],
+      header[h_fRectHeight], header[h_owTLoc], header[h_ascent], header[h_descent],
+      header[h_leading], header[h_rowWords]);
+#endif
+
+  // dump font header
   CbEmitStruct(header, szRCFONT, NULL, fTrue);
 
+  // dump Glyph
   for (x = 0; x < (size_t) header[h_fRectHeight]; x++)
   {
     DumpBytes(bitmap[x], header[h_rowWords] * 2);
     free(bitmap[x]);
   }
 
+  // dump Columns
   for (x = header[h_firstChar];
        x <= (size_t) header[h_lastChar] + 1 + missingChar; x++)
     EmitW(coltable[x]);
 
+  // dump CharInfoTag
   DumpBytes(&fntOW[fntNo][header[h_firstChar]],
             (header[h_lastChar] - header[h_firstChar] + 1 + missingChar) * 2);
 }
+
+
+/*
+ * The main function of this module
+ *
+ *
+ */
+
+void
+DumpFontFamily( int fntNo, int version, unsigned int densityCount, FNTFAMDEF * fontFamilyEntries)
+{
+#define kArraySize 258
+  FILE *in;
+  char s[kArraySize], *s1, *bitmap[kArraySize];
+  unsigned short int coltable[kArraySize];
+  size_t x;
+  int token, value, header[15];
+  unsigned short bit[8] = { 128, 64, 32, 16, 8, 4, 2, 1 };
+  unsigned int counter = 0;
+  FNTFAMDEF * tmpFontFamilyEntries = fontFamilyEntries;
+  unsigned int aGlyphBitsOffset = 0;
+
+  if (densityCount < 2)
+    Error("FontFamily must have 2 fonts with density 72 and 144.");
+
+  do
+  {
+    int curChar = -1;
+    int autoWidth = 1;
+    int autoRectWidth = 1;
+    int row = 0;
+    int col = 0;
+    int width = 0;
+    int missingChar = 0;
+    int headerSize = 0;
+
+    memset(header, 0, sizeof(header));
+    memset(bitmap, 0, sizeof(bitmap));
+
+    filename = FindAndOpenFile(fontFamilyEntries->pchFileName, "rt", &in);
+    lineno = 0;
+
+    if (fntOW[fntNo])
+      free(fntOW[fntNo]);
+    if (!(fntOW[fntNo] = malloc(kArraySize * sizeof(FontCharInfoType))))
+      Error("Out of memory");
+
+    memset(fntOW[fntNo], -1, kArraySize * sizeof(FontCharInfoType));
+
+    while (fgets(s, sizeof(s), in))
+    {
+      lineno++;
+
+      /*
+       * Remove leading and trailing whitespace 
+       */
+      for (s1 = s; s1[0] == ' ' || s1[0] == 9; s1++) ;
+      for (x = strlen(s1); x; x--)
+      {
+        if (s1[x - 1] == ' ' || s1[x - 1] == 9 || s1[x - 1] == 10
+            || s1[x - 1] == 13)
+          s1[x - 1] = 0;
+        else
+          break;
+      }
+
+      if (s1[0] && (s[0] != 47 || s[1] != 47))
+      {
+        /* skip blank lines and comment lines */
+        ParseLine(s1, &token, &value);
+        if (token < g_glyph)
+        {
+          if (curChar >= 0)
+            ErrorX("Header must precede glyphs");
+          header[token] = value;
+          if (token == h_maxWidth)
+            autoWidth = 0;
+          if (token == h_fRectWidth)
+            autoRectWidth = 0;
+        }
+
+        /*
+         * Do new char processing 
+         */
+        if (token == g_glyph)
+        {
+          if (curChar >= 0)
+            CloseGlyph(header, &width, &row, &col, autoWidth, autoRectWidth);
+
+          if (value == -1)
+          {
+            /*
+             * Handle missing char 
+             */
+            curChar++;
+            fntOW[fntNo][curChar].offset = 0;
+            coltable[curChar] = col;
+            missingChar = 1;
+            continue;
+          }
+
+          if (value < 0 || value > 255)
+            ErrorX("Glyph number out of range");
+          if (value <= curChar)
+            ErrorX("Glyph out of sequence");
+          if (missingChar != 0)
+            ErrorX("GLYPH -1 MUST be the last one in the font definition file");
+
+          for (x = curChar + 1; x <= (size_t) value; x++)
+            coltable[x] = col;
+          if (curChar < 0)
+            header[h_firstChar] = value;
+          curChar = value;
+          header[h_lastChar] = value;
+          fntOW[fntNo][curChar].offset = 0;
+          continue;
+        }
+ 
+        if (token == g_offset)
+        {
+          if (curChar < 0)
+            ErrorX("Unexpected OFFSET token");
+          fntOW[fntNo][curChar].offset = value;
+          continue;
+        }
+
+        if (token == g_width)
+        {
+          if (curChar < 0)
+            ErrorX("Unexpected WIDTH token");
+          fntOW[fntNo][curChar].width = value;
+          continue;
+        }
+
+        if (token == g_bitmap)
+        {
+          if (row == 0)
+          {
+            width = strlen(s1);
+            if (fntOW[fntNo][curChar].width == -1)
+              fntOW[fntNo][curChar].width = width;
+          }
+          else if (width != (int)strlen(s1))
+            ErrorX("Invalid width");
+
+          if (!bitmap[row])
+          {
+            if (!(bitmap[row] = malloc(1024)))
+              Error("Out of memory");
+            memset(bitmap[row], 0, 1024);
+          }
+
+          for (x = 0; x < (size_t) width; x++)
+            if (s1[x] != '-' && s1[x] != '.')
+              bitmap[row][(col + x) >> 3] |= bit[(col + x) & 0x7];
+
+          if (++row > 255)
+            ErrorX("Too many rows");
+          continue;
+        }
+      }
+    }
+
+    if (!feof(in))
+      Error2("Error reading file: ", filename);
+
+    fclose(in);
+
+    /*
+     * Write the data 
+     */
+    if (curChar < 0)
+      ErrorX("No glyphs");
+
+    if (!missingChar)
+    {
+      coltable[curChar + 1] = coltable[curChar] + fntOW[fntNo][curChar].width;
+      curChar++;
+      fntOW[fntNo][curChar].offset = 0;
+      fntOW[fntNo][curChar].width = 0;
+      /*
+       * Always output it 
+       */
+      missingChar = 1;
+    }
+
+    /*
+     * Add the extra column info used to compute the last char width
+     * (even if it is the missing char) 
+     */
+
+    coltable[curChar + 1] = coltable[curChar] + fntOW[fntNo][curChar].width;
+    CloseGlyph(header, &width, &row, &col, autoWidth, autoRectWidth);
+    fntH[fntNo] = header[h_fRectHeight];
+
+    header[h_rowWords] = (col + 15) / 16;
+/*
+    header[h_owTLoc] =
+        header[h_rowWords] * header[h_fRectHeight] + 7 + header[h_lastChar] -
+        header[h_firstChar] + missingChar;
+*/
+    if (vfLE32)
+      header[h_owTLoc] = (densityCount * 8) +		// sizeof( RCFONTDENSITYBA32TYPE )= 8
+          header[h_lastChar] - header[h_firstChar] + missingChar + 2;
+    else
+      header[h_owTLoc] = (densityCount * 6) +		// sizeof( RCFONTDENSITYBA16TYPE )= 6
+          header[h_lastChar] - header[h_firstChar] + missingChar + 3;
+
+    header[h_version] = version;
+    header[h_densityCount] = densityCount;
+    header[h_fontType] += 0x200;		// set the fntExtendedFormatMask, high density support
+
+#ifdef DEBUG_FONT
+    fprintf(stderr, "\nfontType    = %04X (%d)\n" \
+                    "firstChar   = %d\n" \
+                    "lastChar    = %d\n" \
+                    "maxWidth    = %d\n" \
+                    "kernMax     = %d\n" \
+                    "nDescent    = %d\n" \
+                    "fRectWidth  = %d\n" \
+                    "fRectHeight = %d\n" \
+                    "owTLoc      = %d\n" \
+                    "ascent      = %d\n" \
+                    "descent     = %d\n" \
+                    "leading     = %d\n" \
+                    "rowWords    = %d\n" \
+                    "version     = %d\n" \
+                    "densityCount= %d\n\n", \
+        header[h_fontType], header[h_fontType], header[h_firstChar], header[h_lastChar],
+        header[h_maxWidth], header[h_kernMax], header[h_nDescent], header[h_fRectWidth],
+        header[h_fRectHeight], header[h_owTLoc], header[h_ascent], header[h_descent],
+        header[h_leading], header[h_rowWords], header[h_version], header[h_densityCount]);
+#endif
+
+    if (!counter)    // Prepare and dump header
+    {
+      // dump font family header
+      headerSize = CbEmitStruct(header, szRCFONT2, NULL, fTrue);
+      if (vfLE32)
+      {
+        EmitW(0x0000);    // padding, must be set to 0
+        headerSize += 2 + (densityCount * 8); // sizeof( RCFONTDENSITYBA32TYPE )= 8
+      }
+      else
+        headerSize += (densityCount * 6);		// sizeof( RCFONTDENSITYBA16TYPE )= 6
+
+      // dump FontDensityType[densityCount]
+      for (x = 0; x < densityCount; x++)
+      {
+        RCFONTDENSITYTYPE aTest;
+
+        SETBAFIELD(aTest, density, tmpFontFamilyEntries->density);
+        if (!x)
+          aGlyphBitsOffset = headerSize + 2 +
+            (((header[h_lastChar] + 1 + missingChar) - (header[h_firstChar] - 1)) * 2) +
+            ((header[h_lastChar] - header[h_firstChar] + 1 + missingChar) * 2);
+        else
+          aGlyphBitsOffset += header[h_fRectHeight] * (header[h_rowWords] * 2);
+        SETBAFIELD(aTest, glyphBitsOffset, aGlyphBitsOffset);
+
+        if (vfLE32)
+          CbEmitStruct(&(aTest.s32), szRCFONTDENSITYTYPE, NULL, fTrue);
+        else
+          CbEmitStruct(&(aTest.s16), szRCFONTDENSITYTYPE, NULL, fTrue);
+        tmpFontFamilyEntries++;
+      }
+
+      // dump Columns
+      for (x = header[h_firstChar];
+           x <= (size_t) header[h_lastChar] + 1 + missingChar; x++)
+        EmitW(coltable[x]);
+
+      // dump CharInfoTag
+      DumpBytes(&fntOW[fntNo][header[h_firstChar]],
+          (header[h_lastChar] - header[h_firstChar] + 1 + missingChar) * 2);
+      EmitW(0xFFFF);
+    }
+ 
+    // dump Glyph
+    for (x = 0; x < (size_t) header[h_fRectHeight]; x++)
+    {
+      DumpBytes(bitmap[x], header[h_rowWords] * 2);
+      if ((fontFamilyEntries->density != 72) && (header[h_rowWords] & 0x0001))
+        EmitW(0x0000);
+      free(bitmap[x]);
+    }
+
+    // next entry
+    fontFamilyEntries++;
+  }
+  while (counter++ < densityCount - 1);
+
+  // add unknown value
+  if (vfLE32)
+  {
+    EmitL( 0);
+    EmitL(0xF2000000);
+  }
+}
+
+
 
 static void
 SetBuiltinFont(int fntNo,

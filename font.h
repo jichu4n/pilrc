@@ -42,11 +42,24 @@
 #define fontKoreanHantip 6
 #define fontCyrillic     7
 
+typedef struct FNTFAMDEF
+{
+  char *pchFileName;
+  int density;
+}
+FNTFAMDEF;
+
 extern int (*pfnChkCode) (unsigned char *cp,
                           int *pdx);
 
 extern void DumpFont(char *,
                      int);
+
+extern void DumpFontFamily(int fntNo,
+                           int version,
+                           unsigned int densityCount,
+                           FNTFAMDEF * fontFamilyEntries);
+
 extern void InitFontMem(int);
 extern void FreeFontMem();
 
