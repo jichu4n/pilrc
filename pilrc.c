@@ -1740,10 +1740,12 @@ ParseItm(ITM * pitm,
         CheckGrif3(if3MinHeapSpace);
         pitm->MinHeapSpace = WGetConstEx("minheapspace");
         break;
+#endif
       case rwLocale:                            /* RMa addition localisation management */
         CheckGrif3(if3Locale);
         pitm->Locale = PchGetSz("locale");
         break;
+#ifdef PALM_INTERNAL
       case rwFontType:                          /* RMa 'NFNT' & 'fntm' */
         CheckGrif4(if4FontType);
         pitm->FontType = WGetConstEx("fonttype");

@@ -2043,6 +2043,8 @@ RWT;
        {"midi", NULL, rwMidi},                   /* 'MIDI' */
 
        {"translation", NULL, rwTranslation},
+       {"locale", NULL, rwLocale},
+
        {"launchercategory", "taic", rwLauncherCategory},
        {"fontfamily", NULL, rwFontFamily},       /* nfnt */
 
@@ -2109,8 +2111,6 @@ RWT;
        {"minheapspace", NULL, rwMinHeapSpace},   /* 'pref' */
 
        {"hardsoftbuttondefault", NULL, rwHardSoftButtonDefault},
-
-       {"locale", NULL, rwLocale},               /* RMa Locatisation management */
 
        {"tablelist", NULL, rwTableList},         /* ttli */
        {"type", NULL, rwType},
