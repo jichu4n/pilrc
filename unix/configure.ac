@@ -43,19 +43,19 @@ AC_ARG_ENABLE(pilrcui,
   [], [enable_pilrcui=no])
 
 PILRCUI=
-if test $enable_pilrcui == yes; then
+if test $enable_pilrcui = yes; then
   AM_PATH_GTK(1.2.0, [PILRCUI=pilrcui])
 fi
 
 AC_SUBST(PILRCUI)
 AM_CONDITIONAL(PILRCUI, [test -n "$PILRCUI"])
 
-AC_ARG_ENABLE(warnings,
-  AC_HELP_STRING([--enable-warnings],
+AC_ARG_ENABLE(build-warnings,
+  AC_HELP_STRING([--enable-build-warnings],
 		 [build with various GCC warnings activated]),
-  [], [enable_warnings=no])
+  [], [enable_build_warnings=no])
 
-AM_CONDITIONAL(WARNINGS, [test $enable_warnings == yes])
+AM_CONDITIONAL(WARNINGS, [test $enable_build_warnings = yes])
 
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
