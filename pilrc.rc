@@ -21,9 +21,7 @@
  */
 
 #include "winres.h"
-
-#define PILRC_VERSION			3, 0, 0, 4
-#define PILRC_VERSION_STR		"3.0 beta 4"
+#include "version.h"
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -51,6 +51,7 @@
 #include <direct.h>
 #endif
 #include "pilrc.h"
+#include "version.h"
 #include "restype.h"
 
 #if !defined(__GNUC__) && !defined(__MWERKS__)
@@ -75,10 +76,11 @@ static void header(void)
 	if (outputHeader == 0)
 	{
 		outputHeader = 1;
-	    printf("PilRC v3.0 beta 4\n");
-	    printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
-	    printf("  Copyright 2000-2003 Aaron Ardiri (aaron@ardiri.com)\n");
-	    printf("\n");
+		printf
+		  ("PilRC v%s\n"
+		   "  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n"
+		   "  Copyright 2000-2003 Aaron Ardiri (aaron@ardiri.com)\n"
+		   "\n", PILRC_VERSION_STR);
 	}
 }
 
@@ -90,7 +92,7 @@ Usage(void)
 {
   header();
   Error
-    ("\nThis program is free software; you may redistribute it under the\n"
+    ("This program is free software; you may redistribute it under the\n"
      "terms of the GNU General Public License. This program has absolutely\n"
      "no warranty, you use it AS IS at your own risk.\n\n"
      "usage: pilrc {<options>} infile [outfiledir]\n\n" "Options:\n"
