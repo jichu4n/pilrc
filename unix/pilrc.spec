@@ -29,7 +29,7 @@ mkdir -p fonts
 unzip -d fonts -q contrib/pilfont.zip
 
 %build
-unix/configure --bindir=%{_bindir} --enable-pilrcui
+unix/configure --prefix=%{_prefix} --enable-pilrcui
 make
 (cd fonts; make; cp -p README README-pilfont.txt)
 
@@ -45,6 +45,7 @@ install -m 0755 fonts/pilfont $RPM_BUILD_ROOT%{_bindir}/pilfont
 %defattr(-, root, root)
 %{_bindir}/pilrc
 %{_bindir}/pilfont
+%{_datadir}/pilrc
 %doc LICENSE.txt
 %doc README.txt
 %doc doc/*.html doc/images

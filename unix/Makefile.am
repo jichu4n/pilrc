@@ -15,6 +15,9 @@ AM_CFLAGS = $(PILRCUI_CFLAGS) $(WARNING_CFLAGS)
 bin_PROGRAMS = pilrc @PILRCUI@
 EXTRA_PROGRAMS = pilrcui
 
+dist_pkgdata_DATA = ppmquant/palette-02.pbm ppmquant/palette-04.pgm \
+		    ppmquant/palette-16.pgm ppmquant/palette-256.ppm
+
 COMMON_SOURCES = pilrc.c lex.c util.c restype.c bitmap.c font.c plex.c
 noinst_HEADERS = bitmap.h font.h lex.h pilrc.h plex.h restype.h std.h util.h
 
@@ -35,11 +38,7 @@ EXAMPLE_FILES = example/images/icon1bpp.bmp example/images/icon2bpp.bmp \
 	example/palm.h example/pilrctst.def example/pilrctst.prc \
 	example/pilrctst.rcp example/resource.h
 
-PPMQUANT_FILES = ppmquant/palette-02.pbm ppmquant/palette-04.pgm \
-	ppmquant/palette-16.pgm ppmquant/palette-256.ppm
-
 FONTS_FILES = contrib/pilfont.zip
 ROOT_FILES = makefile.os2 pilrc.dsp pilrc.mak README.txt LICENSE.txt resource.rc
 
-EXTRA_DIST = $(DOC_FILES) $(EXAMPLE_FILES) $(FONTS_FILES) $(ROOT_FILES) \
-	$(PPMQUANT_FILES)
+EXTRA_DIST = $(DOC_FILES) $(EXAMPLE_FILES) $(FONTS_FILES) $(ROOT_FILES)
