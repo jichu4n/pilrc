@@ -15,7 +15,8 @@
 # compiler commands 
 PREFIX   = 
 CC       = $(PREFIX)m68k-palmos-gcc
-PILRC    = $(PREFIX)pilrc
+#PILRC    = $(PREFIX)pilrc
+PILRC    = ../pilrc
 BUILDPRC = $(PREFIX)build-prc
 PRC2BIN  = $(PREFIX)prc2bin
 
@@ -28,7 +29,7 @@ CCFLAGS = -O2 -Wall -palmos3.5
 
 # compile requirements
 $(EXEC).prc: $(EXEC) $(EXEC).def bin.stamp
-	$(BUILDPRC) $(EXEC).def $(EXEC).prc $(EXEC) *.bin
+	$(BUILDPRC) $(EXEC).def $(EXEC) *.bin
 
 $(EXEC): $(OBJS)
 	$(CC) $(OBJS) $(CCFLAGS) -o $(EXEC)

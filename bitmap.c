@@ -343,7 +343,7 @@ BMP_GetBits1bpp(int        cx,
   cbRow = BMP_CbRow(cx, 1, cBitsAlign);
   pb   += cbRow * y + (x >> 3);
 
-  return (*pb & (0x01 << (7 - (x & 7))));
+  return (*pb & (0x01 << (7 - (x & 7)))) ? 1 : 0;
 }
 
 /**
@@ -515,6 +515,9 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
   int              cbRow, cbHeader, cbits, cbitsPel, numClrs;
   BITMAPINFO       *pbmi;
   BITMAPINFOHEADER bmi;
+  int              (*getBits)(int, PILRC_BYTE *, int, int, int) = NULL;
+  int              dstPalette[256][3] = { };
+  int              dstPaletteSize     = 0;
 
   pbmi = (BITMAPINFO *)(pbResData + sizeof(BITMAPFILEHEADER)); 
   memcpy (&bmi, pbmi,sizeof(BITMAPINFOHEADER));
@@ -530,26 +533,66 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
   colorDat = 0;
 
   // check the format of the bitmap
+  switch (cbits) 
+  {
+    case 1:
+         getBits = BMP_GetBits1bpp;
+         break;
+
+    case 4:
+         getBits = BMP_GetBits4bpp;
+         break;
+
+    case 8:
+         getBits = BMP_GetBits8bpp;
+         break;
+
+    default:
+         ErrorLine ("Bitmap not monochrome, 16 color or 256 color");
+         break;
+  }
+
+  // configure the palmOS bitmap settings
   switch (bitmaptype) 
   {
     case rwBitmap:
-         if (cbits != 1) ErrorLine ("Bitmap not monochrome");
-         cbitsPel = 1;
+         cbitsPel       = 1;
+	 dstPaletteSize = 2;
+	 for (i=0; i<dstPaletteSize; i++) {
+           dstPalette[i][0] = PalmPalette1bpp[i][0];
+           dstPalette[i][1] = PalmPalette1bpp[i][1];
+           dstPalette[i][2] = PalmPalette1bpp[i][2];
+	 } 
          break;
 
     case rwBitmapGrey:
-         if (cbits != 4) ErrorLine ("Bitmap not 16 color");
          cbitsPel = 2;
+	 dstPaletteSize = 4;
+	 for (i=0; i<dstPaletteSize; i++) {
+           dstPalette[i][0] = PalmPalette2bpp[i][0];
+           dstPalette[i][1] = PalmPalette2bpp[i][1];
+           dstPalette[i][2] = PalmPalette2bpp[i][2];
+	 } 
          break;
 
     case rwBitmapGrey16:
-         if (cbits != 4) ErrorLine ("Bitmap not 16 color");
          cbitsPel = 4;
+	 dstPaletteSize = 16;
+	 for (i=0; i<dstPaletteSize; i++) {
+           dstPalette[i][0] = PalmPalette4bpp[i][0];
+           dstPalette[i][1] = PalmPalette4bpp[i][1];
+           dstPalette[i][2] = PalmPalette4bpp[i][2];
+	 } 
          break;
 
     case rwBitmapColor:
-         if (cbits != 8) ErrorLine ("Bitmap not 256 color");
          cbitsPel = 8;
+	 dstPaletteSize = 256;
+	 for (i=0; i<dstPaletteSize; i++) {
+           dstPalette[i][0] = PalmPalette8bpp[i][0];
+           dstPalette[i][1] = PalmPalette8bpp[i][1];
+           dstPalette[i][2] = PalmPalette8bpp[i][2];
+	 } 
          if (colortable) colorDat = COLOR_TABLE_SIZE;
          break;
 
@@ -568,22 +611,6 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
   switch (bitmaptype) 
   {
     case rwBitmap:
-         rcbmp->pixelsize = cbitsPel;
-         rcbmp->version   = 1;
-
-         // lets make sure that color 0 = white :P
-         if (BMP_RGBToColorIndex(pbmi->bmiColors[0].rgbRed,
-                                 pbmi->bmiColors[0].rgbGreen,
-                                 pbmi->bmiColors[0].rgbBlue,
-                                 PalmPalette1bpp, 2) != 1) {
- 
-           // 0 and 1 are wrong way around, invert them
-           for (i=0; i<LLoadX86(bmi.biSizeImage); i++) {
-             pbSrc[i] = ~pbSrc[i];
-           }
-         }
-         break;
-
     case rwBitmapGrey:
     case rwBitmapGrey16:
          rcbmp->pixelsize = cbitsPel;
@@ -594,7 +621,7 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
          rcbmp->pixelsize = cbitsPel;
          rcbmp->version   = 2;
 
-         // do we need to store a color table?
+	 // do we need to store a color table?
 	 if (colortable) {
 
            PILRC_BYTE *tmpPtr;
@@ -613,51 +640,14 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
              *tmpPtr++ = pbmi->bmiColors[i].rgbBlue;
            }
 
-           // fill in remaining colors with Palm system defaults
-           for (; i<256; i++) {
+           // fill in remaining colors with black
+	   for (; i<256; i++) {
              *tmpPtr++ = i;
-             *tmpPtr++ = PalmPalette8bpp[i][0];
-             *tmpPtr++ = PalmPalette8bpp[i][1];
-             *tmpPtr++ = PalmPalette8bpp[i][2];
-           }
-         }
-
-         // ok, we should match the bitmap to the system color table
-         else {
-
-           int *paletteXref;
-           int i;
-
-           // generate the cross reference table
-           paletteXref = (int *)malloc(256 * sizeof(int));
-           for (i=0; i<numClrs; i++) {
-             paletteXref[i] = 
-               BMP_RGBToColorIndex(pbmi->bmiColors[i].rgbRed,
-                                   pbmi->bmiColors[i].rgbGreen,
-                                   pbmi->bmiColors[i].rgbBlue,
-                                   PalmPalette8bpp, 256);
-           }
-
-           // fill in extra colors with black index
-           for (; i<256; i++) {
-             paletteXref[i] = 255;
-           }
-
-           // adjust the bitmap to reflect the closest matching
-           for (y=0; y<dy; y++) {
-             for (x=0; x<dx; x++) {
-
-               int w;
-               int yT = (dy > 0) ? dy - y - 1 : y;
-
-               w = BMP_GetBits8bpp(dx, pbSrc, x, yT, 32);
-               BMP_SetBits8bpp(dx, pbSrc, x, yT, paletteXref[w], 32);
-             }
-           }
-
-           // clean up
-           free(paletteXref);
-         }
+             *tmpPtr++ = 0;
+             *tmpPtr++ = 0;
+             *tmpPtr++ = 0;
+	   }
+	 }
 
          // do we need to consider transparency?
          switch (transparencyData[0]) 
@@ -668,9 +658,9 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
                   BMP_RGBToColorIndex(transparencyData[1],
                                       transparencyData[2],
                                       transparencyData[3],
-                                      PalmPalette8bpp, 256);
+                                      dstPalette, dstPaletteSize);
                 break;
-
+       
            case rwTransparencyIndex:
                 rcbmp->ff |= 0x2000;
                 rcbmp->transparentIndex = transparencyData[1];
@@ -690,48 +680,47 @@ BMP_ConvertWindowsBitmap(RCBITMAP   *rcbmp,
     for (x = 0; x < dx; x++) {
 
       int yT = (dy > 0) ? dy - y - 1 : y;
+      int v, w;
+
+      w = getBits(dx, pbSrc, x, yT, 32);
+      v = BMP_RGBToColorIndex(pbmi->bmiColors[w].rgbRed,
+                              pbmi->bmiColors[w].rgbGreen,
+                              pbmi->bmiColors[w].rgbBlue,
+                              dstPalette, dstPaletteSize);
 
       // what type of bitmap are we dealing with?
       switch (bitmaptype) 
       {
         case rwBitmap:
-             if (BMP_GetBits1bpp(dx, pbSrc, x, yT, 32) == 0) {
-               BMP_SetBits1bpp(dx, rcbmp->pbBits, x, y, 16);
+             {
+               // if needed, set the bit
+               if (v == 1) {
+                 BMP_SetBits1bpp(dx, rcbmp->pbBits, x, y, 16);
+               }
              }
              break;
 
         case rwBitmapGrey:
              {
-               int v, w;
-				
-               w = BMP_GetBits4bpp(dx, pbSrc, x, yT, 32);
-               v = BMP_RGBToColorIndex(pbmi->bmiColors[w].rgbRed,
-                                       pbmi->bmiColors[w].rgbGreen,
-                                       pbmi->bmiColors[w].rgbBlue,
-                                       PalmPalette2bpp, 4);
                BMP_SetBits2bpp(dx, rcbmp->pbBits, x, y, v, 16);
              }
              break;
 
         case rwBitmapGrey16:
              {
-               int v, w;
-
-               w = BMP_GetBits4bpp(dx, pbSrc, x, yT, 32);
-               v = BMP_RGBToColorIndex(pbmi->bmiColors[w].rgbRed,
-                                       pbmi->bmiColors[w].rgbGreen,
-                                       pbmi->bmiColors[w].rgbBlue,
-                                       PalmPalette4bpp, 16);
                BMP_SetBits4bpp(dx, rcbmp->pbBits, x, y, v, 16);
              }
              break;
 
         case rwBitmapColor:
              {
-               int w;
+	       // if we need a color table, use original bitmap data
+	       if (colortable) 
+                 BMP_SetBits8bpp(dx, (rcbmp->pbBits+colorDat), x, y, w, 16);
 
-               w = BMP_GetBits8bpp(dx, pbSrc, x, yT, 32);
-               BMP_SetBits8bpp(dx, (rcbmp->pbBits+colorDat), x, y, w, 16);
+	       // no color table? use mapping
+               else
+	         BMP_SetBits8bpp(dx, (rcbmp->pbBits+colorDat), x, y, v, 16);
              }
              break;
 

@@ -38,7 +38,7 @@
 void 
 Usage(void)
 {
-  Error("This program is free software; you may redistribute it under the\n"
+  printf("\nThis program is free software; you may redistribute it under the\n"
   	"terms of the GNU General Public License. This program as absolutely\n"
 	"no warranty, you use it AS IS at your own risk.\n\n"
 	"usage: pilrc {<options>} infile [outfiledir]\n\n"
@@ -82,7 +82,7 @@ main(int  cArg,
   int  fontType;
 	
   // display the (c) string
-  printf("PilRC v2.5b9\n");
+  printf("PilRC v2.5c\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000      Aaron Ardiri (ardiri@palmgear.com)\n");
 

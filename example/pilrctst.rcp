@@ -100,19 +100,20 @@ END
 VERSION "0.1 beta"
 
 ICONFAMILY 
-  "images/icon1bpp.bmp" "images/icon2bpp.bmp" "" "images/icon8bpp.bmp" 
-TRANSPARENCY 255 0 0
+  "images/icon1bpp.bmp" "images/icon2bpp.bmp" 
+  "images/icon4bpp.bmp" "images/icon8bpp.bmp" TRANSPARENCY 255 0 0
 
 SMALLICONFAMILY 
-  "images/smic1bpp.bmp" "images/smic2bpp.bmp" "" "images/smic8bpp.bmp"
-TRANSPARENCY 255 0 0
+  "images/smic1bpp.bmp" "images/smic2bpp.bmp" 
+  "images/smic4bpp.bmp" "images/smic8bpp.bmp" TRANSPARENCY 255 0 0
 
 BITMAPFAMILY bitmapIcon   
-  "images/icon1bpp.bmp" "images/icon2bpp.bmp" "" "images/icon8bpp.bmp" COMPRESS
-TRANSPARENCY 255 0 0
+  "images/icon1bpp.bmp" "images/icon2bpp.bmp"
+  "images/icon4bpp.bmp" "images/icon8bpp.bmp" TRANSPARENCY 255 0 0 COMPRESS
 
 BITMAPFAMILY bitmapPalm
-  "images/palm1bpp.bmp" "images/palm2bpp.bmp" "" "images/palm8bpp.bmp" COMPRESS
+  "images/palm1bpp.bmp" "images/palm2bpp.bmp" 
+  ""                    "images/palm8bpp.bmp" COMPRESS
 
 STRINGTABLE stringTableMetric   
   "" "Litres" "Meters" "Celsius"    "Newtons"     "Kilograms"
