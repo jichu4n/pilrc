@@ -54,15 +54,8 @@
    given via the printf format etc arguments.  */
 
 VOID Error(const char *szFormat, ...)  PRINTF_FORMATTING;
-VOID Error2(const char *sz1,
-            const char *sz2);
-VOID Error3(const char *sz1,
-            const char *sz2,
-            const char *sz3);
 VOID ErrorLine(const char *szFormat, ...)    PRINTF_FORMATTING;
 VOID WarningLine(const char *szFormat, ...)  PRINTF_FORMATTING;
-VOID ErrorLine2(const char *sz,
-                const char *sz2);
 
 /* The functions above are actually wrappers around this general purpose
    diagnostic function.  Generally there's no need to call this directly,
@@ -73,10 +66,7 @@ VOID Diagnostic(BOOL fError, const char *filename, int lineno,
                 const char *szFormat, va_list *args);
 
 /*lint -function(exit,Error) */
-/*lint -function(exit,Error2) */
-/*lint -function(exit,Error3) */
 /*lint -function(exit,ErrorLine) */
-/*lint -function(exit,ErrorLine2) */
 /*lint -function(exit,Diagnostic) */
 
 BOOL FSzEqI(const char *sz1,

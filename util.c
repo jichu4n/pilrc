@@ -127,7 +127,9 @@ void FreeAccessPathsList(void)
 /*-----------------------------------------------------------------------------
 |	Diagnostic
 |
-|		Print error or warning, and perhaps exit.
+|		Print error or warning, and perhaps exit. All error reporting
+|		is funneled via this function -- it is the only diagnostic
+|		function that things like the CW plugin need to override.
 -------------------------------------------------------------JohnM-----------*/
 VOID
 Diagnostic(BOOL fError, const char *filename, int lineno,
@@ -146,7 +148,7 @@ Diagnostic(BOOL fError, const char *filename, int lineno,
 #endif
 
 /*-----------------------------------------------------------------------------
-|	Error
+|	Error, ErrorLine, WarningLine
 |
 |		Call Diagnostic() with appropriate arguments
 ------------------------------------------------------------WESC------------*/
@@ -159,64 +161,6 @@ Error(const char *szFormat, ...)
   va_end(args);
 }
 
-/*-----------------------------------------------------------------------------
-|	Error2
--------------------------------------------------------------WESC------------*/
-VOID
-Error2(const char *sz1,
-       const char *sz2)
-{
-  char szT[256];
-  snprintf(szT, sizeof(szT), "%s%s", sz1, sz2);
-  Error(szT);
-}
-
-/*-----------------------------------------------------------------------------
-|	Error3
--------------------------------------------------------------WESC------------*/
-VOID
-Error3(const char *sz1,
-       const char *sz2,
-       const char *sz3)
-{
-  char szT[256];
-  snprintf(szT, sizeof(szT), "%s%s %s", sz1, sz2, sz3);
-  Error(szT);
-}
-
-/*-----------------------------------------------------------------------------
-|	ErrorLine2
-|	
-|		Report error w/ current line #
--------------------------------------------------------------WESC------------*/
-VOID
-ErrorLine2(const char *sz,
-           const char *sz2)
-{
-#ifdef CW_PLUGIN
-  CWErrorLine2(sz, sz2, iline);
-#else
-  char szErr[256];
-
-  if (sz2 == NULL)
-    snprintf(szErr, sizeof(szErr),
-            ((vfVSErrors)
-             ? "%s(%d): error : %s"
-             : "%s:%d: error : %s"), szInFile, iline, sz);
-  else
-    snprintf(szErr, sizeof(szErr),
-            ((vfVSErrors)
-             ? "%s(%d): error : %s %s"
-             : "%s:%d: error : %s %s"), szInFile, iline, sz, sz2);
-  Error(szErr);
-#endif
-}
-
-/*-----------------------------------------------------------------------------
-|	ErrorLine
-|	
-|		Report error w/ current line #
--------------------------------------------------------------WESC------------*/
 VOID
 ErrorLine(const char *szFormat, ...)
 {
@@ -226,11 +170,6 @@ ErrorLine(const char *szFormat, ...)
   va_end(args);
 }
 
-/*-----------------------------------------------------------------------------
-|	WarningLine
-|	
-|		Report error w/ current line #
--------------------------------------------------------------WESC------------*/
 VOID
 WarningLine(const char *szFormat, ...)
 {
