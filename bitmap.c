@@ -1543,6 +1543,10 @@ BMP_ConvertTextBitmap(RCBITMAP * rcbmp,
   // allocate image buffer
   rcbmp->cbRow = ((rcbmp->cx + 15) & ~15) / 8;
   rcbmp->cbDst = rcbmp->cbRow * rcbmp->cy;
+  rcbmp->pixelsize = 1;
+  rcbmp->version = 1;
+  if (vfLE32)
+    rcbmp->version |= LE_BITMAP_VERSION_MASK;
   rcbmp->pbBits = malloc(rcbmp->cbDst);
   memset(rcbmp->pbBits, 0, rcbmp->cbDst);
 
