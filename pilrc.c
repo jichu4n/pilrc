@@ -1627,11 +1627,48 @@ ParseItm(ITM * pitm,
       case rwConfirmation:
       case rwWarning:
       case rwError:
+        CheckGrif3(if3AlertType);
         pitm->AlertType = tok.rw - rwInformation;
         break;
       case rwBitmapDensity:                     /* RMa addition */
         CheckGrif4(if4BitmapExtDensity);
         pitm->density = WGetConstEx("density");
+        break;
+      case rwInitialState:
+        CheckGrif4(if4InitialState);
+        pitm->initialState = WGetConstEx("initialstate");
+        break;
+      case rwInitialObjectID:
+        CheckGrif4(if4InitialObjectID);
+        pitm->initialObjectID = WGetConstEx("initialobjectid");
+        break;
+      case rwJumpObjectID:
+        CheckGrif4(if4JumpObjectID);
+        pitm->jumpObjectID = WGetConstEx("jumpobjectid");
+        break;
+      case rwBottomLeftObjectID:
+        CheckGrif4(if4BottomLeftObjectID);
+        pitm->bottomLeftObjectID = WGetConstEx("bottomleftobjectid");
+        break;
+      case rwAbove:
+        CheckGrif4(if4Above);
+        pitm->aboveID = WGetConstEx("above");
+        break;
+      case rwBelow:
+        CheckGrif4(if4Below);
+        pitm->belowID = WGetConstEx("below");
+        break;
+      case rwSkip:
+        CheckGrif4(if4Skip);
+        pitm->skip = fTrue;
+        break;
+      case rwForceInteraction:
+        CheckGrif2(if2ForceInteraction);
+        pitm->forceInteraction = fTrue;
+        break;
+      case rwBigButton:
+        CheckGrif4(if4BigButton);
+        pitm->bigButton = fTrue;
         break;
 
 #ifdef PALM_INTERNAL
@@ -5270,7 +5307,7 @@ ParseResetAutoID()
 }
 
 /*-----------------------------------------------------------------------------
-|	ParseResetAutoID
+|	ParseGenerateHeader
 -------------------------------------------------------------BLC-------------*/
 
 static void
@@ -5281,6 +5318,185 @@ ParseGenerateHeader()
     GetExpectLt(&tok, ltStr, "Output header name");
     strcpy(szOutputHeaderFile, tok.lex.szId);
     vfAutoId = fTrue;
+}
+
+
+/*-----------------------------------------------------------------------------
+|	ParseNavigation: helper to parse OBJECT entries in a NAVIGATION res
+-------------------------------------------------------------BLC-------------*/
+static void
+ParseNavigationList(RCNAVIGATIONITEM **navigationItems, int *numItems)
+{
+  ITM itm;
+  *numItems = 0;
+  *navigationItems = NULL;
+
+  while(1)
+  {
+    ParseItm(&itm, 
+	  ifId, if2ForceInteraction, if3Null,
+	  if4Above | if4Below | if4Skip | if4BigButton);
+
+    ++(*numItems);
+    
+    *navigationItems = realloc(
+    	*navigationItems, sizeof(RCNAVIGATIONITEM) * *numItems);
+    (*navigationItems)[*numItems - 1].objectID = itm.id;
+    (*navigationItems)[*numItems - 1].aboveObjectID = itm.aboveID;
+    (*navigationItems)[*numItems - 1].belowObjectID = itm.belowID;
+    (*navigationItems)[*numItems - 1].objectFlags =
+      (itm.skip ? 0x0001 : 0) |
+      (itm.forceInteraction ? 0x0002 : 0) |
+      (itm.bigButton ? 0x8000 : 0);
+
+    /* check for END at end of list */
+    FGetTok(&tok);
+    if (tok.rw == rwEnd) break;
+    UngetTok();
+  }
+}
+
+/*-----------------------------------------------------------------------------
+|	ParseNavigationMap: helper to parse NAVIGATIONMAP entries
+-------------------------------------------------------------BLC-------------*/
+static void
+ParseNavigationMap(RCNAVIGATIONITEM **navigationItems, int *numItems)
+{
+  ITM itm;
+  const TOK *pTok;
+  int currentRowStart = 0;
+  int lastRowStart = 0;
+  int lastRowEnd = 0;
+  int lastRowFirstID = 0;
+  int i;
+  
+  *numItems = 0;
+  *navigationItems = NULL;
+
+  /* check for END at end of list */
+  while (1)
+  {
+    FGetTok(&tok);
+    if (tok.rw == rwEnd) break;
+    else if (tok.rw == rwRow)
+    {
+	  currentRowStart = *numItems;
+	  
+	  /* parse a row of data, which will be in the form:
+	   * <ID.n> [SKIP] [FORCEINTERACTION] [BIGBUTTON] */
+  	
+  	  while (1)
+  	  {
+    	  int id;
+    	  id = WGetConstEx("form object id");
+    	  
+    	  /* check for modifier keywords */
+    	  ParseItm(&itm, ifNull, if2ForceInteraction, 
+    	    if3Null, if4Skip | if4BigButton);
+
+          ++(*numItems);
+		  *navigationItems = realloc(
+		    *navigationItems, sizeof(RCNAVIGATIONITEM) * *numItems);
+
+		  (*navigationItems)[*numItems - 1].objectID = id;
+	      (*navigationItems)[*numItems - 1].aboveObjectID = lastRowFirstID;
+	      (*navigationItems)[*numItems - 1].objectFlags =
+	        (itm.skip ? 0x0001 : 0) |
+	        (itm.forceInteraction ? 0x0002 : 0) |
+	        (itm.bigButton ? 0x8000 : 0);
+	        
+	      /* break if next token is "END" or "ROW" */
+	      pTok = FPeekTok();
+	      if (pTok && (pTok->rw == rwEnd || pTok->rw == rwRow))
+	        break;
+  	  }
+  	  
+	  /* store ID of start of current row to use for "above" of next row */
+	  lastRowFirstID = (*navigationItems)[currentRowStart].objectID;
+
+      /* fix previous row to point to start of current row */
+      for (i = lastRowStart; i < lastRowEnd; ++i)
+      {
+        (*navigationItems)[i].belowObjectID = lastRowFirstID;
+      }
+
+	  /* store start/end of current row to fixup after next row */
+      lastRowStart = currentRowStart;
+  	  lastRowEnd = *numItems;
+    }
+    else
+      Error("Expected END or ROW");
+  }
+
+  /* fix last row to point to zero for "below" pointers */
+  for (i = lastRowStart; i < lastRowEnd; ++i)
+  {
+    (*navigationItems)[i].belowObjectID = 0;
+  }
+}
+
+/*-----------------------------------------------------------------------------
+|	ParseNavigation: 'fnav'
+-------------------------------------------------------------BLC-------------*/
+
+static void
+ParseNavigation(void)
+{
+  RCNAVIGATION navigation;
+  RCNAVIGATIONITEM *navigationItems = NULL;
+  ITM itm;
+  int resID = 0;
+  int i;
+  
+  ParseItm(&itm, 
+      ifId, if2Null, if3Vers | if3Locale,
+      if4InitialState | if4InitialObjectID |
+      if4JumpObjectID | if4BottomLeftObjectID);
+
+  if (ObjectDesiredInOutputLocale(&itm))
+  {
+    return;
+  }
+
+  resID = itm.id;
+
+  if (itm.grif4Out & if3Vers && itm.version != 1)
+  {
+  	Error("Only NAVIGATION version 1 supported");
+  }
+  if (!(itm.grif4Out & if4InitialState))
+  {
+  	Error("INITIALSTATE required in NAVIGATION resource");
+  }
+  
+  // this is all version one of the resource
+  // (rely on ParseItm to zero out fields of the itm)
+  navigation.headerSizeInBytes = 20;
+  navigation.navElementSizeInBytes = 8;
+  navigation.version = 1;
+  navigation.navFlags = itm.initialState;
+  navigation.initialObjectIDHint = itm.initialObjectID;
+  navigation.jumpObjectIDHint = itm.jumpObjectID;
+  navigation.bottomLeftObjectIDHint = itm.bottomLeftObjectID;
+
+
+  // FIXME: check for what kind of nav list we've got
+  FGetTok(&tok);
+  if (tok.rw == rwBegin)
+      ParseNavigationList(&navigationItems, &navigation.numOfObjects);
+  else if (tok.rw == rwNavigationMap)
+      ParseNavigationMap(&navigationItems, &navigation.numOfObjects);
+  else
+      Error("Expected BEGIN or NAVIGATIONMAP");
+ 
+  OpenOutput(kPalmResType[kNavigationType], resID);
+  CbEmitStruct(&navigation, szRCNAVIGATION, NULL, fTrue);
+  for (i = 0; i < navigation.numOfObjects; ++i)
+  {
+    CbEmitStruct(navigationItems + i, szRCNAVIGATIONITEM, NULL, fTrue);
+  }
+  CloseOutput();
+  free(navigationItems);
 }
 
 /*-----------------------------------------------------------------------------
@@ -5892,6 +6108,9 @@ ParseRcpFile(char *szRcpIn,
         break;
 #endif
 
+      case rwNavigation:
+      	ParseNavigation();
+      	break;
       case rwHex:
         ParseDumpHex();
         break;

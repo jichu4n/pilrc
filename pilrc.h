@@ -1556,6 +1556,40 @@ typedef union RCSYSAPPPREFS
 }
 RCSYSAPPPREFS;
 
+/*----------------------------------------------------------------------------
+|	NAVIGATION
+|
+| The "navigation" resource comes from the Handspring Treo 600 SDK and is
+| used to describe the tab order on their forms, as well as the up/down
+| relationships between items.  There is no LE32 version of this resource.
+-------------------------------------------------------------BLC------------*/
+
+typedef struct RCNAVIGATION
+{
+  p_int	version;
+  p_int numOfObjects;
+  p_int headerSizeInBytes;     /* always 20 for version 1 */
+  p_int navElementSizeInBytes; /* always 8 for version 1 */
+  p_int navFlags;
+  p_int initialObjectIDHint;
+  p_int jumpObjectIDHint;
+  p_int bottomLeftObjectIDHint;
+}
+RCNAVIGATION;
+
+#define szRCNAVIGATION "w,w,w,w,l,w,w,w,zw"
+
+typedef struct RCNAVIGATIONITEM
+{
+  p_int	objectID;
+  p_int objectFlags;
+  p_int aboveObjectID;
+  p_int belowObjectID;
+}
+RCNAVIGATIONITEM;
+
+#define szRCNAVIGATIONITEM "w,w,w,w"
+
 /*-----------------------------------------------------------------------------
 These macros are used to manipulate PalmOS Objects without the need of taking
 care of byte ordering.
@@ -1897,6 +1931,19 @@ RCPFILE;
        rwResetAutoID,
        rwGenerateHeader,
 
+       rwNavigation,
+       rwInitialState,
+       rwInitialObjectID,
+       rwJumpObjectID,
+       rwBottomLeftObjectID,
+       rwAbove,
+       rwBelow,
+       rwSkip,
+       rwForceInteraction,
+       rwBigButton,
+       rwNavigationMap,
+       rwRow,
+
        rwPublic,
        rwShort,
        rwInt,
@@ -2227,6 +2274,19 @@ RWT;
        {"resetautoid", NULL, rwResetAutoID},
        {"generateheader", NULL, rwGenerateHeader},
 
+       {"navigation", NULL, rwNavigation},
+       {"initialstate", NULL, rwInitialState},
+       {"initialobjectid", NULL, rwInitialObjectID},
+       {"jumpobjectid", NULL, rwJumpObjectID},
+       {"bottomleftobjectid", NULL, rwBottomLeftObjectID},
+       {"above", NULL, rwAbove},
+       {"below", NULL, rwBelow},
+       {"skip", NULL, rwSkip},
+       {"forceinteraction", NULL, rwForceInteraction},
+       {"bigbutton", NULL, rwBigButton},
+       {"navigationmap", NULL, rwNavigationMap},
+       {"row", NULL, rwRow},
+
        /*
         * Java specific 
         */
@@ -2425,13 +2485,22 @@ typedef struct ITM
   int numIndexedDataLenBits;                     /* RMa add: font 'ttbl' */
   int numResultBits;                             /* RMa add: font 'ttbl' */
   int indexDataOffset;                           /* RMa add: font 'ttbl' */
+  int initialState;                              /* NAVIGATION */
+  int initialObjectID;                           /* NAVIGATION */
+  int jumpObjectID;                              /* NAVIGATION */
+  int bottomLeftObjectID;                        /* NAVIGATION */
+  int aboveID;                                   /* NAVIGATION */
+  int belowID;                                   /* NAVIGATION */
+  BOOL skip;                                     /* NAVIGATION */
+  BOOL forceInteraction;                         /* NAVIGATION */
+  BOOL bigButton;                                /* NAVIGATION */
 }
 ITM;
 
 /*
  * Item Flags 
  */
-#define ifNull			  0x00000000
+#define ifNull         0x00000000
 #define ifText         0x00000001
 #define ifMultText     0x00000002
 #define ifId           0x00000004
@@ -2454,7 +2523,7 @@ ITM;
 #define ifListId       0x00080000
 #define ifBitmap       0x00100000
 #define ifExtended     0x00200000                /* MBr add: gadget */
-#define ifSearch	     0x00400000
+#define ifSearch       0x00400000
 
 /*
  * Form ifs 
@@ -2464,12 +2533,16 @@ ITM;
 #define ifHelpId       0x00800000
 #define ifDefaultBtnId 0x01000000
 #define ifMenuId       0x02000000
+/* unused              0x04000000 */
+/* unused              0x08000000 */
+/* unused              0x10000000 */
+/* unused              0x20000000 */
 
 /*
  * Ifs defining margins -- extra width to add to an item in addition to it's string width 
  */
-#define ifSmallMargin  0x80000000
 #define ifBigMargin    0x40000000
+#define ifSmallMargin  0x80000000
 
 /*
  * if2s -- ran out of bits in if! 
@@ -2478,34 +2551,35 @@ ITM;
 #define if2NumColumns			0x00000001
 #define if2NumRows				0x00000002
 #define if2ColumnWidths			0x00000004
-#define if2Value					0x00000008
+#define if2Value				0x00000008
 #define if2MinValue				0x00000010
 #define if2MaxValue				0x00000020
 #define if2PageSize				0x00000040
-#define if2AutoShift				0x00000080
-#define if2Scrollbar				0x00000100
+#define if2AutoShift			0x00000080
+#define if2Scrollbar			0x00000100
 #define if2Numeric				0x00000200
-
-#define if2Type 					0x00000800      /* RMa add */
-#define if2File 					0x00001000      /* RMa add */
-#define if2CreatorID				0x00002000      /* RMa add */
-#define if2AppType				0x00004000      /* RMa add */
-#define if2CreateTime			0x00008000      /* RMa add */
-#define if2ModTime				0x00010000      /* RMa add */
-#define if2BackupTime			0x00020000      /* RMa add */
-#define if2AppInfo				0x00040000      /* RMa add */
-#define if2SortInfo				0x00080000      /* RMa add */
-#define if2ReadOnly				0x00100000      /* RMa add */
-#define if2Backup					0x00200000      /* RMa add */
-#define if2CopyProtect			0x00400000      /* RMa add */
-#define if2Priority				0x00800000      /* RMa add */
-#define if2ThumbID				0x01000000      /* RMa add */
-#define if2BackgroundID			0x02000000      /* RMa add */
-#define if2Vertical				0x04000000      /* RMa add */
-#define if2Graphical				0x08000000      /* RMa add */
-#define if2BitmapID				0x10000000      /* RMa add */
-#define if2SelectedBitmapID	0x20000000       /* RMa add */
-#define if2Feedback				0x40000000      /* RMa add */
+/* unused                       0x00000400 */
+#define if2Type 				0x00000800
+#define if2File 				0x00001000
+#define if2CreatorID			0x00002000
+#define if2AppType				0x00004000
+#define if2CreateTime			0x00008000
+#define if2ModTime				0x00010000
+#define if2BackupTime			0x00020000
+#define if2AppInfo				0x00040000
+#define if2SortInfo				0x00080000
+#define if2ReadOnly				0x00100000
+#define if2Backup				0x00200000
+#define if2CopyProtect			0x00400000
+#define if2Priority				0x00800000
+#define if2ThumbID				0x01000000
+#define if2BackgroundID			0x02000000
+#define if2Vertical				0x04000000
+#define if2Graphical			0x08000000
+#define if2BitmapID				0x10000000
+#define if2SelectedBitmapID     0x20000000
+#define if2Feedback				0x40000000
+#define if2ForceInteraction     0x80000000 /* NAVIGATION */
 
 /*
  * if3s -- ran out of bits in if and if2!       RMa add 
@@ -2516,63 +2590,71 @@ ITM;
 #define if3Language				0x00000004
 #define if3Country				0x00000008
 #define if3areaType				0x00000010
-#define if3areaIndex				0x00000020
+#define if3areaIndex			0x00000020
 #define if3keyDownChr			0x00000040
 #define if3keyDownKeyCode		0x00000080
-#define if3keyDownModifiers	0x00000100
-#define if3Number							0x00000200
-#define if3Name							0x00000400
-#define if3DateFormat					0x00000800
-#define if3LongDateFormat				0x00001000
-#define if3WeekStartDay					0x00002000
-#define if3TimeFormat					0x00004000
-#define if3NumberFormat					0x00008000
-#define if3CurrencyName					0x00010000
-#define if3CurrencySymbol				0x00020000
-#define if3CurrencyUniqueSymbol		0x00040000
-#define if3CurrencyDecimalPlaces		0x00080000
-#define if3DayLightSaving				0x00100000
-#define if3MinutesWestOfGmt			0x00200000
-#define if3MeasurementSystem			0x00400000
-#define if3DefaultItm					0x00800000
-#define if3TimeZone  					0x01000000
-#define if3Languages			   		0x02000000
-#define if3Countrys						0x04000000
-#define if3CountryName					0x08000000
-#define if3StackSize						0x10000000
-#define if3MinHeapSpace					0x20000000
-#define if3Locale							0x40000000      /* RMa Localisation Management */
-#define if3AlertType						0x80000000      /* RMa alert */
+#define if3keyDownModifiers     0x00000100
+#define if3Number				0x00000200
+#define if3Name					0x00000400
+#define if3DateFormat			0x00000800
+#define if3LongDateFormat		0x00001000
+#define if3WeekStartDay			0x00002000
+#define if3TimeFormat			0x00004000
+#define if3NumberFormat			0x00008000
+#define if3CurrencyName			0x00010000
+#define if3CurrencySymbol		0x00020000
+#define if3CurrencyUniqueSymbol	0x00040000
+#define if3CurrencyDecimalPlaces 0x00080000
+#define if3DayLightSaving		0x00100000
+#define if3MinutesWestOfGmt		0x00200000
+#define if3MeasurementSystem	0x00400000
+#define if3DefaultItm			0x00800000
+#define if3TimeZone  			0x01000000
+#define if3Languages			0x02000000
+#define if3Countrys				0x04000000
+#define if3CountryName			0x08000000
+#define if3StackSize			0x10000000
+#define if3MinHeapSpace			0x20000000
+#define if3Locale				0x40000000
+#define if3AlertType			0x80000000
 
 /*
  * if4s -- ran out of bits in if, if2 and if3!       RMa add 
  */
 #define if4Null					0x00000000      /* RMa 'NFNT' & 'fntm' */
 #define if4FontType				0x00000001
-#define if4firstChar				0x00000002
+#define if4firstChar			0x00000002
 #define if4lastChar				0x00000004
 #define if4maxWidth				0x00000008
 #define if4kernMax				0x00000010
 #define if4nDescent				0x00000020
 #define if4fRectWidth			0x00000040
 #define if4fRectHeight			0x00000080
-#define if4owTLoc					0x00000100
-#define if4Ascent					0x00000200
+#define if4owTLoc				0x00000100
+#define if4Ascent				0x00000200
 #define if4Descent				0x00000400
 #define if4Leading				0x00000800
 #define if4rowWords				0x00001000
 #define if4flag					0x00002000
-#define if4state					0x00004000
-#define if4tableType						0x00008000
-#define if4defaultOutput				0x00010000
-#define if4numElementBits				0x00020000
-#define if4numIndexedDataLenBits		0x00040000
-#define if4numResultBits				0x00080000
-#define if4indexDataOffset				0x00100000
-#define if4compressed					0x00200000
-
+#define if4state				0x00004000
+#define if4tableType			0x00008000
+#define if4defaultOutput		0x00010000
+#define if4numElementBits		0x00020000
+#define if4numIndexedDataLenBits 0x00040000
+#define if4numResultBits		0x00080000
+#define if4indexDataOffset		0x00100000
+#define if4compressed			0x00200000
 #define if4BitmapExtBpp			0x00400000
-#define if4BitmapExtDensity	0x00800000
+#define if4BitmapExtDensity     0x00800000
+#define if4InitialState         0x01000000 /* NAVIGATION */
+#define if4InitialObjectID      0x02000000 /* NAVIGATION */
+#define if4JumpObjectID         0x04000000 /* NAVIGATION */
+#define if4BottomLeftObjectID   0x08000000 /* NAVIGATION */
+#define if4Above                0x10000000 /* NAVIGATION */
+#define if4Below                0x20000000 /* NAVIGATION */
+#define if4Skip                 0x40000000 /* NAVIGATION */
+#define if4BigButton            0x80000000 /* NAVIGATION */
+
 
 /*
  * Parse globals 
