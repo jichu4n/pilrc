@@ -4865,17 +4865,40 @@ ParseDumpInteger()
 }
 
 /*-----------------------------------------------------------------------------
+|	ParseNumbers
+-------------------------------------------------------------JohnM-----------*/
+static unsigned int
+ParseNumbers(unsigned long **bufferp)
+{
+  unsigned long *buffer = NULL;
+  unsigned int bufsize = 0;
+  unsigned int n = 0;
+
+  while (FGetTok(&tok) && tok.rw != rwEnd)
+    if (tok.lex.lt == ltConst)
+    {
+      if (n >= bufsize)
+      {
+	bufsize = (bufsize == 0)? 64 : 2 * bufsize;
+	buffer = realloc (buffer, bufsize * sizeof (unsigned long));
+      }
+
+      buffer[n++] = tok.lex.val;
+    }
+
+  *bufferp = buffer;
+  return n;
+}
+
+/*-----------------------------------------------------------------------------
 |	ParseDumpWordList
 -------------------------------------------------------------RMa-------------*/
 static void
 ParseDumpWordList(void)
 {
   int id;
-  int i;
-  char *pData;
-  unsigned short *pRunning;
-  int bufferSize = 256 * 2;
-  unsigned short counter = 0;
+  unsigned int i, n;
+  unsigned long *buffer;
   ITM itm;
 
   ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
@@ -4891,40 +4914,14 @@ ParseDumpWordList(void)
 
   id = itm.id;
 
-  pData = malloc(bufferSize);
-  pRunning = (unsigned short *)pData;
-
-  while (FGetTok(&tok))
-  {
-    // we have a constant? 
-    if (tok.lex.lt == ltConst)
-    {
-      *pRunning = (unsigned short)tok.lex.val;
-      pRunning++;
-      counter++;
-      if ((counter * 2) >= bufferSize)
-      {
-        int offset = bufferSize;
-
-        bufferSize *= 2;
-        pData = realloc(pData, bufferSize);
-        pRunning = (unsigned short *)pData + offset;
-      }
-    }
-    // we dunno, assume "end" of resource
-    else if (tok.rw == rwEnd)
-      break;
-  }
+  n = ParseNumbers (&buffer);
 
   OpenOutput(kPalmResType[kWrdListRscType], id); /* RMa "wrdl" */
-  pRunning = (unsigned short *)pData;
-  EmitW(counter);                                /* RMa element in list */
-  for (i = 1; i <= counter; i++)                 /* RMa dump each value */
-  {
-    EmitW(*pRunning);
-    pRunning++;
-  }
+  EmitW(n);                                /* RMa element in list */
+  for (i = 0; i < n; i++)                 /* RMa dump each value */
+    EmitW(buffer[i]);
   CloseOutput();
+  free(buffer);
 }
 
 /*-----------------------------------------------------------------------------
@@ -4935,11 +4932,8 @@ ParseDumpLongWordList(void)
 {
   int id;
   int defaultItem;
-  int i;
-  char *pData;
-  unsigned int *pRunning;
-  int bufferSize = 256 * 4;
-  int counter = 0;
+  unsigned int i, n;
+  unsigned long *buffer;
   ITM itm;
 
   memset(&itm, 0, sizeof(itm));
@@ -4956,41 +4950,16 @@ ParseDumpLongWordList(void)
 
   id = itm.id;
   defaultItem = itm.DefaultItem;
-  pData = malloc(bufferSize);
-  pRunning = (unsigned int *)pData;
 
-  while (FGetTok(&tok))
-  {
-    // we have a constant? 
-    if (tok.lex.lt == ltConst)
-    {
-      *pRunning = (unsigned int)tok.lex.val;
-      pRunning++;
-      counter++;
-      if ((counter * 2) >= bufferSize)
-      {
-        int offset = bufferSize;
-
-        bufferSize *= 2;
-        pData = realloc(pData, bufferSize);
-        pRunning = (unsigned int *)pData + offset;
-      }
-    }
-    // we dunno, assume "end" of resource
-    else if (tok.rw == rwEnd)
-      break;
-  }
+  n = ParseNumbers (&buffer);
 
   OpenOutput(kPalmResType[kLongWrdListRscType], id);    /* RMa "DLST" */
-  pRunning = (unsigned int *)pData;
   EmitW((unsigned short)defaultItem);            /* RMa default item */
-  EmitW((unsigned short)counter);                /* RMa element in list */
-  for (i = 1; i <= counter; i++)                 /* RMa dump each value */
-  {
-    EmitL(*pRunning);
-    pRunning++;
-  }
+  EmitW((unsigned short)n);                      /* RMa element in list */
+  for (i = 0; i < n; i++)                 /* RMa dump each value */
+    EmitL(buffer[i]);
   CloseOutput();
+  free(buffer);
 }
 
 /*-----------------------------------------------------------------------------
@@ -5001,11 +4970,8 @@ ParseDumpByteList(void)
 {
   int id;
   int defaultItem;
-  int i;
-  char *pData;
-  unsigned char *pRunning;
-  int bufferSize = 256 * 1;
-  int counter = 0;
+  unsigned int i, n;
+  unsigned long *buffer;
   ITM itm;
 
   memset(&itm, 0, sizeof(itm));
@@ -5022,41 +4988,16 @@ ParseDumpByteList(void)
 
   id = itm.id;
   defaultItem = itm.DefaultItem;
-  pData = malloc(bufferSize);
-  pRunning = (unsigned char *)pData;
 
-  while (FGetTok(&tok))
-  {
-    // we have a constant? 
-    if (tok.lex.lt == ltConst)
-    {
-      *pRunning = (unsigned int)tok.lex.val;
-      pRunning++;
-      counter++;
-      if ((counter * 2) >= bufferSize)
-      {
-        int offset = bufferSize;
-
-        bufferSize *= 2;
-        pData = realloc(pData, bufferSize);
-        pRunning = (unsigned char *)pData + offset;
-      }
-    }
-    // we dunno, assume "end" of resource
-    else if (tok.rw == rwEnd)
-      break;
-  }
+  n = ParseNumbers (&buffer);
 
   OpenOutput(kPalmResType[kByteListRscType], id);       /* RMa "BLST" */
-  pRunning = (unsigned char *)pData;
   EmitW((unsigned short)defaultItem);            /* RMa default item */
-  EmitW((unsigned short)counter);                /* RMa element in list */
-  for (i = 1; i <= counter; i++)                 /* RMa dump each value */
-  {
-    EmitB(*pRunning);
-    pRunning++;
-  }
+  EmitW((unsigned short)n);                /* RMa element in list */
+  for (i = 0; i < n; i++)                 /* RMa dump each value */
+    EmitB(buffer[i]);
   CloseOutput();
+  free(buffer);
 }
 
 /*-----------------------------------------------------------------------------
