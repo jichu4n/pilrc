@@ -1134,6 +1134,7 @@ ParsePaletteFile(char *pchFileName,
 	}
   }
 
+  fclose(fh);
   *nColors = i;
 }
 
