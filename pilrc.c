@@ -1980,27 +1980,6 @@ DesirableLocale(const char *objlocale)
     return ! vfStripNoLocRes;
 }
 
-/*
- * RMa add & debug : Code cleaning thank to JMa 
- *  add '->' instead of '.' for itm usage and remove not before vfStripNoLocRes
- *
- * FIXME: Remove this function; callers should use DesirableLocale() instead.
- * This function's return value is inverted compared to its name, and so it's
- * entirely incomprehensible :-(.
- */
-BOOL
-ObjectDesiredInOutputLocale(const ITM * itm)
-{
-  if (itm->Locale)
-    if (szLocaleP)
-      return strcmp(itm->Locale, szLocaleP);
-    else
-      return fTrue;
-  //              return szLocaleP == NULL || strcmp (itm->Locale, szLocaleP) == 0;
-  else
-    return vfStripNoLocRes;
-}
-
 #define CondEmitB(b)  /*lint -e{717}*/ do {if (fEmit) EmitB(b);} while (0)
 #define CondEmitW(w)  /*lint -e{717}*/ do {if (fEmit) EmitW(w);} while (0)
 #define CondEmitL(l)  /*lint -e{717}*/ do {if (fEmit) EmitL(l);} while (0)
@@ -3003,7 +2982,7 @@ FParseForm(RCPFILE * prcpf)
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     ParseToFinalEnd();
     return fFalse;
@@ -3381,7 +3360,7 @@ FParseMenu(RCPFILE * prcpfile)
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     ParseToFinalEnd();
     return fFalse;
@@ -3477,7 +3456,7 @@ ParseDumpAlert(RCPFILE * prcpfile)
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     ParseToFinalEnd();
     return;
@@ -3619,7 +3598,7 @@ ParseDumpStringTable()
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
@@ -3714,7 +3693,7 @@ ParseDumpString()
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
@@ -3833,7 +3812,7 @@ ParseDumpCategories()
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
@@ -4529,7 +4508,7 @@ ParseDumpApplicationIconName()
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
@@ -4570,7 +4549,7 @@ ParseDumpApplication()
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
@@ -4731,7 +4710,7 @@ ParseDumpHex()
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
@@ -4848,7 +4827,7 @@ ParseDumpData()
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     while (FGetTok(&tok))                        /* parse to last string in string table */
     {
@@ -4914,7 +4893,7 @@ ParseDumpInteger()
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     return;
   }
@@ -4978,7 +4957,7 @@ ParseDumpWordList(void)
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     ParseToFinalEnd();
     return;
@@ -5014,7 +4993,7 @@ ParseDumpLongWordList(void)
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     ParseToFinalEnd();
     return;
@@ -5052,7 +5031,7 @@ ParseDumpByteList(void)
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     ParseToFinalEnd();
     return;
@@ -5277,7 +5256,7 @@ ParseApplicationPreferences(void)
   /*
    * RMa localisation 
    */
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     return;
   }
@@ -5511,7 +5490,7 @@ ParseNavigation(void)
       if4InitialState | if4InitialObjectID |
       if4JumpObjectID | if4BottomLeftObjectID);
 
-  if (ObjectDesiredInOutputLocale(&itm))
+  if (!DesirableLocale(itm.Locale))
   {
     return;
   }

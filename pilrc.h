@@ -2735,7 +2735,6 @@ extern BOOL vfStripNoLocRes;
 #define kGsiHeight     10
 
 void ParseToFinalEnd(void);
-BOOL ObjectDesiredInOutputLocale(const ITM * itm);
 void ParseItm(ITM * pitm,
               int grif,
               int grif2,
