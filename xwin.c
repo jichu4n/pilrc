@@ -43,6 +43,7 @@
 #include <gtk/gtk.h>
 
 #include "pilrc.h"
+#include "restype.h"
 
 #define PILRCUI_VERSION "PilrcUI/X 0.12"
 
@@ -247,7 +248,10 @@ pilrcui_pilot_text(GtkDrawingArea * w,
   /*
    * CLIPPED 
    */
-  if (ptx & ptxNoExtent) ;
+  if (ptx & ptxNoExtent)
+  {
+    /* nothing */
+  }
 
   /*
    * handle ptxNoExtent 
@@ -440,7 +444,7 @@ pilrcui_drawform(GtkDrawingArea * w)
           if (!ctl.attr.usable)
             break;
 
-          pchText = pobj->control->s16.u.text;
+          pchText = pobj->control->s16.text;
           switch (ctl.style)
           {
             case buttonCtl:
@@ -766,7 +770,6 @@ pilrc_reload(char *fn)
   int ifrm;
   GtkWidget *menu;
   GSList *group = NULL;
-  int savenum;
   int ifrmMac;
 
   if ((s = strrchr(fn, '/')))
@@ -785,13 +788,12 @@ pilrc_reload(char *fn)
   /*
    * chdir (directory); 
    */
-  savenum = totalIncludePaths;
-  includePaths[totalIncludePaths++] = directory;
-
   FreeRcpfile(vprcpfile);
   /*
    * vfErr = fFalse; 
    */
+
+  AddAccessPath(directory);
 
   vprcpfile = ParseFile(fn, directory, NULL, NULL, fontDefault);
   ifrmMac = PlexGetCount(&vprcpfile->plfrm);
@@ -823,7 +825,7 @@ pilrc_reload(char *fn)
   gtk_option_menu_set_menu(GTK_OPTION_MENU(FormMenu), menu);
   pilrcui_drawform(GTK_DRAWING_AREA(FormArea));
 
-  totalIncludePaths = savenum;
+  FreeAccessPathsList();
   /*
    * chdir (cwd); 
    */
@@ -1106,6 +1108,7 @@ main(int argc,
    * gtk_rc_parse ("filerc"); 
    */
 
+  ResTypeInit();
   CbInit();
   create_main_window();
 
