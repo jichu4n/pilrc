@@ -2,7 +2,7 @@
  * @(#)pilrc.rc
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2002, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2003, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -22,8 +22,8 @@
 
 #include "winres.h"
 
-#define PILRC_VERSION			2, 9, 10, 3
-#define PILRC_VERSION_STR		"2.9p10-CW-3"
+#define PILRC_VERSION			3, 0, 0, 0
+#define PILRC_VERSION_STR		"3.0"
 
 /////////////////////////////////////////////////////////////////////////////
 //
