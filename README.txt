@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
- PilRC version 2.8                                              May 1, 2001
+ PilRC version 2.8 - patch release 0                            May 3, 2001
 ----------------------------------------------------------------------------
 
   INSTALLATION:
@@ -46,6 +46,14 @@
   to send modifications (bug-fixes and/or improvements) of PilRC to  Aaron 
   Ardiri so that they can be integrated into the next release(s). 
 
+  If you are compiling under a  UN*X development environment, you may wish
+  to remove the  ^M (return chars) from the source code using the src2unix
+  script:
+
+     ./src2unix.sh
+ 
+  Some UN*X compilers complain about ^M chars, and this is an easy fix :)
+ 
   > generic "compile"
 
   A generic  Makefile has  been included that compiles using a very simple
@@ -60,6 +68,10 @@
 
      make -f Makefile.gui
 
+  NOTE: PilRCUI has not been updated, and may not build correctly - unless
+        there is a fix for this, you should ignore it and use another tool
+        such as 'pilrcedit' to do resource editing.
+ 
   > autoconf + automake installed:
 
   If you  have autoconf  and automake installed,  building  and installing 
