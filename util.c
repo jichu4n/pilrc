@@ -67,8 +67,8 @@ static FILE *vfhRes = NULL;                      /* file receiving resource file
 
 static const char *szOutFileDir = NULL;          /* directory for *.bin files */
 
-static char szOutResDBFile[FILENAME_MAX];        /* filename for final .ro file */
-static char szTempFile[FILENAME_MAX];            /* temporary filename */
+static char *szOutResDBFile = NULL;              /* filename for final .ro file */
+static char *szTempFile = NULL;                  /* temporary filename */
 
 static VOID WriteOutResourceDB(void);
 
@@ -470,10 +470,11 @@ SetOutFileDir(const char *sz)
 static VOID
 RemoveTempFile(VOID)
 {
-  if (*szTempFile)
+  if (szTempFile)
   {
     remove(szTempFile);
-    strcpy(szTempFile, "");
+    free(szTempFile);
+    szTempFile = NULL;
   }
 }
 
@@ -482,10 +483,8 @@ OpenResDBFile(const char *sz)
 {
   static BOOL registered = fFalse;
 
-  strcpy(szOutResDBFile, sz);
-
-  strcpy(szTempFile, szOutResDBFile);
-  szTempFile[strlen(szTempFile) - 1] = '~';
+  szOutResDBFile = MakeFilename("%s", sz);
+  szTempFile = MakeFilename("%s%e.tro", sz, ".ro");
 
   remove(szTempFile);
 
@@ -516,6 +515,7 @@ CloseResDBFile(void)
   }
   
   RemoveTempFile();
+  free(szOutResDBFile);
   PlexFree(&resdir);
 }
 
