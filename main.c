@@ -1,35 +1,31 @@
 /*
  * @(#)main.c
  *
- * Copyright 1997-1999, Wes Cherry   (wesc@technosis.com)
- * Copyright      2000, Aaron Ardiri (ardiri@palmgear.com)
- *
- * This source file was generated as part of the PilRC application
- * that is  used by developers  of the Palm Computing Platform  to
- * translate  a resource script (.rcp)  into binary resource files 
- * required to generate Palm Computing Platform applications. 
+ * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
+ *                2000, Aaron Ardiri (mailto:aaron@ardiri.com)
+ * All rights reserved.
  * 
- * The source code and  binaries are available free  of charge and 
- * are to be used on an "as-is" basis. The developers of PilRC are
- * to provide no warranty, either expressed or  implied due to the 
- * use of the software. 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation;  either version 2, or (at your option)
+ * any version.
+ *
+ * This program is distributed in the hope that it will be useful,  but
+ * WITHOUT  ANY  WARRANTY;   without  even   the  implied  warranty  of 
+ * MERCHANTABILITY  or FITNESS FOR A  PARTICULAR  PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You  should have  received a  copy of the GNU General Public License
+ * along with this program;  if not,  please write to the Free Software 
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  * Revisions:
- * ----------
+ * ==========
  *
- * 29-Oct-96  Wes Cherry       file created
- *
- * PilRC is open-source,  that means that as a  developer can take 
- * part in the development of the software. Any modifications (bug
- * fixes or improvements) should be sent to the current maintainer
- * of PilRC.  This will ensure the entire Palm Computing  Platform
- * development  community can obtain the  latest and greatest from 
- * PilRC.
- *
- * Credits:
- * --------
- * 
- * none
+ * pre 18-Jun-2000 <numerous developers>
+ *                 creation
+ *     18-Jun-2000 Aaron Ardiri
+ *                 GNU GPL documentation additions
  */
 
 #include <stdio.h>
@@ -42,7 +38,10 @@
 void 
 Usage(void)
 {
-  Error("usage: pilrc {<options>} infile [outfiledir]\n\n"
+  Error("This program is free software; you may redistribute it under the\n"
+  	"terms of the GNU General Public License. This program as absolutely\n"
+	"no warranty, you use it AS IS at your own risk.\n\n"
+	"usage: pilrc {<options>} infile [outfiledir]\n\n"
         "Options:\n"
         "        -L LANGUAGE  Compile resources for specific language\n"
         "        -I <path>    Search for bitmap and include files in <path>\n"
@@ -83,7 +82,7 @@ main(int  cArg,
   int  fontType;
 	
   // display the (c) string
-  printf("PilRC v2.5b6\n");
+  printf("PilRC v2.5b7\n");
   printf("  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n");
   printf("  Copyright 2000      Aaron Ardiri (ardiri@palmgear.com)\n");
 

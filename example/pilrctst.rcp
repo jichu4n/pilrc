@@ -96,4 +96,6 @@ TRANSPARENCY 255 0 0
 BITMAPFAMILY bitmapPalm
   "images/palm1bpp.bmp" "images/palm2bpp.bmp" "" "images/palm8bpp.bmp" COMPRESS
 
+HEX "junk" ID 1000 0x20 32 "Hello World" 0x10 0x50
+
 BITMAP bitmapAbout "images/info1bpp.bmp" COMPRESS

@@ -13,7 +13,7 @@
   -->
 
 <html>
-<body bgcolor="#000000" text="#ffffff" link="#0000ff" vlink="#0000ff">
+<body bgcolor="#000000" text="#ffffff" link="#7f3fff" vlink="#7f3fff">
 
 <center>
 <tt>
@@ -32,13 +32,13 @@
 <tr>
 <td>
 <font face="Arial,Helvetica">
-<h2>PilRC v2.5b6 / PilRCUI<br>
+<h2>PilRC v2.5b7 / PilRCUI<br>
     User Manual</h2>
 </font>
 <td valign=top align=right>
 <font face="Arial,Helvetica">
   <a href="mailto:aaron@ardiri.com">Aaron Ardiri</a> (aaron@ardiri.com)<br>
-  10 June 2000
+  18 June 2000
 </font>
 </tr>
 </table>
@@ -692,6 +692,26 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
   <tr>
     <td valign=top>
     <font face="Arial,Helvetica">
+    <a href="#lang_hex">HEX</a>
+    </font>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    Binary Resource (Hex/String based)
+    </font>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
+    <a href="#lang_data">DATA</a>
+    </font>
+    <td valign=center>
+    <font face="Arial,Helvetica">
+    Binary Resource (Data File based)
+    </font>
+  </tr>
+  <tr>
+    <td valign=top>
+    <font face="Arial,Helvetica">
     <a href="#lang_translation">TRANSLATION</a>
     </font>
     <td valign=center>
@@ -855,10 +875,7 @@ is one or more of: <p>
     <td valign=top>
     <tt>
     ID <font color="#00ff00">&lt;Id.n&gt;</font> 
-    AT (<font color="#00ff00">&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</font>) <br>
-    [<font color="#0000ff">USABLE</font>] [NONUSABLE] [DISABLED] 
-    [VISIBLEITEMS <font color="#00ff00">&lt;NumVisItems.n&gt;</font>] <br>
-    [FONT <font color="#00ff00">&lt;FontId.n&gt;</font>]
+    <font color="#00ff00">&lt;ControlId.n&gt; &lt;ListId.n&gt;</font>
     </tt>
   </tr>
   <tr>
@@ -1101,7 +1118,8 @@ END</pre>
 
 <ul>
 <pre>
-VERSION ID <font color="#00ff00">&lt;VersionResourceId.n&gt;</font> <font color="#00ff00">&lt;Version.s&gt;</font></pre>
+VERSION ID <font color="#00ff00">&lt;VersionResourceId.n&gt; &lt;Version.s&gt;</font>
+VERSION <font color="#00ff00">&lt;Version.s&gt;</font></pre>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -1109,7 +1127,8 @@ VERSION ID <font color="#00ff00">&lt;VersionResourceId.n&gt;</font> <font color=
 <ul>
 </font>
 <pre>
-VERSION ID 1 "1.0 beta"</pre>
+VERSION ID 1 "1.0 beta"
+VERSION "1.0 beta"</pre>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -1268,13 +1287,13 @@ SMALLICONFAMILY <font color="#00ff00">&lt;BitmapFileName.s&gt; * 4 </font>[<font
 <li> 
 The bitmap must be 15x9 in dimension.
 <li> 
-Compression is not available for ICONS.
+Compression is not available for SMALLICONS.
 <li> 
 A <tt>tAIB</tt> resource with ID 1001 is created.
 <li>
-<tt>ICON</tt> creates a monochrome icon resource.
+<tt>SMALLICON</tt> creates a monochrome icon resource.
 <li>
-<tt>ICONFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp and 256 color) icon 
+<tt>SMALLICONFAMILY</tt> creates a multibit (1bpp, 2bpp, 4bpp and 256 color) icon 
 resources.
 <li>
 The inclusion of the bitmap color table is <b>not</b> recommended as it slows
@@ -1358,7 +1377,7 @@ BITMAPFAMILY ID 8 "bitm1bpp.bmp" "" "" "bitm8bpp.bmp" COMPRESS TRANSPARENTINDEX 
 
 <ul>
 <pre>
-TRAP ID &lt;TrapId.n&gt; &lt;TrapNumber.n&gt;</pre>
+TRAP ID <font color="#00ff00">&lt;TrapId.n&gt; &lt;TrapNumber.n&gt;</font></pre>
 </ul>
 
 <font face="Arial,Helvetica">
@@ -1531,6 +1550,44 @@ FntDefineFont(128, font128);</pre>
 FONT support in PilRC is not complete, and has been reverse engineered.
 </ul>
 
+<a name="lang_hex"></a>
+<b>HEX</b><p>
+</font>
+
+<ul>
+<pre>
+HEX <font color="#00ff00">&lt;ResType.s&gt;</font> ID <font color="#00ff00">&lt;ResId.n&gt; &lt;Byte.n&gt; | &lt;String.s&gt;</font></pre>
+</ul>
+
+<font face="Arial,Helvetica">
+<u>Example:</u>
+</font>
+<ul>
+<pre>
+HEX "junk" ID 1000 
+  0x00 0x00 0x00 0x23 "String" 0x00 "String2" 
+  0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00</pre>
+</ul>
+
+<font face="Arial,Helvetica">
+<a name="lang_data"></a>
+<b>DATA</b><p>
+</font>
+
+<ul>
+<pre>
+DATA <font color="#00ff00">&lt;ResType.s&gt;</font> ID <font color="#00ff00">&lt;ResId.n&gt; &lt;FileName.s&gt;</font></pre>
+</ul>
+
+<font face="Arial,Helvetica">
+<u>Example:</u>
+</font>
+<ul>
+<pre>
+DATA "junk" ID 1000 "binary.bin"</pre>
+</ul>
+
+<font face="Arial,Helvetica">
 <a name="international"></a>
 <b><u>International Support</u></b><p>
 

@@ -1,36 +1,31 @@
 /*
  * @(#)pilrc.c
  *
- * Copyright 1997-1999, Wes Cherry   (wesc@technosis.com)
- * Copyright      2000, Aaron Ardiri (ardiri@palmgear.com)
- *
- * This source file was generated as part of the PilRC application
- * that is  used by developers  of the Palm Computing Platform  to
- * translate  a resource script (.rcp)  into binary resource files 
- * required to generate Palm Computing Platform applications. 
+ * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
+ *                2000, Aaron Ardiri (mailto:aaron@ardiri.com)
+ * All rights reserved.
  * 
- * The source code and  binaries are available free  of charge and 
- * are to be used on an "as-is" basis. The developers of PilRC are
- * to provide no warranty, either expressed or  implied due to the 
- * use of the software. 
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation;  either version 2, or (at your option)
+ * any version.
+ *
+ * This program is distributed in the hope that it will be useful,  but
+ * WITHOUT  ANY  WARRANTY;   without  even   the  implied  warranty  of 
+ * MERCHANTABILITY  or FITNESS FOR A  PARTICULAR  PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You  should have  received a  copy of the GNU General Public License
+ * along with this program;  if not,  please write to the Free Software 
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  * Revisions:
- * ----------
+ * ==========
  *
- * 29-Oct-96  Wes Cherry       file created
- * 12-Feb-00  Darren Chi       tAIS resource support fix
- *
- * PilRC is open-source,  that means that as a  developer can take 
- * part in the development of the software. Any modifications (bug
- * fixes or improvements) should be sent to the current maintainer
- * of PilRC.  This will ensure the entire Palm Computing  Platform
- * development  community can obtain the  latest and greatest from 
- * PilRC.
- *
- * Credits:
- * --------
- * 
- * xxxxxxxxxxxxxx  xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ * pre 18-Jun-2000 <numerous developers>
+ *                 creation
+ *     18-Jun-2000 Aaron Ardiri
+ *                 GNU GPL documentation additions
  */
 
 #include <stdio.h>
@@ -454,7 +449,7 @@ char *PchGetSzMultiLine(char *szErr)
 			GetExpectLt(&tok, ltStr, szErr);
 			strcat(sz, tok.lex.szId);
 			}
-		}
+		w
 	return strdup(sz);
 	}
 #else
@@ -2727,6 +2722,92 @@ void ParseDumpFont()
 	free(pchFileName);
 	}
 
+// 2.5b7 additions:
+/*-----------------------------------------------------------------------------
+|     ParseDumpHex
+--------------------------------------------------------------AA-------------*/
+void ParseDumpHex()
+{
+	char *pchResType;
+	int id;
+
+        // get the information from the .rcp entry
+	pchResType = PchGetSz("Resource Type");
+	id = WGetId("Data ResourceId", fFalse);
+
+        // write the data to file
+	OpenOutput(pchResType, id);
+	while (FGetTok(&tok))
+	{
+		// we have a constant?
+		if (tok.lex.lt == ltConst)
+		{
+			if (tok.lex.val > 0xff)
+				ErrorLine("HEX data must be BYTE or less");
+
+			EmitB((unsigned char)tok.lex.val);
+		}
+		
+		// we have a string?
+		else
+		if (tok.lex.lt == ltStr)
+		{
+			char *pchString;
+
+			UngetTok();
+			pchString = PchGetSzMultiLine("String Text");
+			DumpBytes(pchString, strlen(pchString));
+			free(pchString);
+		}
+
+		// we dunno, assume "end" of resource
+		else
+		{
+			UngetTok();
+			break;
+		}
+	}
+	CloseOutput();
+
+	free(pchResType);
+}
+
+/*-----------------------------------------------------------------------------
+|     ParseDumpData
+--------------------------------------------------------------AA-------------*/
+void ParseDumpData()
+{
+	char *pchResType;
+	int id;
+	char *pchFileName;
+
+        // get the information from the .rcp entry
+	pchResType = PchGetSz("Resource Type");
+	id = WGetId("Data ResourceId", fFalse);
+	pchFileName = PchGetSz("Data Filename");
+
+        // write the data to file
+	OpenOutput(pchResType, id);
+	{
+		int  cch;
+		char *data;
+		FILE *fh = fopen(pchFileName, "rb");
+
+		data = malloc(4096);
+		cch = fread(data, 1, 4096, fh);
+		while (cch != 0) {
+			DumpBytes(data, cch);
+			cch = fread(data, 1, 4096, fh);
+		}
+		fclose(fh);
+	}
+	CloseOutput();
+
+	free(pchResType);
+	free(pchFileName);
+}
+// end
+
 /*-----------------------------------------------------------------------------
 |	ParseTranslation
 -------------------------------------------------------------WESC------------*/
@@ -3077,6 +3158,14 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 		case rwFont:
 			ParseDumpFont();
 			break;
+// 2.5b7 additions:
+		case rwHex:
+			ParseDumpHex();
+			break;
+		case rwData:
+			ParseDumpData();
+			break;
+// end
 
 		/* Add a rw here, remember to add to error message below */
 		default:
@@ -3087,7 +3176,7 @@ RCPFILE *ParseFile(char *szIn, char *szOutDir, char *szResFile, char *szIncFile,
 			else if (tok.lex.lt == ltDoubleSlash)
 				NextLine();
 			else
-				ErrorLine("FORM, MENU, ALERT, VERSION, STRING, CATEGORIES, APPLICATIONICONNAME, APPLICATION, BITMAP, SMALLICON, ICON, TRAP, FONT or TRANSLATION expected");
+				ErrorLine("FORM, MENU, ALERT, VERSION, STRING, CATEGORIES, APPLICATIONICONNAME, APPLICATION, BITMAP, BITMAPGREY, BITMAPGREY16, BITMAPCOLOR, BITMAPFAMILY, ICON, ICONFAMILY, SMALLICON, SMALLICONFAMILY, TRAP, FONT, HEX, DATA or TRANSLATION expected");
 			}
 		}
 	while (FGetTok(&tok));

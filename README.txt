@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
- PilRC version 2.5b6                                          June 10, 2000
+ PilRC version 2.5b7                                          June 18, 2000
 ----------------------------------------------------------------------------
 
   INSTALLATION:
@@ -30,10 +30,13 @@
   You should obtain the latest version of PilRC before compiling it. It is
   available from the following location:
 
-    http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc
+    http://www.ardiri.com/index.cfm?redir=palm&cat=pilrc&subcat=download
 
   If you wish to link to the PilRC development website, please provide the
-  as it is shown.
+  link as it is shown. Scott Ludwig has kindly donated the redirection url
+  of that links directly to the PilRC pages for convenience:
+
+    http://www.pilrc.com/
 
   BUILDING
   ========
