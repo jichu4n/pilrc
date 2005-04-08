@@ -652,7 +652,7 @@ UngetTok(void)
 }
 
 static const TOK *
-FPeekTok(void)
+PeekTok(void)
 {
   if (FGetTok(&tok))
     UngetTok();
@@ -4083,8 +4083,8 @@ ParseBitmapAttrs(BMPDEF *attr, FamilyItemAttr *eachAttr)
 
 	if (eachAttr)
 	{
-	  if (FPeekTok()->lex.lt == ltConst)
-	    while (FPeekTok()->lex.lt == ltConst)
+	  if (PeekTok()->lex.lt == ltConst)
+	    while (PeekTok()->lex.lt == ltConst)
 	      eachAttr[FindDepth(eachAttr, WGetConst("bitmap depth"))].compress
 		  = attr->compress;
 	  else
@@ -4213,7 +4213,7 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
 
   isicon = (kind == rwIcon || kind == rwIconSmall);
 
-  if (! isicon && FPeekTok()->lex.lt == ltStr)
+  if (! isicon && PeekTok()->lex.lt == ltStr)
     restype = restype_freeme = PchGetSz("Resource Type");
 
   if (isicon)
@@ -4344,9 +4344,9 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
 
     UngetTok();
     ndx = 0;
-    while (FPeekTok()->lex.lt == ltStr || DecodeDepthRW(FPeekTok()->rw) != 0)
+    while (PeekTok()->lex.lt == ltStr || DecodeDepthRW(PeekTok()->rw) != 0)
     {
-      if (FPeekTok()->lex.lt != ltStr)
+      if (PeekTok()->lex.lt != ltStr)
       {
 	FGetTok(&tok);
 	ndx = FindDepth(eachAttr, DecodeDepthRW(tok.rw));
@@ -5432,7 +5432,7 @@ ParseNavigationMap(RCNAVIGATIONITEM **navigationItems, int *numItems)
 	        (itm.bigButton ? 0x8000 : 0);
 	        
 	      /* break if next token is "END" or "ROW" */
-	      pTok = FPeekTok();
+	      pTok = PeekTok();
 	      if (pTok && (pTok->rw == rwEnd || pTok->rw == rwRow))
 	        break;
   	  }
@@ -6220,7 +6220,7 @@ ParseLineDirective(BOOL fnameRequired)
   // The constant given is for the *following* line
   vIn.file.line = WGetConst("Line number constant") - 1;
 
-  if (fnameRequired || FPeekTok()->lex.lt == ltStr)
+  if (fnameRequired || PeekTok()->lex.lt == ltStr)
   {
     free(vIn.file.szFilename);
     vIn.file.szFilename = PchGetSz("Input filename");
