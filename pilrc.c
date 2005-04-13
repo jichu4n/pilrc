@@ -3556,20 +3556,16 @@ ParseDumpVersion()
   }
 
   pchVersion = PchGetSz("Version Text");
-  /*
-   * RMa localisation 
-   */
-  if ((szLocaleP) && (vfStripNoLocRes))
+
+  if (DesirableLocale(NULL))
   {
-    if (pchVersion)
-      free(pchVersion);
-    return;
+    OpenOutput(kPalmResType[kVerRscType], id);     /* RMa "tver" */
+    DumpBytes(pchVersion, strlen(pchVersion) + 1);
+    if (vfLE32)
+      PadWordBoundary();
+    CloseOutput();
   }
-  OpenOutput(kPalmResType[kVerRscType], id);     /* RMa "tver" */
-  DumpBytes(pchVersion, strlen(pchVersion) + 1);
-  if (vfLE32)
-    PadWordBoundary();
-  CloseOutput();
+
   free(pchVersion);
 }
 
@@ -3595,40 +3591,22 @@ ParseDumpStringTable()
   if (buf == NULL) Error("out of memory");
 
   ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
-  /*
-   * RMa localisation 
-   */
-  if (!DesirableLocale(itm.Locale))
-  {
-    while (FGetTok(&tok))                        /* parse to last string in string table */
-    {
-      if (tok.lex.lt == ltConst)
-        //                              if (tok.lex.val == 0)
-        //                                      break;
-        //                              else
-        continue;
-      else if (tok.lex.lt != ltStr)
-      {
-        UngetTok();
-        break;
-      }
-    }
-    free(buf);
-    return;
-  }
-
   id = itm.id;
   //  id = WGetId("StringTable ResourceId", fFalse);
-  if (vfCheckDupes)
-  {
-    int iid;
 
-    for (iid = 0; iid < iidStringTableMac; iid++)       // RMa add for make difference between tSTR and tSTL string
-      if (rgidStringTable[iid] == id)            // RMa add for make difference between tSTR and tSTL string
-        ErrorLine("Duplicate StringTable Resource ID");
+  if (DesirableLocale(itm.Locale))
+  {
+    if (vfCheckDupes)
+    {
+      int iid;
+
+      for (iid = 0; iid < iidStringTableMac; iid++)       // RMa add for make difference between tSTR and tSTL string
+        if (rgidStringTable[iid] == id)            // RMa add for make difference between tSTR and tSTL string
+          ErrorLine("Duplicate StringTable Resource ID");
+    }
+    if (iidStringTableMac < iidStringTableMax)     // RMa add for make difference between tSTR and tSTL string
+      rgidStringTable[iidStringTableMac++] = id;   // RMa add for make difference between tSTR and tSTL string
   }
-  if (iidStringTableMac < iidStringTableMax)     // RMa add for make difference between tSTR and tSTL string
-    rgidStringTable[iidStringTableMac++] = id;   // RMa add for make difference between tSTR and tSTL string
 
   GetExpectLt(&tok, ltStr, "String Text");
   prefixString = strdup(tok.lex.szId);
@@ -3659,19 +3637,23 @@ ParseDumpStringTable()
     if (numStrings >= 384)
       ErrorLine("Number of strings in table must be less than 384");
   }
-  OpenOutput(kPalmResType[kStrListRscType], id); /* RMa "tSTL" */
-  DumpBytes(prefixString, strlen(prefixString) + 1);
-  if (vfLE32)
-  {
-    // RMa add  little hack for generate 68k format stringTable on LE32
-    EmitB((char)(((unsigned short)numStrings & 0xff00) >> 8));
-    EmitB((char)((unsigned short)numStrings & 0x00ff));
-  }
-  else
-    EmitW((unsigned short)numStrings);
 
-  DumpBytes(buf, tot);
-  CloseOutput();
+  if (DesirableLocale(itm.Locale))
+  {
+    OpenOutput(kPalmResType[kStrListRscType], id); /* RMa "tSTL" */
+    DumpBytes(prefixString, strlen(prefixString) + 1);
+    if (vfLE32)
+    {
+      // RMa add  little hack for generate 68k format stringTable on LE32
+      EmitB((char)(((unsigned short)numStrings & 0xff00) >> 8));
+      EmitB((char)((unsigned short)numStrings & 0x00ff));
+    }
+    else
+      EmitW((unsigned short)numStrings);
+
+    DumpBytes(buf, tot);
+    CloseOutput();
+  }
 
   free(prefixString);
   free(buf);
@@ -3690,44 +3672,28 @@ ParseDumpString()
   ITM itm;
 
   ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
-  /*
-   * RMa localisation 
-   */
-  if (!DesirableLocale(itm.Locale))
-  {
-    while (FGetTok(&tok))                        /* parse to last string in string table */
-    {
-      if ((tok.rw == rwFile) || (tok.lex.lt == ltBSlash)
-          || (tok.lex.lt == ltConst))
-        continue;
-      else if (tok.lex.lt != ltStr)
-      {
-        UngetTok();
-        break;
-      }
-    }
-    return;
-  }
-
   id = itm.id;
 
   pchString = NULL;
   //  id = WGetId("String ResourceId", fFalse);
 
-  if (vfCheckDupes)
+  if (DesirableLocale(itm.Locale))
   {
-    int iid;
-
-    for (iid = 0; iid < iidStringMac; iid++)
+    if (vfCheckDupes)
     {
-      if (rgidString[iid] == id)
+      int iid;
+
+      for (iid = 0; iid < iidStringMac; iid++)
       {
-        ErrorLine("Duplicate String Resource ID");
+        if (rgidString[iid] == id)
+        {
+          ErrorLine("Duplicate String Resource ID");
+        }
       }
     }
+    if (iidStringMac < iidStringMax)
+      rgidString[iidStringMac++] = id;
   }
-  if (iidStringMac < iidStringMax)
-    rgidString[iidStringMac++] = id;
 
   if (!FGetTok(&tok))
   {
@@ -3792,9 +3758,13 @@ ParseDumpString()
     pString++;
   }
 
-  OpenOutput(kPalmResType[kStrRscType], id);     /* RMa "tSTR" */
-  DumpBytes(pchString, strlen(pchString) + 1);
-  CloseOutput();
+  if (DesirableLocale(itm.Locale))
+  {
+    OpenOutput(kPalmResType[kStrRscType], id);     /* RMa "tSTR" */
+    DumpBytes(pchString, strlen(pchString) + 1);
+    CloseOutput();
+  }
+
   free(pchString);
 }
 
@@ -3809,40 +3779,28 @@ ParseDumpCategories()
   ITM itm;
 
   ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
-  /*
-   * RMa localisation 
-   */
-  if (!DesirableLocale(itm.Locale))
-  {
-    while (FGetTok(&tok))                        /* parse to last string in string table */
-    {
-      if (tok.lex.lt != ltStr)
-      {
-        UngetTok();
-        break;
-      }
-    }
-    return;
-  }
   id = itm.id;
 
-  if (vfCheckDupes)
+  if (DesirableLocale(itm.Locale))
   {
-    int iid;
-
-    for (iid = 0; iid < iidAISMac; iid++)
+    if (vfCheckDupes)
     {
-      if (rgidAIS[iid] == id)
+      int iid;
+
+      for (iid = 0; iid < iidAISMac; iid++)
       {
-        ErrorLine("Duplicate Categories Resource ID");
+        if (rgidAIS[iid] == id)
+        {
+          ErrorLine("Duplicate Categories Resource ID");
+        }
       }
     }
-  }
-  if (iidAISMac < iidAISMax)
-    //  rgidString[iidAISMac++] = id;
-    rgidAIS[iidAISMac++] = id;
+    if (iidAISMac < iidAISMax)
+      //  rgidString[iidAISMac++] = id;
+      rgidAIS[iidAISMac++] = id;
 
-  OpenOutput(kPalmResType[kAppInfoStringsRscType], id); /* RMa "tAIS" */
+    OpenOutput(kPalmResType[kAppInfoStringsRscType], id); /* RMa "tAIS" */
+  }
 
   count = 0;
   GetExpectLt(&tok, ltStr, "String Text");
@@ -3855,8 +3813,11 @@ ParseDumpCategories()
      */
     if (len >= categoryLength)
       len = categoryLength - 1;
-    DumpBytes(string, len);
-    EmitB(0);
+    if (DesirableLocale(itm.Locale))
+    {
+      DumpBytes(string, len);
+      EmitB(0);
+    }
     if (count == maxCategories)
       WarningLine
         ("More than 16 strings in a Categories. Check it to be sure");
@@ -3893,15 +3854,17 @@ ParseDumpCategories()
   if (tok.lex.lt != ltNil)
     UngetTok();
 
-  /*
-   * The AppInfo category structure expects exactly maxCategories 
-   * * strings, so write a null byte for any unspecified strings 
-   */
-  for (; count < maxCategories; count++)
-    EmitB(0);
+  if (DesirableLocale(itm.Locale))
+  {
+    /*
+     * The AppInfo category structure expects exactly maxCategories 
+     * * strings, so write a null byte for any unspecified strings 
+     */
+    for (; count < maxCategories; count++)
+      EmitB(0);
 
-  CloseOutput();
-
+    CloseOutput();
+  }
 }
 
 /*-----------------------------------------------------------------------------
@@ -4468,30 +4431,17 @@ ParseDumpLauncherCategory(void)
   if (id == 0)
     id = 1000;
 
-  /*
-   * * RMa localisation 
-   */
-  if (pLocale)
+  if (DesirableLocale(pLocale))
   {
-    if (!szLocaleP)
-      goto CLEANUP;
-    else if (strcmp(pLocale, szLocaleP))
-      goto CLEANUP;
+    OpenOutput(kPalmResType[kDefaultCategoryRscType], id);      /* RMa "taic" */
+    DumpBytes(pString, strlen(pString) + 1);
+    //      RMa Remove padding is it no necessary padding. it done by prcbuild if needded
+    //      PadBoundary();
+    CloseOutput();
   }
-  else if (vfStripNoLocRes)
-    goto CLEANUP;
 
-  OpenOutput(kPalmResType[kDefaultCategoryRscType], id);        /* RMa "taic" */
-  DumpBytes(pString, strlen(pString) + 1);
-  //      RMa Remove padding is it no necessary padding. it done by prcbuild if needded
-  //      PadBoundary();
-  CloseOutput();
-
-CLEANUP:
-  if (pString)
   free(pString);
-  if (pLocale)
-    free(pLocale);
+  free(pLocale);
 }
 
 /*-----------------------------------------------------------------------------
@@ -4500,38 +4450,24 @@ CLEANUP:
 static void
 ParseDumpApplicationIconName()
 {
-  int id;
   char *pchString;
   ITM itm;
 
   ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
-  /*
-   * RMa localisation 
-   */
-  if (!DesirableLocale(itm.Locale))
+  pchString = PchGetSz("Icon Name Text");
+
+  if (DesirableLocale(itm.Locale))
   {
-    while (FGetTok(&tok))                        /* parse to last string in string table */
-    {
-      if (tok.lex.lt != ltStr)
-      {
-        UngetTok();
-        break;
-      }
-    }
-    return;
+    OpenOutput(kPalmResType[kAinRscType], itm.id);     /* RMa "tAIN" */
+    DumpBytes(pchString, strlen(pchString) + 1);
+
+    // RMa this resource is align on 16 bits in the two world
+    //      Force 16 bit padding
+    PadWordBoundary();
+
+    CloseOutput();
   }
 
-  id = itm.id;
-
-  pchString = PchGetSz("Icon Name Text");
-  OpenOutput(kPalmResType[kAinRscType], id);     /* RMa "tAIN" */
-  DumpBytes(pchString, strlen(pchString) + 1);
-
-  // RMa this resource is align on 16 bits in the two world
-  //      Force 16 bit padding
-  PadWordBoundary();
-
-  CloseOutput();
   free(pchString);
 }
 
@@ -4541,34 +4477,21 @@ ParseDumpApplicationIconName()
 static void
 ParseDumpApplication()
 {
-  int id;
   char *pchString;
   ITM itm;
 
   ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
-  /*
-   * RMa localisation 
-   */
-  if (!DesirableLocale(itm.Locale))
-  {
-    while (FGetTok(&tok))                        /* parse to last string in string table */
-    {
-      if (tok.lex.lt != ltStr)
-      {
-        UngetTok();
-        break;
-      }
-    }
-    return;
-  }
-
-  id = itm.id;
   pchString = PchGetSz("APPL");
   if (strlen(pchString) != 4)
     ErrorLine("APPL resource must be 4 chars");
-  OpenOutput(kPalmResType[kApplicationType], id);       /* RMa "APPL" */
-  DumpBytes(pchString, 4);
-  CloseOutput();
+
+  if (DesirableLocale(itm.Locale))
+  {
+    OpenOutput(kPalmResType[kApplicationType], itm.id);       /* RMa "APPL" */
+    DumpBytes(pchString, 4);
+    CloseOutput();
+  }
+
   free(pchString);
 }
 
@@ -4597,15 +4520,13 @@ ParseDumpTrap()
   if (id < 1000)
     ErrorLine
       ("TRAP resource id must be >= 1000, see HackMaster documentation");
-  /*
-   * RMa localisation 
-   */
-  if ((szLocaleP) && (vfStripNoLocRes))
-    return;
 
-  OpenOutput(kPalmResType[kTrapType], id);       /* RMa "TRAP" */
-  EmitW((unsigned short)wTrap);
-  CloseOutput();
+  if (DesirableLocale(NULL))
+  {
+    OpenOutput(kPalmResType[kTrapType], id);       /* RMa "TRAP" */
+    EmitW((unsigned short)wTrap);
+    CloseOutput();
+  }
 }
 
 /*-----------------------------------------------------------------------------
@@ -4816,40 +4737,23 @@ ParseDumpHex()
 static void
 ParseDumpData()
 {
-  char *pchResType;
-  int id;
-  char *pchFileName = NULL;
+  char *pchResType, *pchFileName;
   ITM itm;
 
   // get the information from the .rcp entry
   pchResType = PchGetSz("Resource Type");
   ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
-  /*
-   * RMa localisation 
-   */
-  if (!DesirableLocale(itm.Locale))
-  {
-    while (FGetTok(&tok))                        /* parse to last string in string table */
-    {
-      if (tok.lex.lt != ltStr)
-      {
-        UngetTok();
-        break;
-      }
-    }
-  }
+  pchFileName = PchGetSz("Data Filename");
+
+  // file name available?
+  if ((pchFileName == NULL) || (strcmp(pchFileName, "") == 0))        /* RMa bug correction invert test */
+    ErrorLine("Empty or no file name provided");
   else
   {
-    id = itm.id;
-    pchFileName = PchGetSz("Data Filename");
-
-    // file name available?
-    if ((pchFileName == NULL) || (strcmp(pchFileName, "") == 0))        /* RMa bug correction invert test */
-      ErrorLine("Empty or no file name provided");
-    else
+    if (DesirableLocale(itm.Locale))
     {
       // write the data to file
-      OpenOutput(pchResType, id);
+      OpenOutput(pchResType, itm.id);
       {
         int cch;
         char *data;
@@ -4873,10 +4777,9 @@ ParseDumpData()
       CloseOutput();
     }
   }
-  if (pchResType != NULL)
-    free(pchResType);
-  if (pchFileName != NULL)
-    free(pchFileName);
+
+  free(pchResType);
+  free(pchFileName);
 }
 
 /*-----------------------------------------------------------------------------
@@ -5092,24 +4995,19 @@ ParseDumpPaletteTable(void)
     ErrorLine("Palette table : incomplete color definitions");
 
   /*
-   * RMa localisation 
-   */
-  if ((szLocaleP) && (vfStripNoLocRes))
-  {
-    if (pData)
-      free(pData);
-    return;
-  }
-  /*
    * We write the datas to disk 
    */
-  OpenOutput(kPalmResType[kColorTableRscType], id);     /* RMa "tclt" */
-  if (vfLE32)
-    EmitL(counter);
-  else
-    EmitW((unsigned short)counter);
-  DumpBytes(pData, (counter * 4));
-  CloseOutput();
+  if (DesirableLocale(NULL))
+  {
+    OpenOutput(kPalmResType[kColorTableRscType], id);     /* RMa "tclt" */
+    if (vfLE32)
+      EmitL(counter);
+    else
+      EmitW((unsigned short)counter);
+    DumpBytes(pData, (counter * 4));
+    CloseOutput();
+  }
+
   free(pData);
 }
 
@@ -5169,10 +5067,7 @@ ParseDumpMidi(void)
   resId = WGetId("Midi ResourceId");
   pFileName = PchGetSz("Data Filename");
 
-  /*
-   * RMa localisation 
-   */
-  if ((szLocaleP) && (vfStripNoLocRes))
+  if (!DesirableLocale(NULL))
   {
     if (pFileName != NULL)
       free(pFileName);
