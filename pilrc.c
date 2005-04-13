@@ -828,6 +828,30 @@ PchGetSzMultiLine(char *szErr)
 #endif
 
 /*-----------------------------------------------------------------------------
+|	FIsString
+|
+|		Returns true if the token could be the first token of
+|		a (possibly concatenated) string.
+-------------------------------------------------------------JohnM-----------*/
+BOOL
+FIsString(const TOK *ptok)
+{
+  return ptok->lex.lt == ltStr;  // FIXME
+}
+
+/*-----------------------------------------------------------------------------
+|	PchGetString
+|
+|		Get a string (which should be free()ed by the caller),
+|		which may include concatenation and/or string #defines.
+-------------------------------------------------------------JohnM-----------*/
+char *
+PchGetString(const char *szErr)
+{
+  return PchGetSzMultiLine((char *)szErr);  // FIXME
+}
+
+/*-----------------------------------------------------------------------------
 |	WGetConst
 |	
 |		Get an integer constant or one of the Prev* reserved words, returning
@@ -1005,12 +1029,12 @@ AddDefineSymbol(void)
     }
     else
     {
-	    if (ltStr == tok.lex.lt)
+	    if (FIsString(&tok))
 	    {
 			// support a string define that spans multiple lines
 			char *szText;
 			UngetTok();
-			szText = PchGetSzMultiLine("#define string");
+			szText = PchGetString("#define string");
 	        AddSymString(szId, szText);
 	        free(szText);
 	    }
@@ -1399,7 +1423,7 @@ ParseItm(ITM * pitm,
   if (grif & ifText)
   {
     pitm->grifOut |= ifText;
-    pitm->text = PchGetSzMultiLine("item string"); // BLC change PchGetSz to PchGetSzMultiLine
+    pitm->text = PchGetString("item string");
     pitm->cbText = strlen(pitm->text) + 1;
   }
   if (grif & ifMultText)
@@ -1722,15 +1746,15 @@ ParseItm(ITM * pitm,
 #ifdef PALM_INTERNAL
       case rwCreator:                           /* RMa addition */
         CheckGrif3(if3Creator);
-        pitm->creator = PchGetSz("creator");
+        pitm->creator = PchGetString("creator");
         break;
       case rwLanguage:                          /* RMa addition */
         CheckGrif3(if3Language);
-        pitm->language = PchGetSz("language");
+        pitm->language = PchGetString("language");
         break;
       case rwCountry:                           /* RMa addition */
         CheckGrif3(if3Country);
-        pitm->country = PchGetSz("country");
+        pitm->country = PchGetString("country");
         break;
       case rwScreen:                            /* RMa addition */
       case rwGraffiti:                          /* BUG! other types */
@@ -1775,11 +1799,11 @@ ParseItm(ITM * pitm,
         break;
       case rwCountryName:                       /* RMa addition */
         CheckGrif3(if3CountryName);
-        pitm->CountryName = PchGetSz("countryname");
+        pitm->CountryName = PchGetString("countryname");
         break;
       case rwName:                              /* RMa addition */
         CheckGrif3(if3Name);
-        pitm->Name = PchGetSz("name");
+        pitm->Name = PchGetString("name");
         break;
       case rwDateFormat:                        /* RMa addition */
         CheckGrif3(if3DateFormat);
@@ -1803,15 +1827,15 @@ ParseItm(ITM * pitm,
         break;
       case rwCurrencyName:                      /* RMa addition */
         CheckGrif3(if3CurrencyName);
-        pitm->CurrencyName = PchGetSz("currencyname");
+        pitm->CurrencyName = PchGetString("currencyname");
         break;
       case rwCurrencySymbol:                    /* RMa addition */
         CheckGrif3(if3CurrencySymbol);
-        pitm->CurrencySymbol = PchGetSz("currencysymbol");
+        pitm->CurrencySymbol = PchGetString("currencysymbol");
         break;
       case rwCurrencyUniqueSymbol:              /* RMa addition */
         CheckGrif3(if3CurrencyUniqueSymbol);
-        pitm->CurrencyUniqueSymbol = PchGetSz("currencyuniquesymbol");
+        pitm->CurrencyUniqueSymbol = PchGetString("currencyuniquesymbol");
         break;
       case rwCurrencyDecimalPlaces:             /* RMa addition */
         CheckGrif3(if3CurrencyDecimalPlaces);
@@ -1844,7 +1868,7 @@ ParseItm(ITM * pitm,
 #endif
       case rwLocale:                            /* RMa addition localisation management */
         CheckGrif3(if3Locale);
-        pitm->Locale = PchGetSz("locale");
+        pitm->Locale = PchGetString("locale");
         break;
 #ifdef PALM_INTERNAL
       case rwFontType:                          /* RMa 'NFNT' & 'fntm' */
@@ -3216,7 +3240,7 @@ FParsePullDown(RCPFILE * prcpfile)
   int previousID = 0;
 
   memset(&mpd, 0, sizeof(RCMENUPULLDOWN));
-  SETBAFIELD(mpd, title, PchGetSz("Popup title"));
+  SETBAFIELD(mpd, title, PchGetString("Popup title"));
   GetExpectRw(rwBegin);
   while (FGetTok(&tok))
   {
@@ -3265,7 +3289,7 @@ FParsePullDown(RCPFILE * prcpfile)
           int cch;
 
           UngetTok();
-          mi.itemStr = PchGetSz("Item Text");
+          mi.itemStr = PchGetString("Item Text");
           cch = strlen(mi.itemStr);
 
           // only apply special treatment if not requested
@@ -3494,10 +3518,10 @@ ParseDumpAlert(RCPFILE * prcpfile)
       case rwEnd:
         goto WriteAlert;
       case rwTTL:
-        pchTitle = PchGetSzMultiLine("Title Text");     // RMa change PchGetSz to PchGetSzMultiLine
+        pchTitle = PchGetString("Title Text");
         break;
       case rwMessage:
-        pchMessage = PchGetSzMultiLine("Message Text");
+        pchMessage = PchGetString("Message Text");
         break;
       case rwBTN:
       case rwButtons:                           /* button */
@@ -3555,7 +3579,7 @@ ParseDumpVersion()
       id = WGetId("Version ResourceId");
   }
 
-  pchVersion = PchGetSz("Version Text");
+  pchVersion = PchGetString("Version Text");
 
   if (DesirableLocale(NULL))
   {
@@ -3724,7 +3748,7 @@ ParseDumpString()
      */
     if (tok.lex.lt != ltBSlash)
       UngetTok();
-    pchString = PchGetSzMultiLine("String Text");
+    pchString = PchGetString("String Text");
   }
 
   cch = strlen(pchString);                       // RMa add 
@@ -4095,7 +4119,7 @@ ParseBitmapAttrs(BMPDEF *attr, FamilyItemAttr *eachAttr)
 	break;
 
       case rwBitmapPalette:
-	fname = nullify(PchGetSz("Palette filename"));
+	fname = nullify(PchGetString("Palette filename"));
 	if (fname)
 	{
 	  attr->haspalette = fTrue;
@@ -4176,8 +4200,8 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
 
   isicon = (kind == rwIcon || kind == rwIconSmall);
 
-  if (! isicon && PeekTok()->lex.lt == ltStr)
-    restype = restype_freeme = PchGetSz("Resource Type");
+  if (! isicon && FIsString(PeekTok()))
+    restype = restype_freeme = PchGetString("Resource Type");
 
   if (isicon)
     resid = (kind == rwIcon)? 1000 : 1001;
@@ -4224,7 +4248,7 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
       switch (tok.rw)
       {
 	case rwLocale:
-	  locale = PchGetSz("locale");
+	  locale = PchGetString("locale");
 	  break;
 
 	case rwNoCompress:
@@ -4241,7 +4265,7 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
 	  break;
 
 	case rwRscType:
-	  restype = restype_freeme = PchGetSz("Resource Type");
+	  restype = restype_freeme = PchGetString("Resource Type");
 	  break;
 
 	case rwIncludeClut:
@@ -4256,7 +4280,7 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
   if (resid == -1)
     ErrorLine ("Bitmap resource ID required");
 
-  if (tok.lex.lt == ltStr)
+  if (FIsString(&tok))
   {
     static const RW normalTypes[] = {
       rwBitmap, rwBitmapGrey, rwBitmapGrey16,
@@ -4307,19 +4331,19 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
 
     UngetTok();
     ndx = 0;
-    while (PeekTok()->lex.lt == ltStr || DecodeDepthRW(PeekTok()->rw) != 0)
+    while (FIsString(PeekTok()) || DecodeDepthRW(PeekTok()->rw) != 0)
     {
-      if (PeekTok()->lex.lt != ltStr)
+      if (! FIsString(PeekTok()))
       {
 	FGetTok(&tok);
 	ndx = FindDepth(eachAttr, DecodeDepthRW(tok.rw));
       }
 	
       if (ndx < maxfiles)
-	pchFileName[ndx++] = nullify(PchGetSz("Bitmap filename"));
+	pchFileName[ndx++] = nullify(PchGetString("Bitmap filename"));
       else
       {
-	free(PchGetSz("Bitmap filename"));
+	free(PchGetString("Bitmap filename"));
 	WarningLine("Excess bitmap filenames ignored.");
       }
     }
@@ -4348,7 +4372,7 @@ ParseDumpBitmap(RW kind, BOOL begin_allowed)
     {
       int ndx;
       BMPDEF cur = defattr;
-      cur.pchFileName = nullify(PchGetSz("Bitmap filename"));
+      cur.pchFileName = nullify(PchGetString("Bitmap filename"));
       ndx = ParseBitmapAttrs(&cur, NULL);
 
       if (ndx == -1)
@@ -4416,12 +4440,12 @@ ParseDumpLauncherCategory(void)
     }
     else if (tok.rw == rwLocale)
     {
-      pLocale = PchGetSz("locale");
+      pLocale = PchGetString("locale");
     }
-    else if (tok.lex.lt == ltStr)
+    else if (FIsString(&tok))
       {
         UngetTok();
-        pString = PchGetSz("taic");
+        pString = PchGetString("taic");
         break;
       }
     else
@@ -4454,7 +4478,7 @@ ParseDumpApplicationIconName()
   ITM itm;
 
   ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
-  pchString = PchGetSz("Icon Name Text");
+  pchString = PchGetString("Icon Name Text");
 
   if (DesirableLocale(itm.Locale))
   {
@@ -4481,7 +4505,7 @@ ParseDumpApplication()
   ITM itm;
 
   ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
-  pchString = PchGetSz("APPL");
+  pchString = PchGetString("APPL");
   if (strlen(pchString) != 4)
     ErrorLine("APPL resource must be 4 chars");
 
@@ -4546,7 +4570,7 @@ ParseDumpFont()
 
   if (fontid < 128 || fontid > 255)
     ErrorLine("FontID invalid.  valid values: 128<=FontID<=255");
-  pchFileName = PchGetSz("Font Filename");
+  pchFileName = PchGetString("Font Filename");
 
   if (DesirableLocale(itm.Locale))
   {
@@ -4585,11 +4609,11 @@ ParseDumpFontFamily()
     if (tok.rw == rwBitmapDensity)
     {
       aFontFamilyEntries[densityCount].density = WGetConstEx("Density");
-      aFontFamilyEntries[densityCount].pchFileName = PchGetSz("Font Filename");
+      aFontFamilyEntries[densityCount].pchFileName = PchGetString("Font Filename");
     }
     else if (tok.rw == rwFont)
     {
-      aFontFamilyEntries[densityCount].pchFileName = PchGetSz("Font Filename");
+      aFontFamilyEntries[densityCount].pchFileName = PchGetString("Font Filename");
       GetExpectRw(rwBitmapDensity);
       aFontFamilyEntries[densityCount].density = WGetConstEx("Density");
     }
@@ -4626,7 +4650,7 @@ ParseDumpHex()
   ITM itm;
 
   // get the information from the .rcp entry
-  pchResType = PchGetSz("Resource Type");
+  pchResType = PchGetString("Resource Type");
   ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
   /*
    * RMa localisation 
@@ -4709,12 +4733,12 @@ ParseDumpHex()
       }
 
       // we have a string?
-      else if (tok.lex.lt == ltStr)
+      else if (FIsString(&tok))
       {
         char *pchString;
 
         UngetTok();
-        pchString = PchGetSzMultiLine("String Text");
+        pchString = PchGetString("String Text");
         DumpBytes(pchString, strlen(pchString));
         free(pchString);
       }
@@ -4741,9 +4765,9 @@ ParseDumpData()
   ITM itm;
 
   // get the information from the .rcp entry
-  pchResType = PchGetSz("Resource Type");
+  pchResType = PchGetString("Resource Type");
   ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
-  pchFileName = PchGetSz("Data Filename");
+  pchFileName = PchGetString("Data Filename");
 
   // file name available?
   if ((pchFileName == NULL) || (strcmp(pchFileName, "") == 0))        /* RMa bug correction invert test */
@@ -5023,7 +5047,7 @@ ParseDumpPalette()
   id = WGetId("Data ResourceId");
 
   // get the information from the .rcp entry
-  pchFileName = PchGetSz("Palette Filename");
+  pchFileName = PchGetString("Palette Filename");
 
   // file name available?
   if ((pchFileName == NULL) || (strcmp(pchFileName, "") == 0))
@@ -5065,7 +5089,7 @@ ParseDumpMidi(void)
 
   // get the information from the .rcp entry
   resId = WGetId("Midi ResourceId");
-  pFileName = PchGetSz("Data Filename");
+  pFileName = PchGetString("Data Filename");
 
   if (!DesirableLocale(NULL))
   {
@@ -5188,7 +5212,7 @@ ParseTranslation()
       case rwEnd:
         return;
       case rwNil:
-        if (tok.lex.lt != ltStr)
+        if (! FIsString(&tok))
           ErrorLine("String Expected");
         if (fAddTranslation)
         {
@@ -5196,7 +5220,7 @@ ParseTranslation()
           pte->szOrig = strdup(tok.lex.szId);
         }
         GetExpectLt(&tok, ltAssign, "=");
-        pch = PchGetSzMultiLine("Translation");
+        pch = PchGetString("Translation");
         if (fAddTranslation)
         {
           pte->szTrans = pch;
@@ -6115,10 +6139,10 @@ ParseLineDirective(BOOL fnameRequired)
   // The constant given is for the *following* line
   vIn.file.line = WGetConst("Line number constant") - 1;
 
-  if (fnameRequired || PeekTok()->lex.lt == ltStr)
+  if (fnameRequired || FIsString(PeekTok()))
   {
     free(vIn.file.szFilename);
-    vIn.file.szFilename = PchGetSz("Input filename");
+    vIn.file.szFilename = PchGetString("Input filename");
   }
 }
 

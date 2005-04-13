@@ -2743,7 +2743,8 @@ void ParseItm(ITM * pitm,
 BOOL FGetTok(TOK * ptok);
 VOID UngetTok(void);
 int WGetConst(char *szErr);
-char *PchGetSz(char *szErr);
+BOOL FIsString(const TOK *ptok);
+char *PchGetString(const char *szErr);
 VOID GetExpectRw(RW rw);
 int WGetId(char *szErr);
 int WGetConstEx(char *szErr);
