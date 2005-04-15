@@ -5450,6 +5450,7 @@ OpenInputFile(const char *szIn)
   vIn.file.line = 0;
   vIn.buffer[0] = '\0';
   vIn.pch = vIn.buffer;
+  FInitLexer(NULL, fTrue);
 }
 
 /*-----------------------------------------------------------------------------
@@ -6406,7 +6407,6 @@ ParseFile(const char *szIn,
   OpenResFile(szResFile);
 
   vIn.file.szFilename = NULL;
-  FInitLexer(NULL, fTrue);
 
   ParseRcpFile(szIn, prcpfile);
 
