@@ -2669,11 +2669,11 @@ typedef struct INPUTCONTEXT
   char buffer[4096];
   char *pch;
   const char *pchLex;
+  BOOL fPendingTok;
+  TOK pendingTok;
 }
 INPUTCONTEXT;
 
-extern BOOL fTokUngotten;
-extern TOK tokPrev;
 extern TOK tok;
 extern INPUTCONTEXT vIn;
 
@@ -2740,8 +2740,9 @@ void ParseItm(ITM * pitm,
               int grif2,
               int grif3,
               int grif4);
-BOOL FGetTok(TOK * ptok);
+BOOL FGetTok(TOK *ptok);
 VOID UngetTok(void);
+const TOK *PeekTok(void);
 int WGetConst(char *szErr);
 BOOL FIsString(const TOK *ptok);
 char *PchGetString(const char *szErr);

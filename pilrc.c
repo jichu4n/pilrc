@@ -304,8 +304,6 @@ SYM *psymFirst;
 /*
  * Parse globals 
  */
-BOOL fTokUngotten;
-TOK tokPrev;
 TOK tok;
 INPUTCONTEXT vIn;
 
@@ -568,21 +566,22 @@ NextLine(void)
 /*-----------------------------------------------------------------------------
 |	FGetTok
 |
-|		Get the next token.  returns fFalse and .rw=rwNil on EOF
+|		Get the next token.
+|		Returns fFalse, .lex.lt=ltNil, and .rw=rwNil on EOF.
 |
 |	Consistency issue -- takes a ptok, but some other other routines don't.
 |	only one global tok...
 -------------------------------------------------------------WESC------------*/
 BOOL
-FGetTok(TOK * ptok)
+FGetTok(TOK *ptok)
 {
   BOOL fInComment;
 
-  if (fTokUngotten)
+  if (vIn.fPendingTok)
   {
-    *ptok = tokPrev;
-    fTokUngotten = fFalse;
-    return fTrue;
+    *ptok = vIn.pendingTok;
+    vIn.fPendingTok = fFalse;
+    return ptok->lex.lt != ltNil;
   }
 
   ptok->rw = rwNil;
@@ -595,6 +594,8 @@ FGetTok(TOK * ptok)
       {
         if (fInComment)
           ErrorLine("unexpected end of file during C-style comment");
+        ptok->lex.lt = ltNil;
+        vIn.pendingTok = *ptok;
         return fFalse;
       }
     }
@@ -628,7 +629,7 @@ FGetTok(TOK * ptok)
       strcpy(ptok->lex.szId, pte->szTrans);
   }
 
-  tokPrev = *ptok;
+  vIn.pendingTok = *ptok;
   return fTrue;
 }
 
@@ -636,32 +637,21 @@ FGetTok(TOK * ptok)
 |	UngetTok
 |	
 |		Pushback one token.  Note! that this is 1 level only!
-|
-| Notes from JohnM:
-|	Pushing back EOF doesn't work: it leads to old tokens reappearing
-|	in the token stream.  Only use UngetTok() if you are sure that the
-|	preceding FGetTok() didn't return fFalse.
-|	FIXME: It might be easier to make unget-EOF Just Work, which would
-|	be tantamount to making EOF a real token.
 -------------------------------------------------------------WESC------------*/
 VOID
 UngetTok(void)
 {
-  tok = tokPrev;
-  fTokUngotten = fTrue;
+  vIn.fPendingTok = fTrue;
 }
 
-static const TOK *
+/*-----------------------------------------------------------------------------
+|	PeekTok
+-------------------------------------------------------------JohnM-----------*/
+const TOK *
 PeekTok(void)
 {
-  if (FGetTok(&tok))
-    UngetTok();
-  else
-  {
-    tok.rw = rwNil;
-    tok.lex.lt = ltNil;
-  }
-
+  FGetTok(&tok);
+  UngetTok();
   return &tok;
 }
 
@@ -5451,6 +5441,7 @@ OpenInputFile(const char *szIn)
   vIn.buffer[0] = '\0';
   vIn.pch = vIn.buffer;
   FInitLexer(NULL, fTrue);
+  vIn.fPendingTok = fFalse;
 }
 
 /*-----------------------------------------------------------------------------
