@@ -1418,37 +1418,27 @@ ParseItm(ITM * pitm,
   }
   if (grif & ifMultText)
   {
-    char *pch;
-    char rgb[szMultipleLineMaxLength];
-
     pitm->grifOut |= ifMultText;
 
-	// BLC - to support "no strings" for a MultText type, need to peek 
-	// ahead and see if token is a string before entering string read loop
-	FGetTok(&tok);
-    if (tok.lex.lt == ltStr)
-    {
-	    pch = rgb;
-	    for (;;)
-	    {
-		  // BLC - check for buffer overflow before the strcpy
-	      size_t filled = pch - rgb;
-	      if (filled + strlen(tok.lex.szId) + 1 >= sizeof(rgb))
-	        ErrorLine("Hex string or String are too big");
+    pitm->text = NULL;
+    pitm->cbText = 0;
 
-	      strcpy(pch, tok.lex.szId);
-	      pitm->numItems++;
-	      pch += strlen(tok.lex.szId) + 1;
-	      if (!FGetTok(&tok))
-	        return;
-	      if (tok.lex.lt != ltStr)
-	        break;
-	    }
-	    pitm->text = malloc(pch - rgb);
-	    pitm->cbText = pch - rgb;
-	    memcpy(pitm->text, rgb, pch - rgb);
-	 }
-     UngetTok();
+    while (FIsString(PeekTok()))
+    {
+      char *pchSingle = PchGetString("item string");
+      size_t singleSize = strlen(pchSingle) + 1;
+      char *pch = realloc(pitm->text, pitm->cbText + singleSize);
+      if (pch == NULL)
+        ErrorLine("Strings are larger than available memory");
+      else
+        pitm->text = pch;
+
+      memcpy(pitm->text + pitm->cbText, pchSingle, singleSize);
+      pitm->cbText += singleSize;
+      pitm->numItems++;
+
+      free(pchSingle);
+    }
   }
 
   if (grif & ifId)
@@ -3304,16 +3294,13 @@ FParsePullDown(RCPFILE * prcpfile)
           mi.id = WGetId("CommandId");
           if (vfPalmRez)
             previousID = mi.id + 1;              // RMa 
-          if (FGetTok(&tok))
+          if (FIsString(PeekTok()))
           {
-            if (tok.rw == rwNil && tok.lex.lt == ltStr)
-            {
-              if (strlen(tok.lex.szId) != 1)
-                ErrorLine("CommandKey must be 1 character");
-              mi.command = toupper(tok.lex.szId[0]);
-            }
-            else
-              UngetTok();
+            char *key = PchGetString("CommandKey string");
+            if (strlen(key) != 1)
+              ErrorLine("CommandKey must be 1 character");
+            mi.command = toupper(key[0]);
+            free(key);
           }
           if (vfCheckDupes)
           {
@@ -3557,19 +3544,9 @@ WriteAlert:
 static void
 ParseDumpVersion()
 {
-  int id;
-  char *pchVersion;
-
   // default version ID is 1 (it dont work otherwise) :P
-  id = 1;
-  if (FGetTok(&tok))
-  {
-    UngetTok();
-    if (tok.lex.lt != ltStr)
-      id = WGetId("Version ResourceId");
-  }
-
-  pchVersion = PchGetString("Version Text");
+  int id = (FIsString(PeekTok()))? 1 : WGetId("Version ResourceId");
+  char *pchVersion = PchGetString("Version Text");
 
   if (DesirableLocale(NULL))
   {
@@ -3622,34 +3599,22 @@ ParseDumpStringTable()
       rgidStringTable[iidStringTableMac++] = id;   // RMa add for make difference between tSTR and tSTL string
   }
 
-  GetExpectLt(&tok, ltStr, "String Text");
-  prefixString = strdup(tok.lex.szId);
-  if (prefixString == NULL) Error("out of memory");
+  prefixString = PchGetString("Prefix string");
 
-  GetExpectLt(&tok, ltStr, "String Text");
-  strcpy(buf, tok.lex.szId);
-  tot = strlen(tok.lex.szId) + 1;
-  numStrings++;
-
-  while (FGetTok(&tok))
+  while (FIsString(PeekTok()))
   {
-    int l;
-
-    if (tok.lex.lt != ltStr)
-    {
-      UngetTok();
-      break;
-    }
-
-    l = strlen(tok.lex.szId) + 1;
+    char *pch = PchGetString("String text");
+    int l = strlen(pch) + 1;
     if (tot + l > 32768)
       ErrorLine("Sum of string lengths must be less than 32768");
 
-    strcpy(buf + tot, tok.lex.szId);
+    strcpy(buf + tot, pch);
     tot += l;
     numStrings++;
     if (numStrings >= 384)
       ErrorLine("Number of strings in table must be less than 384");
+
+    free(pch);
   }
 
   if (DesirableLocale(itm.Locale))
@@ -3716,20 +3681,22 @@ ParseDumpString()
 
   if (tok.rw == rwFile)
   {
+    char *pchFilename = PchGetString("String filename");
     FILE *fh;
     int cch;
 
     pchString = malloc(szMultipleLineMaxLength);
-    GetExpectLt(&tok, ltStr, "String filename");
-    free(FindAndOpenFile(tok.lex.szId, "rt", &fh));
 
+    free(FindAndOpenFile(pchFilename, "rt", &fh));
     if (fh == NULL)
-      ErrorLine("Unable to open String file %s", tok.lex.szId);
+      ErrorLine("Unable to open String file %s", pchFilename);
+
     cch = fread(pchString, 1, szMultipleLineMaxLength, fh);
     if (cch == szMultipleLineMaxLength)
       ErrorLine("String too long!");
     pchString[cch] = 0;
     fclose(fh);
+    free(pchFilename);
   }
   else
   {
@@ -3817,11 +3784,11 @@ ParseDumpCategories()
   }
 
   count = 0;
-  GetExpectLt(&tok, ltStr, "String Text");
-  do
+
+  while (FIsString(PeekTok()))
   {
-    string = tok.lex.szId;
-    len = strlen(tok.lex.szId);
+    string = PchGetString("String Text");
+    len = strlen(string);
     /*
      * Check the size of the string and only write 15 character max 
      */
@@ -3860,13 +3827,9 @@ ParseDumpCategories()
      * }
      * count++;
      */
-    if (!FGetTok(&tok))
-      break;
-  }
-  while (tok.lex.lt == ltStr);
 
-  if (tok.lex.lt != ltNil)
-    UngetTok();
+    free(string);
+  }
 
   if (DesirableLocale(itm.Locale))
   {
@@ -4635,70 +4598,43 @@ ParseDumpFontFamily()
 static void
 ParseDumpHex()
 {
-  char *pchResType;
-  int id;
+  char *pchResType = PchGetString("Resource Type");
   ITM itm;
 
-  // get the information from the .rcp entry
-  pchResType = PchGetString("Resource Type");
   ParseItm(&itm, ifId, if2Null, if3Locale, if4Null);
-  /*
-   * RMa localisation 
-   */
-  if (!DesirableLocale(itm.Locale))
-  {
-    while (FGetTok(&tok))                        /* parse to last string in string table */
-    {
-      if ((tok.lex.lt != ltConst) && (tok.lex.lt != ltStr))
-      {
-        UngetTok();
-        break;
-      }
-    }
-  }
-  else
-  {
-    id = itm.id;
-    // write the data to file
-    OpenOutput(pchResType, id);
-    while (FGetTok(&tok))
-    {
-      // turn IDs into values
-      if (tok.lex.lt == ltId && tok.rw == rwNil)
-      {
-        SYM *psym;
 
-        psym = PsymLookup(tok.lex.szId);
-        if (psym == NULL)
-        {
-          if (vfAutoId)
-          {
-            psym = PsymAddSymAutoId(tok.lex.szId);
-          }
-          else
-          {
-            ErrorLine("Symbol %s is not defined", tok.lex.szId);
-          }
-        }
-        
-		if (psym->sVal != NULL)
-		{
-			// treat it like a string of bytes
-	        DumpBytes(psym->sVal, strlen(psym->sVal));
-	        continue;
-		}
-		else
-		{
-	        // make this look like a constant and continue
-	        // into next if statement
-	        tok.lex.lt = ltConst;
-	        tok.lex.val = psym->wVal;
-		}
-      }
-      
-      // we have a constant?
-      if (tok.lex.lt == ltConst)
+  if (DesirableLocale(itm.Locale))
+    OpenOutput(pchResType, itm.id);
+
+  for (;;)
+  {
+    const TOK *ptok = PeekTok();
+    if (FIsString(ptok))
+    {
+      char *pch = PchGetString("String Text");
+      if (DesirableLocale(itm.Locale))
+        DumpBytes(pch, strlen(pch));
+      free(pch);
+    }
+    else if (ptok->lex.lt == ltConst ||
+             (ptok->lex.lt == ltId && ptok->rw == rwNil))
+    {
+      /* We can't really use WGetConst() here, because we need the token
+         explicitly so that we can look at its size field.  */
+      FGetTok(&tok);
+      if (tok.lex.lt == ltId)
       {
+        const SYM *psym = PsymLookup(tok.lex.szId);
+        if (psym)
+        {
+          CheckNumericSymbol(psym);
+          tok.lex.val = psym->wVal;
+        }
+        else
+          ErrorLine("Symbol %s is not defined", tok.lex.szId);
+      }
+
+      if (DesirableLocale(itm.Locale))
          switch (tok.lex.size)
          {
            case lsLong:
@@ -4720,28 +4656,14 @@ ParseDumpHex()
                 EmitB((unsigned char)tok.lex.val);
                 break;
          }
-      }
-
-      // we have a string?
-      else if (FIsString(&tok))
-      {
-        char *pchString;
-
-        UngetTok();
-        pchString = PchGetString("String Text");
-        DumpBytes(pchString, strlen(pchString));
-        free(pchString);
-      }
-
-      // we dunno, assume "end" of resource
-      else
-      {
-        UngetTok();
-        break;
-      }
     }
-    CloseOutput();
+    else  // Something else (including EOF) -- end of resource
+      break;
   }
+
+  if (DesirableLocale(itm.Locale))
+    CloseOutput();
+
   free(pchResType);
 }
 
@@ -5186,12 +5108,14 @@ ParseTranslation()
   TE *pte = NULL;
   int i;
 
-  GetExpectLt(&tok, ltStr, "Language");
+  pch = PchGetString("Language");
 
   fAddTranslation = fFalse;
   for (i = 0; i < totalLanguages; i++)
-    if (FSzEqI(tok.lex.szId, aszLanguage[i]))
+    if (FSzEqI(pch, aszLanguage[i]))
       fAddTranslation = fTrue;
+
+  free(pch);
 
   GetExpectRw(rwBegin);
   while (FGetTok(&tok))
@@ -5207,7 +5131,8 @@ ParseTranslation()
         if (fAddTranslation)
         {
           pte = malloc(sizeof(TE));
-          pte->szOrig = strdup(tok.lex.szId);
+          UngetTok();
+          pte->szOrig = PchGetString("Untranslated string");
         }
         GetExpectLt(&tok, ltAssign, "=");
         pch = PchGetString("Translation");
@@ -5247,11 +5172,8 @@ ParseResetAutoID()
 static void
 ParseGenerateHeader()
 {
-    TOK tok;
-
-    GetExpectLt(&tok, ltStr, "Output header name");
     free(szOutputHeaderFile);
-    szOutputHeaderFile = MakeFilename("%s", tok.lex.szId);
+    szOutputHeaderFile = PchGetString("Output header name");
     vfAutoId = fTrue;
 }
 
@@ -5491,8 +5413,9 @@ ParseCInclude(const char *szIncludeFile)
                 {
                   if (depth < 32)
                   {
-                    GetExpectLt(&tok, ltStr, "include filename");
-                    ParseCInclude(tok.lex.szId);
+                    char *pchFilename = PchGetString("include filename");
+                    ParseCInclude(pchFilename);
+                    free(pchFilename);
                   }
                   else
                   {
@@ -6156,11 +6079,8 @@ ParseDirectives(RCPFILE * prcpfile)
         // ignore include files when skipping
         if (ifdefSkipping == 0)
         {
-          char *szFileName;
+          char *szFileName = PchGetString("include filename");
           const char *pchExt;
-
-          GetExpectLt(&tok, ltStr, "include filename");
-          szFileName = tok.lex.szId;
 
           pchExt = strrchr(szFileName, '.');
 	  if (pchExt)
@@ -6178,6 +6098,8 @@ ParseDirectives(RCPFILE * prcpfile)
 	    ParseRcpFile(szFileName, prcpfile);
 	  else
 	    ParseCInclude(szFileName);
+
+          free(szFileName);
         }
         break;
       }
