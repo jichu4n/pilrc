@@ -133,9 +133,15 @@ VOID
 Diagnostic(BOOL fError, const FILELINE *pos,
            const char *szFormat, va_list *args)
 {
-  if (pos)
+  if (pos && pos->szFilename)
     fprintf(stderr, vfVSErrors? "%s(%d): %s : " : "%s:%d: %s: ",
             pos->szFilename, pos->line, fError? "error" : "warning");
+  else
+  {
+    fprintf(stderr, "pilrc: ");
+    if (!fError)
+      fprintf(stderr, vfVSErrors? "%s : " : "%s: ", "warning");
+  }
 
   vfprintf(stderr, szFormat, *args);
   fprintf(stderr, "\n");

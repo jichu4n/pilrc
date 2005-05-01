@@ -60,7 +60,8 @@ VOID WarningLine(const char *szFormat, ...)  PRINTF_FORMATTING;
 /* The functions above are actually wrappers around this general purpose
    diagnostic function.  Generally there's no need to call this directly,
    but in any case: fError distinguishes between error/warning, and if
-   position is NULL then it's a non-localised diagnostic, as for Error().  */
+   position or position->szFilename is NULL then it's a non-localised
+   diagnostic, as for Error().  */
 
 typedef struct FILELINE
 {
