@@ -6048,7 +6048,10 @@ ParseDirectives(RCPFILE * prcpfile)
       }
     case rwDefine:
       {
-          AddDefineSymbol();
+          if (ifdefSkipping)
+            NextLine();
+          else
+            AddDefineSymbol();
           break;
       }
 
