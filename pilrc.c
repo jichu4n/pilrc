@@ -658,8 +658,9 @@ PeekTok(void)
 /*-----------------------------------------------------------------------------
 |	GetExpectLt
 |	
-|		Get a token and expect a particular lex type.  Emit szErr if it isn't
-|	what's expected
+|		Get a token and expect a particular lex type.
+|		Emit szErr if it isn't what's expected.
+|		DO NOT use with lt==ltStr; use PchGetString() instead.
 -------------------------------------------------------------WESC------------*/
 static VOID
 GetExpectLt(TOK * ptok,
@@ -673,8 +674,6 @@ GetExpectLt(TOK * ptok,
     {
       if (lt == ltId)
         ErrorLine("Syntax error : expecting identifier, got %s",ptok->lex.szId);
-      else if (lt == ltStr)
-        ErrorLine("Syntax error : expecting string, got %s", ptok->lex.szId);
       else if (lt == ltConst)
         ErrorLine("Syntax error : expecting constant, got %s", ptok->lex.szId);
       else
@@ -703,120 +702,6 @@ GetExpectRw(RW rw)
     ErrorLine("%s expected, got %s", PchFromRw(rw, fTrue), tok.lex.szId);
 }
 
-static char* 
-PchCheckSymbol()
-{
-    if (!FGetTok(&tok))
-        ErrorLine("Unexpected end of file");
-    
-    if (rwNil == tok.rw && ltId == tok.lex.lt)
-    {
-        SYM* psym = PsymLookup(tok.lex.szId);
-        if (NULL == psym)
-            ErrorLine("Symbol %s is not defined", tok.lex.szId);
-        
-        if (NULL == psym->sVal)
-            ErrorLine("Symbol %s is numeric, a string value is required",
-                      psym->sz);
-        
-        return(strdup(psym->sVal));
-    }
-    
-    UngetTok();
-    return(NULL);
-}
-
-
-/*-----------------------------------------------------------------------------
-|	PchGetSz
-|	
-|		Get a quoted string.  return dup'ed string.  (remember to free!)
-|
-|   bwithers 3/22/03 - Mod to allow defined symbol to be used in addtion
-|                      to string literal.
--------------------------------------------------------------WESC------------*/
-char *
-PchGetSz(char *szErr)
-{
-    char* p = PchCheckSymbol();
-    if (NULL != p)
-        return(p);
-     
-    GetExpectLt(&tok, ltStr, szErr);
-    return(strdup(tok.lex.szId));
-}
-
-#ifdef DOESNTWORK
-
-/*
- * attempt at allowing GCC preprocessed string files 
- */
-
-/*-----------------------------------------------------------------------------
-|	PchGetSzMultiLine
-|	
-|   gets strings on multiple lines w/ \ continuation character.
--------------------------------------------------------------WESC------------*/
-static char *
-PchGetSzMultiLine(char *szErr)
-{
-  char sz[szMultipleLineMaxLength];
-  char* p = PchCheckSymbol();
-  if (NULL != p)
-      return(p);
-
-  GetExpectLt(&tok, ltStr, szErr);
-  strcpy(sz, tok.lex.szId);
-  while (FGetTok(&tok))
-  {
-    if (tok.lex.lt == ltStr)
-    {
-      strcat(sz, tok.lex.szId);
-    }
-    else if (tok.lex.lt != ltBSlash)
-    {
-      UngetTok();
-      break;
-    }
-    else
-    {
-      GetExpectLt(&tok, ltStr, szErr);
-      strcat(sz, tok.lex.szId);
-    }
-    return strdup(sz);
-  }
-}  
-#else
-
-/*-----------------------------------------------------------------------------
-|	PchGetSzMultiLine
-|	
-|   gets strings on multiple lines w/ \ continuation character.
--------------------------------------------------------------WESC------------*/
-static char *
-PchGetSzMultiLine(char *szErr)
-{
-  char sz[8192];
-  char* p = PchCheckSymbol();
-  if (NULL != p)
-      return(p);
-  
-  GetExpectLt(&tok, ltStr, szErr);
-  strcpy(sz, tok.lex.szId);
-  while (FGetTok(&tok))
-  {
-    if (tok.lex.lt != ltBSlash)
-    {
-      UngetTok();
-      break;
-    }
-    GetExpectLt(&tok, ltStr, szErr);
-    strcat(sz, tok.lex.szId);
-  }
-  return strdup(sz);
-}
-#endif
-
 /*-----------------------------------------------------------------------------
 |	FIsString
 |
@@ -826,7 +711,15 @@ PchGetSzMultiLine(char *szErr)
 BOOL
 FIsString(const TOK *ptok)
 {
-  return ptok->lex.lt == ltStr;  // FIXME
+  if (ptok->lex.lt == ltStr)
+    return fTrue;
+  else if (ptok->lex.lt == ltId && ptok->rw == rwNil)
+  {
+    const SYM *psym = PsymLookup(ptok->lex.szId);
+    return psym && psym->sVal;
+  }
+  else
+    return fFalse;
 }
 
 /*-----------------------------------------------------------------------------
@@ -838,7 +731,57 @@ FIsString(const TOK *ptok)
 char *
 PchGetString(const char *szErr)
 {
-  return PchGetSzMultiLine((char *)szErr);  // FIXME
+  char *szOut = NULL;
+  size_t outlen = 0;
+
+  for (;;)
+  {
+    const char *szSingle = NULL;
+    const TOK *ptok;
+
+    if (!FGetTok(&tok))
+      ErrorLine("end of file %s %s", szOut? "in" : "when expecting", szErr);
+    else if (tok.lex.lt == ltStr)
+      szSingle = tok.lex.szId;
+    else if (tok.lex.lt == ltId && tok.rw == rwNil)
+    {
+      const SYM *psym = PsymLookup(tok.lex.szId);
+      if (psym == NULL)
+        ErrorLine("undefined symbol '%s' in %s", tok.lex.szId, szErr);
+      else if (psym->sVal == NULL)
+        ErrorLine("numeric symbol '%s' in %s", tok.lex.szId, szErr);
+      else
+        szSingle = psym->sVal;
+    }
+    else
+    {
+      if (szOut)
+        ErrorLine("cannot concatenate '%s' onto %s", tok.lex.szId, szErr);
+      else
+        ErrorLine("expecting %s, got '%s'", szErr, tok.lex.szId);
+    }
+
+    if (szSingle)
+    {
+      size_t singlelen = strlen(szSingle);
+      char *sz = realloc(szOut, outlen + singlelen + 1);
+      if (sz == NULL)
+        Error("String is larger than available memory");
+      else
+        szOut = sz;
+
+      strcpy(szOut + outlen, szSingle);
+      outlen += singlelen;
+    }
+
+    ptok = PeekTok();
+    if (ptok->lex.lt == ltPlus || ptok->lex.lt == ltBSlash)
+      FGetTok(&tok);
+    else
+      break;
+  }
+
+  return szOut;
 }
 
 /*-----------------------------------------------------------------------------
