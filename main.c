@@ -64,92 +64,74 @@
 #define Str(x)  #x
 #define XStr(x) Str(x)
 
+static const char header[] =
+"PilRC v" PILRC_VERSION_STR "\n"
+"  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n"
+"  Copyright 2000-2005 Aaron Ardiri (aaron@ardiri.com)\n";
 
-/**
- *  Display the PilRC Copyright (c) strings, but only once
- */
-static void header(void)
-{
-	static int outputHeader = 0;
-	
-	if (outputHeader == 0)
-	{
-		outputHeader = 1;
-		printf
-		  ("PilRC v%s\n"
-		   "  Copyright 1997-1999 Wes Cherry   (wesc@ricochet.net)\n"
-		   "  Copyright 2000-2005 Aaron Ardiri (aaron@ardiri.com)\n"
-		   "\n", PILRC_VERSION_STR);
-	}
-}
+static const char disclaimer[] =
+"This program is free software; you may redistribute it under the\n"
+"terms of the GNU General Public License. This program has absolutely\n"
+"no warranty, you use it AS IS at your own risk.\n";
 
-/**
- * Display the usage information for PilRC.
- */
-static void
-Usage(void)
-{
-  header();
-  /* These parentheses ensure that we get the printf() function rather than
-     a printf() macro.  If we got a macro, the #ifdefs within its arguments
-     would constitute undefined behaviour.  */
-  (printf)
-    ("This program is free software; you may redistribute it under the\n"
-     "terms of the GNU General Public License. This program has absolutely\n"
-     "no warranty, you use it AS IS at your own risk.\n\n"
-     "Usage: pilrc {<options>} infile [outfiledir]\n\n" "Options:\n"
-     "        -L LANGUAGE    Use the TRANSLATION section for the given language\n"
-     "                       Up to " XStr(MAXLANG) " -L options may be given\n"
-     "        -I <path>      Search for bitmap and include files in <path>\n"
-     "                       More than one -I <path> options may be given\n"
-     "                       The current directory is always searched\n"
+static const char usage[] =
+"Usage: pilrc [options...] infile [outfiledir]\n"
+"\n"
+"Options:\n"
+"  -L <language>  Use the TRANSLATION section for the given language\n"
+"                 Up to " XStr(MAXLANG) " -L options may be given\n"
+"  -I <path>      Search for bitmap and include files in <path> as well as\n"
+"                 the current directory (may be given more than once)\n"
 #ifdef PALM_INTERNAL
-     "        -noIFIH        Parse includes files in header files\n"
+"  -noIFIH        Parse includes files in header files\n"
 #else
-     "        -noIFIH        Ignore includes files in header files\n"
+"  -noIFIH        Ignore includes files in header files\n"
 #endif
-     "        -R <resfile>   Generate JUMP/PilA .res file\n"
-     "        -ro            Generate resource database file (.ro) instead of .bins\n"
-     "        -ts            put POSIX timestamp on .ro file generated\n"
-     "        -o <filedir>   Equivalent to [outfiledir]\n"
-     "        -H <incfile>   Autoassign IDs and write .h file with #defines\n"
-     "        -idStart <n>   Start autoID assignment at number <n>, counting up\n"
-     "        -D <macro>     Define a pre-processor macro symbol\n"
-     "        -F5            Use Big5 Chinese font widths\n"
-     "        -Fkt           Use Korean font widths (hantip font)\n"
-     "        -Fkm           Use Korean font widths (hanme font)\n"
-     "        -Fg            Use GB Chinese font widths\n"
-     "        -Fj            Use Japense font widths\n"
-     "        -Fh            Use Hebrew font widths\n"
-     "        -Fc            Use Cyrillic font widths\n"
-     "        -rtl           Right to left support\n"
-     "        -q             Less noisy output\n"
-     "        -V             Generate M$ (VS-type) error/warning output\n"
-     "        -allowEditID   Disable warnings about menu item IDs in the\n"
-     "                       edit (10000-10007) range\n"
-     "        -allowBadSize  Disable warnings about icon sizes being incorrect\n"
-     "        -allowLargeRes Disable warnings about resources that exceed the\n"
-     "                       maximum HotSync resource size\n"
-     "        -noEllipsis    Disable special handling of \"...\" and ellipsis char\n"
-     "        -PalmRez       Generate res with PalmRez option\n"
-     "        -LE32          Generate 32 bit little endian (ARM, NT) resources\n"
+"  -R <resfile>   Generate JUMP/PilA .res file\n"
+"  -ro            Generate resource database file (.ro) instead of .bins\n"
+"  -ts            put POSIX timestamp on .ro file generated\n"
+"  -o <filedir>   Equivalent to [outfiledir]\n"
+"  -H <incfile>   Autoassign IDs and write .h file with #defines\n"
+"  -idStart <n>   Start autoID assignment at number <n>, counting up\n"
+"  -D <macro>     Define a pre-processor macro symbol\n"
+"  -F5            Use Big5 Chinese font widths\n"
+"  -Fkt           Use Korean font widths (hantip font)\n"
+"  -Fkm           Use Korean font widths (hanme font)\n"
+"  -Fg            Use GB Chinese font widths\n"
+"  -Fj            Use Japense font widths\n"
+"  -Fh            Use Hebrew font widths\n"
+"  -Fc            Use Cyrillic font widths\n"
+"  -rtl           Right to left support\n"
+"  -q             Less noisy output\n"
+"  -V             Generate M$ (VS-type) error/warning output\n"
+"  -allowEditID   Disable warnings about menu item IDs in the\n"
+"                 edit (10000-10007) range\n"
+"  -allowBadSize  Disable warnings about icon sizes being incorrect\n"
+"  -allowLargeRes Disable warnings about resources that exceed the maximum\n"
+"                 HotSync resource size\n"
+"  -noEllipsis    Disable special handling of \"...\" and ellipsis char\n"
+"  -PalmRez       Generate res with PalmRez option\n"
+"  -LE32          Generate 32 bit little endian (ARM, NT) resources\n"
 #ifdef PALM_INTERNAL
-     "        -AppIcon68K    Force AppIcon resources generation in 68K format\n"
-     "        -amdc <name>   Generate resource 'amdc' id=1 with <name>.dll as content\n"
+"  -AppIcon68K    Force AppIcon resources generation in 68K format\n"
+"  -amdc <name>   Generate resource 'amdc' id=1 with <name>.dll as content\n"
 #endif
-     "        -Loc <code>    Compile only res with the attribute LOCALE \"code\"\n"
-     "                       code samples: deDE, esES, enUS, frFR, itIT, jpJP\n"
-     "        -StripLoc      Don't compile 'non localisable resources'\n"
-     "        -type          Specify the type to use when generating a prc (-ro)\n"
-     "        -creator       Specify the creator to use when generating a prc (-ro)\n"
-     "        -name          Specify the database name when generating a prc (-ro)\n"
-     "        <outfiledir>   Directory where .bin files should be generated,\n"
-     "                       or name of the file to generate containing all\n"
-     "                       the generated resources\n"
-     "        -M             Generate dependency list only; suppress all other output\n"
-     "        -MD            Generate dependency list\n"
-     );
-  exit(0);
+"  -Loc <code>    Compile only res with the attribute LOCALE \"code\"\n"
+"                 code samples: deDE, esES, enUS, frFR, itIT, jpJP\n"
+"  -StripLoc      Don't compile 'non localisable resources'\n"
+"  -type          Specify the type to use when generating a prc (-ro)\n"
+"  -creator       Specify the creator to use when generating a prc (-ro)\n"
+"  -name          Specify the database name when generating a prc (-ro)\n"
+"  <outfiledir>   Directory where .bin files should be generated, or name of\n"
+"                 the file to generate containing all the generated resources\n"
+"  -M             Generate dependency list only; suppress all other output\n"
+"  -MD            Generate dependency list\n";
+
+static void
+ArgError()
+{
+  fprintf(stderr, "%s", usage);
+  exit(1);
 }
 
 /**
@@ -174,11 +156,13 @@ main(int cArg,
   int fontType;
   int macroValue;
 
-  BOOL vfShowVersion = fFalse;
+  if (cArg < 2)
+  {
+    printf("%s\n%s\n%s", header, disclaimer, usage);
+    exit(1);
+  }
 
   // initialize
-  if (cArg < 2)
-    Usage();
   vfCheckDupes = 1;
   szResFile = NULL;
   szIncFile = NULL;
@@ -213,7 +197,7 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-Loc"))
     {
       if (i++ == cArg)
-        Usage();
+        ArgError();
       szLocaleP = rgszArg[i];
       continue;
     }
@@ -227,7 +211,7 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-L"))
     {
       if (i++ == cArg || totalLanguages >= MAXLANG)
-        Usage();
+        ArgError();
 
       aszLanguage[totalLanguages++] = rgszArg[i];
       continue;
@@ -237,7 +221,7 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-I"))
     {
       if (i++ == cArg)
-        Usage();
+        ArgError();
 
 	  AddAccessPath(rgszArg[i]);
       continue;
@@ -247,7 +231,7 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-D"))
     {
       if (i++ == cArg)
-        Usage();
+        ArgError();
 
       szMacro = strdup(rgszArg[i]);
 
@@ -271,7 +255,7 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-R"))
     {
       if (i++ == cArg)
-        Usage();
+        ArgError();
 
       szResFile = rgszArg[i];
       continue;
@@ -281,7 +265,7 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-H"))
     {
       if (i++ == cArg)
-        Usage();
+        ArgError();
 
       szIncFile = rgszArg[i];
       vfAutoId = fTrue;
@@ -292,7 +276,7 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-idStart"))
     {
       if (i++ == cArg)
-        Usage();
+        ArgError();
         
       szIDStart = rgszArg[i];
       // reset ID start sequence to this number and start counting up.
@@ -424,7 +408,7 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-amdc"))
     {
       if (i++ == cArg)
-        Usage();
+        ArgError();
       szDllNameP = rgszArg[i];
       vfAutoAmdc = fTrue;
       continue;
@@ -461,7 +445,7 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-o"))
     {
       if (i++ == cArg)
-        Usage();
+        ArgError();
 
       szOutputPath = rgszArg[i];
       continue;
@@ -471,7 +455,7 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-name"))
     {
       if (i++ == cArg)
-        Usage();
+        ArgError();
 
       vfPrcName = rgszArg[i];
       continue;
@@ -481,7 +465,7 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-creator"))
     {
       if (i++ == cArg)
-        Usage();
+        ArgError();
 
       vfPrcCreator = rgszArg[i];
       continue;
@@ -491,7 +475,7 @@ main(int cArg,
     if (FSzEqI(rgszArg[i], "-type"))
     {
       if (i++ == cArg)
-        Usage();
+        ArgError();
 
       vfPrcType = 0;
 
@@ -516,25 +500,26 @@ main(int cArg,
 
     if (FSzEqI(rgszArg[i], "--version"))
     {
-        vfShowVersion = fTrue;
-        continue;
+        printf("%s\n%s", header, disclaimer);
+        exit(0);
+    }
+
+    if (FSzEqI(rgszArg[i], "--help"))
+    {
+        printf("%s\n%s\n%s", header, disclaimer, usage);
+        exit(0);
     }
 
     // unknown argument?
-    Usage();
+    ArgError();
   }
 
   // display the (c) string
   if (!vfQuiet)
-  {
-    header();
-  }
-
-  if (vfShowVersion)
-    return 0;  // Stop prematurely, after showing the header
+    printf("%s\n", header);
 
   if ((cArg - i) < 1)
-    Usage();
+    ArgError();
 
   if ((!szLocaleP) && (vfStripNoLocRes))
   {
@@ -562,7 +547,7 @@ main(int cArg,
 
   // last minute check? (extra stuff?)
   if (cArg != i)
-    Usage();
+    ArgError();
 
   if (!vfQuiet)
   {
