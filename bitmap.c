@@ -2,7 +2,7 @@
  * @(#)bitmap.c
  *
  * Copyright 1997-1999, Wes Cherry   (mailto:wesc@technosis.com)
- *           2000-2004, Aaron Ardiri (mailto:aaron@ardiri.com)
+ *           2000-2005, Aaron Ardiri (mailto:aaron@ardiri.com)
  * All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
@@ -69,14 +69,14 @@ typedef struct BITMAPFILEHEADER
 typedef struct BITMAPINFOHEADER
 {
   PILRC_ULONG biSize;
-  long biWidth;
-  long biHeight;
+  PILRC_ULONG biWidth;
+  PILRC_ULONG biHeight;
   PILRC_USHORT biPlanes;
   PILRC_USHORT biBitCount;
   PILRC_ULONG biCompression;
   PILRC_ULONG biSizeImage;
-  long biXPelsPerMeter;
-  long biYPelsPerMeter;
+  PILRC_ULONG biXPelsPerMeter;
+  PILRC_ULONG biYPelsPerMeter;
   PILRC_ULONG biClrUsed;
   PILRC_ULONG biClrImportant;
 } BITMAPINFOHEADER;
