@@ -73,9 +73,9 @@ static VOID WriteOutResourceDB(void);
 DEFPL(PLEXRESOURCEDIR)
 typedef struct RESOURCEDIRENTRY
 {
-  int type[4];
-  int id;
-  int offset;
+  p_int type[4];
+  p_int id;
+  p_int offset;
 } RESOURCEDIRENTRY;
 
 #define szRESOURCEDIRENTRY "b4,w,l"
