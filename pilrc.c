@@ -5125,7 +5125,7 @@ ParseGenerateHeader()
 |	ParseNavigation: helper to parse OBJECT entries in a NAVIGATION res
 -------------------------------------------------------------BLC-------------*/
 static void
-ParseNavigationList(RCNAVIGATIONITEM **navigationItems, int *numItems)
+ParseNavigationList(RCNAVIGATIONITEM **navigationItems, p_int *numItems)
 {
   ITM itm;
   *numItems = 0;
@@ -5160,7 +5160,7 @@ ParseNavigationList(RCNAVIGATIONITEM **navigationItems, int *numItems)
 |	ParseNavigationMap: helper to parse NAVIGATIONMAP entries
 -------------------------------------------------------------BLC-------------*/
 static void
-ParseNavigationMap(RCNAVIGATIONITEM **navigationItems, int *numItems)
+ParseNavigationMap(RCNAVIGATIONITEM **navigationItems, p_int *numItems)
 {
   ITM itm;
   const TOK *pTok;
