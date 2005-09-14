@@ -1,3 +1,4 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
 <title>PilRC</title>
@@ -98,9 +99,8 @@ home page</a> for the latest version.
 
 <table border=0>
 <tr>
-  <a name="switch_L"></a>
   <td valign=top width="150">
-  -L LANGUAGE
+  <a name="switch_L">-L LANGUAGE</a>
   </td>
   <td valign=top>
   Generate resource files translated to the target language LANGUAGE -- see
@@ -138,9 +138,8 @@ home page</a> for the latest version.
   </td>
 </tr>
 <tr>
-  <a name="switch_H"></a>
   <td valign=top>
-  -H INCFILE
+  <a name="switch_H">-H INCFILE</a>
   </td>
   <td valign=top>
   Output a <tt>.h</tt> file containing auto-generated resource item IDs for
@@ -428,7 +427,6 @@ resources within a PRC file, depending on whether <code>-ro</code> is given:
   with ".ro" (or appending ".ro" if the input filename does not end in ".rcp").
   It is possible to specify the type and creator directly using -type and -creator.
   </ul>
-</p>
 </ul>
 
 <b><u>Example:</u></b>
@@ -688,7 +686,7 @@ symbols as can <tt>PilRC</tt>. <p>
     </td>
     <td valign=top>
     <tt class=syntax>
-    package &lt;PackageName&gt; <p>
+    package &lt;PackageName&gt; <br>
     public class &lt;ClassName&gt; { <br>
       &nbsp;&nbsp;&nbsp;&nbsp;
       public static final short <var>&lt;Symbol.i&gt;</var> = <var>&lt;Value.n&gt;</var>; <br>
@@ -722,14 +720,14 @@ Once defined, a symbol can be used in place of any number.
 PilRC includes a rudimentary C-style preprocessor that can handle object-like
 macros and simple conditionals.  The following are accepted:
 <p><ul><table>
- <tr><td><tt class=syntax>#define <var>&lt;Symbol.i&gt;</var></tt></td><tr>
- <tr><td><tt class=syntax>#define <var>&lt;Symbol.i&gt;</var> <var>&lt;Value.n&gt;</var></tt></td><tr>
- <tr><td><tt class=syntax>#define <var>&lt;Symbol.i&gt;</var> <var>&lt;StringValue.ss&gt;</var></tt></td><tr>
- <tr><td><tt class=syntax>#undef&nbsp; <var>&lt;Symbol.i&gt;</var></tt></td><tr>
- <tr><td><tt class=syntax>#ifdef&nbsp; <var>&lt;Symbol.i&gt;</var></tt></td><tr>
- <tr><td><tt class=syntax>#ifndef <var>&lt;Symbol.i&gt;</var></tt></td><tr>
- <tr><td><tt class=syntax>#else</tt></td><tr>
- <tr><td><tt class=syntax>#endif</tt></td><tr>
+ <tr><td><tt class=syntax>#define <var>&lt;Symbol.i&gt;</var></tt></td></tr>
+ <tr><td><tt class=syntax>#define <var>&lt;Symbol.i&gt;</var> <var>&lt;Value.n&gt;</var></tt></td></tr>
+ <tr><td><tt class=syntax>#define <var>&lt;Symbol.i&gt;</var> <var>&lt;StringValue.ss&gt;</var></tt></td></tr>
+ <tr><td><tt class=syntax>#undef&nbsp; <var>&lt;Symbol.i&gt;</var></tt></td></tr>
+ <tr><td><tt class=syntax>#ifdef&nbsp; <var>&lt;Symbol.i&gt;</var></tt></td></tr>
+ <tr><td><tt class=syntax>#ifndef <var>&lt;Symbol.i&gt;</var></tt></td></tr>
+ <tr><td><tt class=syntax>#else</tt></td></tr>
+ <tr><td><tt class=syntax>#endif</tt></td></tr>
 </table></ul>
 <p>
 <b>NOTE</b>: neither function-like macros with parameters nor <tt>#if</tt>
@@ -748,289 +746,217 @@ The <tt>.rcp</tt> file may contain the following object definitions: <p>
     <td valign=top width=300>
     <a href="#lang_form">FORM</a>
     </td>
-    <td valign=center>
-    Form Resource
-    </td>
+    <td>Form Resource</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_menu">MENU</a>
     </td>
-    <td valign=center>
-    Form Menu Bar
-    </td>
+    <td>Form Menu Bar</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_alert">ALERT</a>
     </td>
-    <td valign=center>
-    Alert Dialog Resource
-    </td>
+    <td>Alert Dialog Resource</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_version">VERSION</a>
     </td>
-    <td valign=center>
-    Version String
-    </td>
+    <td>Version String</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_string">STRING</a>
     </td>
-    <td valign=center>
-    String Resource
-    </td>
+    <td>String Resource</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_stringtable">STRINGTABLE</a>
     </td>
-    <td valign=center>
-    String List Resource
-    </td>
+    <td>String List Resource</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_categories">CATEGORIES</a>
     </td>
-    <td valign=center>
-    Default Category Names 
-    </td>
+    <td>Default Category Names</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_appiconname">APPLICATIONICONNAME</a>
     </td>
-    <td valign=center>
-    Application Icon Name
-    </td>
+    <td>Application Icon Name</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_appid">APPLICATION</a>
     </td>
-    <td valign=center>
-    Application Creator Identification
-    </td>
+    <td>Application Creator Identification</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_launchcat">LAUNCHERCATEGORY</a>
     </td>
-    <td valign=center>
-    Default launcher Category Name
-    </td>
+    <td>Default launcher Category Name</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_bitmap">BITMAP, ICON, SMALLICON, etc</a>
     </td>
-    <td valign=center>
-    Bitmap or Icon Resource
-    </td>
+    <td>Bitmap or Icon Resource</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_trap">TRAP</a>
     </td>
-    <td valign=center>
-    HackMaster Trap Resource
-    </td>
+    <td>HackMaster Trap Resource</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_font">FONT</a>
     </td>
-    <td valign=center>
-    User Defined Font Resource
-    </td>
+    <td>User Defined Font Resource</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_fontfamily">FONTFAMILY</a>
     </td>
-    <td valign=center>
-    User Defined Font Family Resource
-    </td>
+    <td>User Defined Font Family Resource</td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
     <a href="#lang_fontindex">FONTINDEX</a>
     </td>
-    <td valign=center>
-    Font Index table for Font Resource
-    </td>
+    <td>Font Index table for Font Resource</td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
     <a href="#lang_fontmap">FONTMAP</a>
     </td>
-    <td valign=center>
-    Font Map extension for Font Resource (i.e. japan)
-    </td>
+    <td>Font Map extension for Font Resource (i.e. Japan)</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_hex">HEX</a>
     </td>
-    <td valign=center>
-    Binary Resource (Hex/String based)
-    </td>
+    <td>Binary Resource (Hex/String based)</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_data">DATA</a>
     </td>
-    <td valign=center>
-    Binary Resource (Data File based)
-    </td>
+    <td>Binary Resource (Data File based)</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_integer">INTEGER</a>
     </td>
-    <td valign=center>
-    2-byte Integer Value
-    </td>
+    <td>2-byte Integer Value</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_bytelist">BYTELIST</a>
     </td>
-    <td valign=center>
-    1-byte Integer Value List
-    </td>
+    <td>1-byte Integer Value List</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_wordlist">WORDLIST</a>
     </td>
-    <td valign=center>
-    2-byte Integer Value List
-    </td>
+    <td>2-byte Integer Value List</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_longwordlist">LONGWORDLIST</a>
     </td>
-    <td valign=center>
-    4-byte Integer Value List
-    </td>
+    <td>4-byte Integer Value List</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_navigation">NAVIGATION</a>
     </td>
-    <td valign=center>
-    Form Navigation Order Specification
-    </td>
+    <td>Form Navigation Order Specification</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_palettetable">PALETTETABLE</a>
     </td>
-    <td valign=center>
-    Color List Resource
-    </td>
+    <td>Color List Resource</td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
     <a href="#lang_feature">FEATURE</a>
     </td>
-    <td valign=center>
-    System reserved
-    </td>
+    <td>System reserved</td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
     <a href="#lang_graffitiinputarea">GRAFFITIINPUTAREA</a>
     </td>
-    <td valign=center>
-    System reserved
-    </td>
+    <td>System reserved</td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
     <a href="#lang_countrylocalisation">COUNTRYLOCALISATION</a>
     </td>
-    <td valign=center>
-    System reserved
-    </td>
+    <td>System reserved</td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
     <a href="#lang_locales">LOCALES</a>
     </td>
-    <td valign=center>
-    System reserved
-    </td>
+    <td>System reserved</td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
     <a href="#lang_keyboard">KEYBOARD</a>
     </td>
-    <td valign=center>
-    System reserved 
-    </td>
+    <td>System reserved</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_midi">MIDI</a>
     </td>
-    <td valign=center>
-    Copy .aif or .mid to a Palm midi Resource
-    </td>
+    <td>Copy .aif or .mid to a Palm midi Resource</td>
   </tr>
   <tr  class="palmInternal">
     <td valign=top>
     <a href="#lang_Hardsoftbutton">HARDSOFTBUTTONDEFAULT</a>
     </td>
-    <td valign=center>
-    System reserved
-    </td>
+    <td>System reserved</td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
     <a href="#lang_SysAppPrefs">SYSAPPLICATIONPREFERENCES</a>
     </td>
-    <td valign=center>
-    System reserved
-    </td>
+    <td>System reserved</td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
     <a href="#lang_SearchTable">SEARCHTABLE</a>
     </td>
-    <td valign=center>
-    System reserved
-    </td>
+    <td>System reserved</td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
     <a href="#lang_TextTable">TEXTTABLE</a>
     </td>
-    <td valign=center>
-    System reserved
-    </td>
+    <td>System reserved</td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
     <a href="#lang_TableList">TABLELIST</a>
     </td>
-    <td valign=center>
-    System reserved
-    </td>
+    <td>System reserved</td>
   </tr>
   <tr class="palmInternal">
     <td valign=top>
     <a href="#lang_CharSetList">CHARSETLIST</a>
     </td>
-    <td valign=center>
-    System reserved
-    </td>
+    <td>System reserved</td>
   </tr>
   </table>
 </ul>
@@ -1043,28 +969,22 @@ The <tt>.rcp</tt> file may also contain the following directives: <p>
 <ul>
   <table border=0>
   <tr>
-    <td valign=top>
+    <td valign=top width=300>
     <a href="#lang_translation">TRANSLATION</a>
     </td>
-    <td valign=center>
-    Language Translation Strings
-    </td>
+    <td>Language Translation Strings</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_generateheader">GENERATEHEADER</a>
     </td>
-    <td valign=center>
-    Generate a header file from IDs defined in the file
-    </td>
+    <td>Generate a header file from IDs defined in the file</td>
   </tr>
   <tr>
     <td valign=top>
     <a href="#lang_resetautoid">RESETAUTOID</a>
     </td>
-    <td valign=center>
-    Reset AutoID sequence number
-    </td>
+    <td>Reset AutoID sequence number</td>
   </tr>
   </table>
 </ul>
@@ -1395,7 +1315,7 @@ warning it.
 </ul>
 
 <u>Example:</u><p>
-<pre>
+<ul><pre>
 FORM ID 1 AT (2 2 156 156)
   USABLE MODAL 
   HELPID 1 
@@ -1566,8 +1486,7 @@ STRINGTABLE ID <var>&lt;StringTableResourceId.n&gt;</var>&nbsp;
 Using the <tt>tSTL</tt> resource: <p>
 
 <b>.. in a LIST</b> <br>
-<ul>
-<pre>
+<ul><pre>
 [source.rcp]
 STRINGTABLE stringTableMetric
   "" "Litres" "Meters" "Celsius"    "Newtons"     "Kilograms"
@@ -1593,24 +1512,20 @@ memStringList =
 ...
 
 MemHandleUnlock(memHandle);
-DmReleaseResource(memHandle); </pre>
+DmReleaseResource(memHandle);</pre></ul>
 
-</ul>
 <b>.. to get a single STRING</b> <br>
-<ul>
-
-<pre>
+<ul><pre>
 [source.rcp]
 STRINGTABLE stringTableTypes
   "Units are:" "Metric" "Imperial"
 
 [source.c]
 Char string[32];
-SysStringByIndex(stringTableTypes, 0, string, 32);</pre>
-</ul>
-</ul>
+SysStringByIndex(stringTableTypes, 0, string, 32);</pre></ul>
+
 <li>
-a limitation of 384 strings apply<p>
+A limitation of 384 strings applies.
 </ul>
 
 <u>Example:</u>
@@ -2067,8 +1982,8 @@ The FONT header has the following fields: <p>
 
 Each glyph has a bitmap, offset, and a width associated with it. The width 
 can be overridden, however it is not recommended as it is set automatically. 
-</ul>
 
+<p>
 <u>Notes:</u>
 <ul>
 <li>
@@ -3154,7 +3069,6 @@ FONT<br>
 <a name="reading"></a>
 <b><u>Further Reading</u></b><p>
 
-<ul>
 For Palm Computing Platform reference information, be sure to also visit the
 following websites: <p>
 
