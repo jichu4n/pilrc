@@ -16,6 +16,15 @@ PilRC
 </center> <p>
 
 <pre>
+What's new in 3.3
+-----------------
+o String concatenation and string #defines are available in all strings
+  anywhere in an .rcp file.
+o In -H / GENERATEHEADER mode, HEX data may no longer contain undefined
+  symbols (since they are not IDs in this context).
+o C-compatible integer suffices are more compatible: they may be spelt either
+  as "UL" or "LU" or in lower case, etc.  (They are still ignored by PilRC.)
+
 What's new in 3.2 (Friday, 9 July 2004)
 -----------------
 o Fixed bug introduced in 3.0 with frame values for popup triggers that
@@ -188,7 +197,7 @@ o added ability to override the "default" type for Bitmap resources
 - ie: BITMAP "SBmp" ID 1000 "..."
 o include paths can be applied to string files in addition to image paths
 o MANUAL addemdum/errata
-* Palm Computing (France Office) R&D
+* Palm Computing (France Office) R&amp;D
 - experimental ARM resource generation (subject to change, <b>DO NOT</b> use)
 
 What's new in 2.6   (Mon, 30 Oct 2000)
