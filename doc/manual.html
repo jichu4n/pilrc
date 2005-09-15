@@ -480,21 +480,15 @@ Each field's required type is indicated by a suffix after the field name
     </td>
     <td valign=top>
     string <br>
-    (may contain normal C style character escapes) <br>
-    example: <tt>"Click Me"</tt> 
-    </td>
-  </tr>
-  <tr>
-    <td valign=top>
-    <tt>.ss</tt>
-    </td>
-    <td valign=top>
-    multi line string <br>
-    <tt>PilRC</tt> will concatenate strings on separate lines <br>
-    example: <tt>"Now is the time for all good " \</tt> <br>
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <tt>"men to come and aid of their country"</tt>
+    (may contain normal C style character escapes
+    and/or concatenation using the "+" or "\" operators) <br>
+    examples:<ul><tt>
+	"Click Me"<br>
+	"Conc" + "atenate"<br>
+	"foo"+" "\"bar"<br>
+	"These two lines form " \<br>
+	"a single string"
+    </tt></ul>
     </td>
   </tr>
   <tr>
@@ -722,7 +716,7 @@ macros and simple conditionals.  The following are accepted:
 <p><ul><table>
  <tr><td><tt class=syntax>#define <var>&lt;Symbol.i&gt;</var></tt></td></tr>
  <tr><td><tt class=syntax>#define <var>&lt;Symbol.i&gt;</var> <var>&lt;Value.n&gt;</var></tt></td></tr>
- <tr><td><tt class=syntax>#define <var>&lt;Symbol.i&gt;</var> <var>&lt;StringValue.ss&gt;</var></tt></td></tr>
+ <tr><td><tt class=syntax>#define <var>&lt;Symbol.i&gt;</var> <var>&lt;StringValue.s&gt;</var></tt></td></tr>
  <tr><td><tt class=syntax>#undef&nbsp; <var>&lt;Symbol.i&gt;</var></tt></td></tr>
  <tr><td><tt class=syntax>#ifdef&nbsp; <var>&lt;Symbol.i&gt;</var></tt></td></tr>
  <tr><td><tt class=syntax>#ifndef <var>&lt;Symbol.i&gt;</var></tt></td></tr>
@@ -1019,7 +1013,7 @@ Where <tt class=syntax><var>&lt;OBJECTS&gt;</var></tt> is one or more of:
     </td>
     <td valign=top>
     <tt class=syntax>
-    <var>&lt;Title.ss&gt;</var>
+    <var>&lt;Title.s&gt;</var>
     </tt>
     </td>
   </tr>
@@ -1029,7 +1023,7 @@ Where <tt class=syntax><var>&lt;OBJECTS&gt;</var></tt> is one or more of:
     </td>
     <td valign=top>
     <tt class=syntax>
-    <var>&lt;Label.ss&gt;</var> 
+    <var>&lt;Label.s&gt;</var> 
     ID <var>&lt;Id.n&gt;</var> 
     AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
     [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] [LEFTANCHOR] 
@@ -1048,7 +1042,7 @@ Where <tt class=syntax><var>&lt;OBJECTS&gt;</var></tt> is one or more of:
     </td>
     <td valign=top>
     <tt class=syntax>
-    <var>&lt;Label.ss&gt;</var> 
+    <var>&lt;Label.s&gt;</var> 
     ID <var>&lt;Id.n&gt;</var> 
     AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>)<br>
     [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] [LEFTANCHOR] 
@@ -1067,7 +1061,7 @@ Where <tt class=syntax><var>&lt;OBJECTS&gt;</var></tt> is one or more of:
     </td>
     <td valign=top>
     <tt class=syntax>
-    <var>&lt;Label.ss&gt;</var>
+    <var>&lt;Label.s&gt;</var>
     ID <var>&lt;Id.n&gt;</var> 
     AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
     [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
@@ -1083,7 +1077,7 @@ Where <tt class=syntax><var>&lt;OBJECTS&gt;</var></tt> is one or more of:
     </td>
     <td valign=top>
     <tt class=syntax>
-    <var>&lt;Label.ss&gt;</var>
+    <var>&lt;Label.s&gt;</var>
     ID <var>&lt;Id.n&gt;</var> 
     AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
     [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
@@ -1101,7 +1095,7 @@ Where <tt class=syntax><var>&lt;OBJECTS&gt;</var></tt> is one or more of:
     </td>
     <td valign=top>
     <tt class=syntax>
-    <var>&lt;Label.ss&gt;</var>
+    <var>&lt;Label.s&gt;</var>
     ID <var>&lt;Id.n&gt;</var> 
     AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
     [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
@@ -1119,7 +1113,7 @@ Where <tt class=syntax><var>&lt;OBJECTS&gt;</var></tt> is one or more of:
     </td>
     <td valign=top>
     <tt class=syntax>
-    <var>&lt;Label.ss&gt;</var>
+    <var>&lt;Label.s&gt;</var>
     ID <var>&lt;Id.n&gt;</var> 
     AT (<var>&lt;Left.p&gt; &lt;Top.p&gt; &lt;Width.p&gt; &lt;Height.p&gt;</var>) <br>
     [<strong>USABLE</strong>] [NONUSABLE] [DISABLED] [LEFTANCHOR]
@@ -1138,7 +1132,7 @@ Where <tt class=syntax><var>&lt;OBJECTS&gt;</var></tt> is one or more of:
     </td>
     <td valign=top>
     <tt class=syntax>
-    <var>&lt;Label.ss&gt;</var>
+    <var>&lt;Label.s&gt;</var>
     ID <var>&lt;Id.n&gt;</var> 
     AT (<var>&lt;Left.p&gt; &lt;Top.p&gt;</var>) <br>
     [<strong>USABLE</strong>] [NONUSABLE] 
@@ -1402,7 +1396,7 @@ ALERT ID <var>&lt;AlertResrouceId.n&gt;</var>
   [LOCALE <var>&lt;LocaleName.s&gt;</var>]
 BEGIN
   TITLE <var>&lt;Title.s&gt;</var>
-  MESSAGE <var>&lt;Message.ss&gt;</var>
+  MESSAGE <var>&lt;Message.s&gt;</var>
   BUTTONS <var>&lt;Button.s&gt;</var> ... <var>&lt;Button.s&gt;</var>
 END</pre>
 
@@ -1454,7 +1448,7 @@ VERSION "1.0 beta"</pre>
 
 <pre class=syntax>
 STRING ID <var>&lt;StringResourceId.n&gt;</var>&nbsp;
-[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;String.ss&gt;</var>
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;String.s&gt;</var>
 STRING ID <var>&lt;StringResourceId.n&gt;</var>&nbsp;
 [LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;FILE <var>&lt;StringFile.s&gt;</var></pre>
 
@@ -1468,8 +1462,8 @@ Character '\r' = 0x0D is replaced by '\n' = 0x0A.
 <u>Example:</u>
 <ul>
 <pre>
-STRING ID 100 "This is a very long string that shows escape characters \n" \
-              "as well as continued .ss syntax strings"
+STRING ID 100 "This is a very long string that shows escape characters \n" +
+              "as well as string concatenation"
 STRING ID 101 FILE "string.txt"</pre>
 </ul>
 
@@ -1478,7 +1472,7 @@ STRING ID 101 FILE "string.txt"</pre>
 
 <pre class=syntax>
 STRINGTABLE ID <var>&lt;StringTableResourceId.n&gt;</var>&nbsp;
-[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;PrefixString.ss&gt; </var> ... <var>&lt;String.ss&gt;</var></pre>
+[LOCALE <var>&lt;LocaleName.s&gt;</var>]&nbsp;<var>&lt;PrefixString.s&gt; </var> ... <var>&lt;String.s&gt;</var></pre>
 
 <u>Notes:</u>
 <ul>
@@ -3016,7 +3010,7 @@ more of:
 
 <p>
 <pre class=syntax>
-<var>&lt;Original.s&gt;</var> = <var>&lt;Translated.ss&gt;</var></pre>
+<var>&lt;Original.s&gt;</var> = <var>&lt;Translated.s&gt;</var></pre>
 
 <u>Notes:</u> <p>
 <ul>
