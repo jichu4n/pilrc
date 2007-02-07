@@ -1242,8 +1242,18 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
         rcbmp->flags.hasColorTable = fTrue;
 
         tmpPtr = rcbmp->pbBits;
-        *tmpPtr++ = 0x01;
-        *tmpPtr++ = 0x00;
+        if ( vfLE32 ) {
+            /* 0x100 in 32-bit littleendian */
+            *tmpPtr++ = 0x00;
+            *tmpPtr++ = 0x01;
+            *tmpPtr++ = 0x00;
+            *tmpPtr++ = 0x00;
+        }
+        else {
+            /* 0x100 in 16-bit bigendian */
+            *tmpPtr++ = 0x01;
+            *tmpPtr++ = 0x00;
+        }
 
         // extract the color table (the number we have)
         for (i = 0; i < numClrs; i++)
