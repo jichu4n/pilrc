@@ -2431,7 +2431,10 @@ BMP_FillBitmapV3Header(RCBITMAP * rcbmp,
     if (vfLE32)
     {
       if (rcbmp->pixelsize <= 8)
-        rcbmpv3->pixelFormat = pixelFormatIndexedLE;
+        /* Palm/Sony devices don't support pixelFormatIndexedLE,
+           so do pixelFormatIndexed--which is the same, since
+           there is no LE/BE difference for 8-bits! */
+        rcbmpv3->pixelFormat = pixelFormatIndexed; 
       else
         rcbmpv3->pixelFormat = pixelFormat565LE;
     }
