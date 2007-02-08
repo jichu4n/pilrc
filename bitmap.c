@@ -28,6 +28,8 @@
  *                 GNU GPL documentation additions
  *     18-Aug-2003 Ben Combee
  *                 Applied Eric Clonniger's fix for 32-bit BMPs
+ *        Feb-2007 Alexander Pruss
+ *                 LE32 fixes
  */
 
 #include <stdlib.h>

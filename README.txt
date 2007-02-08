@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
- PilRC version 3.2                                             17 July 2004
+ PilRC version 3.2.x                                             07 Feb 2007
 ----------------------------------------------------------------------------
 
   INSTALLATION:
@@ -12,6 +12,7 @@
 
   Copyright (C) 1997-1999 Wes Cherry
   Copyright (C) 2000-2004 Aaron Ardiri
+  Copyright (C) 2004-2007 Alexander Pruss
 
   This program is free software;  you can redistribute it and/or modify it 
   under the terms of the GNU  General  Public  License as published by the 
