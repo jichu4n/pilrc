@@ -15,8 +15,8 @@ AM_CFLAGS = $(PILRCUI_CFLAGS) $(WARNING_CFLAGS)
 bin_PROGRAMS = pilrc @PILRCUI@
 EXTRA_PROGRAMS = pilrcui
 
-dist_pkgdata_DATA = ppmquant/palette-02.pbm ppmquant/palette-04.pgm \
-		    ppmquant/palette-16.pgm ppmquant/palette-256.ppm
+dist_pkgdata_DATA = ../ppmquant/palette-02.pbm ../ppmquant/palette-04.pgm \
+		    ../ppmquant/palette-16.pgm ../ppmquant/palette-256.ppm
 
 COMMON_SOURCES = pilrc.c lex.c util.c restype.c bitmap.c font.c plex.c
 noinst_HEADERS = bitmap.h font.h lex.h pilrc.h plex.h restype.h std.h util.h
