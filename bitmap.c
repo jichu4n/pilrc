@@ -146,7 +146,7 @@ int PalmPalette4bppColor[16][3] =
  */
 int PalmPalette8bpp[256][3] = 
 {
-  { 255, 255, 255 }, { 255, 204, 255 }, { 255, 153, 255 }, { 255, 102, 255 }, 
+  { 255, 255, 255 }, { 255, 204, 255 }, { 255, 153, 255 }, { 255, 102, 255 },
   { 255,  51, 255 }, { 255,   0, 255 }, { 255, 255, 204 }, { 255, 204, 204 }, 
   { 255, 153, 204 }, { 255, 102, 204 }, { 255,  51, 204 }, { 255,   0, 204 }, 
   { 255, 255, 153 }, { 255, 204, 153 }, { 255, 153, 153 }, { 255, 102, 153 }, 
@@ -1188,12 +1188,6 @@ BMP_ConvertWindowsBitmap(RCBITMAP * rcbmp,
     case rwBitmap:
     case rwBitmapGrey:
     case rwBitmapGrey16:
-      rcbmp->pixelsize = cbitsPel;
-      rcbmp->version = 1;
-      if (vfLE32)
-        rcbmp->version |= LE_BITMAP_VERSION_MASK;
-      break;
-
     case rwBitmapColor16:
 
       rcbmp->pixelsize = cbitsPel;
