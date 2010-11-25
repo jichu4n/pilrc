@@ -5,14 +5,14 @@
   INSTALLATION:
   =============
 
-  PilRC is an application  that takes a resource script file and generates 
-  one or more binary resource files  that are to be  used when  developing 
+  PilRC is an application  that takes a resource script file and generates
+  one or more binary resource files  that are to be  used when  developing
   for  the  Palm Computing Platform.  PilRCUI gives you a  preview of your
-  resource file. 
+  resource file.
 
   Copyright (C) 1997-1999 Wes Cherry
   Copyright (C) 2000-2004 Aaron Ardiri
-  Copyright (C) 2004-2007 Alexander Pruss
+  Copyright (C) 2004-2010 Alexander Pruss
 
   This program is free software;  you can redistribute it and/or modify it 
   under the terms of the GNU  General  Public  License as published by the 
