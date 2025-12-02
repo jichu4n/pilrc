@@ -31,6 +31,9 @@ function build() {
   # Build and install into temp directory.
   rm -rf "$package_root_dir"
 
+  # Fix errors on modern compilers
+  export CFLAGS="-std=gnu89 -w"
+
   # See contrib/package
   (cd "$base_dir/unix" && \
     aclocal && \

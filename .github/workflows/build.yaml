@@ -1,43 +1,43 @@
 name: build
-on: [push]
+on: [push, pull_request]
 jobs:
   build-deb:
     name: build deb package
     strategy:
       matrix:
         docker_image:
-          - "ubuntu:focal"
-          - "ubuntu:bionic"
-          - "ubuntu:xenial"
-          - "debian:buster"
-          - "debian:stretch"
+          - "ubuntu:jammy"
+          - "ubuntu:noble"
+          - "debian:trixie"
+          - "debian:bookworm"
         include:
-          - docker_image: "ubuntu:focal"
-            dist: focal
+          - docker_image: "ubuntu:jammy"
+            dist: jammy
             arch: amd64
-          - docker_image: "ubuntu:bionic"
-            dist: bionic
+          - docker_image: "ubuntu:noble"
+            dist: noble
             arch: amd64
-          - docker_image: "ubuntu:xenial"
-            dist: xenial
+          - docker_image: "debian:trixie"
+            dist: trixie
             arch: amd64
-          - docker_image: "debian:buster"
-            dist: buster
-            arch: amd64
-          - docker_image: "debian:stretch"
-            dist: stretch
+          - docker_image: "debian:bookworm"
+            dist: bookworm
             arch: amd64
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
       - name: Build deb package
         run: |
              tools/build-deb-with-docker.sh \
                ${{matrix.docker_image}} \
                ${{matrix.dist}} ${{matrix.arch}}
+      - name: Find deb package
+        id: find_deb
+        run: echo "name=$(ls *.deb)" >> $GITHUB_OUTPUT
       - name: Upload deb package
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
-          path: "*.deb"
+          name: "${{ steps.find_deb.outputs.name }}"
+          path: "${{ steps.find_deb.outputs.name }}"
 
